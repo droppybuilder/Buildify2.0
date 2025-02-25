@@ -1,7 +1,7 @@
-
 import { useState, useRef } from 'react';
 import { toast } from "sonner";
 import { Maximize2, Minimize2, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 interface Component {
   id: string;
@@ -27,6 +27,7 @@ export const Canvas = ({
   const canvasRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [windowTitle, setWindowTitle] = useState("Untitled Window");
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [windowSize, setWindowSize] = useState({ width: 800, height: 600 });
   
   const onDragOver = (e: React.DragEvent) => {
@@ -76,6 +77,24 @@ export const Canvas = ({
     }
   };
 
+  const handleTitleClick = () => {
+    setIsEditingTitle(true);
+  };
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setWindowTitle(e.target.value);
+  };
+
+  const handleTitleBlur = () => {
+    setIsEditingTitle(false);
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      setIsEditingTitle(false);
+    }
+  };
+
   return (
     <div className="w-full h-full p-8 bg-gray-100 flex items-center justify-center">
       <div 
@@ -100,8 +119,25 @@ export const Canvas = ({
               <Maximize2 size={8} className="absolute inset-0 m-auto text-green-800 opacity-0 group-hover:opacity-100" />
             </button>
           </div>
-          <div className="flex-1 text-center text-sm font-medium text-gray-600">
-            {windowTitle}
+          <div className="flex-1 text-center">
+            {isEditingTitle ? (
+              <Input
+                type="text"
+                value={windowTitle}
+                onChange={handleTitleChange}
+                onBlur={handleTitleBlur}
+                onKeyDown={handleTitleKeyDown}
+                className="w-48 mx-auto h-6 text-sm text-center bg-white/50"
+                autoFocus
+              />
+            ) : (
+              <div 
+                className="text-sm font-medium text-gray-600 cursor-pointer hover:text-gray-800"
+                onClick={handleTitleClick}
+              >
+                {windowTitle}
+              </div>
+            )}
           </div>
         </div>
 
@@ -119,10 +155,10 @@ export const Canvas = ({
                 selectedComponent?.id === component.id ? 'ring-2 ring-primary ring-offset-2' : ''
               }`}
               style={{
-                left: component.position.x,
-                top: component.position.y,
-                width: component.size.width,
-                height: component.size.height,
+                left: `${component.position.x}px`,
+                top: `${component.position.y}px`,
+                width: `${component.size.width}px`,
+                height: `${component.size.height}px`,
                 transform: 'translate(0, 0)',
                 transition: 'all 0.2s ease',
               }}
@@ -144,11 +180,11 @@ const ComponentPreview = ({ component }: { component: Component }) => {
         <button 
           className="w-full h-full border rounded-lg shadow-sm hover:bg-gray-50 transition-colors"
           style={{
-            backgroundColor: component.props.bgColor,
-            color: component.props.fgColor,
+            backgroundColor: component.props.bgColor || '#ffffff',
+            color: component.props.fgColor || '#000000',
           }}
         >
-          {component.props.text}
+          {component.props.text || 'Button'}
         </button>
       );
     case 'label':
@@ -156,12 +192,12 @@ const ComponentPreview = ({ component }: { component: Component }) => {
         <div 
           className="w-full h-full flex items-center"
           style={{
-            color: component.props.fgColor,
-            fontSize: `${component.props.fontSize}px`,
-            fontFamily: component.props.font,
+            color: component.props.fgColor || '#000000',
+            fontSize: `${component.props.fontSize || 12}px`,
+            fontFamily: component.props.font || 'system-ui',
           }}
         >
-          {component.props.text}
+          {component.props.text || 'Label'}
         </div>
       );
     case 'entry':

@@ -1,9 +1,9 @@
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Select } from "@/components/ui/select";
+import { toast } from "sonner";
 
 interface PropertyPanelProps {
   selectedComponent: any;
@@ -27,26 +27,35 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
         [key]: value
       }
     });
+    toast.success(`Updated ${key}`);
   };
 
-  const updatePosition = (axis: 'x' | 'y', value: number) => {
-    onUpdate({
-      ...selectedComponent,
-      position: {
-        ...selectedComponent.position,
-        [axis]: value
-      }
-    });
+  const updatePosition = (axis: 'x' | 'y', value: string) => {
+    const numValue = parseInt(value);
+    if (!isNaN(numValue)) {
+      onUpdate({
+        ...selectedComponent,
+        position: {
+          ...selectedComponent.position,
+          [axis]: numValue
+        }
+      });
+      toast.success(`Updated position ${axis}`);
+    }
   };
 
-  const updateSize = (dimension: 'width' | 'height', value: number) => {
-    onUpdate({
-      ...selectedComponent,
-      size: {
-        ...selectedComponent.size,
-        [dimension]: value
-      }
-    });
+  const updateSize = (dimension: 'width' | 'height', value: string) => {
+    const numValue = parseInt(value);
+    if (!isNaN(numValue) && numValue > 0) {
+      onUpdate({
+        ...selectedComponent,
+        size: {
+          ...selectedComponent.size,
+          [dimension]: numValue
+        }
+      });
+      toast.success(`Updated ${dimension}`);
+    }
   };
 
   return (
@@ -62,7 +71,9 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
               <Input
                 type="number"
                 value={selectedComponent.position.x}
-                onChange={(e) => updatePosition('x', parseInt(e.target.value) || 0)}
+                onChange={(e) => updatePosition('x', e.target.value)}
+                min={0}
+                step={1}
               />
             </div>
             <div>
@@ -70,7 +81,9 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
               <Input
                 type="number"
                 value={selectedComponent.position.y}
-                onChange={(e) => updatePosition('y', parseInt(e.target.value) || 0)}
+                onChange={(e) => updatePosition('y', e.target.value)}
+                min={0}
+                step={1}
               />
             </div>
           </div>
@@ -84,8 +97,9 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
               <Input
                 type="number"
                 value={selectedComponent.size.width}
-                onChange={(e) => updateSize('width', parseInt(e.target.value) || 0)}
+                onChange={(e) => updateSize('width', e.target.value)}
                 min={10}
+                step={1}
               />
             </div>
             <div>
@@ -93,8 +107,9 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
               <Input
                 type="number"
                 value={selectedComponent.size.height}
-                onChange={(e) => updateSize('height', parseInt(e.target.value) || 0)}
+                onChange={(e) => updateSize('height', e.target.value)}
                 min={10}
+                step={1}
               />
             </div>
           </div>
@@ -109,23 +124,44 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
               <Input
                 value={selectedComponent.props.text || ''}
                 onChange={(e) => updateProp('text', e.target.value)}
+                placeholder="Button text"
               />
             </div>
             <div className="space-y-2">
               <Label>Background Color</Label>
-              <Input
-                type="color"
-                value={selectedComponent.props.bgColor || '#ffffff'}
-                onChange={(e) => updateProp('bgColor', e.target.value)}
-              />
+              <div className="flex gap-2 items-center">
+                <Input
+                  type="color"
+                  value={selectedComponent.props.bgColor || '#ffffff'}
+                  onChange={(e) => updateProp('bgColor', e.target.value)}
+                  className="w-16 h-8 p-1"
+                />
+                <Input
+                  type="text"
+                  value={selectedComponent.props.bgColor || '#ffffff'}
+                  onChange={(e) => updateProp('bgColor', e.target.value)}
+                  className="flex-1"
+                  placeholder="#ffffff"
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <Label>Text Color</Label>
-              <Input
-                type="color"
-                value={selectedComponent.props.fgColor || '#000000'}
-                onChange={(e) => updateProp('fgColor', e.target.value)}
-              />
+              <div className="flex gap-2 items-center">
+                <Input
+                  type="color"
+                  value={selectedComponent.props.fgColor || '#000000'}
+                  onChange={(e) => updateProp('fgColor', e.target.value)}
+                  className="w-16 h-8 p-1"
+                />
+                <Input
+                  type="text"
+                  value={selectedComponent.props.fgColor || '#000000'}
+                  onChange={(e) => updateProp('fgColor', e.target.value)}
+                  className="flex-1"
+                  placeholder="#000000"
+                />
+              </div>
             </div>
           </div>
         )}

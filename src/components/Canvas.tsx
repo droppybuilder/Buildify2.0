@@ -1,6 +1,5 @@
 
 import { useState, useRef } from 'react';
-import { useUndo } from 'react-use';
 import { toast } from "sonner";
 
 interface Component {

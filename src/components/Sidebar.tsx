@@ -4,7 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { 
   Square, 
   Type, 
-  Input, 
+  TextCursor, // Changed from Input to TextCursor
   CheckSquare, 
   SlidersHorizontal, 
   Box
@@ -13,7 +13,7 @@ import {
 const componentTypes = [
   { id: 'button', icon: Square, label: 'Button' },
   { id: 'label', icon: Type, label: 'Label' },
-  { id: 'entry', icon: Input, label: 'Entry' },
+  { id: 'entry', icon: TextCursor, label: 'Entry' }, // Updated icon
   { id: 'checkbox', icon: CheckSquare, label: 'Checkbox' },
   { id: 'slider', icon: SlidersHorizontal, label: 'Slider' },
   { id: 'frame', icon: Box, label: 'Frame' },

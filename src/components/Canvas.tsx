@@ -1,3 +1,4 @@
+
 import { useState, useRef } from 'react';
 import { toast } from "sonner";
 import { Maximize2, Minimize2, X } from "lucide-react";
@@ -77,19 +78,26 @@ export const Canvas = ({
 
   return (
     <div className="w-full h-full p-8 bg-gray-100 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col"
-           style={{ width: windowSize.width, height: windowSize.height }}>
+      <div 
+        className="bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col border border-gray-200"
+        style={{ 
+          width: windowSize.width, 
+          height: windowSize.height,
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+        }}
+      >
         {/* Window Title Bar */}
-        <div className="h-8 bg-gray-100 border-b flex items-center px-3 select-none">
+        <div className="h-10 bg-gray-50/90 border-b border-gray-200 flex items-center px-4 select-none backdrop-blur-md">
           <div className="flex items-center gap-2">
-            <button className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600">
-              <X size={8} className="m-auto text-red-800 opacity-0 hover:opacity-100" />
+            <button className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 relative group">
+              <X size={8} className="absolute inset-0 m-auto text-red-800 opacity-0 group-hover:opacity-100" />
             </button>
-            <button className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600">
-              <Minimize2 size={8} className="m-auto text-yellow-800 opacity-0 hover:opacity-100" />
+            <button className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600 relative group">
+              <Minimize2 size={8} className="absolute inset-0 m-auto text-yellow-800 opacity-0 group-hover:opacity-100" />
             </button>
-            <button className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-600">
-              <Maximize2 size={8} className="m-auto text-green-800 opacity-0 hover:opacity-100" />
+            <button className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-600 relative group">
+              <Maximize2 size={8} className="absolute inset-0 m-auto text-green-800 opacity-0 group-hover:opacity-100" />
             </button>
           </div>
           <div className="flex-1 text-center text-sm font-medium text-gray-600">
@@ -100,7 +108,7 @@ export const Canvas = ({
         {/* Canvas Area */}
         <div
           ref={canvasRef}
-          className="flex-1 canvas-grid relative overflow-auto"
+          className="flex-1 canvas-grid relative overflow-auto bg-white/50"
           onDragOver={onDragOver}
           onDrop={onDrop}
         >
@@ -115,6 +123,8 @@ export const Canvas = ({
                 top: component.position.y,
                 width: component.size.width,
                 height: component.size.height,
+                transform: 'translate(0, 0)',
+                transition: 'all 0.2s ease',
               }}
               onClick={() => setSelectedComponent(component)}
             >
@@ -174,7 +184,7 @@ const ComponentPreview = ({ component }: { component: Component }) => {
         >
           <input 
             type="checkbox" 
-            className="rounded" 
+            className="rounded border-gray-300" 
             checked={component.props.value}
             readOnly 
           />
@@ -185,7 +195,7 @@ const ComponentPreview = ({ component }: { component: Component }) => {
       return (
         <input
           type="range"
-          className="w-full h-full"
+          className="w-full h-full accent-primary"
           min={component.props.from}
           max={component.props.to}
           value={component.props.value}
@@ -198,7 +208,7 @@ const ComponentPreview = ({ component }: { component: Component }) => {
     case 'frame':
       return (
         <div 
-          className="w-full h-full border-2 rounded-lg" 
+          className="w-full h-full rounded-lg" 
           style={{
             backgroundColor: component.props.background,
             borderStyle: component.props.relief === 'flat' ? 'solid' : component.props.relief,

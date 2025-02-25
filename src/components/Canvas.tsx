@@ -1,7 +1,6 @@
-
 import { useState, useRef } from 'react';
 import { toast } from "sonner";
-import { WindowMaximize, WindowMinimize, X } from "lucide-react";
+import { Maximize2, Minimize2, X } from "lucide-react";
 
 interface Component {
   id: string;
@@ -87,10 +86,10 @@ export const Canvas = ({
               <X size={8} className="m-auto text-red-800 opacity-0 hover:opacity-100" />
             </button>
             <button className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600">
-              <WindowMinimize size={8} className="m-auto text-yellow-800 opacity-0 hover:opacity-100" />
+              <Minimize2 size={8} className="m-auto text-yellow-800 opacity-0 hover:opacity-100" />
             </button>
             <button className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-600">
-              <WindowMaximize size={8} className="m-auto text-green-800 opacity-0 hover:opacity-100" />
+              <Maximize2 size={8} className="m-auto text-green-800 opacity-0 hover:opacity-100" />
             </button>
           </div>
           <div className="flex-1 text-center text-sm font-medium text-gray-600">

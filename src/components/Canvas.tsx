@@ -1,3 +1,4 @@
+
 import { useState, useRef } from 'react';
 import { toast } from "sonner";
 import { Maximize2, Minimize2, X } from "lucide-react";
@@ -205,9 +206,9 @@ const ComponentPreview = ({ component }: { component: Component }) => {
         <input
           type="text"
           className="w-full h-full px-3 border rounded-lg"
-          placeholder={component.props.placeholder}
+          placeholder={component.props.placeholder || 'Enter text...'}
           style={{
-            backgroundColor: component.props.bgColor,
+            backgroundColor: component.props.bgColor || '#ffffff',
           }}
           readOnly
         />
@@ -216,15 +217,15 @@ const ComponentPreview = ({ component }: { component: Component }) => {
       return (
         <label 
           className="flex items-center gap-2"
-          style={{ fontFamily: component.props.font }}
+          style={{ fontFamily: component.props.font || 'system-ui' }}
         >
           <input 
             type="checkbox" 
             className="rounded border-gray-300" 
-            checked={component.props.value}
+            checked={component.props.value || false}
             readOnly 
           />
-          <span>{component.props.text}</span>
+          <span>{component.props.text || 'Checkbox'}</span>
         </label>
       );
     case 'slider':
@@ -232,9 +233,9 @@ const ComponentPreview = ({ component }: { component: Component }) => {
         <input
           type="range"
           className="w-full h-full accent-primary"
-          min={component.props.from}
-          max={component.props.to}
-          value={component.props.value}
+          min={component.props.from || 0}
+          max={component.props.to || 100}
+          value={component.props.value || 50}
           style={{
             transform: component.props.orient === 'vertical' ? 'rotate(90deg)' : 'none'
           }}
@@ -246,9 +247,9 @@ const ComponentPreview = ({ component }: { component: Component }) => {
         <div 
           className="w-full h-full rounded-lg" 
           style={{
-            backgroundColor: component.props.background,
+            backgroundColor: component.props.background || 'transparent',
             borderStyle: component.props.relief === 'flat' ? 'solid' : component.props.relief,
-            borderWidth: `${component.props.borderwidth}px`,
+            borderWidth: `${component.props.borderwidth || 1}px`,
           }}
         />
       );

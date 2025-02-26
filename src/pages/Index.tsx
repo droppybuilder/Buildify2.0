@@ -14,30 +14,42 @@ const Index = () => {
   const [historyIndex, setHistoryIndex] = useState(0);
   
   const addToHistory = useCallback((newComponents: any[]) => {
-    const newHistory = history.slice(0, historyIndex + 1);
-    newHistory.push(newComponents);
-    setHistory(newHistory);
-    setHistoryIndex(newHistory.length - 1);
+    // Only add to history if the components have actually changed
+    if (JSON.stringify(newComponents) !== JSON.stringify(history[historyIndex])) {
+      const newHistory = history.slice(0, historyIndex + 1);
+      newHistory.push([...newComponents]);
+      setHistory(newHistory);
+      setHistoryIndex(newHistory.length - 1);
+    }
   }, [history, historyIndex]);
 
-  const handleComponentsChange = (newComponents: any[]) => {
-    setComponents(newComponents);
-    addToHistory(newComponents);
-  };
+  const handleComponentsChange = useCallback((newComponents: any[]) => {
+    setComponents([...newComponents]);
+    addToHistory([...newComponents]);
+  }, [addToHistory]);
 
-  const handleUndo = () => {
+  const handleUndo = useCallback(() => {
     if (historyIndex > 0) {
-      setHistoryIndex(historyIndex - 1);
-      setComponents(history[historyIndex - 1]);
+      const newIndex = historyIndex - 1;
+      setHistoryIndex(newIndex);
+      setComponents([...history[newIndex]]);
     }
-  };
+  }, [history, historyIndex]);
 
-  const handleRedo = () => {
+  const handleRedo = useCallback(() => {
     if (historyIndex < history.length - 1) {
-      setHistoryIndex(historyIndex + 1);
-      setComponents(history[historyIndex + 1]);
+      const newIndex = historyIndex + 1;
+      setHistoryIndex(newIndex);
+      setComponents([...history[newIndex]]);
     }
-  };
+  }, [history, historyIndex]);
+
+  const handleComponentUpdate = useCallback((updatedComponent: any) => {
+    const newComponents = components.map(c => 
+      c.id === updatedComponent.id ? { ...updatedComponent } : c
+    );
+    handleComponentsChange(newComponents);
+  }, [components, handleComponentsChange]);
   
   return (
     <div className="h-screen flex overflow-hidden">
@@ -67,12 +79,7 @@ const Index = () => {
           <div className="w-80 border-l flex flex-col overflow-hidden">
             <PropertyPanel
               selectedComponent={selectedComponent}
-              onUpdate={(updatedComponent) => {
-                const newComponents = components.map(c => 
-                  c.id === updatedComponent.id ? updatedComponent : c
-                );
-                handleComponentsChange(newComponents);
-              }}
+              onUpdate={handleComponentUpdate}
             />
             <CodePreview
               components={components}

@@ -21,28 +21,31 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
   }
 
   const handlePositionChange = (e: React.ChangeEvent<HTMLInputElement>, axis: 'x' | 'y') => {
-    const value = parseInt(e.target.value);
-    if (!isNaN(value)) {
-      const newComponent = {
-        ...selectedComponent,
-        position: {
-          ...selectedComponent.position,
-          [axis]: value
-        }
-      };
-      onUpdate(newComponent);
-      console.log('Position updated:', newComponent.position);
-    }
+    const value = e.target.value;
+    const numValue = parseFloat(value);
+
+    const newComponent = {
+      ...selectedComponent,
+      position: {
+        ...selectedComponent.position,
+        [axis]: value === '' ? 0 : numValue
+      }
+    };
+    
+    onUpdate(newComponent);
+    console.log('Position updated:', newComponent.position);
   };
 
   const handleSizeChange = (e: React.ChangeEvent<HTMLInputElement>, dimension: 'width' | 'height') => {
-    const value = parseInt(e.target.value);
-    if (!isNaN(value) && value > 0) {
+    const value = e.target.value;
+    const numValue = parseFloat(value);
+
+    if (value === '' || (!isNaN(numValue) && numValue > 0)) {
       const newComponent = {
         ...selectedComponent,
         size: {
           ...selectedComponent.size,
-          [dimension]: value
+          [dimension]: value === '' ? 0 : numValue
         }
       };
       onUpdate(newComponent);
@@ -59,7 +62,6 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
       }
     };
     onUpdate(newComponent);
-    console.log(`Property ${key} updated:`, value);
     toast.success(`Updated ${key}`);
   };
 
@@ -71,7 +73,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
           <div>
             <Label>X Position</Label>
             <Input
-              type="number"
+              type="text"
               value={selectedComponent.position.x}
               onChange={(e) => handlePositionChange(e, 'x')}
               className="mt-1"
@@ -80,7 +82,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
           <div>
             <Label>Y Position</Label>
             <Input
-              type="number"
+              type="text"
               value={selectedComponent.position.y}
               onChange={(e) => handlePositionChange(e, 'y')}
               className="mt-1"
@@ -89,21 +91,19 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
           <div>
             <Label>Width</Label>
             <Input
-              type="number"
+              type="text"
               value={selectedComponent.size.width}
               onChange={(e) => handleSizeChange(e, 'width')}
               className="mt-1"
-              min={10}
             />
           </div>
           <div>
             <Label>Height</Label>
             <Input
-              type="number"
+              type="text"
               value={selectedComponent.size.height}
               onChange={(e) => handleSizeChange(e, 'height')}
               className="mt-1"
-              min={10}
             />
           </div>
         </div>
@@ -116,6 +116,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
           <div>
             <Label>Button Text</Label>
             <Input
+              type="text"
               value={selectedComponent.props.text || ''}
               onChange={(e) => handlePropertyChange('text', e.target.value)}
               className="mt-1"
@@ -165,6 +166,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
           <div>
             <Label>Label Text</Label>
             <Input
+              type="text"
               value={selectedComponent.props.text || ''}
               onChange={(e) => handlePropertyChange('text', e.target.value)}
               className="mt-1"
@@ -173,11 +175,15 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
           <div>
             <Label>Font Size</Label>
             <Input
-              type="number"
+              type="text"
               value={selectedComponent.props.fontSize || 12}
-              onChange={(e) => handlePropertyChange('fontSize', parseInt(e.target.value))}
-              min={8}
-              max={72}
+              onChange={(e) => {
+                const value = e.target.value;
+                const numValue = parseInt(value);
+                if (value === '' || (!isNaN(numValue) && numValue >= 8 && numValue <= 72)) {
+                  handlePropertyChange('fontSize', value === '' ? 12 : numValue);
+                }
+              }}
               className="mt-1"
             />
           </div>

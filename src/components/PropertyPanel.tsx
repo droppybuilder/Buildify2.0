@@ -3,7 +3,6 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Select } from "@/components/ui/select";
-import { toast } from "sonner";
 
 interface PropertyPanelProps {
   selectedComponent: any;
@@ -28,7 +27,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
   };
 
   const handlePositionChange = (e: React.ChangeEvent<HTMLInputElement>, axis: 'x' | 'y') => {
-    const value = e.target.value;
+    const value = parseInt(e.target.value) || 0;
     handleUpdate({
       position: {
         ...selectedComponent.position,
@@ -38,7 +37,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
   };
 
   const handleSizeChange = (e: React.ChangeEvent<HTMLInputElement>, dimension: 'width' | 'height') => {
-    const value = e.target.value;
+    const value = parseInt(e.target.value) || 0;
     handleUpdate({
       size: {
         ...selectedComponent.size,
@@ -64,8 +63,8 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
           <div>
             <Label>X Position</Label>
             <Input
-              type="text"
-              defaultValue={selectedComponent.position.x}
+              type="number"
+              value={selectedComponent.position.x}
               onChange={(e) => handlePositionChange(e, 'x')}
               className="mt-1"
             />
@@ -73,8 +72,8 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
           <div>
             <Label>Y Position</Label>
             <Input
-              type="text"
-              defaultValue={selectedComponent.position.y}
+              type="number"
+              value={selectedComponent.position.y}
               onChange={(e) => handlePositionChange(e, 'y')}
               className="mt-1"
             />
@@ -82,8 +81,8 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
           <div>
             <Label>Width</Label>
             <Input
-              type="text"
-              defaultValue={selectedComponent.size.width}
+              type="number"
+              value={selectedComponent.size.width}
               onChange={(e) => handleSizeChange(e, 'width')}
               className="mt-1"
             />
@@ -91,8 +90,8 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
           <div>
             <Label>Height</Label>
             <Input
-              type="text"
-              defaultValue={selectedComponent.size.height}
+              type="number"
+              value={selectedComponent.size.height}
               onChange={(e) => handleSizeChange(e, 'height')}
               className="mt-1"
             />
@@ -108,7 +107,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
             <Label>Button Text</Label>
             <Input
               type="text"
-              defaultValue={selectedComponent.props.text || ''}
+              value={selectedComponent.props.text || ''}
               onChange={(e) => handlePropertyChange('text', e.target.value)}
               className="mt-1"
             />
@@ -148,6 +147,35 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
                 className="flex-1"
               />
             </div>
+          </div>
+          <div>
+            <Label>Hover Color</Label>
+            <div className="flex gap-2 mt-1">
+              <Input
+                type="color"
+                value={selectedComponent.props.hoverColor || '#f0f0f0'}
+                onChange={(e) => handlePropertyChange('hoverColor', e.target.value)}
+                className="w-20 h-10 p-1"
+              />
+              <Input
+                type="text"
+                value={selectedComponent.props.hoverColor || '#f0f0f0'}
+                onChange={(e) => handlePropertyChange('hoverColor', e.target.value)}
+                placeholder="#f0f0f0"
+                className="flex-1"
+              />
+            </div>
+          </div>
+          <div>
+            <Label>Corner Radius</Label>
+            <Input
+              type="number"
+              value={selectedComponent.props.cornerRadius || 8}
+              onChange={(e) => handlePropertyChange('cornerRadius', parseInt(e.target.value) || 0)}
+              min="0"
+              max="20"
+              className="mt-1"
+            />
           </div>
         </div>
       )}

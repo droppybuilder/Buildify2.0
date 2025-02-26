@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import { toast } from "sonner";
 import { Maximize2, Minimize2, X } from "lucide-react";
@@ -27,13 +26,103 @@ export const Canvas = ({
 }: CanvasProps) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizeDirection, setResizeDirection] = useState<string | null>(null);
   const [windowTitle, setWindowTitle] = useState("Untitled Window");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [windowSize, setWindowSize] = useState({ width: 800, height: 600 });
-  
+
   const onDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'copy';
+  };
+
+  const handleMouseDown = (e: React.MouseEvent, component: Component) => {
+    if (!selectedComponent || selectedComponent.id !== component.id) {
+      setSelectedComponent(component);
+      return;
+    }
+
+    const target = e.target as HTMLElement;
+    if (target.classList.contains('resize-handle')) {
+      setIsResizing(true);
+      setResizeDirection(target.dataset.direction || null);
+    } else {
+      setIsDragging(true);
+    }
+
+    setDragStart({
+      x: e.clientX - component.position.x,
+      y: e.clientY - component.position.y
+    });
+
+    e.stopPropagation();
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!selectedComponent) return;
+
+    if (isDragging) {
+      const newComponents = components.map(comp => {
+        if (comp.id === selectedComponent.id) {
+          return {
+            ...comp,
+            position: {
+              x: e.clientX - dragStart.x,
+              y: e.clientY - dragStart.y
+            }
+          };
+        }
+        return comp;
+      });
+      setComponents(newComponents);
+    } else if (isResizing && resizeDirection) {
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const newComponents = components.map(comp => {
+        if (comp.id === selectedComponent.id) {
+          const newSize = { ...comp.size };
+          const newPosition = { ...comp.position };
+
+          if (resizeDirection.includes('e')) {
+            newSize.width = Math.max(50, e.clientX - rect.left - comp.position.x);
+          }
+          if (resizeDirection.includes('s')) {
+            newSize.height = Math.max(50, e.clientY - rect.top - comp.position.y);
+          }
+          if (resizeDirection.includes('w')) {
+            const newWidth = Math.max(50, comp.size.width + (comp.position.x - (e.clientX - rect.left)));
+            if (newWidth >= 50) {
+              newPosition.x = e.clientX - rect.left;
+              newSize.width = newWidth;
+            }
+          }
+          if (resizeDirection.includes('n')) {
+            const newHeight = Math.max(50, comp.size.height + (comp.position.y - (e.clientY - rect.top)));
+            if (newHeight >= 50) {
+              newPosition.y = e.clientY - rect.top;
+              newSize.height = newHeight;
+            }
+          }
+
+          return {
+            ...comp,
+            size: newSize,
+            position: newPosition
+          };
+        }
+        return comp;
+      });
+      setComponents(newComponents);
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    setIsResizing(false);
+    setResizeDirection(null);
   };
 
   const onDrop = (e: React.DragEvent) => {
@@ -107,7 +196,6 @@ export const Canvas = ({
           WebkitBackdropFilter: 'blur(20px)',
         }}
       >
-        {/* Window Title Bar */}
         <div className="h-10 bg-gray-50/90 border-b border-gray-200 flex items-center px-4 select-none backdrop-blur-md">
           <div className="flex items-center gap-2">
             <button className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 relative group">
@@ -142,17 +230,19 @@ export const Canvas = ({
           </div>
         </div>
 
-        {/* Canvas Area */}
         <div
           ref={canvasRef}
           className="flex-1 canvas-grid relative overflow-auto bg-white/50"
           onDragOver={onDragOver}
           onDrop={onDrop}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
         >
           {components.map((component) => (
             <div
               key={component.id}
-              className={`absolute component-preview ${
+              className={`absolute component-preview cursor-move ${
                 selectedComponent?.id === component.id ? 'ring-2 ring-primary ring-offset-2' : ''
               }`}
               style={{
@@ -161,11 +251,19 @@ export const Canvas = ({
                 width: `${component.size.width}px`,
                 height: `${component.size.height}px`,
                 transform: 'translate(0, 0)',
-                transition: 'all 0.2s ease',
+                transition: isDragging || isResizing ? 'none' : 'all 0.2s ease',
               }}
-              onClick={() => setSelectedComponent(component)}
+              onMouseDown={(e) => handleMouseDown(e, component)}
             >
               <ComponentPreview component={component} />
+              {selectedComponent?.id === component.id && (
+                <>
+                  <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full top-0 left-0 -translate-x-1/2 -translate-y-1/2 cursor-nw-resize" data-direction="nw" />
+                  <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full top-0 right-0 translate-x-1/2 -translate-y-1/2 cursor-ne-resize" data-direction="ne" />
+                  <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full bottom-0 left-0 -translate-x-1/2 translate-y-1/2 cursor-sw-resize" data-direction="sw" />
+                  <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full bottom-0 right-0 translate-x-1/2 translate-y-1/2 cursor-se-resize" data-direction="se" />
+                </>
+              )}
             </div>
           ))}
         </div>

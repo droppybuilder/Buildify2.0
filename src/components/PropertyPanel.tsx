@@ -19,39 +19,41 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
     );
   }
 
-  const handlePositionChange = (e: React.ChangeEvent<HTMLInputElement>, axis: 'x' | 'y') => {
-    const value = e.target.value;
+  const handleUpdate = (updates: Partial<any>) => {
     const newComponent = {
       ...selectedComponent,
+      ...updates
+    };
+    onUpdate(newComponent);
+  };
+
+  const handlePositionChange = (e: React.ChangeEvent<HTMLInputElement>, axis: 'x' | 'y') => {
+    const value = e.target.value;
+    handleUpdate({
       position: {
         ...selectedComponent.position,
         [axis]: value
       }
-    };
-    onUpdate(newComponent);
+    });
   };
 
   const handleSizeChange = (e: React.ChangeEvent<HTMLInputElement>, dimension: 'width' | 'height') => {
     const value = e.target.value;
-    const newComponent = {
-      ...selectedComponent,
+    handleUpdate({
       size: {
         ...selectedComponent.size,
         [dimension]: value
       }
-    };
-    onUpdate(newComponent);
+    });
   };
 
   const handlePropertyChange = (key: string, value: any) => {
-    const newComponent = {
-      ...selectedComponent,
+    handleUpdate({
       props: {
         ...selectedComponent.props,
         [key]: value
       }
-    };
-    onUpdate(newComponent);
+    });
   };
 
   return (
@@ -116,13 +118,13 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
             <div className="flex gap-2 mt-1">
               <Input
                 type="color"
-                defaultValue={selectedComponent.props.bgColor || '#ffffff'}
+                value={selectedComponent.props.bgColor || '#ffffff'}
                 onChange={(e) => handlePropertyChange('bgColor', e.target.value)}
                 className="w-20 h-10 p-1"
               />
               <Input
                 type="text"
-                defaultValue={selectedComponent.props.bgColor || '#ffffff'}
+                value={selectedComponent.props.bgColor || '#ffffff'}
                 onChange={(e) => handlePropertyChange('bgColor', e.target.value)}
                 placeholder="#ffffff"
                 className="flex-1"
@@ -134,13 +136,13 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
             <div className="flex gap-2 mt-1">
               <Input
                 type="color"
-                defaultValue={selectedComponent.props.fgColor || '#000000'}
+                value={selectedComponent.props.fgColor || '#000000'}
                 onChange={(e) => handlePropertyChange('fgColor', e.target.value)}
                 className="w-20 h-10 p-1"
               />
               <Input
                 type="text"
-                defaultValue={selectedComponent.props.fgColor || '#000000'}
+                value={selectedComponent.props.fgColor || '#000000'}
                 onChange={(e) => handlePropertyChange('fgColor', e.target.value)}
                 placeholder="#000000"
                 className="flex-1"
@@ -175,13 +177,13 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
             <div className="flex gap-2 mt-1">
               <Input
                 type="color"
-                defaultValue={selectedComponent.props.fgColor || '#000000'}
+                value={selectedComponent.props.fgColor || '#000000'}
                 onChange={(e) => handlePropertyChange('fgColor', e.target.value)}
                 className="w-20 h-10 p-1"
               />
               <Input
                 type="text"
-                defaultValue={selectedComponent.props.fgColor || '#000000'}
+                value={selectedComponent.props.fgColor || '#000000'}
                 onChange={(e) => handlePropertyChange('fgColor', e.target.value)}
                 placeholder="#000000"
                 className="flex-1"

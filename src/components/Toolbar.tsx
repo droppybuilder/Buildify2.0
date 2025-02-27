@@ -108,6 +108,7 @@ if __name__ == "__main__":
 
   const generateCustomTkinterCode = (components: any[]) => {
     const imports = `import customtkinter as ctk
+from PIL import Image, ImageTk
 
 class App:
     def __init__(self):
@@ -122,22 +123,33 @@ class App:
         case 'button':
           return `        self.button_${safeId} = ctk.CTkButton(self.root, 
             text="${component.props.text}",
-            fg_color="${component.props.bgColor}",
-            text_color="${component.props.fgColor}",
-            hover_color="${component.props.hoverColor || adjustColor(component.props.bgColor, -20)}",
+            fg_color="${component.props.bgColor || '#ffffff'}",
+            text_color="${component.props.fgColor || '#000000'}",
+            hover_color="${component.props.hoverColor || adjustColor(component.props.bgColor || '#ffffff', -20)}",
+            border_color="${component.props.borderColor || '#e2e8f0'}",
             corner_radius=${component.props.cornerRadius || 8})
         self.button_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
         case 'label':
           return `        self.label_${safeId} = ctk.CTkLabel(self.root, 
             text="${component.props.text}",
-            text_color="${component.props.fgColor}",
-            font=("TkDefaultFont", ${component.props.fontSize}))
+            text_color="${component.props.fgColor || '#000000'}",
+            font=("TkDefaultFont", ${component.props.fontSize || 12}))
         self.label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
         case 'entry':
           return `        self.entry_${safeId} = ctk.CTkEntry(self.root,
-            fg_color="${component.props.bgColor}",
-            corner_radius=${component.props.cornerRadius || 8})
+            fg_color="${component.props.bgColor || '#ffffff'}",
+            border_color="${component.props.borderColor || '#e2e8f0'}",
+            corner_radius=${component.props.cornerRadius || 8},
+            placeholder_text="${component.props.placeholder || ''}")
         self.entry_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+        case 'image':
+          return `        self.image_${safeId} = ctk.CTkImage(
+              light_image=Image.open("${component.props.src}"),
+              size=(${Math.round(component.size.width)}, ${Math.round(component.size.height)}))
+          self.image_label_${safeId} = ctk.CTkLabel(self.root,
+              image=self.image_${safeId},
+              text="")
+          self.image_label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
         default:
           return '';
       }

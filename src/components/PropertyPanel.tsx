@@ -1,4 +1,3 @@
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -19,39 +18,15 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
     );
   }
 
-  const handleUpdate = (updates: Partial<any>) => {
+  const handlePropertyChange = (key: string, value: any) => {
+    const updatedProps = {
+      ...selectedComponent.props,
+      [key]: value
+    };
+
     onUpdate({
       ...selectedComponent,
-      ...updates,
-    });
-  };
-
-  const handlePositionChange = (e: React.ChangeEvent<HTMLInputElement>, axis: 'x' | 'y') => {
-    const value = parseInt(e.target.value) || 0;
-    handleUpdate({
-      position: {
-        ...selectedComponent.position,
-        [axis]: value
-      }
-    });
-  };
-
-  const handleSizeChange = (e: React.ChangeEvent<HTMLInputElement>, dimension: 'width' | 'height') => {
-    const value = parseInt(e.target.value) || 0;
-    handleUpdate({
-      size: {
-        ...selectedComponent.size,
-        [dimension]: value
-      }
-    });
-  };
-
-  const handlePropertyChange = (key: string, value: any) => {
-    handleUpdate({
-      props: {
-        ...selectedComponent.props,
-        [key]: value
-      }
+      props: updatedProps
     });
   };
 
@@ -65,7 +40,13 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
             <Input
               type="number"
               value={Math.round(selectedComponent.position.x)}
-              onChange={(e) => handlePositionChange(e, 'x')}
+              onChange={(e) => onUpdate({
+                ...selectedComponent,
+                position: {
+                  ...selectedComponent.position,
+                  x: parseInt(e.target.value) || 0
+                }
+              })}
               className="mt-1"
             />
           </div>
@@ -74,7 +55,13 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
             <Input
               type="number"
               value={Math.round(selectedComponent.position.y)}
-              onChange={(e) => handlePositionChange(e, 'y')}
+              onChange={(e) => onUpdate({
+                ...selectedComponent,
+                position: {
+                  ...selectedComponent.position,
+                  y: parseInt(e.target.value) || 0
+                }
+              })}
               className="mt-1"
             />
           </div>
@@ -83,7 +70,13 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
             <Input
               type="number"
               value={Math.round(selectedComponent.size.width)}
-              onChange={(e) => handleSizeChange(e, 'width')}
+              onChange={(e) => onUpdate({
+                ...selectedComponent,
+                size: {
+                  ...selectedComponent.size,
+                  width: parseInt(e.target.value) || 0
+                }
+              })}
               className="mt-1"
             />
           </div>
@@ -92,7 +85,13 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
             <Input
               type="number"
               value={Math.round(selectedComponent.size.height)}
-              onChange={(e) => handleSizeChange(e, 'height')}
+              onChange={(e) => onUpdate({
+                ...selectedComponent,
+                size: {
+                  ...selectedComponent.size,
+                  height: parseInt(e.target.value) || 0
+                }
+              })}
               className="mt-1"
             />
           </div>
@@ -104,6 +103,8 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
       {/* Common properties for all components */}
       <div>
         <h3 className="font-semibold mb-4">Properties</h3>
+        
+        {/* Text properties */}
         {['button', 'label', 'checkbox'].includes(selectedComponent.type) && (
           <div className="space-y-4">
             <div>
@@ -128,7 +129,6 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
                   type="text"
                   value={selectedComponent.props.fgColor || '#000000'}
                   onChange={(e) => handlePropertyChange('fgColor', e.target.value)}
-                  placeholder="#000000"
                   className="flex-1"
                 />
               </div>
@@ -136,6 +136,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
           </div>
         )}
 
+        {/* Background and border properties */}
         {['button', 'entry', 'frame'].includes(selectedComponent.type) && (
           <div className="space-y-4">
             <div>
@@ -151,7 +152,6 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
                   type="text"
                   value={selectedComponent.props.bgColor || '#ffffff'}
                   onChange={(e) => handlePropertyChange('bgColor', e.target.value)}
-                  placeholder="#ffffff"
                   className="flex-1"
                 />
               </div>
@@ -163,29 +163,22 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
                 value={selectedComponent.props.cornerRadius || 8}
                 onChange={(e) => handlePropertyChange('cornerRadius', parseInt(e.target.value) || 0)}
                 min="0"
-                max="20"
                 className="mt-1"
               />
             </div>
-          </div>
-        )}
-
-        {selectedComponent.type === 'button' && (
-          <div className="space-y-4">
             <div>
-              <Label>Hover Color</Label>
+              <Label>Border Color</Label>
               <div className="flex gap-2 mt-1">
                 <Input
                   type="color"
-                  value={selectedComponent.props.hoverColor || '#f0f0f0'}
-                  onChange={(e) => handlePropertyChange('hoverColor', e.target.value)}
+                  value={selectedComponent.props.borderColor || '#e2e8f0'}
+                  onChange={(e) => handlePropertyChange('borderColor', e.target.value)}
                   className="w-20 h-10 p-1"
                 />
                 <Input
                   type="text"
-                  value={selectedComponent.props.hoverColor || '#f0f0f0'}
-                  onChange={(e) => handlePropertyChange('hoverColor', e.target.value)}
-                  placeholder="#f0f0f0"
+                  value={selectedComponent.props.borderColor || '#e2e8f0'}
+                  onChange={(e) => handlePropertyChange('borderColor', e.target.value)}
                   className="flex-1"
                 />
               </div>
@@ -193,6 +186,28 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
           </div>
         )}
 
+        {/* Button-specific properties */}
+        {selectedComponent.type === 'button' && (
+          <div>
+            <Label>Hover Color</Label>
+            <div className="flex gap-2 mt-1">
+              <Input
+                type="color"
+                value={selectedComponent.props.hoverColor || '#f0f0f0'}
+                onChange={(e) => handlePropertyChange('hoverColor', e.target.value)}
+                className="w-20 h-10 p-1"
+              />
+              <Input
+                type="text"
+                value={selectedComponent.props.hoverColor || '#f0f0f0'}
+                onChange={(e) => handlePropertyChange('hoverColor', e.target.value)}
+                className="flex-1"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Entry-specific properties */}
         {selectedComponent.type === 'entry' && (
           <div>
             <Label>Placeholder</Label>
@@ -205,6 +220,60 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
           </div>
         )}
 
+        {/* Image-specific properties */}
+        {selectedComponent.type === 'image' && (
+          <div className="space-y-4">
+            <div>
+              <Label>Image Source</Label>
+              <Input
+                type="text"
+                value={selectedComponent.props.src || '/placeholder.svg'}
+                onChange={(e) => handlePropertyChange('src', e.target.value)}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Fit</Label>
+              <Select
+                value={selectedComponent.props.fit || 'contain'}
+                onValueChange={(value) => handlePropertyChange('fit', value)}
+              >
+                <option value="contain">Contain</option>
+                <option value="cover">Cover</option>
+                <option value="fill">Fill</option>
+              </Select>
+            </div>
+            <div>
+              <Label>Border Radius</Label>
+              <Input
+                type="number"
+                value={selectedComponent.props.cornerRadius || 8}
+                onChange={(e) => handlePropertyChange('cornerRadius', parseInt(e.target.value) || 0)}
+                min="0"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Border Color</Label>
+              <div className="flex gap-2 mt-1">
+                <Input
+                  type="color"
+                  value={selectedComponent.props.borderColor || '#e2e8f0'}
+                  onChange={(e) => handlePropertyChange('borderColor', e.target.value)}
+                  className="w-20 h-10 p-1"
+                />
+                <Input
+                  type="text"
+                  value={selectedComponent.props.borderColor || '#e2e8f0'}
+                  onChange={(e) => handlePropertyChange('borderColor', e.target.value)}
+                  className="flex-1"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Slider-specific properties */}
         {selectedComponent.type === 'slider' && (
           <div className="space-y-4">
             <div>
@@ -247,6 +316,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
           </div>
         )}
 
+        {/* Frame-specific properties */}
         {selectedComponent.type === 'frame' && (
           <div className="space-y-4">
             <div>

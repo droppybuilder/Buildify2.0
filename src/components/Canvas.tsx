@@ -155,11 +155,13 @@ export const Canvas = ({
   const getDefaultProps = (type: string) => {
     switch (type) {
       case 'button':
-        return { text: 'Button', command: '', bgColor: '#ffffff', fgColor: '#000000' };
+        return { text: 'Button', bgColor: '#ffffff', fgColor: '#000000', hoverColor: '#f0f0f0', cornerRadius: 8, borderColor: '#e2e8f0' };
       case 'label':
         return { text: 'Label', font: 'Default', fontSize: 12, fgColor: '#000000' };
       case 'entry':
-        return { placeholder: 'Enter text...', bgColor: '#ffffff', width: 120 };
+        return { placeholder: 'Enter text...', bgColor: '#ffffff', cornerRadius: 8, borderColor: '#e2e8f0' };
+      case 'image':
+        return { src: '/placeholder.svg', fit: 'contain', borderRadius: 8, borderColor: '#e2e8f0' };
       case 'checkbox':
         return { text: 'Checkbox', value: false, font: 'Default' };
       case 'slider':
@@ -282,11 +284,12 @@ const ComponentPreview = ({ component }: { component: Component }) => {
     case 'button':
       return (
         <button 
-          className="w-full h-full border rounded-lg shadow-sm hover:bg-gray-50 transition-colors"
+          className="w-full h-full border shadow-sm hover:bg-gray-50 transition-colors"
           style={{
             backgroundColor: component.props.bgColor || '#ffffff',
             color: component.props.fgColor || '#000000',
             borderRadius: `${component.props.cornerRadius || 8}px`,
+            borderColor: component.props.borderColor || '#e2e8f0'
           }}
         >
           {component.props.text || 'Button'}
@@ -314,9 +317,29 @@ const ComponentPreview = ({ component }: { component: Component }) => {
           style={{
             backgroundColor: component.props.bgColor || '#ffffff',
             borderRadius: `${component.props.cornerRadius || 8}px`,
+            borderColor: component.props.borderColor || '#e2e8f0'
           }}
           readOnly
         />
+      );
+    case 'image':
+      return (
+        <div 
+          className="w-full h-full border overflow-hidden"
+          style={{
+            borderRadius: `${component.props.cornerRadius || 8}px`,
+            borderColor: component.props.borderColor || '#e2e8f0'
+          }}
+        >
+          <img 
+            src={component.props.src || '/placeholder.svg'}
+            alt="Widget"
+            className="w-full h-full"
+            style={{
+              objectFit: component.props.fit || 'contain'
+            }}
+          />
+        </div>
       );
     case 'checkbox':
       return (

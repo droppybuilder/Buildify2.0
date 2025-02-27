@@ -2,7 +2,7 @@
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
-import { Image as ImageIcon, Type, Button as ButtonIcon, TextCursor, SlidersHorizontal, Frame } from "lucide-react";
+import { Image as ImageIcon, Type, CircleIcon, TextCursor, SlidersHorizontal, Frame } from "lucide-react";
 
 export const Sidebar = () => {
   const handleDragStart = (e: React.DragEvent, type: string) => {
@@ -24,7 +24,7 @@ export const Sidebar = () => {
               onDragStart={(e) => handleDragStart(e, 'button')}
               className="aspect-[4/1] rounded-lg border border-gray-200 bg-white p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors"
             >
-              <ButtonIcon size={16} />
+              <CircleIcon size={16} />
               <span>Button</span>
             </div>
             <div

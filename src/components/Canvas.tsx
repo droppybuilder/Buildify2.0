@@ -38,12 +38,17 @@ export const Canvas = ({
     e.dataTransfer.dropEffect = 'copy';
   };
 
-  const handleMouseDown = (e: React.MouseEvent, component: Component) => {
-    if (!selectedComponent || selectedComponent.id !== component.id) {
-      setSelectedComponent(component);
-      return;
+  const handleCanvasClick = (e: React.MouseEvent) => {
+    if (e.target === canvasRef.current) {
+      setSelectedComponent(null);
     }
+  };
 
+  const handleMouseDown = (e: React.MouseEvent, component: Component) => {
+    e.stopPropagation();
+    
+    setSelectedComponent(component);
+    
     const target = e.target as HTMLElement;
     if (target.classList.contains('resize-handle')) {
       setIsResizing(true);
@@ -56,8 +61,6 @@ export const Canvas = ({
       x: e.clientX - component.position.x,
       y: e.clientY - component.position.y
     });
-
-    e.stopPropagation();
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -66,12 +69,13 @@ export const Canvas = ({
     if (isDragging) {
       const newComponents = components.map(comp => {
         if (comp.id === selectedComponent.id) {
+          const newPosition = {
+            x: e.clientX - dragStart.x,
+            y: e.clientY - dragStart.y
+          };
           return {
             ...comp,
-            position: {
-              x: e.clientX - dragStart.x,
-              y: e.clientY - dragStart.y
-            }
+            position: newPosition
           };
         }
         return comp;
@@ -238,6 +242,7 @@ export const Canvas = ({
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
+          onClick={handleCanvasClick}
         >
           {components.map((component) => (
             <div
@@ -281,6 +286,7 @@ const ComponentPreview = ({ component }: { component: Component }) => {
           style={{
             backgroundColor: component.props.bgColor || '#ffffff',
             color: component.props.fgColor || '#000000',
+            borderRadius: `${component.props.cornerRadius || 8}px`,
           }}
         >
           {component.props.text || 'Button'}
@@ -303,10 +309,11 @@ const ComponentPreview = ({ component }: { component: Component }) => {
       return (
         <input
           type="text"
-          className="w-full h-full px-3 border rounded-lg"
+          className="w-full h-full px-3 border"
           placeholder={component.props.placeholder || 'Enter text...'}
           style={{
             backgroundColor: component.props.bgColor || '#ffffff',
+            borderRadius: `${component.props.cornerRadius || 8}px`,
           }}
           readOnly
         />
@@ -315,7 +322,10 @@ const ComponentPreview = ({ component }: { component: Component }) => {
       return (
         <label 
           className="flex items-center gap-2"
-          style={{ fontFamily: component.props.font || 'system-ui' }}
+          style={{ 
+            fontFamily: component.props.font || 'system-ui',
+            color: component.props.fgColor || '#000000',
+          }}
         >
           <input 
             type="checkbox" 
@@ -348,6 +358,7 @@ const ComponentPreview = ({ component }: { component: Component }) => {
             backgroundColor: component.props.background || 'transparent',
             borderStyle: component.props.relief === 'flat' ? 'solid' : component.props.relief,
             borderWidth: `${component.props.borderwidth || 1}px`,
+            borderRadius: `${component.props.cornerRadius || 8}px`,
           }}
         />
       );

@@ -110,6 +110,9 @@ if __name__ == "__main__":
     const imports = `import customtkinter as ctk
 from PIL import Image
 import os
+import requests
+from io import BytesIO
+import urllib.parse
 
 class App:
     def __init__(self):
@@ -117,6 +120,21 @@ class App:
         self.root.title("CustomTkinter GUI")
         self.root.geometry("800x600")
         self._create_widgets()
+        
+    def load_image(self, path):
+        """Load image from local path or URL"""
+        try:
+            if path.startswith(('http://', 'https://')):
+                response = requests.get(path)
+                return Image.open(BytesIO(response.content))
+            elif os.path.exists(path):
+                return Image.open(path)
+            else:
+                print(f"Image not found: {path}")
+                return None
+        except Exception as e:
+            print(f"Error loading image: {e}")
+            return None
 
     def _create_widgets(self):`;
 
@@ -128,12 +146,25 @@ class App:
             text="${component.props.text}",
             fg_color="${component.props.bgColor || '#ffffff'}",
             text_color="${component.props.fgColor || '#000000'}",
-            hover_color="${component.props.hoverColor || adjustColor(component.props.bgColor || '#ffffff', -20)}",
+            hover_color="${component.props.hoverColor || '#f0f0f0'}",
             border_color="${component.props.borderColor || '#e2e8f0'}",
             corner_radius=${component.props.cornerRadius || 8})
         self.button_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-        case 'label':
-          return `        self.label_${safeId} = ctk.CTkLabel(self.root, 
+      
+      case 'image':
+        return `        image_path = "${component.props.src}"
+        image = self.load_image(image_path)
+        if image:
+            self.image_${safeId} = ctk.CTkImage(
+                light_image=image,
+                size=(${Math.round(component.size.width)}, ${Math.round(component.size.height)}))
+            self.image_label_${safeId} = ctk.CTkLabel(self.root,
+                image=self.image_${safeId},
+                text="")
+            self.image_label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
+
+      case 'label':
+        return `        self.label_${safeId} = ctk.CTkLabel(self.root, 
             text="${component.props.text}",
             text_color="${component.props.fgColor || '#000000'}",
             font=("TkDefaultFont", ${component.props.fontSize || 12}))
@@ -145,23 +176,15 @@ class App:
             corner_radius=${component.props.cornerRadius || 8},
             placeholder_text="${component.props.placeholder || ''}")
         self.entry_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-        case 'image':
-          return `        try:
-            image_path = "${component.props.src}"
-            if os.path.exists(image_path):
-                self.image_${safeId} = ctk.CTkImage(
-                    light_image=Image.open(image_path),
-                    size=(${Math.round(component.size.width)}, ${Math.round(component.size.height)}))
-                self.image_label_${safeId} = ctk.CTkLabel(self.root,
-                    image=self.image_${safeId},
-                    text="")
-                self.image_label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})
-        except Exception as e:
-            print(f"Error loading image {image_path}: {e}")`;
         default:
           return '';
       }
     }).join('\n\n');
+
+    const requirements = `"""
+Requirements:
+pip install customtkinter Pillow requests
+"""`;
 
     const main = `
 
@@ -169,7 +192,7 @@ if __name__ == "__main__":
     app = App()
     app.root.mainloop()`;
 
-    return imports + '\n' + setupComponents + main;
+    return requirements + '\n\n' + imports + '\n' + setupComponents + main;
   };
 
   const adjustColor = (hex: string, amount: number) => {

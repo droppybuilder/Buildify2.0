@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Select } from "@/components/ui/select";
+import { toast } from "sonner";
 
 interface PropertyPanelProps {
   selectedComponent: any;
@@ -28,6 +29,32 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
       ...selectedComponent,
       props: updatedProps
     });
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size should be less than 5MB');
+      return;
+    }
+
+    try {
+      const objectUrl = URL.createObjectURL(file);
+      
+      handlePropertyChange('src', objectUrl);
+      
+      toast.success('Image uploaded successfully');
+    } catch (error) {
+      toast.error('Failed to upload image');
+      console.error('Image upload error:', error);
+    }
   };
 
   return (
@@ -100,11 +127,9 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
 
       <Separator />
 
-      {/* Common properties for all components */}
       <div>
         <h3 className="font-semibold mb-4">Properties</h3>
         
-        {/* Text properties */}
         {['button', 'label', 'checkbox'].includes(selectedComponent.type) && (
           <div className="space-y-4">
             <div>
@@ -136,7 +161,6 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
           </div>
         )}
 
-        {/* Background and border properties */}
         {['button', 'entry', 'frame'].includes(selectedComponent.type) && (
           <div className="space-y-4">
             <div>
@@ -186,7 +210,6 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
           </div>
         )}
 
-        {/* Button-specific properties */}
         {selectedComponent.type === 'button' && (
           <div>
             <Label>Hover Color</Label>
@@ -207,7 +230,6 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
           </div>
         )}
 
-        {/* Entry-specific properties */}
         {selectedComponent.type === 'entry' && (
           <div>
             <Label>Placeholder</Label>
@@ -220,11 +242,19 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
           </div>
         )}
 
-        {/* Image-specific properties */}
         {selectedComponent.type === 'image' && (
           <div className="space-y-4">
             <div>
-              <Label>Image Source</Label>
+              <Label>Upload Image</Label>
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Image Source URL</Label>
               <Input
                 type="text"
                 value={selectedComponent.props.src || '/placeholder.svg'}
@@ -234,7 +264,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
             </div>
             <div>
               <Label>Fit</Label>
-              <Select
+              <Select 
                 value={selectedComponent.props.fit || 'contain'}
                 onValueChange={(value) => handlePropertyChange('fit', value)}
               >
@@ -273,7 +303,6 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
           </div>
         )}
 
-        {/* Slider-specific properties */}
         {selectedComponent.type === 'slider' && (
           <div className="space-y-4">
             <div>
@@ -316,7 +345,6 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
           </div>
         )}
 
-        {/* Frame-specific properties */}
         {selectedComponent.type === 'frame' && (
           <div className="space-y-4">
             <div>

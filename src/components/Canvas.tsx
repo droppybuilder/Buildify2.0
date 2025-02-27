@@ -161,13 +161,7 @@ export const Canvas = ({
       case 'entry':
         return { placeholder: 'Enter text...', bgColor: '#ffffff', cornerRadius: 8, borderColor: '#e2e8f0' };
       case 'image':
-        return { src: '/placeholder.svg', fit: 'contain', borderRadius: 8, borderColor: '#e2e8f0' };
-      case 'checkbox':
-        return { text: 'Checkbox', value: false, font: 'Default' };
-      case 'slider':
-        return { from: 0, to: 100, value: 50, orient: 'horizontal' };
-      case 'frame':
-        return { background: 'transparent', relief: 'flat', borderwidth: 1 };
+        return { src: '/placeholder.svg', fit: 'contain', cornerRadius: 8, borderColor: '#e2e8f0' };
       default:
         return {};
     }
@@ -338,52 +332,12 @@ const ComponentPreview = ({ component }: { component: Component }) => {
             style={{
               objectFit: component.props.fit || 'contain'
             }}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = '/placeholder.svg';
+            }}
           />
         </div>
-      );
-    case 'checkbox':
-      return (
-        <label 
-          className="flex items-center gap-2"
-          style={{ 
-            fontFamily: component.props.font || 'system-ui',
-            color: component.props.fgColor || '#000000',
-          }}
-        >
-          <input 
-            type="checkbox" 
-            className="rounded border-gray-300" 
-            checked={component.props.value || false}
-            readOnly 
-          />
-          <span>{component.props.text || 'Checkbox'}</span>
-        </label>
-      );
-    case 'slider':
-      return (
-        <input
-          type="range"
-          className="w-full h-full accent-primary"
-          min={component.props.from || 0}
-          max={component.props.to || 100}
-          value={component.props.value || 50}
-          style={{
-            transform: component.props.orient === 'vertical' ? 'rotate(90deg)' : 'none'
-          }}
-          readOnly
-        />
-      );
-    case 'frame':
-      return (
-        <div 
-          className="w-full h-full rounded-lg" 
-          style={{
-            backgroundColor: component.props.background || 'transparent',
-            borderStyle: component.props.relief === 'flat' ? 'solid' : component.props.relief,
-            borderWidth: `${component.props.borderwidth || 1}px`,
-            borderRadius: `${component.props.cornerRadius || 8}px`,
-          }}
-        />
       );
     default:
       return null;

@@ -108,14 +108,17 @@ if __name__ == "__main__":
 
   const generateCustomTkinterCode = (components: any[]) => {
     const imports = `import customtkinter as ctk
-from PIL import Image, ImageTk
+from PIL import Image
+import os
 
 class App:
     def __init__(self):
         self.root = ctk.CTk()
         self.root.title("CustomTkinter GUI")
         self.root.geometry("800x600")
-`;
+        self._create_widgets()
+
+    def _create_widgets(self):`;
 
     const setupComponents = components.map(component => {
       const safeId = sanitizeId(component.id);
@@ -143,25 +146,30 @@ class App:
             placeholder_text="${component.props.placeholder || ''}")
         self.entry_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
         case 'image':
-          return `        self.image_${safeId} = ctk.CTkImage(
-              light_image=Image.open("${component.props.src}"),
-              size=(${Math.round(component.size.width)}, ${Math.round(component.size.height)}))
-          self.image_label_${safeId} = ctk.CTkLabel(self.root,
-              image=self.image_${safeId},
-              text="")
-          self.image_label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
+          return `        try:
+            image_path = "${component.props.src}"
+            if os.path.exists(image_path):
+                self.image_${safeId} = ctk.CTkImage(
+                    light_image=Image.open(image_path),
+                    size=(${Math.round(component.size.width)}, ${Math.round(component.size.height)}))
+                self.image_label_${safeId} = ctk.CTkLabel(self.root,
+                    image=self.image_${safeId},
+                    text="")
+                self.image_label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})
+        except Exception as e:
+            print(f"Error loading image {image_path}: {e}")`;
         default:
           return '';
       }
     }).join('\n\n');
 
     const main = `
+
 if __name__ == "__main__":
     app = App()
-    app.root.mainloop()
-`;
+    app.root.mainloop()`;
 
-    return imports + setupComponents + main;
+    return imports + '\n' + setupComponents + main;
   };
 
   const adjustColor = (hex: string, amount: number) => {

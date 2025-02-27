@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -47,9 +48,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
 
     try {
       const objectUrl = URL.createObjectURL(file);
-      
       handlePropertyChange('src', objectUrl);
-      
       toast.success('Image uploaded successfully');
     } catch (error) {
       toast.error('Failed to upload image');
@@ -66,7 +65,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
             <Label>X Position</Label>
             <Input
               type="number"
-              value={Math.round(selectedComponent.position.x)}
+              defaultValue={Math.round(selectedComponent.position.x)}
               onChange={(e) => onUpdate({
                 ...selectedComponent,
                 position: {
@@ -81,7 +80,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
             <Label>Y Position</Label>
             <Input
               type="number"
-              value={Math.round(selectedComponent.position.y)}
+              defaultValue={Math.round(selectedComponent.position.y)}
               onChange={(e) => onUpdate({
                 ...selectedComponent,
                 position: {
@@ -96,7 +95,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
             <Label>Width</Label>
             <Input
               type="number"
-              value={Math.round(selectedComponent.size.width)}
+              defaultValue={Math.round(selectedComponent.size.width)}
               onChange={(e) => onUpdate({
                 ...selectedComponent,
                 size: {
@@ -111,7 +110,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
             <Label>Height</Label>
             <Input
               type="number"
-              value={Math.round(selectedComponent.size.height)}
+              defaultValue={Math.round(selectedComponent.size.height)}
               onChange={(e) => onUpdate({
                 ...selectedComponent,
                 size: {
@@ -136,7 +135,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
               <Label>Text</Label>
               <Input
                 type="text"
-                value={selectedComponent.props.text || ''}
+                defaultValue={selectedComponent.props.text || ''}
                 onChange={(e) => handlePropertyChange('text', e.target.value)}
                 className="mt-1"
               />
@@ -146,13 +145,13 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
               <div className="flex gap-2 mt-1">
                 <Input
                   type="color"
-                  value={selectedComponent.props.fgColor || '#000000'}
+                  defaultValue={selectedComponent.props.fgColor || '#000000'}
                   onChange={(e) => handlePropertyChange('fgColor', e.target.value)}
                   className="w-20 h-10 p-1"
                 />
                 <Input
                   type="text"
-                  value={selectedComponent.props.fgColor || '#000000'}
+                  defaultValue={selectedComponent.props.fgColor || '#000000'}
                   onChange={(e) => handlePropertyChange('fgColor', e.target.value)}
                   className="flex-1"
                 />
@@ -168,13 +167,13 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
               <div className="flex gap-2 mt-1">
                 <Input
                   type="color"
-                  value={selectedComponent.props.bgColor || '#ffffff'}
+                  defaultValue={selectedComponent.props.bgColor || '#ffffff'}
                   onChange={(e) => handlePropertyChange('bgColor', e.target.value)}
                   className="w-20 h-10 p-1"
                 />
                 <Input
                   type="text"
-                  value={selectedComponent.props.bgColor || '#ffffff'}
+                  defaultValue={selectedComponent.props.bgColor || '#ffffff'}
                   onChange={(e) => handlePropertyChange('bgColor', e.target.value)}
                   className="flex-1"
                 />
@@ -184,7 +183,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
               <Label>Corner Radius</Label>
               <Input
                 type="number"
-                value={selectedComponent.props.cornerRadius || 8}
+                defaultValue={selectedComponent.props.cornerRadius || 8}
                 onChange={(e) => handlePropertyChange('cornerRadius', parseInt(e.target.value) || 0)}
                 min="0"
                 className="mt-1"
@@ -195,13 +194,13 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
               <div className="flex gap-2 mt-1">
                 <Input
                   type="color"
-                  value={selectedComponent.props.borderColor || '#e2e8f0'}
+                  defaultValue={selectedComponent.props.borderColor || '#e2e8f0'}
                   onChange={(e) => handlePropertyChange('borderColor', e.target.value)}
                   className="w-20 h-10 p-1"
                 />
                 <Input
                   type="text"
-                  value={selectedComponent.props.borderColor || '#e2e8f0'}
+                  defaultValue={selectedComponent.props.borderColor || '#e2e8f0'}
                   onChange={(e) => handlePropertyChange('borderColor', e.target.value)}
                   className="flex-1"
                 />
@@ -216,13 +215,13 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
             <div className="flex gap-2 mt-1">
               <Input
                 type="color"
-                value={selectedComponent.props.hoverColor || '#f0f0f0'}
+                defaultValue={selectedComponent.props.hoverColor || '#f0f0f0'}
                 onChange={(e) => handlePropertyChange('hoverColor', e.target.value)}
                 className="w-20 h-10 p-1"
               />
               <Input
                 type="text"
-                value={selectedComponent.props.hoverColor || '#f0f0f0'}
+                defaultValue={selectedComponent.props.hoverColor || '#f0f0f0'}
                 onChange={(e) => handlePropertyChange('hoverColor', e.target.value)}
                 className="flex-1"
               />
@@ -235,7 +234,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
             <Label>Placeholder</Label>
             <Input
               type="text"
-              value={selectedComponent.props.placeholder || ''}
+              defaultValue={selectedComponent.props.placeholder || ''}
               onChange={(e) => handlePropertyChange('placeholder', e.target.value)}
               className="mt-1"
             />
@@ -257,7 +256,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
               <Label>Image Source URL</Label>
               <Input
                 type="text"
-                value={selectedComponent.props.src || '/placeholder.svg'}
+                defaultValue={selectedComponent.props.src || '/placeholder.svg'}
                 onChange={(e) => handlePropertyChange('src', e.target.value)}
                 className="mt-1"
               />
@@ -277,7 +276,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
               <Label>Border Radius</Label>
               <Input
                 type="number"
-                value={selectedComponent.props.cornerRadius || 8}
+                defaultValue={selectedComponent.props.cornerRadius || 8}
                 onChange={(e) => handlePropertyChange('cornerRadius', parseInt(e.target.value) || 0)}
                 min="0"
                 className="mt-1"
@@ -288,13 +287,13 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
               <div className="flex gap-2 mt-1">
                 <Input
                   type="color"
-                  value={selectedComponent.props.borderColor || '#e2e8f0'}
+                  defaultValue={selectedComponent.props.borderColor || '#e2e8f0'}
                   onChange={(e) => handlePropertyChange('borderColor', e.target.value)}
                   className="w-20 h-10 p-1"
                 />
                 <Input
                   type="text"
-                  value={selectedComponent.props.borderColor || '#e2e8f0'}
+                  defaultValue={selectedComponent.props.borderColor || '#e2e8f0'}
                   onChange={(e) => handlePropertyChange('borderColor', e.target.value)}
                   className="flex-1"
                 />
@@ -309,7 +308,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
               <Label>Minimum Value</Label>
               <Input
                 type="number"
-                value={selectedComponent.props.from || 0}
+                defaultValue={selectedComponent.props.from || 0}
                 onChange={(e) => handlePropertyChange('from', parseInt(e.target.value) || 0)}
                 className="mt-1"
               />
@@ -318,7 +317,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
               <Label>Maximum Value</Label>
               <Input
                 type="number"
-                value={selectedComponent.props.to || 100}
+                defaultValue={selectedComponent.props.to || 100}
                 onChange={(e) => handlePropertyChange('to', parseInt(e.target.value) || 100)}
                 className="mt-1"
               />
@@ -327,7 +326,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
               <Label>Current Value</Label>
               <Input
                 type="number"
-                value={selectedComponent.props.value || 50}
+                defaultValue={selectedComponent.props.value || 50}
                 onChange={(e) => handlePropertyChange('value', parseInt(e.target.value) || 50)}
                 className="mt-1"
               />
@@ -363,7 +362,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
               <Label>Border Width</Label>
               <Input
                 type="number"
-                value={selectedComponent.props.borderwidth || 1}
+                defaultValue={selectedComponent.props.borderwidth || 1}
                 onChange={(e) => handlePropertyChange('borderwidth', parseInt(e.target.value) || 1)}
                 min="0"
                 max="10"

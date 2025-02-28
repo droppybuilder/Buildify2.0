@@ -1,7 +1,7 @@
 
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Image as ImageIcon, Type, Square, TextCursor, SlidersHorizontal, Frame, CheckSquare, ListFilter } from "lucide-react";
+import { Image as ImageIcon, Type, Square, TextCursor, SlidersHorizontal, Frame, CheckSquare, Calendar, LayoutGrid, BarChart3, FileText, ListTodo } from "lucide-react";
 
 export const Sidebar = () => {
   const handleDragStart = (e: React.DragEvent, type: string) => {
@@ -77,11 +77,19 @@ export const Sidebar = () => {
               </div>
               <div
                 draggable
-                onDragStart={(e) => handleDragStart(e, 'dropdown')}
+                onDragStart={(e) => handleDragStart(e, 'datepicker')}
                 className="aspect-[4/1] rounded-lg border border-gray-200 bg-white p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors"
               >
-                <ListFilter size={16} />
-                <span>Dropdown</span>
+                <Calendar size={16} />
+                <span>Date Picker</span>
+              </div>
+              <div
+                draggable
+                onDragStart={(e) => handleDragStart(e, 'progressbar')}
+                className="aspect-[4/1] rounded-lg border border-gray-200 bg-white p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors"
+              >
+                <BarChart3 size={16} />
+                <span>Progress Bar</span>
               </div>
             </div>
           </div>
@@ -89,7 +97,7 @@ export const Sidebar = () => {
           <Separator className="my-4" />
 
           <div className="space-y-3">
-            <Label className="text-sm font-medium text-gray-700">Layout</Label>
+            <Label className="text-sm font-medium text-gray-700">Layout & Containers</Label>
             <div className="grid grid-cols-2 gap-3">
               <div
                 draggable
@@ -98,6 +106,30 @@ export const Sidebar = () => {
               >
                 <Frame size={16} />
                 <span>Frame</span>
+              </div>
+              <div
+                draggable
+                onDragStart={(e) => handleDragStart(e, 'notebook')}
+                className="aspect-[4/1] rounded-lg border border-gray-200 bg-white p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors"
+              >
+                <FileText size={16} />
+                <span>Notebook</span>
+              </div>
+              <div
+                draggable
+                onDragStart={(e) => handleDragStart(e, 'listbox')}
+                className="aspect-[4/1] rounded-lg border border-gray-200 bg-white p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors"
+              >
+                <ListTodo size={16} />
+                <span>Listbox</span>
+              </div>
+              <div
+                draggable
+                onDragStart={(e) => handleDragStart(e, 'canvas')}
+                className="aspect-[4/1] rounded-lg border border-gray-200 bg-white p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors"
+              >
+                <LayoutGrid size={16} />
+                <span>Grid</span>
               </div>
             </div>
           </div>

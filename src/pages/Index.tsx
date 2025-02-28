@@ -13,6 +13,7 @@ const Index = () => {
   const [isTkinter, setIsTkinter] = useState(true);
   const [history, setHistory] = useState<any[][]>([[]]);
   const [historyIndex, setHistoryIndex] = useState(0);
+  const [inputFocused, setInputFocused] = useState(false);
   
   // Load from localStorage on mount
   useEffect(() => {
@@ -86,6 +87,11 @@ const Index = () => {
   // Keyboard shortcut to delete selected component
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Skip if an input field is focused
+      if (inputFocused) {
+        return;
+      }
+      
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedComponent && 
           // Only process delete if not in an input field
           !['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
@@ -108,7 +114,7 @@ const Index = () => {
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedComponent, handleDeleteComponent, handleUndo, handleRedo]);
+  }, [selectedComponent, handleDeleteComponent, handleUndo, handleRedo, inputFocused]);
   
   return (
     <div className="h-screen flex overflow-hidden">

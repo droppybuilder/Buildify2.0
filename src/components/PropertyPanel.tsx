@@ -357,7 +357,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
               </div>
               <div>
                 <Label>Fit</Label>
-                <div onClick={handleSelectFocus} onBlur={handleSelectBlur}>
+                <div onFocus={handleSelectFocus} onBlur={handleSelectBlur}>
                   <Select 
                     defaultValue={selectedComponent.props.fit || 'contain'}
                     onValueChange={(value) => handlePropertyChange('fit', value)}
@@ -440,7 +440,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
               </div>
               <div>
                 <Label>Orientation</Label>
-                <div onClick={handleSelectFocus} onBlur={handleSelectBlur}>
+                <div onFocus={handleSelectFocus} onBlur={handleSelectBlur}>
                   <Select
                     defaultValue={selectedComponent.props.orient || 'horizontal'}
                     onValueChange={(value) => handlePropertyChange('orient', value)}
@@ -458,7 +458,7 @@ export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProp
             <div className="space-y-4">
               <div>
                 <Label>Border Style</Label>
-                <div onClick={handleSelectFocus} onBlur={handleSelectBlur}>
+                <div onFocus={handleSelectFocus} onBlur={handleSelectBlur}>
                   <Select
                     defaultValue={selectedComponent.props.relief || 'flat'}
                     onValueChange={(value) => handlePropertyChange('relief', value)}

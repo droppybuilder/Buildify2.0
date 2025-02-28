@@ -1,10 +1,11 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Canvas } from '@/components/Canvas';
 import { PropertyPanel } from '@/components/PropertyPanel';
 import { CodePreview } from '@/components/CodePreview';
 import { Toolbar } from '@/components/Toolbar';
+import { toast } from 'sonner';
 
 const Index = () => {
   const [selectedComponent, setSelectedComponent] = useState(null);
@@ -12,6 +13,29 @@ const Index = () => {
   const [isTkinter, setIsTkinter] = useState(true);
   const [history, setHistory] = useState<any[][]>([[]]);
   const [historyIndex, setHistoryIndex] = useState(0);
+  
+  // Load from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedComponents = localStorage.getItem('guiBuilderComponents');
+      if (savedComponents) {
+        const parsedComponents = JSON.parse(savedComponents);
+        setComponents(parsedComponents);
+        addToHistory(parsedComponents);
+      }
+    } catch (error) {
+      console.error('Failed to load saved components:', error);
+    }
+  }, []);
+  
+  // Save to localStorage when components change
+  useEffect(() => {
+    try {
+      localStorage.setItem('guiBuilderComponents', JSON.stringify(components));
+    } catch (error) {
+      console.error('Failed to save components:', error);
+    }
+  }, [components]);
   
   const addToHistory = useCallback((newComponents: any[]) => {
     // Only add to history if the components have actually changed
@@ -33,6 +57,7 @@ const Index = () => {
       const newIndex = historyIndex - 1;
       setHistoryIndex(newIndex);
       setComponents([...history[newIndex]]);
+      toast.info("Undo successful");
     }
   }, [history, historyIndex]);
 
@@ -41,6 +66,7 @@ const Index = () => {
       const newIndex = historyIndex + 1;
       setHistoryIndex(newIndex);
       setComponents([...history[newIndex]]);
+      toast.info("Redo successful");
     }
   }, [history, historyIndex]);
 
@@ -50,6 +76,36 @@ const Index = () => {
     );
     handleComponentsChange(newComponents);
   }, [components, handleComponentsChange]);
+  
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    // Handle keyboard shortcuts
+    if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
+      if (!e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      } else {
+        e.preventDefault();
+        handleRedo();
+      }
+    }
+    
+    // Delete selected component with Delete key
+    if (e.key === 'Delete' && selectedComponent) {
+      e.preventDefault();
+      const newComponents = components.filter(c => c.id !== selectedComponent.id);
+      handleComponentsChange(newComponents);
+      setSelectedComponent(null);
+      toast.info("Component deleted");
+    }
+  }, [handleUndo, handleRedo, selectedComponent, components, handleComponentsChange]);
+
+  // Add keyboard shortcut listeners
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleKeyDown]);
   
   return (
     <div className="h-screen flex overflow-hidden">

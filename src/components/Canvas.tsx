@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react';
+
+import { useState, useRef, useEffect } from 'react';
 import { toast } from "sonner";
 import { Maximize2, Minimize2, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,25 @@ export const Canvas = ({
   const [windowTitle, setWindowTitle] = useState("Untitled Window");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [windowSize, setWindowSize] = useState({ width: 800, height: 600 });
+  const [imageCache, setImageCache] = useState<Record<string, string>>({});
+
+  // Pre-cache images for smoother drag
+  useEffect(() => {
+    const imageComponents = components.filter(c => c.type === 'image');
+    
+    imageComponents.forEach(comp => {
+      if (comp.props.src && !imageCache[comp.props.src]) {
+        const img = new Image();
+        img.src = comp.props.src;
+        img.onload = () => {
+          setImageCache(prev => ({
+            ...prev,
+            [comp.props.src]: comp.props.src
+          }));
+        };
+      }
+    });
+  }, [components, imageCache]);
 
   const onDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -69,13 +89,23 @@ export const Canvas = ({
     if (isDragging) {
       const newComponents = components.map(comp => {
         if (comp.id === selectedComponent.id) {
-          const newPosition = {
-            x: e.clientX - dragStart.x,
-            y: e.clientY - dragStart.y
-          };
+          const rect = canvasRef.current?.getBoundingClientRect();
+          if (!rect) return comp;
+          
+          // Calculate new position ensuring it stays within canvas
+          let newX = e.clientX - dragStart.x;
+          let newY = e.clientY - dragStart.y;
+          
+          // Prevent component from being dragged out of bounds
+          newX = Math.max(0, Math.min(newX, rect.width - comp.size.width));
+          newY = Math.max(0, Math.min(newY, rect.height - comp.size.height));
+          
           return {
             ...comp,
-            position: newPosition
+            position: {
+              x: newX,
+              y: newY
+            }
           };
         }
         return comp;
@@ -144,12 +174,35 @@ export const Canvas = ({
       id: `${type}-${Date.now()}`,
       type,
       position: { x, y },
-      size: { width: 120, height: 40 },
+      size: getDefaultSize(type),
       props: getDefaultProps(type),
     };
 
     setComponents([...components, newComponent]);
     toast.success("Component added to canvas");
+  };
+
+  const getDefaultSize = (type: string) => {
+    switch (type) {
+      case 'button':
+        return { width: 120, height: 40 };
+      case 'label':
+        return { width: 200, height: 30 };
+      case 'entry':
+        return { width: 200, height: 40 };
+      case 'image':
+        return { width: 200, height: 200 };
+      case 'slider':
+        return { width: 200, height: 30 };
+      case 'frame':
+        return { width: 300, height: 200 };
+      case 'checkbox':
+        return { width: 120, height: 30 };
+      case 'dropdown':
+        return { width: 200, height: 40 };
+      default:
+        return { width: 120, height: 40 };
+    }
   };
 
   const getDefaultProps = (type: string) => {
@@ -162,6 +215,14 @@ export const Canvas = ({
         return { placeholder: 'Enter text...', bgColor: '#ffffff', cornerRadius: 8, borderColor: '#e2e8f0' };
       case 'image':
         return { src: '/placeholder.svg', fit: 'contain', cornerRadius: 8, borderColor: '#e2e8f0' };
+      case 'slider':
+        return { from: 0, to: 100, value: 50, orient: 'horizontal', bgColor: '#e2e8f0', troughColor: '#3b82f6' };
+      case 'frame':
+        return { relief: 'flat', borderwidth: 1, bgColor: '#ffffff', borderColor: '#e2e8f0' };
+      case 'checkbox':
+        return { text: 'Checkbox', checked: false, fgColor: '#000000' };
+      case 'dropdown':
+        return { options: 'Option 1,Option 2,Option 3', selected: 'Option 1', bgColor: '#ffffff', fgColor: '#000000' };
       default:
         return {};
     }
@@ -253,6 +314,7 @@ export const Canvas = ({
                 height: `${component.size.height}px`,
                 transform: 'translate(0, 0)',
                 transition: isDragging || isResizing ? 'none' : 'all 0.2s ease',
+                willChange: 'transform, left, top, width, height',
               }}
               onMouseDown={(e) => handleMouseDown(e, component)}
             >
@@ -330,14 +392,128 @@ const ComponentPreview = ({ component }: { component: Component }) => {
             alt="Widget"
             className="w-full h-full"
             style={{
-              objectFit: component.props.fit || 'contain'
+              objectFit: component.props.fit || 'contain',
+              imageRendering: 'high-quality'
             }}
+            loading="eager"
+            decoding="async"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.src = '/placeholder.svg';
             }}
           />
         </div>
+      );
+    case 'slider':
+      return (
+        <div 
+          className="w-full h-full flex items-center justify-center"
+          style={{
+            borderRadius: `${component.props.cornerRadius || 8}px`,
+          }}
+        >
+          <div 
+            className="relative"
+            style={{
+              width: component.props.orient === 'vertical' ? '8px' : '100%',
+              height: component.props.orient === 'vertical' ? '100%' : '8px',
+              backgroundColor: component.props.bgColor || '#e2e8f0',
+              borderRadius: '4px',
+            }}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                backgroundColor: component.props.troughColor || '#3b82f6',
+                borderRadius: '4px',
+                ...(component.props.orient === 'vertical' 
+                  ? {
+                      width: '100%',
+                      bottom: 0,
+                      height: `${((component.props.value - component.props.from) / (component.props.to - component.props.from)) * 100}%`
+                    }
+                  : {
+                      height: '100%',
+                      width: `${((component.props.value - component.props.from) / (component.props.to - component.props.from)) * 100}%`
+                    }
+                )
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                width: '16px',
+                height: '16px',
+                backgroundColor: 'white',
+                borderRadius: '50%',
+                border: '1px solid #d1d5db',
+                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+                ...(component.props.orient === 'vertical'
+                  ? {
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      bottom: `calc(${((component.props.value - component.props.from) / (component.props.to - component.props.from)) * 100}% - 8px)`
+                    }
+                  : {
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      left: `calc(${((component.props.value - component.props.from) / (component.props.to - component.props.from)) * 100}% - 8px)`
+                    }
+                )
+              }}
+            />
+          </div>
+        </div>
+      );
+    case 'frame':
+      return (
+        <div 
+          className="w-full h-full"
+          style={{
+            backgroundColor: component.props.bgColor || '#ffffff',
+            borderWidth: `${component.props.borderwidth || 1}px`,
+            borderColor: component.props.borderColor || '#e2e8f0',
+            borderStyle: 
+              component.props.relief === 'flat' ? 'solid' :
+              component.props.relief === 'groove' ? 'groove' :
+              component.props.relief === 'ridge' ? 'ridge' : 'solid',
+            borderRadius: `${component.props.cornerRadius || 4}px`,
+          }}
+        />
+      );
+    case 'checkbox':
+      return (
+        <label className="flex items-center gap-2 h-full cursor-default">
+          <input 
+            type="checkbox" 
+            className="w-4 h-4 rounded border-gray-300"
+            defaultChecked={component.props.checked}
+            readOnly
+          />
+          <span style={{ color: component.props.fgColor || '#000000' }}>
+            {component.props.text || 'Checkbox'}
+          </span>
+        </label>
+      );
+    case 'dropdown':
+      return (
+        <select 
+          className="w-full h-full px-3 py-1 border rounded appearance-none"
+          style={{
+            backgroundColor: component.props.bgColor || '#ffffff',
+            color: component.props.fgColor || '#000000',
+            borderColor: component.props.borderColor || '#e2e8f0',
+            borderRadius: `${component.props.cornerRadius || 4}px`,
+          }}
+        >
+          {(component.props.options || 'Option 1,Option 2,Option 3')
+            .split(',')
+            .map((option: string, i: number) => (
+              <option key={i} value={option.trim()}>
+                {option.trim()}
+              </option>
+            ))}
+        </select>
       );
     default:
       return null;

@@ -267,16 +267,8 @@ export const Canvas = ({
         return { width: 300, height: 200 };
       case 'checkbox':
         return { width: 120, height: 30 };
-      case 'datepicker':
+      case 'dropdown':
         return { width: 200, height: 40 };
-      case 'progressbar':
-        return { width: 200, height: 20 };
-      case 'notebook':
-        return { width: 300, height: 250 };
-      case 'listbox':
-        return { width: 200, height: 150 };
-      case 'canvas':
-        return { width: 300, height: 200 };
       default:
         return { width: 120, height: 40 };
     }
@@ -295,19 +287,11 @@ export const Canvas = ({
       case 'slider':
         return { from: 0, to: 100, value: 50, orient: 'horizontal', bgColor: '#e2e8f0', troughColor: '#3b82f6' };
       case 'frame':
-        return { relief: 'flat', borderwidth: 1, bgColor: '#ffffff', borderColor: '#e2e8f0', cornerRadius: 4 };
+        return { relief: 'flat', borderwidth: 1, bgColor: '#ffffff', borderColor: '#e2e8f0' };
       case 'checkbox':
         return { text: 'Checkbox', checked: false, fgColor: '#000000' };
-      case 'datepicker':
-        return { format: 'yyyy-mm-dd', bgColor: '#ffffff', borderColor: '#e2e8f0', cornerRadius: 8 };
-      case 'progressbar':
-        return { value: 50, maxValue: 100, bgColor: '#e2e8f0', progressColor: '#3b82f6', cornerRadius: 4 };
-      case 'notebook':
-        return { tabs: 'Tab 1,Tab 2,Tab 3', selectedTab: 'Tab 1', bgColor: '#ffffff', borderColor: '#e2e8f0' };
-      case 'listbox':
-        return { items: 'Item 1,Item 2,Item 3,Item 4,Item 5', bgColor: '#ffffff', fgColor: '#000000', borderColor: '#e2e8f0' };
-      case 'canvas':
-        return { bgColor: '#ffffff', borderColor: '#e2e8f0', borderwidth: 1, cornerRadius: 4 };
+      case 'dropdown':
+        return { options: 'Option 1,Option 2,Option 3', selected: 'Option 1', bgColor: '#ffffff', fgColor: '#000000' };
       default:
         return {};
     }
@@ -640,106 +624,25 @@ const ComponentPreview = ({ component }: { component: Component }) => {
           </span>
         </label>
       );
-    case 'datepicker':
+    case 'dropdown':
       return (
-        <div
-          className="w-full h-full flex items-center border px-3"
+        <select 
+          className="w-full h-full px-3 py-1 border rounded appearance-none"
           style={{
             backgroundColor: component.props.bgColor || '#ffffff',
+            color: component.props.fgColor || '#000000',
             borderColor: component.props.borderColor || '#e2e8f0',
-            borderRadius: `${component.props.cornerRadius || 8}px`,
-          }}
-        >
-          <div className="text-sm text-gray-500">{component.props.format || 'yyyy-mm-dd'}</div>
-          <div className="ml-auto">📅</div>
-        </div>
-      );
-    case 'progressbar':
-      return (
-        <div
-          className="w-full h-full rounded overflow-hidden"
-          style={{
-            backgroundColor: component.props.bgColor || '#e2e8f0',
             borderRadius: `${component.props.cornerRadius || 4}px`,
           }}
         >
-          <div
-            style={{
-              width: `${(component.props.value / component.props.maxValue) * 100}%`,
-              height: '100%',
-              backgroundColor: component.props.progressColor || '#3b82f6',
-              transition: 'width 0.3s ease'
-            }}
-          ></div>
-        </div>
-      );
-    case 'notebook':
-      return (
-        <div
-          className="w-full h-full flex flex-col border"
-          style={{
-            backgroundColor: component.props.bgColor || '#ffffff',
-            borderColor: component.props.borderColor || '#e2e8f0',
-            borderRadius: '4px',
-          }}
-        >
-          <div className="flex border-b">
-            {(component.props.tabs || 'Tab 1,Tab 2,Tab 3').split(',').map((tab: string, i: number) => (
-              <div
-                key={i}
-                className={`px-4 py-2 text-sm cursor-default ${
-                  tab.trim() === component.props.selectedTab ? 'bg-white border-b-2 border-primary' : 'bg-gray-50'
-                }`}
-              >
-                {tab.trim()}
-              </div>
+          {(component.props.options || 'Option 1,Option 2,Option 3')
+            .split(',')
+            .map((option: string, i: number) => (
+              <option key={i} value={option.trim()}>
+                {option.trim()}
+              </option>
             ))}
-          </div>
-          <div className="flex-1 p-2">
-            <div className="w-full h-full flex items-center justify-center text-sm text-gray-400">
-              {component.props.selectedTab || 'Tab 1'} Content
-            </div>
-          </div>
-        </div>
-      );
-    case 'listbox':
-      return (
-        <div
-          className="w-full h-full border overflow-auto"
-          style={{
-            backgroundColor: component.props.bgColor || '#ffffff',
-            borderColor: component.props.borderColor || '#e2e8f0',
-            borderRadius: '4px',
-          }}
-        >
-          {(component.props.items || 'Item 1,Item 2,Item 3,Item 4,Item 5').split(',').map((item: string, i: number) => (
-            <div
-              key={i}
-              className={`px-3 py-1 text-sm ${i === 0 ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
-              style={{
-                color: component.props.fgColor || '#000000'
-              }}
-            >
-              {item.trim()}
-            </div>
-          ))}
-        </div>
-      );
-    case 'canvas':
-      return (
-        <div
-          className="w-full h-full border"
-          style={{
-            backgroundColor: component.props.bgColor || '#ffffff',
-            borderColor: component.props.borderColor || '#e2e8f0',
-            borderWidth: `${component.props.borderwidth || 1}px`,
-            borderRadius: `${component.props.cornerRadius || 4}px`,
-          }}
-        >
-          <div className="w-full h-full flex items-center justify-center text-sm text-gray-500">
-            Canvas Area
-          </div>
-        </div>
+        </select>
       );
     default:
       return null;

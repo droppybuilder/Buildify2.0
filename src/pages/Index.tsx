@@ -13,6 +13,7 @@ const Index = () => {
   const [isTkinter, setIsTkinter] = useState(true);
   const [history, setHistory] = useState<any[][]>([[]]);
   const [historyIndex, setHistoryIndex] = useState(0);
+  const [inputFocused, setInputFocused] = useState(false);
   
   // Load from localStorage on mount
   useEffect(() => {
@@ -86,9 +87,12 @@ const Index = () => {
   // Keyboard shortcut to delete selected component
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedComponent && 
-          // Only process delete if not in an input field
-          !['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
+      // Skip if an input field is focused
+      if (e.target && ['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement).tagName)) {
+        return;
+      }
+      
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedComponent) {
         e.preventDefault();
         handleDeleteComponent(selectedComponent);
         setSelectedComponent(null);

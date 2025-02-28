@@ -77,35 +77,38 @@ const Index = () => {
     handleComponentsChange(newComponents);
   }, [components, handleComponentsChange]);
   
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    // Handle keyboard shortcuts
-    if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
-      if (!e.shiftKey) {
-        e.preventDefault();
-        handleUndo();
-      } else {
-        e.preventDefault();
-        handleRedo();
-      }
-    }
-    
-    // Delete selected component with Delete key
-    if (e.key === 'Delete' && selectedComponent) {
-      e.preventDefault();
-      const newComponents = components.filter(c => c.id !== selectedComponent.id);
-      handleComponentsChange(newComponents);
-      setSelectedComponent(null);
-      toast.info("Component deleted");
-    }
-  }, [handleUndo, handleRedo, selectedComponent, components, handleComponentsChange]);
-
-  // Add keyboard shortcut listeners
+  const handleDeleteComponent = useCallback((component: any) => {
+    const newComponents = components.filter(c => c.id !== component.id);
+    handleComponentsChange(newComponents);
+    toast.info("Component deleted");
+  }, [components, handleComponentsChange]);
+  
+  // Keyboard shortcut to delete selected component
   useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedComponent && 
+          // Only process delete if not in an input field
+          !['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
+        e.preventDefault();
+        handleDeleteComponent(selectedComponent);
+        setSelectedComponent(null);
+      }
+      
+      // Handle Undo/Redo shortcuts
+      if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
+        if (!e.shiftKey) {
+          e.preventDefault();
+          handleUndo();
+        } else {
+          e.preventDefault();
+          handleRedo();
+        }
+      }
     };
-  }, [handleKeyDown]);
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedComponent, handleDeleteComponent, handleUndo, handleRedo]);
   
   return (
     <div className="h-screen flex overflow-hidden">
@@ -129,6 +132,7 @@ const Index = () => {
               setComponents={handleComponentsChange}
               selectedComponent={selectedComponent}
               setSelectedComponent={setSelectedComponent}
+              onDeleteComponent={handleDeleteComponent}
             />
           </div>
           

@@ -1,8 +1,14 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { toast } from "sonner";
-import { Maximize2, Minimize2, X } from "lucide-react";
+import { Maximize2, Minimize2, X, Copy, Scissors, Trash } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 
 interface Component {
   id: string;
@@ -17,6 +23,7 @@ interface CanvasProps {
   setComponents: (components: Component[]) => void;
   selectedComponent: Component | null;
   setSelectedComponent: (component: Component | null) => void;
+  onDeleteComponent?: (component: Component) => void;
 }
 
 export const Canvas = ({
@@ -24,6 +31,7 @@ export const Canvas = ({
   setComponents,
   selectedComponent,
   setSelectedComponent,
+  onDeleteComponent,
 }: CanvasProps) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -34,6 +42,8 @@ export const Canvas = ({
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [windowSize, setWindowSize] = useState({ width: 800, height: 600 });
   const [imageCache, setImageCache] = useState<Record<string, string>>({});
+  const [clipboard, setClipboard] = useState<Component | null>(null);
+  const [contextMenuPosition, setContextMenuPosition] = useState<{x: number, y: number} | null>(null);
 
   // Pre-cache images for smoother drag
   useEffect(() => {
@@ -62,6 +72,12 @@ export const Canvas = ({
     if (e.target === canvasRef.current) {
       setSelectedComponent(null);
     }
+  };
+
+  const handleContextMenu = (e: React.MouseEvent, component: Component) => {
+    e.preventDefault();
+    setSelectedComponent(component);
+    setContextMenuPosition({ x: e.clientX, y: e.clientY });
   };
 
   const handleMouseDown = (e: React.MouseEvent, component: Component) => {
@@ -182,6 +198,59 @@ export const Canvas = ({
     toast.success("Component added to canvas");
   };
 
+  const handleCopyComponent = () => {
+    if (selectedComponent) {
+      setClipboard({...selectedComponent});
+      toast.success("Component copied to clipboard");
+    }
+  };
+
+  const handleCutComponent = () => {
+    if (selectedComponent) {
+      setClipboard({...selectedComponent});
+      handleDeleteComponent();
+      toast.success("Component cut to clipboard");
+    }
+  };
+
+  const handlePasteComponent = (e: React.MouseEvent) => {
+    if (clipboard) {
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      // Use mouse position if available, otherwise offset from original
+      let x, y;
+      if (e) {
+        x = e.clientX - rect.left;
+        y = e.clientY - rect.top;
+      } else {
+        x = clipboard.position.x + 20;
+        y = clipboard.position.y + 20;
+      }
+
+      const newComponent: Component = {
+        ...clipboard,
+        id: `${clipboard.type}-${Date.now()}`,
+        position: { x, y }
+      };
+
+      setComponents([...components, newComponent]);
+      toast.success("Component pasted from clipboard");
+    }
+  };
+
+  const handleDeleteComponent = () => {
+    if (selectedComponent) {
+      const newComponents = components.filter(comp => comp.id !== selectedComponent.id);
+      setComponents(newComponents);
+      setSelectedComponent(null);
+      if (onDeleteComponent) {
+        onDeleteComponent(selectedComponent);
+      }
+      toast.success("Component deleted");
+    }
+  };
+
   const getDefaultSize = (type: string) => {
     switch (type) {
       case 'button':
@@ -246,6 +315,39 @@ export const Canvas = ({
     }
   };
 
+  // Handle keyboard shortcuts for delete and copy/paste
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (selectedComponent) {
+        // Delete component
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+          handleDeleteComponent();
+        }
+        
+        // Copy component
+        if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+          handleCopyComponent();
+          e.preventDefault();
+        }
+        
+        // Cut component
+        if ((e.ctrlKey || e.metaKey) && e.key === 'x') {
+          handleCutComponent();
+          e.preventDefault();
+        }
+        
+        // Paste component
+        if ((e.ctrlKey || e.metaKey) && e.key === 'v' && clipboard) {
+          handlePasteComponent(null as any);
+          e.preventDefault();
+        }
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedComponent, clipboard, components]);
+
   return (
     <div className="w-full h-full p-8 bg-gray-100 flex items-center justify-center">
       <div 
@@ -300,34 +402,61 @@ export const Canvas = ({
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
           onClick={handleCanvasClick}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            if (e.target === canvasRef.current) {
+              // Allow pasting on canvas background
+              if (clipboard) {
+                handlePasteComponent(e);
+              }
+            }
+          }}
         >
           {components.map((component) => (
-            <div
-              key={component.id}
-              className={`absolute component-preview cursor-move ${
-                selectedComponent?.id === component.id ? 'ring-2 ring-primary ring-offset-2' : ''
-              }`}
-              style={{
-                left: `${component.position.x}px`,
-                top: `${component.position.y}px`,
-                width: `${component.size.width}px`,
-                height: `${component.size.height}px`,
-                transform: 'translate(0, 0)',
-                transition: isDragging || isResizing ? 'none' : 'all 0.2s ease',
-                willChange: 'transform, left, top, width, height',
-              }}
-              onMouseDown={(e) => handleMouseDown(e, component)}
-            >
-              <ComponentPreview component={component} />
-              {selectedComponent?.id === component.id && (
-                <>
-                  <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full top-0 left-0 -translate-x-1/2 -translate-y-1/2 cursor-nw-resize" data-direction="nw" />
-                  <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full top-0 right-0 translate-x-1/2 -translate-y-1/2 cursor-ne-resize" data-direction="ne" />
-                  <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full bottom-0 left-0 -translate-x-1/2 translate-y-1/2 cursor-sw-resize" data-direction="sw" />
-                  <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full bottom-0 right-0 translate-x-1/2 translate-y-1/2 cursor-se-resize" data-direction="se" />
-                </>
-              )}
-            </div>
+            <ContextMenu key={component.id}>
+              <ContextMenuTrigger>
+                <div
+                  className={`absolute component-preview cursor-move ${
+                    selectedComponent?.id === component.id ? 'ring-2 ring-primary ring-offset-2' : ''
+                  }`}
+                  style={{
+                    left: `${component.position.x}px`,
+                    top: `${component.position.y}px`,
+                    width: `${component.size.width}px`,
+                    height: `${component.size.height}px`,
+                    transform: 'translate(0, 0)',
+                    transition: isDragging || isResizing ? 'none' : 'all 0.2s ease',
+                    willChange: 'transform, left, top, width, height',
+                  }}
+                  onMouseDown={(e) => handleMouseDown(e, component)}
+                  onContextMenu={(e) => handleContextMenu(e, component)}
+                >
+                  <ComponentPreview component={component} />
+                  {selectedComponent?.id === component.id && (
+                    <>
+                      <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full top-0 left-0 -translate-x-1/2 -translate-y-1/2 cursor-nw-resize" data-direction="nw" />
+                      <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full top-0 right-0 translate-x-1/2 -translate-y-1/2 cursor-ne-resize" data-direction="ne" />
+                      <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full bottom-0 left-0 -translate-x-1/2 translate-y-1/2 cursor-sw-resize" data-direction="sw" />
+                      <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full bottom-0 right-0 translate-x-1/2 translate-y-1/2 cursor-se-resize" data-direction="se" />
+                    </>
+                  )}
+                </div>
+              </ContextMenuTrigger>
+              <ContextMenuContent>
+                <ContextMenuItem onClick={handleCopyComponent}>
+                  <Copy className="mr-2 h-4 w-4" />
+                  <span>Copy</span>
+                </ContextMenuItem>
+                <ContextMenuItem onClick={handleCutComponent}>
+                  <Scissors className="mr-2 h-4 w-4" />
+                  <span>Cut</span>
+                </ContextMenuItem>
+                <ContextMenuItem onClick={handleDeleteComponent}>
+                  <Trash className="mr-2 h-4 w-4" />
+                  <span>Delete</span>
+                </ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
           ))}
         </div>
       </div>
@@ -393,7 +522,6 @@ const ComponentPreview = ({ component }: { component: Component }) => {
             className="w-full h-full"
             style={{
               objectFit: component.props.fit || 'contain',
-              // Replace 'high-quality' with a valid CSS value
               imageRendering: 'auto'
             }}
             loading="eager"

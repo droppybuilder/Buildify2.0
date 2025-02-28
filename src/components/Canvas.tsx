@@ -393,7 +393,8 @@ const ComponentPreview = ({ component }: { component: Component }) => {
             className="w-full h-full"
             style={{
               objectFit: component.props.fit || 'contain',
-              imageRendering: 'high-quality'
+              // Replace 'high-quality' with a valid CSS value
+              imageRendering: 'auto'
             }}
             loading="eager"
             decoding="async"

@@ -1,5 +1,5 @@
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Dispatch, SetStateAction } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -11,12 +11,14 @@ import { GripVertical } from "lucide-react";
 interface PropertyPanelProps {
   selectedComponent: any;
   onUpdate: (component: any) => void;
+  setInputFocused: Dispatch<SetStateAction<boolean>>;
 }
 
-export const PropertyPanel = ({ selectedComponent, onUpdate }: PropertyPanelProps) => {
+export const PropertyPanel = ({ selectedComponent, onUpdate, setInputFocused }: PropertyPanelProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
-  const [inputFocused, setInputFocused] = useState(false);
+  // We don't need the local state anymore as we're using the one passed from the parent
+  // const [inputFocused, setInputFocused] = useState(false);
 
   // Draggable panel functionality
   const handleMouseDown = (e: React.MouseEvent) => {

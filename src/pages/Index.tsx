@@ -146,6 +146,7 @@ const Index = () => {
             <PropertyPanel
               selectedComponent={selectedComponent}
               onUpdate={handleComponentUpdate}
+              setInputFocused={setInputFocused}
             />
             <CodePreview
               components={components}

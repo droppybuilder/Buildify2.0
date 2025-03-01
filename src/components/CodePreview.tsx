@@ -106,6 +106,13 @@ class App:
       case 'canvas':
         return `        self.canvas_${component.id} = tk.Canvas(root, bd=${component.props.borderwidth || 1})
         self.canvas_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+      case 'dropdown':
+        const options = component.props.options || 'Option 1,Option 2,Option 3';
+        const optionsList = options.split(',').map((option: string) => option.trim());
+        return `        self.dropdown_var_${component.id} = tk.StringVar(value="${component.props.selected || optionsList[0]}")
+        self.dropdown_${component.id} = ttk.Combobox(root, textvariable=self.dropdown_var_${component.id})
+        self.dropdown_${component.id}['values'] = (${optionsList.map(opt => `"${opt}"`).join(', ')})
+        self.dropdown_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
       default:
         return '';
     }
@@ -138,48 +145,48 @@ class App:
   const setupComponents = components.map(component => {
     switch (component.type) {
       case 'button':
-        return `        self.button_${component.id} = ctk.CTkButton(self.root, text="${component.props.text || 'Button'}")
-        self.button_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+        return `        self.button_${component.id} = ctk.CTkButton(self.root, text="${component.props.text || 'Button'}", width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+        self.button_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
       case 'label':
-        return `        self.label_${component.id} = ctk.CTkLabel(self.root, text="${component.props.text || 'Label'}")
-        self.label_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+        return `        self.label_${component.id} = ctk.CTkLabel(self.root, text="${component.props.text || 'Label'}", width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+        self.label_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
       case 'entry':
-        return `        self.entry_${component.id} = ctk.CTkEntry(self.root, placeholder_text="${component.props.placeholder || ''}")
-        self.entry_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+        return `        self.entry_${component.id} = ctk.CTkEntry(self.root, placeholder_text="${component.props.placeholder || ''}", width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+        self.entry_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
       case 'image':
         return `        # Image placeholder - replace with your own image 
-        self.image_${component.id} = ctk.CTkLabel(self.root, text="Image")
-        self.image_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+        self.image_${component.id} = ctk.CTkLabel(self.root, text="Image", width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+        self.image_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})
         # Use this code to load an actual image:
         # img = Image.open("path/to/image.png")
         # ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=(${Math.round(component.size.width)}, ${Math.round(component.size.height)}))
         # self.image_${component.id}.configure(image=ctk_img, text="")`;
       case 'slider':
-        return `        self.slider_${component.id} = ctk.CTkSlider(self.root, from_=${component.props.from || 0}, to=${component.props.to || 100}, orientation="${component.props.orient || 'horizontal'}")
+        return `        self.slider_${component.id} = ctk.CTkSlider(self.root, from_=${component.props.from || 0}, to=${component.props.to || 100}, orientation="${component.props.orient || 'horizontal'}", width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
         self.slider_${component.id}.set(${component.props.value || 50})
-        self.slider_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+        self.slider_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
       case 'frame':
-        return `        self.frame_${component.id} = ctk.CTkFrame(self.root, border_width=${component.props.borderwidth || 1})
-        self.frame_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+        return `        self.frame_${component.id} = ctk.CTkFrame(self.root, border_width=${component.props.borderwidth || 1}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+        self.frame_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
       case 'checkbox':
-        return `        self.checkbox_${component.id} = ctk.CTkCheckBox(self.root, text="${component.props.text || 'Checkbox'}")
+        return `        self.checkbox_${component.id} = ctk.CTkCheckBox(self.root, text="${component.props.text || 'Checkbox'}", width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
         ${component.props.checked ? 'self.checkbox_' + component.id + '.select()' : 'self.checkbox_' + component.id + '.deselect()'}
-        self.checkbox_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+        self.checkbox_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
       case 'datepicker':
-        return `        self.datepicker_${component.id} = ctk.CTkEntry(self.root, placeholder_text="${component.props.format || 'yyyy-mm-dd'}")
-        self.datepicker_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width) - 30}, height=${Math.round(component.size.height)})
-        self.calendar_button_${component.id} = ctk.CTkButton(self.root, text="📅", width=30, height=${Math.round(component.size.height) - 4})
+        return `        self.datepicker_${component.id} = ctk.CTkEntry(self.root, placeholder_text="${component.props.format || 'yyyy-mm-dd'}", width=${Math.round(component.size.width) - 30}, height=${Math.round(component.size.height)})
+        self.datepicker_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})
+        self.calendar_button_${component.id} = ctk.CTkButton(self.root, text="📅", width=30, height=${Math.round(component.size.height)})
         self.calendar_button_${component.id}.place(x=${Math.round(component.position.x) + Math.round(component.size.width) - 30}, y=${Math.round(component.position.y)})`;
       case 'progressbar':
-        return `        self.progressbar_${component.id} = ctk.CTkProgressBar(self.root)
-        self.progressbar_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+        return `        self.progressbar_${component.id} = ctk.CTkProgressBar(self.root, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+        self.progressbar_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})
         self.progressbar_${component.id}.set(${(component.props.value || 50) / 100})`;
       case 'notebook':
         const tabsRaw = component.props.tabs || 'Tab 1,Tab 2,Tab 3';
         const tabsList = tabsRaw.split(',').map((tab: string) => tab.trim());
         
-        let notebookCode = `        self.tabview_${component.id} = ctk.CTkTabview(self.root)
-        self.tabview_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+        let notebookCode = `        self.tabview_${component.id} = ctk.CTkTabview(self.root, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+        self.tabview_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
         
         tabsList.forEach((tab: string) => {
           const safeTabName = tab.replace(/\s+/g, '_');
@@ -202,8 +209,17 @@ class App:
         
         return listboxCode;
       case 'canvas':
-        return `        self.canvas_${component.id} = ctk.CTkCanvas(self.root, bd=${component.props.borderwidth || 1}, highlightthickness=0)
-        self.canvas_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+        return `        self.canvas_${component.id} = ctk.CTkCanvas(self.root, bd=${component.props.borderwidth || 1}, highlightthickness=0, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+        self.canvas_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
+      case 'dropdown':
+        const options = component.props.options || 'Option 1,Option 2,Option 3';
+        const optionsList = options.split(',').map((option: string) => option.trim());
+        return `        self.dropdown_${component.id} = ctk.CTkOptionMenu(self.root, 
+            values=[${optionsList.map(opt => `"${opt}"`).join(', ')}],
+            width=${Math.round(component.size.width)}, 
+            height=${Math.round(component.size.height)})
+        self.dropdown_${component.id}.set("${component.props.selected || optionsList[0]}")
+        self.dropdown_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
       default:
         return '';
     }

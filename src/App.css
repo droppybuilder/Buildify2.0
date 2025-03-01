@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -39,4 +40,39 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Dark mode styles */
+.dark-mode {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #333333;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --border-color: #444444;
+  --accent-color: #3b82f6;
+  --hover-color: #2563eb;
+}
+
+.dark-mode .canvas-container {
+  background-color: #333 !important;
+  border-color: #444 !important;
+}
+
+.dark-mode .property-panel {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.dark-mode input,
+.dark-mode select,
+.dark-mode textarea {
+  background-color: #444;
+  color: white;
+  border-color: #555;
+}
+
+.dark-mode input::placeholder,
+.dark-mode textarea::placeholder {
+  color: #aaa;
 }

@@ -1,13 +1,15 @@
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useContext } from 'react';
 import { Sidebar } from '@/components/Sidebar';
-import { Canvas } from '@/components/Canvas';
+import Canvas from '@/components/Canvas';
 import { PropertyPanel } from '@/components/PropertyPanel';
 import { CodePreview } from '@/components/CodePreview';
 import { Toolbar } from '@/components/Toolbar';
 import { toast } from 'sonner';
+import { ThemeContext } from '../App';
 
 const Index = () => {
+  const { isDarkMode } = useContext(ThemeContext);
   const [selectedComponent, setSelectedComponent] = useState(null);
   const [components, setComponents] = useState([]);
   const [isTkinter, setIsTkinter] = useState(true);
@@ -139,7 +141,7 @@ const Index = () => {
   }, [selectedComponent, selectedComponents, handleDeleteComponent, handleUndo, handleRedo, inputFocused, components, handleComponentsChange]);
   
   return (
-    <div className="h-screen flex overflow-hidden">
+    <div className={`h-screen flex overflow-hidden ${isDarkMode ? 'dark' : 'light'}`}>
       <Sidebar />
       
       <main className="flex-1 flex flex-col overflow-hidden">
@@ -154,7 +156,7 @@ const Index = () => {
         />
         
         <div className="flex-1 flex overflow-hidden">
-          <div className="flex-1 overflow-auto">
+          <div className="flex-1 overflow-auto bg-background">
             <Canvas
               components={components}
               setComponents={handleComponentsChange}
@@ -164,7 +166,7 @@ const Index = () => {
             />
           </div>
           
-          <div className="w-80 border-l flex flex-col overflow-hidden">
+          <div className="w-80 border-l flex flex-col overflow-hidden border-border bg-card">
             <PropertyPanel
               selectedComponent={selectedComponent}
               onUpdate={handleComponentUpdate}

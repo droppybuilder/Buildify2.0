@@ -1,8 +1,9 @@
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useContext } from 'react';
 import { toast } from "sonner";
 import { Maximize2, Minimize2, X, Copy, Scissors, Trash } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { ThemeContext } from '../App';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -26,13 +27,14 @@ interface CanvasProps {
   onDeleteComponent?: (component: Component) => void;
 }
 
-export const Canvas = ({
+const Canvas = ({
   components,
   setComponents,
   selectedComponent,
   setSelectedComponent,
   onDeleteComponent,
 }: CanvasProps) => {
+  const { isDarkMode } = useContext(ThemeContext);
   const canvasRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -361,33 +363,116 @@ export const Canvas = ({
   };
 
   const getDefaultProps = (type: string) => {
+    const isDark = isDarkMode;
+    
+    // Common component properties
+    const commonLightProps = {
+      bgColor: '#ffffff',
+      fgColor: '#000000',
+      borderColor: '#e2e8f0'
+    };
+    
+    const commonDarkProps = {
+      bgColor: '#222222',
+      fgColor: '#e6e6e6',
+      borderColor: '#333333'
+    };
+    
+    const commonProps = isDark ? commonDarkProps : commonLightProps;
+    
     switch (type) {
       case 'button':
-        return { text: 'Button', bgColor: '#ffffff', fgColor: '#000000', hoverColor: '#f0f0f0', cornerRadius: 8, borderColor: '#e2e8f0' };
+        return { 
+          text: 'Button', 
+          bgColor: isDark ? '#333333' : '#ffffff',
+          fgColor: isDark ? '#e6e6e6' : '#000000',
+          hoverColor: isDark ? '#444444' : '#f0f0f0',
+          cornerRadius: 8,
+          borderColor: isDark ? '#444444' : '#e2e8f0'
+        };
       case 'label':
-        return { text: 'Label', font: 'Default', fontSize: 12, fgColor: '#000000' };
+        return { 
+          text: 'Label', 
+          font: 'Default', 
+          fontSize: 12, 
+          fgColor: isDark ? '#e6e6e6' : '#000000' 
+        };
       case 'entry':
-        return { placeholder: 'Enter text...', bgColor: '#ffffff', cornerRadius: 8, borderColor: '#e2e8f0' };
+        return { 
+          placeholder: 'Enter text...',
+          bgColor: isDark ? '#333333' : '#ffffff',
+          cornerRadius: 8,
+          borderColor: isDark ? '#444444' : '#e2e8f0'
+        };
       case 'image':
-        return { src: '/placeholder.svg', fit: 'contain', cornerRadius: 8, borderColor: '#e2e8f0' };
+        return { 
+          src: '/placeholder.svg',
+          fit: 'contain',
+          cornerRadius: 8,
+          borderColor: isDark ? '#444444' : '#e2e8f0'
+        };
       case 'slider':
-        return { from: 0, to: 100, value: 50, orient: 'horizontal', bgColor: '#e2e8f0', troughColor: '#3b82f6' };
+        return { 
+          from: 0,
+          to: 100,
+          value: 50,
+          orient: 'horizontal',
+          bgColor: isDark ? '#444444' : '#e2e8f0',
+          troughColor: isDark ? '#666666' : '#3b82f6'
+        };
       case 'frame':
-        return { relief: 'flat', borderwidth: 1, bgColor: '#ffffff', borderColor: '#e2e8f0', cornerRadius: 4 };
+        return { 
+          relief: 'flat',
+          borderwidth: 1,
+          bgColor: isDark ? '#333333' : '#ffffff',
+          borderColor: isDark ? '#444444' : '#e2e8f0',
+          cornerRadius: 4
+        };
       case 'checkbox':
-        return { text: 'Checkbox', checked: false, fgColor: '#000000' };
+        return { 
+          text: 'Checkbox',
+          checked: false,
+          fgColor: isDark ? '#e6e6e6' : '#000000'
+        };
       case 'datepicker':
-        return { format: 'yyyy-mm-dd', bgColor: '#ffffff', fgColor: '#000000', cornerRadius: 8, borderColor: '#e2e8f0' };
+        return { 
+          format: 'yyyy-mm-dd',
+          bgColor: isDark ? '#333333' : '#ffffff',
+          fgColor: isDark ? '#e6e6e6' : '#000000',
+          cornerRadius: 8,
+          borderColor: isDark ? '#444444' : '#e2e8f0'
+        };
       case 'progressbar':
-        return { value: 50, maxValue: 100, progressColor: '#3b82f6', bgColor: '#e2e8f0', cornerRadius: 4 };
+        return { 
+          value: 50,
+          maxValue: 100,
+          progressColor: isDark ? '#666666' : '#3b82f6',
+          bgColor: isDark ? '#444444' : '#e2e8f0',
+          cornerRadius: 4
+        };
       case 'notebook':
-        return { tabs: 'Tab 1,Tab 2,Tab 3', selectedTab: 'Tab 1', bgColor: '#ffffff', fgColor: '#000000' };
+        return { 
+          tabs: 'Tab 1,Tab 2,Tab 3',
+          selectedTab: 'Tab 1',
+          bgColor: isDark ? '#333333' : '#ffffff',
+          fgColor: isDark ? '#e6e6e6' : '#000000'
+        };
       case 'listbox':
-        return { items: 'Item 1,Item 2,Item 3,Item 4,Item 5', bgColor: '#ffffff', fgColor: '#000000', borderColor: '#e2e8f0' };
+        return { 
+          items: 'Item 1,Item 2,Item 3,Item 4,Item 5',
+          bgColor: isDark ? '#333333' : '#ffffff',
+          fgColor: isDark ? '#e6e6e6' : '#000000',
+          borderColor: isDark ? '#444444' : '#e2e8f0'
+        };
       case 'canvas':
-        return { bgColor: '#ffffff', borderwidth: 1, borderColor: '#e2e8f0', cornerRadius: 4 };
+        return { 
+          bgColor: isDark ? '#333333' : '#ffffff',
+          borderwidth: 1,
+          borderColor: isDark ? '#444444' : '#e2e8f0',
+          cornerRadius: 4
+        };
       default:
-        return {};
+        return commonProps;
     }
   };
 
@@ -443,29 +528,27 @@ export const Canvas = ({
   }, [selectedComponent, selectedComponents, clipboard, components]);
 
   return (
-    <div className="w-full h-full p-8 bg-gray-100 flex items-center justify-center">
+    <div className="w-full h-full p-8 flex items-center justify-center">
       <div 
-        className="bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col border border-gray-200"
+        className={`macos-window ${isDarkMode ? 'dark' : 'light'} flex flex-col`}
         style={{ 
           width: windowSize.width, 
           height: windowSize.height,
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
         }}
       >
-        <div className="h-10 bg-gray-50/90 border-b border-gray-200 flex items-center px-4 select-none backdrop-blur-md">
-          <div className="flex items-center gap-2">
-            <button className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 relative group">
-              <X size={8} className="absolute inset-0 m-auto text-red-800 opacity-0 group-hover:opacity-100" />
-            </button>
-            <button className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600 relative group">
-              <Minimize2 size={8} className="absolute inset-0 m-auto text-yellow-800 opacity-0 group-hover:opacity-100" />
-            </button>
-            <button className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-600 relative group">
-              <Maximize2 size={8} className="absolute inset-0 m-auto text-green-800 opacity-0 group-hover:opacity-100" />
-            </button>
+        <div className="window-titlebar">
+          <div className="window-buttons">
+            <div className="window-button window-close">
+              <X size={8} className="text-red-800" />
+            </div>
+            <div className="window-button window-minimize">
+              <Minimize2 size={8} className="text-yellow-800" />
+            </div>
+            <div className="window-button window-maximize">
+              <Maximize2 size={8} className="text-green-800" />
+            </div>
           </div>
-          <div className="flex-1 text-center">
+          <div className="window-title">
             {isEditingTitle ? (
               <Input
                 type="text"
@@ -473,12 +556,12 @@ export const Canvas = ({
                 onChange={handleTitleChange}
                 onBlur={handleTitleBlur}
                 onKeyDown={handleTitleKeyDown}
-                className="w-48 mx-auto h-6 text-sm text-center bg-white/50"
+                className="w-48 mx-auto h-6 text-sm text-center bg-transparent"
                 autoFocus
               />
             ) : (
               <div 
-                className="text-sm font-medium text-gray-600 cursor-pointer hover:text-gray-800"
+                className="cursor-pointer"
                 onClick={handleTitleClick}
               >
                 {windowTitle}
@@ -489,7 +572,7 @@ export const Canvas = ({
 
         <div
           ref={canvasRef}
-          className="flex-1 canvas-grid relative overflow-auto bg-white/50"
+          className={`flex-1 canvas-grid relative overflow-auto`}
           onDragOver={onDragOver}
           onDrop={onDrop}
           onMouseDown={handleCanvasMouseDown}
@@ -540,13 +623,13 @@ export const Canvas = ({
                   onMouseDown={(e) => handleMouseDown(e, component)}
                   onContextMenu={(e) => handleContextMenu(e, component)}
                 >
-                  <ComponentPreview component={component} />
+                  <ComponentPreview component={component} isDarkMode={isDarkMode} />
                   {selectedComponent?.id === component.id && (
                     <>
-                      <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full top-0 left-0 -translate-x-1/2 -translate-y-1/2 cursor-nw-resize" data-direction="nw" />
-                      <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full top-0 right-0 translate-x-1/2 -translate-y-1/2 cursor-ne-resize" data-direction="ne" />
-                      <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full bottom-0 left-0 -translate-x-1/2 translate-y-1/2 cursor-sw-resize" data-direction="sw" />
-                      <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full bottom-0 right-0 translate-x-1/2 translate-y-1/2 cursor-se-resize" data-direction="se" />
+                      <div className="resize-handle absolute w-2 h-2 rounded-full top-0 left-0 -translate-x-1/2 -translate-y-1/2 cursor-nw-resize" data-direction="nw" />
+                      <div className="resize-handle absolute w-2 h-2 rounded-full top-0 right-0 translate-x-1/2 -translate-y-1/2 cursor-ne-resize" data-direction="ne" />
+                      <div className="resize-handle absolute w-2 h-2 rounded-full bottom-0 left-0 -translate-x-1/2 translate-y-1/2 cursor-sw-resize" data-direction="sw" />
+                      <div className="resize-handle absolute w-2 h-2 rounded-full bottom-0 right-0 translate-x-1/2 translate-y-1/2 cursor-se-resize" data-direction="se" />
                     </>
                   )}
                 </div>
@@ -573,17 +656,17 @@ export const Canvas = ({
   );
 };
 
-const ComponentPreview = ({ component }: { component: Component }) => {
+const ComponentPreview = ({ component, isDarkMode }: { component: Component, isDarkMode: boolean }) => {
   switch (component.type) {
     case 'button':
       return (
         <button 
           className="w-full h-full border shadow-sm hover:bg-gray-50 transition-colors"
           style={{
-            backgroundColor: component.props.bgColor || '#ffffff',
-            color: component.props.fgColor || '#000000',
+            backgroundColor: component.props.bgColor || (isDarkMode ? '#333333' : '#ffffff'),
+            color: component.props.fgColor || (isDarkMode ? '#e6e6e6' : '#000000'),
             borderRadius: `${component.props.cornerRadius || 8}px`,
-            borderColor: component.props.borderColor || '#e2e8f0'
+            borderColor: component.props.borderColor || (isDarkMode ? '#444444' : '#e2e8f0')
           }}
         >
           {component.props.text || 'Button'}
@@ -594,7 +677,7 @@ const ComponentPreview = ({ component }: { component: Component }) => {
         <div 
           className="w-full h-full flex items-center"
           style={{
-            color: component.props.fgColor || '#000000',
+            color: component.props.fgColor || (isDarkMode ? '#e6e6e6' : '#000000'),
             fontSize: `${component.props.fontSize || 12}px`,
             fontFamily: component.props.font || 'system-ui',
           }}
@@ -609,9 +692,10 @@ const ComponentPreview = ({ component }: { component: Component }) => {
           className="w-full h-full px-3 border"
           placeholder={component.props.placeholder || 'Enter text...'}
           style={{
-            backgroundColor: component.props.bgColor || '#ffffff',
+            backgroundColor: component.props.bgColor || (isDarkMode ? '#333333' : '#ffffff'),
             borderRadius: `${component.props.cornerRadius || 8}px`,
-            borderColor: component.props.borderColor || '#e2e8f0'
+            borderColor: component.props.borderColor || (isDarkMode ? '#444444' : '#e2e8f0'),
+            color: isDarkMode ? '#e6e6e6' : '#000000'
           }}
           readOnly
         />
@@ -622,7 +706,7 @@ const ComponentPreview = ({ component }: { component: Component }) => {
           className="w-full h-full border overflow-hidden"
           style={{
             borderRadius: `${component.props.cornerRadius || 8}px`,
-            borderColor: component.props.borderColor || '#e2e8f0'
+            borderColor: component.props.borderColor || (isDarkMode ? '#444444' : '#e2e8f0')
           }}
         >
           <img 
@@ -655,14 +739,14 @@ const ComponentPreview = ({ component }: { component: Component }) => {
             style={{
               width: component.props.orient === 'vertical' ? '8px' : '100%',
               height: component.props.orient === 'vertical' ? '100%' : '8px',
-              backgroundColor: component.props.bgColor || '#e2e8f0',
+              backgroundColor: component.props.bgColor || (isDarkMode ? '#444444' : '#e2e8f0'),
               borderRadius: '4px',
             }}
           >
             <div
               style={{
                 position: 'absolute',
-                backgroundColor: component.props.troughColor || '#3b82f6',
+                backgroundColor: component.props.troughColor || (isDarkMode ? '#666666' : '#3b82f6'),
                 borderRadius: '4px',
                 ...(component.props.orient === 'vertical' 
                   ? {
@@ -682,10 +766,10 @@ const ComponentPreview = ({ component }: { component: Component }) => {
                 position: 'absolute',
                 width: '16px',
                 height: '16px',
-                backgroundColor: 'white',
+                backgroundColor: isDarkMode ? '#666666' : 'white',
                 borderRadius: '50%',
-                border: '1px solid #d1d5db',
-                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+                border: `1px solid ${isDarkMode ? '#777777' : '#d1d5db'}`,
+                boxShadow: isDarkMode ? '0 1px 2px rgba(0, 0, 0, 0.3)' : '0 1px 2px rgba(0, 0, 0, 0.1)',
                 ...(component.props.orient === 'vertical'
                   ? {
                       left: '50%',
@@ -708,9 +792,9 @@ const ComponentPreview = ({ component }: { component: Component }) => {
         <div 
           className="w-full h-full"
           style={{
-            backgroundColor: component.props.bgColor || '#ffffff',
+            backgroundColor: component.props.bgColor || (isDarkMode ? '#333333' : '#ffffff'),
             borderWidth: `${component.props.borderwidth || 1}px`,
-            borderColor: component.props.borderColor || '#e2e8f0',
+            borderColor: component.props.borderColor || (isDarkMode ? '#444444' : '#e2e8f0'),
             borderStyle: 
               component.props.relief === 'flat' ? 'solid' :
               component.props.relief === 'groove' ? 'groove' :
@@ -727,8 +811,11 @@ const ComponentPreview = ({ component }: { component: Component }) => {
             className="w-4 h-4 rounded border-gray-300"
             defaultChecked={component.props.checked}
             readOnly
+            style={{
+              accentColor: isDarkMode ? '#666666' : undefined
+            }}
           />
-          <span style={{ color: component.props.fgColor || '#000000' }}>
+          <span style={{ color: component.props.fgColor || (isDarkMode ? '#e6e6e6' : '#000000') }}>
             {component.props.text || 'Checkbox'}
           </span>
         </label>
@@ -738,10 +825,10 @@ const ComponentPreview = ({ component }: { component: Component }) => {
         <div 
           className="w-full h-full flex items-center border px-3"
           style={{
-            backgroundColor: component.props.bgColor || '#ffffff',
+            backgroundColor: component.props.bgColor || (isDarkMode ? '#333333' : '#ffffff'),
             borderRadius: `${component.props.cornerRadius || 8}px`,
-            borderColor: component.props.borderColor || '#e2e8f0',
-            color: component.props.fgColor || '#000000',
+            borderColor: component.props.borderColor || (isDarkMode ? '#444444' : '#e2e8f0'),
+            color: component.props.fgColor || (isDarkMode ? '#e6e6e6' : '#000000'),
           }}
         >
           <div className="flex justify-between w-full items-center">
@@ -760,7 +847,7 @@ const ComponentPreview = ({ component }: { component: Component }) => {
           <div 
             className="w-full h-3 rounded-full overflow-hidden"
             style={{
-              backgroundColor: component.props.bgColor || '#e2e8f0',
+              backgroundColor: component.props.bgColor || (isDarkMode ? '#444444' : '#e2e8f0'),
               borderRadius: `${component.props.cornerRadius || 4}px`,
             }}
           >
@@ -768,7 +855,7 @@ const ComponentPreview = ({ component }: { component: Component }) => {
               className="h-full"
               style={{
                 width: `${(component.props.value / component.props.maxValue) * 100}%`,
-                backgroundColor: component.props.progressColor || '#3b82f6',
+                backgroundColor: component.props.progressColor || (isDarkMode ? '#666666' : '#3b82f6'),
                 transition: 'width 0.3s ease-in-out'
               }}
             />
@@ -780,12 +867,12 @@ const ComponentPreview = ({ component }: { component: Component }) => {
         <div 
           className="w-full h-full flex flex-col border"
           style={{
-            backgroundColor: component.props.bgColor || '#ffffff',
-            color: component.props.fgColor || '#000000',
-            borderColor: '#e2e8f0',
+            backgroundColor: component.props.bgColor || (isDarkMode ? '#333333' : '#ffffff'),
+            color: component.props.fgColor || (isDarkMode ? '#e6e6e6' : '#000000'),
+            borderColor: isDarkMode ? '#444444' : '#e2e8f0',
           }}
         >
-          <div className="flex border-b">
+          <div className="flex border-b" style={{ borderColor: isDarkMode ? '#444444' : '#e2e8f0' }}>
             {(component.props.tabs || 'Tab 1,Tab 2,Tab 3')
               .split(',')
               .map((tab: string, i: number) => (
@@ -793,9 +880,13 @@ const ComponentPreview = ({ component }: { component: Component }) => {
                   key={i}
                   className={`px-4 py-2 cursor-default ${
                     tab.trim() === (component.props.selectedTab || 'Tab 1')
-                      ? 'border-b-2 border-primary font-medium'
-                      : 'text-gray-500'
+                      ? 'border-b-2 font-medium'
+                      : isDarkMode ? 'text-gray-400' : 'text-gray-500'
                   }`}
+                  style={{
+                    borderColor: tab.trim() === (component.props.selectedTab || 'Tab 1') ? 
+                      (isDarkMode ? '#666666' : '#3b82f6') : 'transparent'
+                  }}
                 >
                   {tab.trim()}
                 </div>
@@ -803,7 +894,8 @@ const ComponentPreview = ({ component }: { component: Component }) => {
           </div>
           <div className="flex-1 p-4">
             {/* Tab content placeholder */}
-            <div className="h-full w-full flex items-center justify-center text-gray-400 text-sm">
+            <div className="h-full w-full flex items-center justify-center text-sm" 
+              style={{ color: isDarkMode ? 'rgba(230, 230, 230, 0.5)' : 'rgba(0, 0, 0, 0.4)' }}>
               Content for {component.props.selectedTab || 'Tab 1'}
             </div>
           </div>
@@ -814,9 +906,9 @@ const ComponentPreview = ({ component }: { component: Component }) => {
         <div 
           className="w-full h-full border overflow-y-auto"
           style={{
-            backgroundColor: component.props.bgColor || '#ffffff',
-            color: component.props.fgColor || '#000000',
-            borderColor: component.props.borderColor || '#e2e8f0',
+            backgroundColor: component.props.bgColor || (isDarkMode ? '#333333' : '#ffffff'),
+            color: component.props.fgColor || (isDarkMode ? '#e6e6e6' : '#000000'),
+            borderColor: component.props.borderColor || (isDarkMode ? '#444444' : '#e2e8f0'),
           }}
         >
           {(component.props.items || 'Item 1,Item 2,Item 3,Item 4,Item 5')
@@ -824,7 +916,7 @@ const ComponentPreview = ({ component }: { component: Component }) => {
             .map((item: string, i: number) => (
               <div
                 key={i}
-                className={`px-3 py-1 cursor-default ${i === 0 ? 'bg-blue-100' : 'hover:bg-gray-50'}`}
+                className={`px-3 py-1 cursor-default ${i === 0 ? (isDarkMode ? 'bg-gray-700/50' : 'bg-blue-100') : (isDarkMode ? 'hover:bg-gray-700/20' : 'hover:bg-gray-50')}`}
               >
                 {item.trim()}
               </div>
@@ -836,14 +928,15 @@ const ComponentPreview = ({ component }: { component: Component }) => {
         <div 
           className="w-full h-full"
           style={{
-            backgroundColor: component.props.bgColor || '#ffffff',
+            backgroundColor: component.props.bgColor || (isDarkMode ? '#333333' : '#ffffff'),
             borderWidth: `${component.props.borderwidth || 1}px`,
-            borderColor: component.props.borderColor || '#e2e8f0',
+            borderColor: component.props.borderColor || (isDarkMode ? '#444444' : '#e2e8f0'),
             borderStyle: 'solid',
             borderRadius: `${component.props.cornerRadius || 4}px`,
           }}
         >
-          <div className="h-full w-full flex items-center justify-center text-gray-400 text-sm">
+          <div className="h-full w-full flex items-center justify-center text-sm"
+               style={{ color: isDarkMode ? 'rgba(230, 230, 230, 0.5)' : 'rgba(0, 0, 0, 0.4)' }}>
             Canvas Area
           </div>
         </div>
@@ -852,3 +945,5 @@ const ComponentPreview = ({ component }: { component: Component }) => {
       return null;
   }
 };
+
+export default Canvas;

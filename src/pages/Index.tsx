@@ -147,6 +147,7 @@ const Index = () => {
               selectedComponent={selectedComponent}
               onUpdate={handleComponentUpdate}
               setInputFocused={setInputFocused}
+              inputFocused={inputFocused}
             />
             <CodePreview
               components={components}

@@ -12,9 +12,15 @@ interface PropertyPanelProps {
   selectedComponent: any;
   onUpdate: (component: any) => void;
   setInputFocused: Dispatch<SetStateAction<boolean>>;
+  inputFocused?: boolean; // Add this prop to receive the inputFocused state from parent
 }
 
-export const PropertyPanel = ({ selectedComponent, onUpdate, setInputFocused }: PropertyPanelProps) => {
+export const PropertyPanel = ({ 
+  selectedComponent, 
+  onUpdate, 
+  setInputFocused, 
+  inputFocused = false // Default to false if not provided
+}: PropertyPanelProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   // We don't need the local state anymore as we're using the one passed from the parent

@@ -1,9 +1,9 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useDarkMode } from "@/context/DarkModeContext";
 import { 
   Undo2, 
   Redo2, 
@@ -12,9 +12,7 @@ import {
   Grid, 
   Eye,
   Settings,
-  File,
-  Sun,
-  Moon
+  File
 } from "lucide-react";
 import {
   Dialog,
@@ -48,7 +46,6 @@ export const Toolbar = ({
   canUndo,
   canRedo
 }: ToolbarProps) => {
-  const { isDarkMode, toggleDarkMode } = useDarkMode();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [appName, setAppName] = useState("MyGUIApp");
   const [windowTitle, setWindowTitle] = useState("Tkinter GUI App");
@@ -537,14 +534,13 @@ if __name__ == "__main__":
 
   return (
     <>
-      <div className={`h-14 border-b flex items-center px-4 gap-4 ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white'}`}>
+      <div className="h-14 border-b flex items-center px-4 gap-4 bg-white">
         <div className="flex items-center gap-2">
           <Button 
             variant="outline" 
             size="icon"
             onClick={onUndo}
             disabled={!canUndo}
-            className={isDarkMode ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' : ''}
           >
             <Undo2 size={16} />
           </Button>
@@ -553,32 +549,23 @@ if __name__ == "__main__":
             size="icon"
             onClick={onRedo}
             disabled={!canRedo}
-            className={isDarkMode ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' : ''}
           >
             <Redo2 size={16} />
           </Button>
         </div>
 
-        <div className={`h-6 w-px ${isDarkMode ? 'bg-gray-600' : 'bg-border'}`} />
+        <div className="h-6 w-px bg-border" />
 
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="icon"
-            className={isDarkMode ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' : ''}
-          >
+          <Button variant="outline" size="icon">
             <Grid size={16} />
           </Button>
-          <Button 
-            variant="outline" 
-            size="icon"
-            className={isDarkMode ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' : ''}
-          >
+          <Button variant="outline" size="icon">
             <Eye size={16} />
           </Button>
         </div>
 
-        <div className={`h-6 w-px ${isDarkMode ? 'bg-gray-600' : 'bg-border'}`} />
+        <div className="h-6 w-px bg-border" />
 
         <div className="flex items-center gap-2">
           <span className="text-sm">Tkinter</span>
@@ -589,44 +576,16 @@ if __name__ == "__main__":
           <span className="text-sm">CustomTkinter</span>
         </div>
 
-        <div className={`h-6 w-px ${isDarkMode ? 'bg-gray-600' : 'bg-border'}`} />
-
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="icon"
-            onClick={toggleDarkMode}
-            className={isDarkMode ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' : ''}
-          >
-            {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
-          </Button>
-        </div>
-
         <div className="ml-auto flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setIsSettingsOpen(true)}
-            className={isDarkMode ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' : ''}
-          >
+          <Button variant="outline" size="sm" onClick={() => setIsSettingsOpen(true)}>
             <Settings size={16} className="mr-2" />
             Settings
           </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleCopyCode}
-            className={isDarkMode ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' : ''}
-          >
+          <Button variant="outline" size="sm" onClick={handleCopyCode}>
             <Copy size={16} className="mr-2" />
             Copy Code
           </Button>
-          <Button 
-            variant={isDarkMode ? "outline" : "default"} 
-            size="sm" 
-            onClick={handleExportCode}
-            className={isDarkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''}
-          >
+          <Button variant="default" size="sm" onClick={handleExportCode}>
             <Download size={16} className="mr-2" />
             Export .py
           </Button>
@@ -634,10 +593,10 @@ if __name__ == "__main__":
       </div>
 
       <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-        <DialogContent className={`sm:max-w-[425px] ${isDarkMode ? 'bg-gray-800 text-white' : ''}`}>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Export Settings</DialogTitle>
-            <DialogDescription className={isDarkMode ? 'text-gray-300' : ''}>
+            <DialogDescription>
               Configure how your Python GUI code will be generated
             </DialogDescription>
           </DialogHeader>
@@ -649,7 +608,6 @@ if __name__ == "__main__":
                 value={appName}
                 onChange={(e) => setAppName(e.target.value)}
                 placeholder="MyGUIApp"
-                className={isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : ''}
               />
             </div>
             <div className="space-y-2">
@@ -659,7 +617,6 @@ if __name__ == "__main__":
                 value={windowTitle}
                 onChange={(e) => setWindowTitle(e.target.value)}
                 placeholder="My GUI Application"
-                className={isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : ''}
               />
             </div>
             <div className="space-y-2">
@@ -669,11 +626,8 @@ if __name__ == "__main__":
                 value={exportFilename}
                 onChange={(e) => setExportFilename(e.target.value.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, ''))}
                 placeholder="my_app"
-                className={isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : ''}
               />
-              <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-muted-foreground'}`}>
-                This will be the name of the Python file
-              </p>
+              <p className="text-xs text-muted-foreground">This will be the name of the Python file</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="custom-imports">Custom Imports (optional)</Label>
@@ -682,11 +636,9 @@ if __name__ == "__main__":
                 value={customImports}
                 onChange={(e) => setCustomImports(e.target.value)}
                 placeholder="import numpy as np\nimport pandas as pd"
-                className={`resize-y min-h-[80px] ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : ''}`}
+                className="resize-y min-h-[80px]"
               />
-              <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-muted-foreground'}`}>
-                Add any additional imports you need
-              </p>
+              <p className="text-xs text-muted-foreground">Add any additional imports you need</p>
             </div>
             <div className="flex items-center space-x-2">
               <Switch
@@ -698,9 +650,7 @@ if __name__ == "__main__":
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={() => setIsSettingsOpen(false)} className={isDarkMode ? 'bg-blue-600 hover:bg-blue-700' : ''}>
-              Save Settings
-            </Button>
+            <Button onClick={() => setIsSettingsOpen(false)}>Save Settings</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

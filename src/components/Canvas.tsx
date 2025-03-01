@@ -1,22 +1,21 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 
 interface CanvasProps {
   components: any[];
-  onAddComponent: (componentType: string, position: { x: number; y: number }) => void;
-  onUpdateComponent: (id: string, x: number, y: number, width: number, height: number) => void;
-  onDeleteComponent: (id: string) => void;
-  selectedComponentId: string | null;
-  onSelectComponent: (id: string | null) => void;
+  setComponents: (newComponents: any[]) => void;
+  selectedComponent: any;
+  setSelectedComponent: (component: any) => void;
+  onDeleteComponent: (component: any) => void;
 }
 
 const Canvas = ({ 
   components, 
-  onAddComponent,
-  onUpdateComponent,
-  onDeleteComponent,
-  selectedComponentId,
-  onSelectComponent
+  setComponents,
+  selectedComponent,
+  setSelectedComponent,
+  onDeleteComponent
 }: CanvasProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [draggedComponentId, setDraggedComponentId] = useState<string | null>(null);
@@ -30,7 +29,17 @@ const Canvas = ({
       const rect = canvasRef.current.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      onAddComponent(componentType, { x, y });
+      
+      // Create a new component
+      const newComponent = {
+        id: Date.now().toString(),
+        type: componentType,
+        position: { x, y },
+        size: { width: 150, height: 40 },
+        props: { text: componentType === 'button' ? 'Button' : componentType === 'label' ? 'Label' : '' }
+      };
+      
+      setComponents([...components, newComponent]);
     }
   };
 
@@ -43,7 +52,7 @@ const Canvas = ({
     setIsDragging(true);
     setDraggedComponentId(id);
     setInitialPosition({ x: e.clientX, y: e.clientY });
-    onSelectComponent(id);
+    setSelectedComponent(components.find(c => c.id === id) || null);
   };
 
   const handleMouseUp = (e: React.MouseEvent) => {
@@ -75,7 +84,13 @@ const Canvas = ({
     const newY = component.position.y + deltaY;
 
     // Update the component's position
-    onUpdateComponent(draggedComponentId, newX, newY, component.size.width, component.size.height);
+    const updatedComponents = components.map(c => 
+      c.id === draggedComponentId 
+        ? { ...c, position: { x: newX, y: newY } } 
+        : c
+    );
+    
+    setComponents(updatedComponents);
 
     // Update the initial position for the next move
     setInitialPosition({ x: e.clientX, y: e.clientY });
@@ -98,7 +113,7 @@ const Canvas = ({
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onSelectComponent(null);
+    setSelectedComponent(null);
   };
 
   return (
@@ -120,7 +135,7 @@ const Canvas = ({
             top: component.position.y,
             width: component.size.width,
             height: component.size.height,
-            border: selectedComponentId === component.id ? '2px solid blue' : '1px solid transparent',
+            border: selectedComponent?.id === component.id ? '2px solid blue' : '1px solid transparent',
             boxSizing: 'border-box',
             pointerEvents: 'auto',
           }}

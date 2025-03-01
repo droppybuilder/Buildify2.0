@@ -12,7 +12,7 @@ import {
   Calendar, 
   LayoutGrid, 
   Gauge, 
-  Tabs, 
+  Layout, 
   List 
 } from "lucide-react";
 
@@ -125,7 +125,7 @@ export const Sidebar = () => {
                 onDragStart={(e) => handleDragStart(e, 'notebook')}
                 className="aspect-[4/1] rounded-lg border border-gray-200 bg-white p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors"
               >
-                <Tabs size={16} />
+                <Layout size={16} />
                 <span>Notebook</span>
               </div>
               <div

@@ -76,3 +76,12 @@
 .dark-mode textarea::placeholder {
   color: #aaa;
 }
+
+.dark-mode button {
+  border-color: var(--border-color);
+}
+
+.dark-mode code {
+  background-color: #222;
+  color: #eee;
+}

@@ -1,9 +1,9 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useDarkMode } from "@/context/DarkModeContext";
 import { 
   Undo2, 
   Redo2, 
@@ -37,8 +37,6 @@ interface ToolbarProps {
   onRedo: () => void;
   canUndo: boolean;
   canRedo: boolean;
-  isDarkMode?: boolean;
-  toggleDarkMode?: () => void;
 }
 
 export const Toolbar = ({ 
@@ -48,10 +46,9 @@ export const Toolbar = ({
   onUndo,
   onRedo,
   canUndo,
-  canRedo,
-  isDarkMode = false,
-  toggleDarkMode = () => {}
+  canRedo
 }: ToolbarProps) => {
+  const { isDarkMode, toggleDarkMode } = useDarkMode();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [appName, setAppName] = useState("MyGUIApp");
   const [windowTitle, setWindowTitle] = useState("Tkinter GUI App");

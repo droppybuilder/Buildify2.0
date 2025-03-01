@@ -1,6 +1,6 @@
-
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { useDarkMode } from "@/context/DarkModeContext";
 import { 
   Image as ImageIcon, 
   Type, 
@@ -16,17 +16,15 @@ import {
   List 
 } from "lucide-react";
 
-interface SidebarProps {
-  isDarkMode?: boolean;
-}
-
-export const Sidebar = ({ isDarkMode = false }: SidebarProps) => {
+export const Sidebar = () => {
+  const { isDarkMode } = useDarkMode();
+  
   const handleDragStart = (e: React.DragEvent, type: string) => {
     e.dataTransfer.setData('componentType', type);
   };
 
   return (
-    <div className={`w-64 border-r ${isDarkMode ? 'bg-gray-800/95 backdrop-blur-xl text-white' : 'bg-white/95 backdrop-blur-xl'} flex flex-col shadow-sm`}>
+    <div className={`w-64 border-r ${isDarkMode ? 'bg-gray-800/95 backdrop-blur-xl text-white border-gray-700' : 'bg-white/95 backdrop-blur-xl'} flex flex-col shadow-sm`}>
       <div className={`h-14 border-b flex items-center px-4 ${isDarkMode ? 'bg-gray-800/95 border-gray-700' : 'bg-white/95'}`}>
         <span className={`font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}>Design Widgets</span>
       </div>

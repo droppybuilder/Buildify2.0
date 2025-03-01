@@ -1,6 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
+import { useDarkMode } from "@/context/DarkModeContext";
 
 interface CanvasProps {
   components: any[];
@@ -17,6 +18,7 @@ const Canvas = ({
   setSelectedComponent,
   onDeleteComponent
 }: CanvasProps) => {
+  const { isDarkMode } = useDarkMode();
   const [isDragging, setIsDragging] = useState(false);
   const [draggedComponentId, setDraggedComponentId] = useState<string | null>(null);
   const [initialPosition, setInitialPosition] = useState({ x: 0, y: 0 });
@@ -119,12 +121,15 @@ const Canvas = ({
   return (
     <div
       ref={canvasRef}
-      className="flex-1 relative bg-gray-100 border rounded-md cursor-pointer"
+      className={`flex-1 relative border rounded-md cursor-pointer ${
+        isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-300'
+      }`}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onClick={handleClick}
       onMouseUp={handleMouseUp}
       onMouseMove={handleMouseMove}
+      style={{ minHeight: '400px' }}
     >
       {components.map(component => (
         <div
@@ -142,15 +147,21 @@ const Canvas = ({
           onMouseDown={(e) => handleMouseDown(e, component.id)}
         >
           {component.type === 'button' && (
-            <Button>{component.props.text || 'Button'}</Button>
+            <Button className={isDarkMode ? 'bg-blue-600 hover:bg-blue-700' : ''}>
+              {component.props.text || 'Button'}
+            </Button>
           )}
           {component.type === 'label' && (
-            <div style={{ width: '100%', height: '100%', overflow: 'hidden', wordWrap: 'break-word' }}>
+            <div className={`${isDarkMode ? 'text-white' : 'text-black'}`} style={{ width: '100%', height: '100%', overflow: 'hidden', wordWrap: 'break-word' }}>
               {component.props.text || 'Label'}
             </div>
           )}
           {component.type === 'entry' && (
-            <input type="text" style={{ width: '100%', height: '100%' }} />
+            <input 
+              type="text" 
+              className={`border px-2 ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white'}`}
+              style={{ width: '100%', height: '100%' }} 
+            />
           )}
           {component.type === 'image' && component.props.src && (
             <img src={component.props.src} alt="Component" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />

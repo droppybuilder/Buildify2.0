@@ -1,14 +1,15 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
-// Fix the Canvas import to use default import instead of named import
 import Canvas from '@/components/Canvas';
 import { PropertyPanel } from '@/components/PropertyPanel';
 import { CodePreview } from '@/components/CodePreview';
 import { Toolbar } from '@/components/Toolbar';
+import { useDarkMode } from '@/context/DarkModeContext';
 import { toast } from 'sonner';
 
 const Index = () => {
+  const { isDarkMode } = useDarkMode();
   const [selectedComponent, setSelectedComponent] = useState(null);
   const [components, setComponents] = useState([]);
   const [isTkinter, setIsTkinter] = useState(true);
@@ -92,6 +93,7 @@ const Index = () => {
       // Delete single component
       const newComponents = components.filter(c => c.id !== component.id);
       handleComponentsChange(newComponents);
+      setSelectedComponent(null);
       toast.info("Component deleted");
     }
   }, [components, handleComponentsChange, selectedComponents]);
@@ -140,7 +142,7 @@ const Index = () => {
   }, [selectedComponent, selectedComponents, handleDeleteComponent, handleUndo, handleRedo, inputFocused, components, handleComponentsChange]);
   
   return (
-    <div className="h-screen flex overflow-hidden">
+    <div className={`h-screen flex overflow-hidden ${isDarkMode ? 'dark-mode' : ''}`}>
       <Sidebar />
       
       <main className="flex-1 flex flex-col overflow-hidden">
@@ -165,7 +167,7 @@ const Index = () => {
             />
           </div>
           
-          <div className="w-80 border-l flex flex-col overflow-hidden">
+          <div className={`w-80 border-l flex flex-col overflow-hidden ${isDarkMode ? 'border-gray-700 bg-gray-800' : ''}`}>
             <PropertyPanel
               selectedComponent={selectedComponent}
               onUpdate={handleComponentUpdate}

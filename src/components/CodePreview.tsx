@@ -1,12 +1,12 @@
-
 import { useMemo } from 'react';
 
 interface CodePreviewProps {
   components: any[];
   isTkinter: boolean;
+  isDarkMode?: boolean;
 }
 
-export const CodePreview = ({ components, isTkinter }: CodePreviewProps) => {
+export const CodePreview = ({ components, isTkinter, isDarkMode = false }: CodePreviewProps) => {
   const generatedCode = useMemo(() => {
     if (isTkinter) {
       return generateTkinterCode(components);
@@ -16,10 +16,10 @@ export const CodePreview = ({ components, isTkinter }: CodePreviewProps) => {
 
   return (
     <div className="h-64 border-t flex flex-col">
-      <div className="p-2 bg-secondary border-b">
-        <span className="text-xs font-medium">Generated Code</span>
+      <div className={`p-2 ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-secondary border-b'}`}>
+        <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-200' : ''}`}>Generated Code</span>
       </div>
-      <pre className="flex-1 p-4 overflow-auto text-sm bg-zinc-50">
+      <pre className={`flex-1 p-4 overflow-auto text-sm ${isDarkMode ? 'bg-gray-900 text-gray-300' : 'bg-zinc-50'}`}>
         <code>{generatedCode}</code>
       </pre>
     </div>

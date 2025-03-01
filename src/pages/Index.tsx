@@ -1,7 +1,8 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
-import { Canvas } from '@/components/Canvas';
+// Fix the Canvas import to use default import instead of named import
+import Canvas from '@/components/Canvas';
 import { PropertyPanel } from '@/components/PropertyPanel';
 import { CodePreview } from '@/components/CodePreview';
 import { Toolbar } from '@/components/Toolbar';

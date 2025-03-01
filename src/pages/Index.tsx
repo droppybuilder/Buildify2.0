@@ -14,6 +14,7 @@ const Index = () => {
   const [history, setHistory] = useState<any[][]>([[]]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [inputFocused, setInputFocused] = useState(false);
+  const [selectedComponents, setSelectedComponents] = useState<string[]>([]);
   
   // Load from localStorage on mount
   useEffect(() => {
@@ -79,10 +80,20 @@ const Index = () => {
   }, [components, handleComponentsChange]);
   
   const handleDeleteComponent = useCallback((component: any) => {
-    const newComponents = components.filter(c => c.id !== component.id);
-    handleComponentsChange(newComponents);
-    toast.info("Component deleted");
-  }, [components, handleComponentsChange]);
+    // Check if there are multiple selected components
+    if (selectedComponents.length > 1) {
+      const newComponents = components.filter(c => !selectedComponents.includes(c.id));
+      handleComponentsChange(newComponents);
+      setSelectedComponents([]);
+      setSelectedComponent(null);
+      toast.info("Multiple components deleted");
+    } else if (component) {
+      // Delete single component
+      const newComponents = components.filter(c => c.id !== component.id);
+      handleComponentsChange(newComponents);
+      toast.info("Component deleted");
+    }
+  }, [components, handleComponentsChange, selectedComponents]);
   
   // Keyboard shortcut to delete selected component
   useEffect(() => {
@@ -92,12 +103,23 @@ const Index = () => {
         return;
       }
       
-      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedComponent && 
+      if ((e.key === 'Delete' || e.key === 'Backspace') && 
           // Only process delete if not in an input field
           !['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
         e.preventDefault();
-        handleDeleteComponent(selectedComponent);
-        setSelectedComponent(null);
+        
+        if (selectedComponents.length > 1) {
+          // Delete multiple selected components
+          const newComponents = components.filter(c => !selectedComponents.includes(c.id));
+          handleComponentsChange(newComponents);
+          setSelectedComponents([]);
+          setSelectedComponent(null);
+          toast.info("Multiple components deleted");
+        } else if (selectedComponent) {
+          // Delete single selected component
+          handleDeleteComponent(selectedComponent);
+          setSelectedComponent(null);
+        }
       }
       
       // Handle Undo/Redo shortcuts
@@ -114,7 +136,7 @@ const Index = () => {
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedComponent, handleDeleteComponent, handleUndo, handleRedo, inputFocused]);
+  }, [selectedComponent, selectedComponents, handleDeleteComponent, handleUndo, handleRedo, inputFocused, components, handleComponentsChange]);
   
   return (
     <div className="h-screen flex overflow-hidden">

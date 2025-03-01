@@ -44,7 +44,12 @@ export const Canvas = ({
   const [imageCache, setImageCache] = useState<Record<string, string>>({});
   const [clipboard, setClipboard] = useState<Component | null>(null);
   const [contextMenuPosition, setContextMenuPosition] = useState<{x: number, y: number} | null>(null);
-
+  
+  // Click and drag to select functionality
+  const [selectionBox, setSelectionBox] = useState<{start: {x: number, y: number}, end: {x: number, y: number}} | null>(null);
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [selectedComponents, setSelectedComponents] = useState<string[]>([]);
+  
   // Pre-cache images for smoother drag
   useEffect(() => {
     const imageComponents = components.filter(c => c.type === 'image');
@@ -71,7 +76,71 @@ export const Canvas = ({
   const handleCanvasClick = (e: React.MouseEvent) => {
     if (e.target === canvasRef.current) {
       setSelectedComponent(null);
+      setSelectedComponents([]);
     }
+  };
+
+  const handleCanvasMouseDown = (e: React.MouseEvent) => {
+    // Only start selection if clicking directly on the canvas
+    if (e.target === canvasRef.current) {
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      
+      setIsSelecting(true);
+      setSelectionBox({
+        start: { x: e.clientX - rect.left, y: e.clientY - rect.top },
+        end: { x: e.clientX - rect.left, y: e.clientY - rect.top }
+      });
+    }
+  };
+
+  const handleCanvasMouseMove = (e: React.MouseEvent) => {
+    if (isSelecting && selectionBox && canvasRef.current) {
+      const rect = canvasRef.current.getBoundingClientRect();
+      setSelectionBox({
+        ...selectionBox,
+        end: { x: e.clientX - rect.left, y: e.clientY - rect.top }
+      });
+    }
+    
+    // Continue with normal mouse move handling
+    handleMouseMove(e);
+  };
+
+  const handleCanvasMouseUp = () => {
+    if (isSelecting && selectionBox) {
+      // Calculate the selection box bounds
+      const x1 = Math.min(selectionBox.start.x, selectionBox.end.x);
+      const y1 = Math.min(selectionBox.start.y, selectionBox.end.y);
+      const x2 = Math.max(selectionBox.start.x, selectionBox.end.x);
+      const y2 = Math.max(selectionBox.start.y, selectionBox.end.y);
+      
+      // Find components that intersect with the selection box
+      const selected = components.filter(component => {
+        const cx1 = component.position.x;
+        const cy1 = component.position.y;
+        const cx2 = cx1 + component.size.width;
+        const cy2 = cy1 + component.size.height;
+        
+        // Check for intersection
+        return !(cx2 < x1 || cx1 > x2 || cy2 < y1 || cy1 > y2);
+      });
+      
+      // Update selected components
+      if (selected.length > 0) {
+        setSelectedComponents(selected.map(c => c.id));
+        if (selected.length === 1) {
+          setSelectedComponent(selected[0]);
+        } else if (selected.length > 1) {
+          // Clear single selection when multiple components are selected
+          setSelectedComponent(null);
+        }
+      }
+    }
+    
+    setIsSelecting(false);
+    setSelectionBox(null);
+    handleMouseUp();
   };
 
   const handleContextMenu = (e: React.MouseEvent, component: Component) => {
@@ -84,6 +153,7 @@ export const Canvas = ({
     e.stopPropagation();
     
     setSelectedComponent(component);
+    setSelectedComponents([component.id]);
     
     const target = e.target as HTMLElement;
     if (target.classList.contains('resize-handle')) {
@@ -240,7 +310,15 @@ export const Canvas = ({
   };
 
   const handleDeleteComponent = () => {
-    if (selectedComponent) {
+    if (selectedComponents.length > 1) {
+      // Delete multiple selected components
+      const newComponents = components.filter(comp => !selectedComponents.includes(comp.id));
+      setComponents(newComponents);
+      setSelectedComponents([]);
+      setSelectedComponent(null);
+      toast.success("Components deleted");
+    } else if (selectedComponent) {
+      // Delete single selected component
       const newComponents = components.filter(comp => comp.id !== selectedComponent.id);
       setComponents(newComponents);
       setSelectedComponent(null);
@@ -267,8 +345,16 @@ export const Canvas = ({
         return { width: 300, height: 200 };
       case 'checkbox':
         return { width: 120, height: 30 };
-      case 'dropdown':
+      case 'datepicker':
         return { width: 200, height: 40 };
+      case 'progressbar':
+        return { width: 200, height: 30 };
+      case 'notebook':
+        return { width: 400, height: 300 };
+      case 'listbox':
+        return { width: 200, height: 200 };
+      case 'canvas':
+        return { width: 300, height: 200 };
       default:
         return { width: 120, height: 40 };
     }
@@ -287,11 +373,19 @@ export const Canvas = ({
       case 'slider':
         return { from: 0, to: 100, value: 50, orient: 'horizontal', bgColor: '#e2e8f0', troughColor: '#3b82f6' };
       case 'frame':
-        return { relief: 'flat', borderwidth: 1, bgColor: '#ffffff', borderColor: '#e2e8f0' };
+        return { relief: 'flat', borderwidth: 1, bgColor: '#ffffff', borderColor: '#e2e8f0', cornerRadius: 4 };
       case 'checkbox':
         return { text: 'Checkbox', checked: false, fgColor: '#000000' };
-      case 'dropdown':
-        return { options: 'Option 1,Option 2,Option 3', selected: 'Option 1', bgColor: '#ffffff', fgColor: '#000000' };
+      case 'datepicker':
+        return { format: 'yyyy-mm-dd', bgColor: '#ffffff', fgColor: '#000000', cornerRadius: 8, borderColor: '#e2e8f0' };
+      case 'progressbar':
+        return { value: 50, maxValue: 100, progressColor: '#3b82f6', bgColor: '#e2e8f0', cornerRadius: 4 };
+      case 'notebook':
+        return { tabs: 'Tab 1,Tab 2,Tab 3', selectedTab: 'Tab 1', bgColor: '#ffffff', fgColor: '#000000' };
+      case 'listbox':
+        return { items: 'Item 1,Item 2,Item 3,Item 4,Item 5', bgColor: '#ffffff', fgColor: '#000000', borderColor: '#e2e8f0' };
+      case 'canvas':
+        return { bgColor: '#ffffff', borderwidth: 1, borderColor: '#e2e8f0', cornerRadius: 4 };
       default:
         return {};
     }
@@ -318,8 +412,8 @@ export const Canvas = ({
   // Handle keyboard shortcuts for delete and copy/paste
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (selectedComponent) {
-        // Delete component
+      if (selectedComponent || selectedComponents.length > 0) {
+        // Delete component(s)
         if (e.key === 'Delete' || e.key === 'Backspace') {
           handleDeleteComponent();
         }
@@ -346,7 +440,7 @@ export const Canvas = ({
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedComponent, clipboard, components]);
+  }, [selectedComponent, selectedComponents, clipboard, components]);
 
   return (
     <div className="w-full h-full p-8 bg-gray-100 flex items-center justify-center">
@@ -398,9 +492,10 @@ export const Canvas = ({
           className="flex-1 canvas-grid relative overflow-auto bg-white/50"
           onDragOver={onDragOver}
           onDrop={onDrop}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
+          onMouseDown={handleCanvasMouseDown}
+          onMouseMove={handleCanvasMouseMove}
+          onMouseUp={handleCanvasMouseUp}
+          onMouseLeave={handleCanvasMouseUp}
           onClick={handleCanvasClick}
           onContextMenu={(e) => {
             e.preventDefault();
@@ -412,12 +507,26 @@ export const Canvas = ({
             }
           }}
         >
+          {/* Selection box for click and drag to select */}
+          {isSelecting && selectionBox && (
+            <div 
+              className="absolute border border-primary bg-primary/10 pointer-events-none"
+              style={{
+                left: Math.min(selectionBox.start.x, selectionBox.end.x),
+                top: Math.min(selectionBox.start.y, selectionBox.end.y),
+                width: Math.abs(selectionBox.end.x - selectionBox.start.x),
+                height: Math.abs(selectionBox.end.y - selectionBox.start.y),
+              }}
+            />
+          )}
+          
           {components.map((component) => (
             <ContextMenu key={component.id}>
               <ContextMenuTrigger>
                 <div
                   className={`absolute component-preview cursor-move ${
-                    selectedComponent?.id === component.id ? 'ring-2 ring-primary ring-offset-2' : ''
+                    selectedComponent?.id === component.id ? 'ring-2 ring-primary ring-offset-2' : 
+                    selectedComponents.includes(component.id) ? 'ring-2 ring-blue-400 ring-offset-2' : ''
                   }`}
                   style={{
                     left: `${component.position.x}px`,
@@ -624,25 +733,120 @@ const ComponentPreview = ({ component }: { component: Component }) => {
           </span>
         </label>
       );
-    case 'dropdown':
+    case 'datepicker':
       return (
-        <select 
-          className="w-full h-full px-3 py-1 border rounded appearance-none"
+        <div 
+          className="w-full h-full flex items-center border px-3"
+          style={{
+            backgroundColor: component.props.bgColor || '#ffffff',
+            borderRadius: `${component.props.cornerRadius || 8}px`,
+            borderColor: component.props.borderColor || '#e2e8f0',
+            color: component.props.fgColor || '#000000',
+          }}
+        >
+          <div className="flex justify-between w-full items-center">
+            <span>{component.props.format || 'yyyy-mm-dd'}</span>
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-70">
+              <path d="M4.5 1C4.77614 1 5 1.22386 5 1.5V2H10V1.5C10 1.22386 10.2239 1 10.5 1C10.7761 1 11 1.22386 11 1.5V2H12.5C13.3284 2 14 2.67157 14 3.5V12.5C14 13.3284 13.3284 14 12.5 14H2.5C1.67157 14 1 13.3284 1 12.5V3.5C1 2.67157 1.67157 2 2.5 2H4V1.5C4 1.22386 4.22386 1 4.5 1ZM10 3V3.5C10 3.77614 10.2239 4 10.5 4C10.7761 4 11 3.77614 11 3.5V3H12.5C12.7761 3 13 3.22386 13 3.5V5H2V3.5C2 3.22386 2.22386 3 2.5 3H4V3.5C4 3.77614 4.22386 4 4.5 4C4.77614 4 5 3.77614 5 3.5V3H10ZM2 6V12.5C2 12.7761 2.22386 13 2.5 13H12.5C12.7761 13 13 12.7761 13 12.5V6H2Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path>
+            </svg>
+          </div>
+        </div>
+      );
+    case 'progressbar':
+      return (
+        <div 
+          className="w-full h-full flex items-center"
+        >
+          <div 
+            className="w-full h-3 rounded-full overflow-hidden"
+            style={{
+              backgroundColor: component.props.bgColor || '#e2e8f0',
+              borderRadius: `${component.props.cornerRadius || 4}px`,
+            }}
+          >
+            <div 
+              className="h-full"
+              style={{
+                width: `${(component.props.value / component.props.maxValue) * 100}%`,
+                backgroundColor: component.props.progressColor || '#3b82f6',
+                transition: 'width 0.3s ease-in-out'
+              }}
+            />
+          </div>
+        </div>
+      );
+    case 'notebook':
+      return (
+        <div 
+          className="w-full h-full flex flex-col border"
+          style={{
+            backgroundColor: component.props.bgColor || '#ffffff',
+            color: component.props.fgColor || '#000000',
+            borderColor: '#e2e8f0',
+          }}
+        >
+          <div className="flex border-b">
+            {(component.props.tabs || 'Tab 1,Tab 2,Tab 3')
+              .split(',')
+              .map((tab: string, i: number) => (
+                <div
+                  key={i}
+                  className={`px-4 py-2 cursor-default ${
+                    tab.trim() === (component.props.selectedTab || 'Tab 1')
+                      ? 'border-b-2 border-primary font-medium'
+                      : 'text-gray-500'
+                  }`}
+                >
+                  {tab.trim()}
+                </div>
+              ))}
+          </div>
+          <div className="flex-1 p-4">
+            {/* Tab content placeholder */}
+            <div className="h-full w-full flex items-center justify-center text-gray-400 text-sm">
+              Content for {component.props.selectedTab || 'Tab 1'}
+            </div>
+          </div>
+        </div>
+      );
+    case 'listbox':
+      return (
+        <div 
+          className="w-full h-full border overflow-y-auto"
           style={{
             backgroundColor: component.props.bgColor || '#ffffff',
             color: component.props.fgColor || '#000000',
             borderColor: component.props.borderColor || '#e2e8f0',
+          }}
+        >
+          {(component.props.items || 'Item 1,Item 2,Item 3,Item 4,Item 5')
+            .split(',')
+            .map((item: string, i: number) => (
+              <div
+                key={i}
+                className={`px-3 py-1 cursor-default ${i === 0 ? 'bg-blue-100' : 'hover:bg-gray-50'}`}
+              >
+                {item.trim()}
+              </div>
+            ))}
+        </div>
+      );
+    case 'canvas':
+      return (
+        <div 
+          className="w-full h-full"
+          style={{
+            backgroundColor: component.props.bgColor || '#ffffff',
+            borderWidth: `${component.props.borderwidth || 1}px`,
+            borderColor: component.props.borderColor || '#e2e8f0',
+            borderStyle: 'solid',
             borderRadius: `${component.props.cornerRadius || 4}px`,
           }}
         >
-          {(component.props.options || 'Option 1,Option 2,Option 3')
-            .split(',')
-            .map((option: string, i: number) => (
-              <option key={i} value={option.trim()}>
-                {option.trim()}
-              </option>
-            ))}
-        </select>
+          <div className="h-full w-full flex items-center justify-center text-gray-400 text-sm">
+            Canvas Area
+          </div>
+        </div>
       );
     default:
       return null;

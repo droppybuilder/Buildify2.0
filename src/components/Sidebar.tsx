@@ -1,7 +1,20 @@
 
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Image as ImageIcon, Type, Square, TextCursor, SlidersHorizontal, Frame, CheckSquare, ListFilter } from "lucide-react";
+import { 
+  Image as ImageIcon, 
+  Type, 
+  Square, 
+  TextCursor, 
+  SlidersHorizontal, 
+  Frame, 
+  CheckSquare, 
+  Calendar, 
+  LayoutGrid, 
+  Gauge, 
+  Tabs, 
+  List 
+} from "lucide-react";
 
 export const Sidebar = () => {
   const handleDragStart = (e: React.DragEvent, type: string) => {
@@ -77,11 +90,19 @@ export const Sidebar = () => {
               </div>
               <div
                 draggable
-                onDragStart={(e) => handleDragStart(e, 'dropdown')}
+                onDragStart={(e) => handleDragStart(e, 'datepicker')}
                 className="aspect-[4/1] rounded-lg border border-gray-200 bg-white p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors"
               >
-                <ListFilter size={16} />
-                <span>Dropdown</span>
+                <Calendar size={16} />
+                <span>DatePicker</span>
+              </div>
+              <div
+                draggable
+                onDragStart={(e) => handleDragStart(e, 'progressbar')}
+                className="aspect-[4/1] rounded-lg border border-gray-200 bg-white p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors"
+              >
+                <Gauge size={16} />
+                <span>ProgressBar</span>
               </div>
             </div>
           </div>
@@ -98,6 +119,30 @@ export const Sidebar = () => {
               >
                 <Frame size={16} />
                 <span>Frame</span>
+              </div>
+              <div
+                draggable
+                onDragStart={(e) => handleDragStart(e, 'notebook')}
+                className="aspect-[4/1] rounded-lg border border-gray-200 bg-white p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors"
+              >
+                <Tabs size={16} />
+                <span>Notebook</span>
+              </div>
+              <div
+                draggable
+                onDragStart={(e) => handleDragStart(e, 'listbox')}
+                className="aspect-[4/1] rounded-lg border border-gray-200 bg-white p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors"
+              >
+                <List size={16} />
+                <span>Listbox</span>
+              </div>
+              <div
+                draggable
+                onDragStart={(e) => handleDragStart(e, 'canvas')}
+                className="aspect-[4/1] rounded-lg border border-gray-200 bg-white p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors"
+              >
+                <LayoutGrid size={16} />
+                <span>Canvas</span>
               </div>
             </div>
           </div>

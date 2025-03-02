@@ -7,6 +7,7 @@ import { CodePreview } from '@/components/CodePreview';
 import { Toolbar } from '@/components/Toolbar';
 import { toast } from 'sonner';
 import { ThemeContext } from '../App';
+import { X, Minus, Square } from 'lucide-react';
 
 const Index = () => {
   const { isDarkMode } = useContext(ThemeContext);
@@ -141,7 +142,7 @@ const Index = () => {
   }, [selectedComponent, selectedComponents, handleDeleteComponent, handleUndo, handleRedo, inputFocused, components, handleComponentsChange]);
   
   return (
-    <div className={`h-screen flex overflow-hidden ${isDarkMode ? 'dark' : 'light'}`}>
+    <div className={`h-screen flex overflow-hidden`}>
       <Sidebar />
       
       <main className="flex-1 flex flex-col overflow-hidden">
@@ -156,14 +157,31 @@ const Index = () => {
         />
         
         <div className="flex-1 flex overflow-hidden">
-          <div className="flex-1 overflow-auto bg-background">
-            <Canvas
-              components={components}
-              setComponents={handleComponentsChange}
-              selectedComponent={selectedComponent}
-              setSelectedComponent={setSelectedComponent}
-              onDeleteComponent={handleDeleteComponent}
-            />
+          <div className="flex-1 overflow-auto bg-background p-8">
+            <div className="macos-window mx-auto max-w-5xl h-[80vh]">
+              <div className="window-titlebar">
+                <div className="window-buttons">
+                  <div className="window-button window-close">
+                    <X size={8} />
+                  </div>
+                  <div className="window-button window-minimize">
+                    <Minus size={8} />
+                  </div>
+                  <div className="window-button window-maximize">
+                    <Square size={8} />
+                  </div>
+                </div>
+                <div className="window-title">Untitled Window</div>
+                <div className="w-[60px]"></div>
+              </div>
+              <Canvas
+                components={components}
+                setComponents={handleComponentsChange}
+                selectedComponent={selectedComponent}
+                setSelectedComponent={setSelectedComponent}
+                onDeleteComponent={handleDeleteComponent}
+              />
+            </div>
           </div>
           
           <div className="w-80 border-l flex flex-col overflow-hidden border-border bg-card">

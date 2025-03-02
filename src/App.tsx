@@ -37,10 +37,15 @@ const App = () => {
 
   // Update the document class and localStorage when dark mode changes
   useEffect(() => {
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(isDarkMode ? 'dark' : 'light');
+    document.documentElement.classList.toggle('dark', isDarkMode);
+    document.documentElement.classList.toggle('light', !isDarkMode);
     localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
   }, [isDarkMode]);
+
+  // Set initial class on first load
+  useEffect(() => {
+    document.documentElement.classList.add(isDarkMode ? 'dark' : 'light');
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

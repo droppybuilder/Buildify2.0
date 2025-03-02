@@ -1,5 +1,8 @@
 
-import { useMemo } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
+import Prism from 'prismjs';
+import 'prismjs/components/prism-python';
+import 'prismjs/themes/prism.css';
 
 interface CodePreviewProps {
   components: any[];
@@ -7,6 +10,8 @@ interface CodePreviewProps {
 }
 
 export const CodePreview = ({ components, isTkinter }: CodePreviewProps) => {
+  const codeRef = useRef<HTMLElement>(null);
+  
   const generatedCode = useMemo(() => {
     if (isTkinter) {
       return generateTkinterCode(components);
@@ -14,13 +19,20 @@ export const CodePreview = ({ components, isTkinter }: CodePreviewProps) => {
     return generateCustomTkinterCode(components);
   }, [components, isTkinter]);
 
+  // Apply syntax highlighting when code changes
+  useEffect(() => {
+    if (codeRef.current) {
+      Prism.highlightElement(codeRef.current);
+    }
+  }, [generatedCode]);
+
   return (
     <div className="h-64 border-t flex flex-col">
-      <div className="p-2 bg-secondary border-b">
+      <div className="p-2 bg-secondary flex items-center justify-between">
         <span className="text-xs font-medium">Generated Code</span>
       </div>
-      <pre className="flex-1 p-4 overflow-auto text-sm bg-zinc-50">
-        <code>{generatedCode}</code>
+      <pre className="flex-1 p-0 m-0 overflow-auto code-preview">
+        <code ref={codeRef} className="language-python">{generatedCode}</code>
       </pre>
     </div>
   );

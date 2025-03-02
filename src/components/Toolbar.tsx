@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,9 @@ import {
   Grid, 
   Eye,
   Settings,
-  File
+  File,
+  Sun,
+  Moon
 } from "lucide-react";
 import {
   Dialog,
@@ -26,6 +28,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
+import { ThemeContext } from '../App';
 
 interface ToolbarProps {
   isTkinter: boolean;
@@ -46,6 +49,7 @@ export const Toolbar = ({
   canUndo,
   canRedo
 }: ToolbarProps) => {
+  const { isDarkMode, toggleDarkMode } = useContext(ThemeContext);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [appName, setAppName] = useState("MyGUIApp");
   const [windowTitle, setWindowTitle] = useState("Tkinter GUI App");
@@ -534,13 +538,14 @@ if __name__ == "__main__":
 
   return (
     <>
-      <div className="h-14 border-b flex items-center px-4 gap-4 bg-white">
+      <div className="toolbar">
         <div className="flex items-center gap-2">
           <Button 
             variant="outline" 
             size="icon"
             onClick={onUndo}
             disabled={!canUndo}
+            className="h-8 w-8"
           >
             <Undo2 size={16} />
           </Button>
@@ -549,34 +554,43 @@ if __name__ == "__main__":
             size="icon"
             onClick={onRedo}
             disabled={!canRedo}
+            className="h-8 w-8"
           >
             <Redo2 size={16} />
           </Button>
         </div>
 
-        <div className="h-6 w-px bg-border" />
+        <div className="toolbar-divider" />
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" className="h-8 w-8">
             <Grid size={16} />
           </Button>
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" className="h-8 w-8">
             <Eye size={16} />
           </Button>
         </div>
 
-        <div className="h-6 w-px bg-border" />
+        <div className="toolbar-divider" />
 
         <div className="flex items-center gap-2">
-          <span className="text-sm">Tkinter</span>
+          <span className="text-sm font-medium">Tkinter</span>
           <Switch
             checked={!isTkinter}
             onCheckedChange={(checked) => setIsTkinter(!checked)}
           />
-          <span className="text-sm">CustomTkinter</span>
+          <span className="text-sm font-medium">CustomTkinter</span>
         </div>
 
         <div className="ml-auto flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={toggleDarkMode} 
+            className="h-8 w-8"
+          >
+            {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
+          </Button>
           <Button variant="outline" size="sm" onClick={() => setIsSettingsOpen(true)}>
             <Settings size={16} className="mr-2" />
             Settings
@@ -657,3 +671,4 @@ if __name__ == "__main__":
     </>
   );
 };
+</lov-add-dependency>prismjs@1.29.0</lov-add-dependency>

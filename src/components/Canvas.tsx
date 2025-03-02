@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect, useContext } from 'react';
 import { toast } from "sonner";
 import { Maximize2, Minimize2, X, Copy, Scissors, Trash } from "lucide-react";
@@ -47,12 +46,10 @@ const Canvas = ({
   const [clipboard, setClipboard] = useState<Component | null>(null);
   const [contextMenuPosition, setContextMenuPosition] = useState<{x: number, y: number} | null>(null);
   
-  // Click and drag to select functionality
   const [selectionBox, setSelectionBox] = useState<{start: {x: number, y: number}, end: {x: number, y: number}} | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectedComponents, setSelectedComponents] = useState<string[]>([]);
   
-  // Pre-cache images for smoother drag
   useEffect(() => {
     const imageComponents = components.filter(c => c.type === 'image');
     
@@ -83,7 +80,6 @@ const Canvas = ({
   };
 
   const handleCanvasMouseDown = (e: React.MouseEvent) => {
-    // Only start selection if clicking directly on the canvas
     if (e.target === canvasRef.current) {
       const rect = canvasRef.current?.getBoundingClientRect();
       if (!rect) return;
@@ -105,36 +101,30 @@ const Canvas = ({
       });
     }
     
-    // Continue with normal mouse move handling
     handleMouseMove(e);
   };
 
   const handleCanvasMouseUp = () => {
     if (isSelecting && selectionBox) {
-      // Calculate the selection box bounds
       const x1 = Math.min(selectionBox.start.x, selectionBox.end.x);
       const y1 = Math.min(selectionBox.start.y, selectionBox.end.y);
       const x2 = Math.max(selectionBox.start.x, selectionBox.end.x);
       const y2 = Math.max(selectionBox.start.y, selectionBox.end.y);
       
-      // Find components that intersect with the selection box
       const selected = components.filter(component => {
         const cx1 = component.position.x;
         const cy1 = component.position.y;
         const cx2 = cx1 + component.size.width;
         const cy2 = cy1 + component.size.height;
         
-        // Check for intersection
         return !(cx2 < x1 || cx1 > x2 || cy2 < y1 || cy1 > y2);
       });
       
-      // Update selected components
       if (selected.length > 0) {
         setSelectedComponents(selected.map(c => c.id));
         if (selected.length === 1) {
           setSelectedComponent(selected[0]);
         } else if (selected.length > 1) {
-          // Clear single selection when multiple components are selected
           setSelectedComponent(null);
         }
       }
@@ -180,11 +170,9 @@ const Canvas = ({
           const rect = canvasRef.current?.getBoundingClientRect();
           if (!rect) return comp;
           
-          // Calculate new position ensuring it stays within canvas
           let newX = e.clientX - dragStart.x;
           let newY = e.clientY - dragStart.y;
           
-          // Prevent component from being dragged out of bounds
           newX = Math.max(0, Math.min(newX, rect.width - comp.size.width));
           newY = Math.max(0, Math.min(newY, rect.height - comp.size.height));
           
@@ -290,7 +278,6 @@ const Canvas = ({
       const rect = canvasRef.current?.getBoundingClientRect();
       if (!rect) return;
 
-      // Use mouse position if available, otherwise offset from original
       let x, y;
       if (e) {
         x = e.clientX - rect.left;
@@ -313,14 +300,12 @@ const Canvas = ({
 
   const handleDeleteComponent = () => {
     if (selectedComponents.length > 1) {
-      // Delete multiple selected components
       const newComponents = components.filter(comp => !selectedComponents.includes(comp.id));
       setComponents(newComponents);
       setSelectedComponents([]);
       setSelectedComponent(null);
       toast.success("Components deleted");
     } else if (selectedComponent) {
-      // Delete single selected component
       const newComponents = components.filter(comp => comp.id !== selectedComponent.id);
       setComponents(newComponents);
       setSelectedComponent(null);
@@ -365,7 +350,6 @@ const Canvas = ({
   const getDefaultProps = (type: string) => {
     const isDark = isDarkMode;
     
-    // Common component properties
     const commonLightProps = {
       bgColor: '#ffffff',
       fgColor: '#000000',
@@ -494,28 +478,23 @@ const Canvas = ({
     }
   };
 
-  // Handle keyboard shortcuts for delete and copy/paste
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (selectedComponent || selectedComponents.length > 0) {
-        // Delete component(s)
         if (e.key === 'Delete' || e.key === 'Backspace') {
           handleDeleteComponent();
         }
         
-        // Copy component
         if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
           handleCopyComponent();
           e.preventDefault();
         }
         
-        // Cut component
         if ((e.ctrlKey || e.metaKey) && e.key === 'x') {
           handleCutComponent();
           e.preventDefault();
         }
         
-        // Paste component
         if ((e.ctrlKey || e.metaKey) && e.key === 'v' && clipboard) {
           handlePasteComponent(null as any);
           e.preventDefault();
@@ -583,14 +562,12 @@ const Canvas = ({
           onContextMenu={(e) => {
             e.preventDefault();
             if (e.target === canvasRef.current) {
-              // Allow pasting on canvas background
               if (clipboard) {
                 handlePasteComponent(e);
               }
             }
           }}
         >
-          {/* Selection box for click and drag to select */}
           {isSelecting && selectionBox && (
             <div 
               className="absolute border border-primary bg-primary/10 pointer-events-none"
@@ -893,7 +870,6 @@ const ComponentPreview = ({ component, isDarkMode }: { component: Component, isD
               ))}
           </div>
           <div className="flex-1 p-4">
-            {/* Tab content placeholder */}
             <div className="h-full w-full flex items-center justify-center text-sm" 
               style={{ color: isDarkMode ? 'rgba(230, 230, 230, 0.5)' : 'rgba(0, 0, 0, 0.4)' }}>
               Content for {component.props.selectedTab || 'Tab 1'}

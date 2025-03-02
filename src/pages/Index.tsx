@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect, useContext } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import Canvas from '@/components/Canvas';
@@ -19,7 +18,6 @@ const Index = () => {
   const [inputFocused, setInputFocused] = useState(false);
   const [selectedComponents, setSelectedComponents] = useState<string[]>([]);
   
-  // Load from localStorage on mount
   useEffect(() => {
     try {
       const savedComponents = localStorage.getItem('guiBuilderComponents');
@@ -33,7 +31,6 @@ const Index = () => {
     }
   }, []);
   
-  // Save to localStorage when components change
   useEffect(() => {
     try {
       localStorage.setItem('guiBuilderComponents', JSON.stringify(components));
@@ -43,7 +40,6 @@ const Index = () => {
   }, [components]);
   
   const addToHistory = useCallback((newComponents: any[]) => {
-    // Only add to history if the components have actually changed
     if (JSON.stringify(newComponents) !== JSON.stringify(history[historyIndex])) {
       const newHistory = history.slice(0, historyIndex + 1);
       newHistory.push([...newComponents]);
@@ -83,7 +79,6 @@ const Index = () => {
   }, [components, handleComponentsChange]);
   
   const handleDeleteComponent = useCallback((component: any) => {
-    // Check if there are multiple selected components
     if (selectedComponents.length > 1) {
       const newComponents = components.filter(c => !selectedComponents.includes(c.id));
       handleComponentsChange(newComponents);
@@ -91,41 +86,34 @@ const Index = () => {
       setSelectedComponent(null);
       toast.info("Multiple components deleted");
     } else if (component) {
-      // Delete single component
       const newComponents = components.filter(c => c.id !== component.id);
       handleComponentsChange(newComponents);
       toast.info("Component deleted");
     }
   }, [components, handleComponentsChange, selectedComponents]);
   
-  // Keyboard shortcut to delete selected component
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Skip if an input field is focused
       if (inputFocused) {
         return;
       }
       
       if ((e.key === 'Delete' || e.key === 'Backspace') && 
-          // Only process delete if not in an input field
           !['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
         e.preventDefault();
         
         if (selectedComponents.length > 1) {
-          // Delete multiple selected components
           const newComponents = components.filter(c => !selectedComponents.includes(c.id));
           handleComponentsChange(newComponents);
           setSelectedComponents([]);
           setSelectedComponent(null);
           toast.info("Multiple components deleted");
         } else if (selectedComponent) {
-          // Delete single selected component
           handleDeleteComponent(selectedComponent);
           setSelectedComponent(null);
         }
       }
       
-      // Handle Undo/Redo shortcuts
       if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
         if (!e.shiftKey) {
           e.preventDefault();
@@ -158,30 +146,13 @@ const Index = () => {
         
         <div className="flex-1 flex overflow-hidden">
           <div className="flex-1 overflow-auto bg-background p-6">
-            <div className="macos-window mx-auto max-w-4xl h-[75vh] relative">
-              <div className="window-titlebar">
-                <div className="window-buttons">
-                  <div className="window-button window-close">
-                    <X size={8} />
-                  </div>
-                  <div className="window-button window-minimize">
-                    <Minus size={8} />
-                  </div>
-                  <div className="window-button window-maximize">
-                    <Square size={8} />
-                  </div>
-                </div>
-                <div className="window-title">Untitled Window</div>
-                <div className="w-[60px]"></div>
-              </div>
-              <Canvas
-                components={components}
-                setComponents={handleComponentsChange}
-                selectedComponent={selectedComponent}
-                setSelectedComponent={setSelectedComponent}
-                onDeleteComponent={handleDeleteComponent}
-              />
-            </div>
+            <Canvas
+              components={components}
+              setComponents={handleComponentsChange}
+              selectedComponent={selectedComponent}
+              setSelectedComponent={setSelectedComponent}
+              onDeleteComponent={handleDeleteComponent}
+            />
           </div>
           
           <div className="w-80 border-l flex flex-col overflow-hidden border-border bg-card">

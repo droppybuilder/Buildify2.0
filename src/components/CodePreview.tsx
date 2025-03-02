@@ -122,12 +122,16 @@ if __name__ == "__main__":
     // CustomTKinter code generation function
     const imports = `import customtkinter as ctk
 from PIL import Image
+import os
+import base64
+from io import BytesIO
 
 class MyGUIApp:
     def __init__(self):
         self.root = ctk.CTk()
         self.root.title("CustomTkinter GUI App")
         self.root.geometry("800x600")
+        self.images = []  # Keep references to images
         self._create_widgets()
         
     def _create_widgets(self):`;

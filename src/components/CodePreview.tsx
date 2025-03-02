@@ -1,3 +1,4 @@
+
 import { useEffect, useRef } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-python';
@@ -242,11 +243,12 @@ if __name__ == "__main__":
 
   return (
     <div className="flex-1 overflow-hidden flex flex-col">
-      <div className="p-3 text-sm font-medium border-t border-b border-border">
-        Code Preview
+      <div className="code-preview-header">
+        <span>Code Preview</span>
+        <span className="text-xs text-muted-foreground">{isTkinter ? "Tkinter" : "CustomTkinter"}</span>
       </div>
-      <div className="flex-1 overflow-auto p-2">
-        <pre className="code-preview h-full" ref={codeRef}>
+      <div className="code-preview-container">
+        <pre className="code-preview h-full m-0" ref={codeRef}>
           <code className="language-python">{code}</code>
         </pre>
       </div>

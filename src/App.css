@@ -50,7 +50,7 @@
   --card-foreground: 0 0% 95%;
   --popover: 0 0% 15%;
   --popover-foreground: 0 0% 95%;
-  --primary: 200 80% 60%;
+  --primary: 235 85% 70%;
   --primary-foreground: 0 0% 98%;
   --secondary: 240 4% 20%;
   --secondary-foreground: 0 0% 95%;
@@ -65,7 +65,7 @@
   --ring: 240 4% 70%;
   --sidebar-background: 0 0% 15%;
   --sidebar-foreground: 0 0% 95%;
-  --sidebar-primary: 200 80% 60%;
+  --sidebar-primary: 235 85% 70%;
   --sidebar-primary-foreground: 0 0% 98%;
   --sidebar-accent: 240 4% 20%;
   --sidebar-accent-foreground: 0 0% 95%;
@@ -81,7 +81,7 @@
   --card-foreground: 0 0% 10%;
   --popover: 0 0% 100%;
   --popover-foreground: 0 0% 10%;
-  --primary: 200 80% 50%;
+  --primary: 235 85% 65%;
   --primary-foreground: 0 0% 98%;
   --secondary: 0 0% 96%;
   --secondary-foreground: 0 0% 10%;
@@ -93,21 +93,21 @@
   --destructive-foreground: 0 0% 98%;
   --border: 0 0% 89.8%;
   --input: 0 0% 89.8%;
-  --ring: 200 80% 50%;
+  --ring: 235 85% 65%;
   --sidebar-background: 0 0% 98%;
   --sidebar-foreground: 0 0% 10%;
-  --sidebar-primary: 200 80% 50%;
+  --sidebar-primary: 235 85% 65%;
   --sidebar-primary-foreground: 0 0% 98%;
   --sidebar-accent: 0 0% 96%;
   --sidebar-accent-foreground: 0 0% 10%;
   --sidebar-border: 0 0% 89.8%;
-  --sidebar-ring: 200 80% 50%;
+  --sidebar-ring: 235 85% 65%;
 }
 
 /* Canvas styles */
 .canvas-grid {
   background-size: 20px 20px;
-  border-radius: 8px;
+  border-radius: 0;
   transition: all 0.3s ease;
 }
 
@@ -222,7 +222,7 @@
 }
 
 .component-preview.selected {
-  border: 2px solid var(--primary);
+  border: 2px solid hsl(var(--primary));
 }
 
 .dark .component-preview {
@@ -241,20 +241,20 @@
   background-color: hsl(var(--primary));
 }
 
-/* Code highlighting styles */
+/* Code highlighting styles - Notion inspired */
 .code-preview {
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
   line-height: 1.5;
   tab-size: 4;
   overflow-x: auto;
-  background: transparent;
-  border-radius: 4px;
-  padding: 0.5rem;
+  border-radius: 0;
+  padding: 0.75rem 1rem;
+  margin: 0;
 }
 
 .dark .code-preview {
-  background-color: hsl(220, 13%, 18%);
+  background-color: hsl(220, 13%, 15%);
   color: #e2e8f0;
 }
 
@@ -263,53 +263,61 @@
   color: #1e293b;
 }
 
-/* Syntax highlighting colors - inspired by popular themes */
+/* Notion-like syntax highlighting colors */
 .token.comment {
-  color: #636e7b;
+  color: #8b949e;
   font-style: italic;
 }
 
 .token.string {
-  color: #47b881;
-}
-
-.token.number {
-  color: #f2545b;
-}
-
-.token.keyword, 
-.token.function {
-  color: #7988e1;
-}
-
-.token.class-name,
-.token.builtin {
-  color: #31a2db;
-}
-
-.dark .token.comment {
-  color: #6c7a89;
+  color: #a5d6ff;
 }
 
 .dark .token.string {
-  color: #88c379;
+  color: #7ee787;
+}
+
+.token.number {
+  color: #79c0ff;
 }
 
 .dark .token.number {
-  color: #ff7575;
+  color: #ff7b72;
 }
 
-.dark .token.keyword, 
-.dark .token.function {
-  color: #c792ea;
+.token.keyword, .token.function {
+  color: #ff7b72;
 }
 
-.dark .token.class-name,
-.dark .token.builtin {
-  color: #61afef;
+.dark .token.keyword, .dark .token.function {
+  color: #ff7b72;
 }
 
-/* Custom scrollbar */
+.token.operator {
+  color: #79c0ff;
+}
+
+.dark .token.operator {
+  color: #79c0ff;
+}
+
+.token.punctuation {
+  color: #c9d1d9;
+}
+
+.dark .token.punctuation {
+  color: #c9d1d9;
+}
+
+.token.class-name, .token.builtin {
+  color: #d2a8ff;
+}
+
+.dark .token.class-name, .dark .token.builtin {
+  color: #d2a8ff;
+}
+
+/* Custom scrollbar - Notion style */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -321,7 +329,7 @@
 
 ::-webkit-scrollbar-thumb {
   background: rgba(155, 155, 155, 0.5);
-  border-radius: 4px;
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -348,4 +356,55 @@
 
 .toolbar-divider {
   @apply h-6 w-px bg-border;
+}
+
+/* Property panel improvements */
+.property-section {
+  @apply border-b border-border;
+}
+
+.property-section-title {
+  @apply text-sm font-medium p-3;
+}
+
+.property-field {
+  @apply p-3 flex flex-col gap-2;
+}
+
+.property-field:not(:last-child) {
+  @apply border-b border-border;
+}
+
+.property-label {
+  @apply text-xs font-medium text-muted-foreground;
+}
+
+/* Code preview section */
+.code-preview-header {
+  @apply p-3 text-sm font-medium border-t border-border bg-card flex items-center justify-between;
+}
+
+.code-preview-container {
+  @apply flex-1 overflow-auto;
+}
+
+/* Sidebar improvements */
+.sidebar-section {
+  @apply py-2 px-3;
+}
+
+.sidebar-section-title {
+  @apply text-xs uppercase font-semibold tracking-wider text-muted-foreground px-3 py-2;
+}
+
+.component-item {
+  @apply flex items-center gap-2 py-1.5 px-3 rounded-md cursor-pointer transition-colors hover:bg-secondary;
+}
+
+.component-item-icon {
+  @apply text-muted-foreground;
+}
+
+.component-item-text {
+  @apply text-sm font-medium;
 }

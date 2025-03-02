@@ -1,8 +1,7 @@
-
-import { useMemo, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-python';
-import 'prismjs/themes/prism.css';
+import 'prismjs/themes/prism-tomorrow.css';
 
 interface CodePreviewProps {
   components: any[];
@@ -10,238 +9,247 @@ interface CodePreviewProps {
 }
 
 export const CodePreview = ({ components, isTkinter }: CodePreviewProps) => {
-  const codeRef = useRef<HTMLElement>(null);
-  
-  const generatedCode = useMemo(() => {
-    if (isTkinter) {
-      return generateTkinterCode(components);
-    }
-    return generateCustomTkinterCode(components);
-  }, [components, isTkinter]);
+  const codeRef = useRef<HTMLPreElement>(null);
 
-  // Apply syntax highlighting when code changes
+  const generateTkinterCode = (components: any[]) => {
+    // TKinter code generation function
+    const imports = `import tkinter as tk
+from tkinter import ttk
+import os
+import base64
+from io import BytesIO
+from PIL import Image, ImageTk
+
+class MyGUIApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Tkinter GUI App")
+        self.root.geometry("800x600")
+        self.images = []  # Keep references to images to prevent garbage collection
+`;
+
+    const setupComponents = components.map(component => {
+      const safeId = component.id.replace(/[^a-zA-Z0-9_]/g, '_');
+      switch (component.type) {
+        case 'button':
+          return `        self.button_${safeId} = tk.Button(root, 
+            text="${component.props.text}",
+            bg="${component.props.bgColor}",
+            fg="${component.props.fgColor}",
+            activebackground="${component.props.hoverColor || '#f0f0f0'}",
+            borderwidth=1,
+            relief="solid")
+        self.button_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+        
+        case 'label':
+          return `        self.label_${safeId} = tk.Label(root, 
+            text="${component.props.text}",
+            fg="${component.props.fgColor}",
+            font=("TkDefaultFont", ${component.props.fontSize || 12}),
+            anchor="w")
+        self.label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+        
+        case 'entry':
+          return `        self.entry_${safeId} = tk.Entry(root,
+            bg="${component.props.bgColor}",
+            borderwidth=1,
+            relief="solid")
+        self.entry_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+        
+        case 'slider':
+          return `        self.slider_${safeId} = tk.Scale(root,
+            from_=${component.props.from || 0},
+            to=${component.props.to || 100},
+            orient="${component.props.orient === 'vertical' ? 'vertical' : 'horizontal'}",
+            background="${component.props.bgColor || '#e2e8f0'}",
+            troughcolor="${component.props.troughColor || '#3b82f6'}",
+            sliderlength=16,
+            showvalue=True)
+        self.slider_${safeId}.set(${component.props.value || 50})
+        self.slider_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+        
+        case 'frame':
+          return `        self.frame_${safeId} = tk.Frame(root,
+            bg="${component.props.bgColor || '#ffffff'}",
+            borderwidth=${component.props.borderwidth || 1},
+            relief="${component.props.relief || 'flat'}")
+        self.frame_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+        
+        case 'checkbox':
+          return `        self.var_${safeId} = tk.BooleanVar(value=${component.props.checked ? 'True' : 'False'})
+        self.checkbox_${safeId} = tk.Checkbutton(root,
+            text="${component.props.text}",
+            fg="${component.props.fgColor || '#000000'}",
+            variable=self.var_${safeId},
+            onvalue=True,
+            offvalue=False)
+        self.checkbox_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+
+        case 'dropdown':
+          const options = (component.props.options || 'Option 1,Option 2,Option 3').split(',').map((o: string) => o.trim());
+          return `        self.var_${safeId} = tk.StringVar(value="${component.props.selected || options[0]}")
+        self.dropdown_${safeId} = ttk.Combobox(root,
+            values=[${options.map(o => `"${o}"`).join(', ')}],
+            textvariable=self.var_${safeId},
+            state="readonly")
+        self.dropdown_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+        
+        case 'image':
+          return `        self.image_${safeId} = tk.Label(root, text="Image", bg="light gray")
+        self.image_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+        # Note: Add your image file to the same directory and update the code:
+        # img = tk.PhotoImage(file="your_image.png")
+        # self.image_${safeId}.configure(image=img)
+        # self.image_${safeId}.image = img  # Keep a reference`;
+        
+        default:
+          return '';
+      }
+    }).join('\n\n');
+
+    const main = `
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = MyGUIApp(root)
+    root.mainloop()
+`;
+
+    return imports + '        # Setup UI components\n' + setupComponents + main;
+  };
+
+  const generateCustomTkinterCode = (components: any[]) => {
+    // CustomTKinter code generation function
+    const imports = `import customtkinter as ctk
+from PIL import Image
+
+class MyGUIApp:
+    def __init__(self):
+        self.root = ctk.CTk()
+        self.root.title("CustomTkinter GUI App")
+        self.root.geometry("800x600")
+        self._create_widgets()
+        
+    def _create_widgets(self):`;
+
+    const setupComponents = components.map(component => {
+      const safeId = component.id.replace(/[^a-zA-Z0-9_]/g, '_');
+      switch (component.type) {
+        case 'button':
+          return `        self.button_${safeId} = ctk.CTkButton(self.root, 
+            text="${component.props.text}",
+            fg_color="${component.props.bgColor || '#ffffff'}",
+            text_color="${component.props.fgColor || '#000000'}",
+            hover_color="${component.props.hoverColor || '#f0f0f0'}",
+            border_color="${component.props.borderColor || '#e2e8f0'}",
+            corner_radius=${component.props.cornerRadius || 8})
+        self.button_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+      
+      case 'image':
+        return `        # Placeholder image - replace with your own image
+        self.image_${safeId} = ctk.CTkLabel(self.root, text="Image", fg_color="gray70")
+        self.image_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+
+      case 'label':
+        return `        self.label_${safeId} = ctk.CTkLabel(self.root, 
+            text="${component.props.text}",
+            text_color="${component.props.fgColor || '#000000'}",
+            font=("TkDefaultFont", ${component.props.fontSize || 12}),
+            anchor="w")
+        self.label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+      
+      case 'entry':
+        return `        self.entry_${safeId} = ctk.CTkEntry(self.root,
+            fg_color="${component.props.bgColor || '#ffffff'}",
+            border_color="${component.props.borderColor || '#e2e8f0'}",
+            corner_radius=${component.props.cornerRadius || 8},
+            placeholder_text="${component.props.placeholder || ''}")
+        self.entry_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+      
+      case 'slider':
+        return `        self.slider_${safeId} = ctk.CTkSlider(self.root,
+            from_=${component.props.from || 0},
+            to=${component.props.to || 100},
+            orientation="${component.props.orient === 'vertical' ? 'vertical' : 'horizontal'}",
+            button_color="${component.props.troughColor || '#3b82f6'}",
+            button_hover_color="${adjustColor(component.props.troughColor || '#3b82f6', -20)}",
+            progress_color="${component.props.troughColor || '#3b82f6'}")
+        self.slider_${safeId}.set(${component.props.value || 50})
+        self.slider_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+      
+      case 'frame':
+        return `        self.frame_${safeId} = ctk.CTkFrame(self.root,
+            fg_color="${component.props.bgColor || '#ffffff'}",
+            border_width=${component.props.borderwidth || 1},
+            border_color="${component.props.borderColor || '#e2e8f0'}",
+            corner_radius=${component.props.cornerRadius || 8})
+        self.frame_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+      
+      case 'checkbox':
+        return `        self.checkbox_${safeId} = ctk.CTkCheckBox(self.root,
+            text="${component.props.text}",
+            text_color="${component.props.fgColor || '#000000'}")
+        ${component.props.checked ? 'self.checkbox_' + safeId + '.select()' : 'self.checkbox_' + safeId + '.deselect()'}
+        self.checkbox_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+      
+      case 'dropdown':
+        const options = (component.props.options || 'Option 1,Option 2,Option 3').split(',').map((o: string) => o.trim());
+        return `        self.dropdown_${safeId} = ctk.CTkOptionMenu(self.root,
+            values=[${options.map(o => `"${o}"`).join(', ')}],
+            fg_color="${component.props.bgColor || '#ffffff'}",
+            text_color="${component.props.fgColor || '#000000'}")
+        self.dropdown_${safeId}.set("${component.props.selected || options[0]}")
+        self.dropdown_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+
+      default:
+        return '';
+      }
+    }).join('\n\n');
+
+    const main = `
+
+if __name__ == "__main__":
+    app = MyGUIApp()
+    app.root.mainloop()`;
+
+    return imports + '\n        # Setup UI components\n' + setupComponents + main;
+  };
+
+  const adjustColor = (hex: string, amount: number) => {
+    try {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+
+      const newR = Math.max(0, Math.min(255, r + amount));
+      const newG = Math.max(0, Math.min(255, g + amount));
+      const newB = Math.max(0, Math.min(255, b + amount));
+
+      return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
+    } catch {
+      return amount > 0 ? '#f0f0f0' : '#d0d0d0';
+    }
+  };
+
+  const code = isTkinter 
+    ? generateTkinterCode(components)
+    : generateCustomTkinterCode(components);
+
   useEffect(() => {
     if (codeRef.current) {
       Prism.highlightElement(codeRef.current);
     }
-  }, [generatedCode]);
+  }, [code]);
 
   return (
-    <div className="h-64 border-t flex flex-col">
-      <div className="p-2 bg-secondary flex items-center justify-between">
-        <span className="text-xs font-medium">Generated Code</span>
+    <div className="flex-1 overflow-hidden flex flex-col">
+      <div className="p-3 text-sm font-medium border-t border-b border-border">
+        Code Preview
       </div>
-      <pre className="flex-1 p-0 m-0 overflow-auto code-preview">
-        <code ref={codeRef} className="language-python">{generatedCode}</code>
-      </pre>
+      <div className="flex-1 overflow-auto p-2">
+        <pre className="code-preview h-full" ref={codeRef}>
+          <code className="language-python">{code}</code>
+        </pre>
+      </div>
     </div>
   );
-};
-
-const generateTkinterCode = (components: any[]) => {
-  const imports = `import tkinter as tk
-from tkinter import ttk
-import os
-from PIL import Image, ImageTk
-
-class App:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Tkinter GUI")
-        self.images = []  # Keep references to prevent garbage collection
-`;
-
-  const setupComponents = components.map(component => {
-    switch (component.type) {
-      case 'button':
-        return `        self.button_${component.id} = tk.Button(root, text="${component.props.text || 'Button'}")
-        self.button_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-      case 'label':
-        return `        self.label_${component.id} = tk.Label(root, text="${component.props.text || 'Label'}")
-        self.label_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-      case 'entry':
-        return `        self.entry_${component.id} = tk.Entry(root)
-        self.entry_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-      case 'image':
-        return `        # Image placeholder - replace with your own image
-        self.image_${component.id} = tk.Label(root, text="Image")
-        self.image_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
-        # Use this code to load an actual image:
-        # img = ImageTk.PhotoImage(Image.open("path/to/image.png"))
-        # self.image_${component.id}.configure(image=img)
-        # self.images.append(img)  # Keep a reference`;
-      case 'slider':
-        return `        self.slider_${component.id} = tk.Scale(root, from_=${component.props.from || 0}, to=${component.props.to || 100}, orient="${component.props.orient || 'horizontal'}")
-        self.slider_${component.id}.set(${component.props.value || 50})
-        self.slider_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-      case 'frame':
-        return `        self.frame_${component.id} = tk.Frame(root, bd=${component.props.borderwidth || 1}, relief="${component.props.relief || 'flat'}")
-        self.frame_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-      case 'checkbox':
-        return `        self.var_${component.id} = tk.BooleanVar(value=${component.props.checked ? 'True' : 'False'})
-        self.checkbox_${component.id} = tk.Checkbutton(root, text="${component.props.text || 'Checkbox'}", variable=self.var_${component.id})
-        self.checkbox_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-      case 'datepicker':
-        return `        self.datepicker_${component.id} = tk.Entry(root)
-        self.datepicker_${component.id}.insert(0, "${component.props.format || 'yyyy-mm-dd'}")
-        self.datepicker_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
-        # This is a simple entry field in Tkinter
-        # For a real date picker, you'd need to implement a calendar popup`;
-      case 'progressbar':
-        return `        self.progress_${component.id} = ttk.Progressbar(root, orient="horizontal", length=${Math.round(component.size.width)}, mode='determinate')
-        self.progress_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
-        self.progress_${component.id}["value"] = ${component.props.value || 50}`;
-      case 'notebook':
-        const tabsRaw = component.props.tabs || 'Tab 1,Tab 2,Tab 3';
-        const tabsList = tabsRaw.split(',').map((tab: string) => tab.trim());
-        let notebookCode = `        self.notebook_${component.id} = ttk.Notebook(root)
-        self.notebook_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-        
-        tabsList.forEach((tab: string, i: number) => {
-          notebookCode += `\n        self.tab_${component.id}_${i} = tk.Frame(self.notebook_${component.id})
-        self.notebook_${component.id}.add(self.tab_${component.id}_${i}, text="${tab}")`;
-        });
-        
-        return notebookCode;
-      case 'listbox':
-        const items = component.props.items || 'Item 1,Item 2,Item 3,Item 4,Item 5';
-        const itemsList = items.split(',').map((item: string) => item.trim());
-        
-        let listboxCode = `        self.listbox_${component.id} = tk.Listbox(root)
-        self.listbox_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-        
-        itemsList.forEach((item: string, i: number) => {
-          listboxCode += `\n        self.listbox_${component.id}.insert(${i}, "${item}")`;
-        });
-        
-        return listboxCode;
-      case 'canvas':
-        return `        self.canvas_${component.id} = tk.Canvas(root, bd=${component.props.borderwidth || 1})
-        self.canvas_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-      case 'dropdown':
-        const options = component.props.options || 'Option 1,Option 2,Option 3';
-        const optionsList = options.split(',').map((option: string) => option.trim());
-        return `        self.dropdown_var_${component.id} = tk.StringVar(value="${component.props.selected || optionsList[0]}")
-        self.dropdown_${component.id} = ttk.Combobox(root, textvariable=self.dropdown_var_${component.id})
-        self.dropdown_${component.id}['values'] = (${optionsList.map(opt => `"${opt}"`).join(', ')})
-        self.dropdown_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-      default:
-        return '';
-    }
-  }).join('\n\n');
-
-  const main = `
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = App(root)
-    root.mainloop()
-`;
-
-  return imports + setupComponents + main;
-};
-
-const generateCustomTkinterCode = (components: any[]) => {
-  const imports = `import customtkinter as ctk
-from PIL import Image, ImageTk
-import os
-
-class App:
-    def __init__(self):
-        self.root = ctk.CTk()
-        self.root.title("CustomTkinter GUI")
-        self.create_widgets()
-        
-    def create_widgets(self):
-`;
-
-  const setupComponents = components.map(component => {
-    switch (component.type) {
-      case 'button':
-        return `        self.button_${component.id} = ctk.CTkButton(self.root, text="${component.props.text || 'Button'}", width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
-        self.button_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
-      case 'label':
-        return `        self.label_${component.id} = ctk.CTkLabel(self.root, text="${component.props.text || 'Label'}", width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
-        self.label_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
-      case 'entry':
-        return `        self.entry_${component.id} = ctk.CTkEntry(self.root, placeholder_text="${component.props.placeholder || ''}", width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
-        self.entry_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
-      case 'image':
-        return `        # Image placeholder - replace with your own image 
-        self.image_${component.id} = ctk.CTkLabel(self.root, text="Image", width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
-        self.image_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})
-        # Use this code to load an actual image:
-        # img = Image.open("path/to/image.png")
-        # ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=(${Math.round(component.size.width)}, ${Math.round(component.size.height)}))
-        # self.image_${component.id}.configure(image=ctk_img, text="")`;
-      case 'slider':
-        return `        self.slider_${component.id} = ctk.CTkSlider(self.root, from_=${component.props.from || 0}, to=${component.props.to || 100}, orientation="${component.props.orient || 'horizontal'}", width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
-        self.slider_${component.id}.set(${component.props.value || 50})
-        self.slider_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
-      case 'frame':
-        return `        self.frame_${component.id} = ctk.CTkFrame(self.root, border_width=${component.props.borderwidth || 1}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
-        self.frame_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
-      case 'checkbox':
-        return `        self.checkbox_${component.id} = ctk.CTkCheckBox(self.root, text="${component.props.text || 'Checkbox'}", width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
-        ${component.props.checked ? 'self.checkbox_' + component.id + '.select()' : 'self.checkbox_' + component.id + '.deselect()'}
-        self.checkbox_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
-      case 'datepicker':
-        return `        self.datepicker_${component.id} = ctk.CTkEntry(self.root, placeholder_text="${component.props.format || 'yyyy-mm-dd'}", width=${Math.round(component.size.width) - 30}, height=${Math.round(component.size.height)})
-        self.datepicker_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})
-        self.calendar_button_${component.id} = ctk.CTkButton(self.root, text="📅", width=30, height=${Math.round(component.size.height)})
-        self.calendar_button_${component.id}.place(x=${Math.round(component.position.x) + Math.round(component.size.width) - 30}, y=${Math.round(component.position.y)})`;
-      case 'progressbar':
-        return `        self.progressbar_${component.id} = ctk.CTkProgressBar(self.root, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
-        self.progressbar_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})
-        self.progressbar_${component.id}.set(${(component.props.value || 50) / 100})`;
-      case 'notebook':
-        const tabsRaw = component.props.tabs || 'Tab 1,Tab 2,Tab 3';
-        const tabsList = tabsRaw.split(',').map((tab: string) => tab.trim());
-        
-        let notebookCode = `        self.tabview_${component.id} = ctk.CTkTabview(self.root, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
-        self.tabview_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
-        
-        tabsList.forEach((tab: string) => {
-          const safeTabName = tab.replace(/\s+/g, '_');
-          notebookCode += `\n        self.tab_${component.id}_${safeTabName} = self.tabview_${component.id}.add("${tab}")`;
-        });
-        
-        notebookCode += `\n        self.tabview_${component.id}.set("${component.props.selectedTab || tabsList[0]}")`;
-        return notebookCode;
-      case 'listbox':
-        const items = component.props.items || 'Item 1,Item 2,Item 3,Item 4,Item 5';
-        const itemsList = items.split(',').map((item: string) => item.trim());
-        
-        let listboxCode = `        self.scrollable_frame_${component.id} = ctk.CTkScrollableFrame(self.root, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
-        self.scrollable_frame_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
-        
-        itemsList.forEach((item: string, i: number) => {
-          listboxCode += `\n        self.item_${component.id}_${i} = ctk.CTkLabel(self.scrollable_frame_${component.id}, text="${item}", anchor="w")
-        self.item_${component.id}_${i}.pack(fill="x", padx=5, pady=2)`;
-        });
-        
-        return listboxCode;
-      case 'canvas':
-        return `        self.canvas_${component.id} = ctk.CTkCanvas(self.root, bd=${component.props.borderwidth || 1}, highlightthickness=0, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
-        self.canvas_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
-      case 'dropdown':
-        const options = component.props.options || 'Option 1,Option 2,Option 3';
-        const optionsList = options.split(',').map((option: string) => option.trim());
-        return `        self.dropdown_${component.id} = ctk.CTkOptionMenu(self.root, 
-            values=[${optionsList.map(opt => `"${opt}"`).join(', ')}],
-            width=${Math.round(component.size.width)}, 
-            height=${Math.round(component.size.height)})
-        self.dropdown_${component.id}.set("${component.props.selected || optionsList[0]}")
-        self.dropdown_${component.id}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
-      default:
-        return '';
-    }
-  }).join('\n\n');
-
-  const main = `
-if __name__ == "__main__":
-    app = App()
-    app.root.mainloop()
-`;
-
-  return imports + setupComponents + main;
 };

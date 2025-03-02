@@ -37,8 +37,8 @@ const App = () => {
 
   // Update the document class and localStorage when dark mode changes
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', isDarkMode);
-    document.documentElement.classList.toggle('light', !isDarkMode);
+    document.documentElement.classList.remove('dark', 'light');
+    document.documentElement.classList.add(isDarkMode ? 'dark' : 'light');
     localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
   }, [isDarkMode]);
 

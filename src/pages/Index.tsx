@@ -157,8 +157,8 @@ const Index = () => {
         />
         
         <div className="flex-1 flex overflow-hidden">
-          <div className="flex-1 overflow-auto bg-background p-8">
-            <div className="macos-window mx-auto max-w-5xl h-[80vh]">
+          <div className="flex-1 overflow-auto bg-background p-6">
+            <div className="macos-window mx-auto max-w-4xl h-[75vh]">
               <div className="window-titlebar">
                 <div className="window-buttons">
                   <div className="window-button window-close">

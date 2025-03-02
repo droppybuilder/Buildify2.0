@@ -2,13 +2,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
 
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
-
 /* Dark mode styles - Notion inspired */
 .dark {
   --background: 220 13% 8%;
@@ -71,7 +64,16 @@
   --sidebar-ring: 235 85% 65%;
 }
 
-/* Canvas styles - remove duplicate canvas */
+/* Remove the duplicate #root definition that causes spacing issues */
+#root {
+  width: 100%;
+  max-width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+/* Canvas styles */
 .canvas-grid {
   background-size: 20px 20px;
   border-radius: 0;
@@ -208,7 +210,7 @@
   background-color: hsl(var(--primary));
 }
 
-/* Code highlighting styles - Prism.js specific */
+/* Code highlighting styles - Improved Prism.js specific */
 .code-preview {
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
@@ -216,18 +218,20 @@
   tab-size: 4;
   overflow-x: auto;
   border-radius: 0;
-  padding: 0;
+  padding: 12px !important;
   margin: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .dark .code-preview {
-  background-color: hsl(220, 13%, 9%);
-  color: #e2e8f0;
+  background-color: hsl(220, 13%, 9%) !important;
+  color: #e2e8f0 !important;
 }
 
 .light .code-preview {
-  background-color: #f8f9fc;
-  color: #1e293b;
+  background-color: #f8f9fc !important;
+  color: #1e293b !important;
 }
 
 /* Prism syntax highlighting - Dark mode theme */
@@ -328,10 +332,11 @@
 
 .code-preview-container {
   @apply flex-1 overflow-auto;
-  padding: 0.75rem;
+  padding: 0;
+  background-color: transparent;
 }
 
-/* Remove unwanted spacing in sidebar */
+/* Fix sidebar styling */
 .sidebar-section {
   @apply py-2 px-3;
   margin: 0;
@@ -392,7 +397,7 @@
 }
 
 .dark .toolbar {
-  @apply border-gray-800 bg-card;
+  @apply border-border bg-card;
 }
 
 .light .toolbar {
@@ -408,4 +413,9 @@
 .toolbar-divider {
   @apply h-6 w-px bg-border;
   margin: 0;
+}
+
+/* Improved dark mode for icons */
+.dark .lucide {
+  color: hsl(var(--foreground));
 }

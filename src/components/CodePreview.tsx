@@ -2,7 +2,7 @@
 import { useEffect, useRef } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-python';
-import 'prismjs/themes/prism-tomorrow.css';
+import 'prismjs/themes/prism.css'; // Base theme which we'll override with our custom CSS
 
 interface CodePreviewProps {
   components: any[];
@@ -237,9 +237,17 @@ if __name__ == "__main__":
 
   useEffect(() => {
     if (codeRef.current) {
+      // Force re-highlighting on every code change
       Prism.highlightElement(codeRef.current);
     }
-  }, [code]);
+  }, [code, isTkinter]);
+
+  // Also highlight on component mount
+  useEffect(() => {
+    if (codeRef.current) {
+      Prism.highlightElement(codeRef.current);
+    }
+  }, []);
 
   return (
     <div className="flex-1 overflow-hidden flex flex-col">
@@ -248,7 +256,7 @@ if __name__ == "__main__":
         <span className="text-xs text-muted-foreground">{isTkinter ? "Tkinter" : "CustomTkinter"}</span>
       </div>
       <div className="code-preview-container">
-        <pre className="code-preview h-full m-0" ref={codeRef}>
+        <pre className="code-preview language-python" ref={codeRef}>
           <code className="language-python">{code}</code>
         </pre>
       </div>

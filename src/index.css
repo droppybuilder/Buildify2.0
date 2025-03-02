@@ -11,6 +11,10 @@
     @apply border-border;
   }
 
+  html, body {
+    @apply w-full h-full m-0 p-0 overflow-hidden;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', sans-serif;

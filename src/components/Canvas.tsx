@@ -24,6 +24,8 @@ interface CanvasProps {
   selectedComponent: Component | null;
   setSelectedComponent: (component: Component | null) => void;
   onDeleteComponent?: (component: Component) => void;
+  selectedComponents: string[];
+  setSelectedComponents: (ids: string[]) => void;
 }
 
 const Canvas = ({
@@ -32,6 +34,8 @@ const Canvas = ({
   selectedComponent,
   setSelectedComponent,
   onDeleteComponent,
+  selectedComponents,
+  setSelectedComponents,
 }: CanvasProps) => {
   const { isDarkMode } = useContext(ThemeContext);
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -48,7 +52,6 @@ const Canvas = ({
   
   const [selectionBox, setSelectionBox] = useState<{start: {x: number, y: number}, end: {x: number, y: number}} | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
-  const [selectedComponents, setSelectedComponents] = useState<string[]>([]);
   
   useEffect(() => {
     const imageComponents = components.filter(c => c.type === 'image');

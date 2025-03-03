@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect, useContext } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import Canvas from '@/components/Canvas';
@@ -6,7 +7,6 @@ import { CodePreview } from '@/components/CodePreview';
 import { Toolbar } from '@/components/Toolbar';
 import { toast } from 'sonner';
 import { ThemeContext } from '../App';
-import { X, Minus, Square } from 'lucide-react';
 
 const Index = () => {
   const { isDarkMode } = useContext(ThemeContext);

@@ -1,4 +1,5 @@
-import { useState, useContext } from "react";
+<lov-code>
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
@@ -11,9 +12,7 @@ import {
   Grid, 
   Eye,
   Settings,
-  File,
-  Sun,
-  Moon
+  File
 } from "lucide-react";
 import {
   Dialog,
@@ -27,7 +26,6 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
-import { ThemeContext } from '../App';
 
 interface ToolbarProps {
   isTkinter: boolean;
@@ -48,13 +46,13 @@ export const Toolbar = ({
   canUndo,
   canRedo
 }: ToolbarProps) => {
-  const { isDarkMode, toggleDarkMode } = useContext(ThemeContext);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [appName, setAppName] = useState("MyGUIApp");
   const [windowTitle, setWindowTitle] = useState("Tkinter GUI App");
   const [includeImageData, setIncludeImageData] = useState(true);
   const [exportFilename, setExportFilename] = useState("my_app");
   const [customImports, setCustomImports] = useState("");
+  const [optimizeCode, setOptimizeCode] = useState(true);
   
   const handleExportCode = async () => {
     if (components.length === 0) {
@@ -63,7 +61,7 @@ export const Toolbar = ({
     }
 
     try {
-      const mainCode = generateCode(components, isTkinter, appName, windowTitle, includeImageData, customImports);
+      const mainCode = generateCode(components, isTkinter, appName, windowTitle, includeImageData, customImports, optimizeCode);
       
       // Create a zip file with the code and requirements
       const zip = new JSZip();
@@ -114,7 +112,7 @@ This is a Python GUI application built with ${isTkinter ? 'Tkinter' : 'CustomTki
         // Create an images folder
         const imgFolder = zip.folder("images");
         
-        // Add image files (in a real app, you'd extract the actual images)
+        // Add image files
         for (let i = 0; i < imageComponents.length; i++) {
           const comp = imageComponents[i];
           const imgSrc = comp.props.src;
@@ -148,24 +146,39 @@ This is a Python GUI application built with ${isTkinter ? 'Tkinter' : 'CustomTki
   };
 
   const handleCopyCode = () => {
-    const code = generateCode(components, isTkinter, appName, windowTitle, includeImageData, customImports);
+    const code = generateCode(components, isTkinter, appName, windowTitle, includeImageData, customImports, optimizeCode);
     navigator.clipboard.writeText(code)
       .then(() => toast.success("Code copied to clipboard!"))
       .catch(() => toast.error("Failed to copy code"));
   };
 
-  const generateCode = (components: any[], isTkinter: boolean, appName: string, windowTitle: string, includeImageData: boolean, customImports: string) => {
+  const generateCode = (components: any[], isTkinter: boolean, appName: string, windowTitle: string, includeImageData: boolean, customImports: string, optimize: boolean) => {
     if (isTkinter) {
-      return generateTkinterCode(components, appName, windowTitle, includeImageData, customImports);
+      return generateTkinterCode(components, appName, windowTitle, includeImageData, customImports, optimize);
     }
-    return generateCustomTkinterCode(components, appName, windowTitle, includeImageData, customImports);
+    return generateCustomTkinterCode(components, appName, windowTitle, includeImageData, customImports, optimize);
   };
 
   const sanitizeId = (id: string) => {
     return id.replace(/[^a-zA-Z0-9_]/g, '_');
   };
 
-  const generateTkinterCode = (components: any[], appName: string, windowTitle: string, includeImageData: boolean, customImports: string) => {
+  // Optimization function to group components by type for more efficient code
+  const optimizeComponents = (components: any[]) => {
+    // Group components by type
+    const compsByType: Record<string, any[]> = {};
+    
+    components.forEach(comp => {
+      if (!compsByType[comp.type]) {
+        compsByType[comp.type] = [];
+      }
+      compsByType[comp.type].push(comp);
+    });
+    
+    return compsByType;
+  };
+
+  const generateTkinterCode = (components: any[], appName: string, windowTitle: string, includeImageData: boolean, customImports: string, optimize: boolean) => {
     const imports = `import tkinter as tk
 from tkinter import ttk
 import os
@@ -237,17 +250,127 @@ class ${appName.replace(/\s+/g, '')}:
       }
     }
 
-    const setupComponents = components.map(component => {
-      const safeId = sanitizeId(component.id);
+    let setupComponents = '';
+    
+    if (optimize) {
+      // Use optimized grouped components approach
+      const compsByType = optimizeComponents(components);
       
-      // Skip image components if they're handled separately
-      if (component.type === 'image' && includeImageData && component.props.src && !component.props.src.startsWith('/placeholder')) {
-        return '';
-      }
-      
-      switch (component.type) {
-        case 'button':
-          return `        self.button_${safeId} = tk.Button(root, 
+      // Generate code for each type separately
+      Object.entries(compsByType).forEach(([type, comps]) => {
+        // Skip image components if they're handled separately
+        if (type === 'image' && includeImageData) {
+          const relevantComps = comps.filter(c => !c.props.src || c.props.src.startsWith('/placeholder'));
+          if (relevantComps.length === 0) return;
+        }
+        
+        setupComponents += `\n        # Setup ${type} components\n`;
+        
+        comps.forEach(component => {
+          const safeId = sanitizeId(component.id);
+          
+          // Skip image components if they're handled separately
+          if (component.type === 'image' && includeImageData && component.props.src && !component.props.src.startsWith('/placeholder')) {
+            return;
+          }
+          
+          switch (component.type) {
+            case 'button':
+              setupComponents += `        self.button_${safeId} = tk.Button(root, 
+            text="${component.props.text}",
+            bg="${component.props.bgColor}",
+            fg="${component.props.fgColor}",
+            activebackground="${component.props.hoverColor || '#f0f0f0'}",
+            borderwidth=1,
+            relief="solid")
+        self.button_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})\n\n`;
+              break;
+            
+            case 'label':
+              setupComponents += `        self.label_${safeId} = tk.Label(root, 
+            text="${component.props.text}",
+            fg="${component.props.fgColor}",
+            font=("TkDefaultFont", ${component.props.fontSize || 12}),
+            anchor="w")
+        self.label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})\n\n`;
+              break;
+            
+            case 'entry':
+              setupComponents += `        self.entry_${safeId} = tk.Entry(root,
+            bg="${component.props.bgColor}",
+            borderwidth=1,
+            relief="solid")
+        self.entry_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})\n\n`;
+              break;
+            
+            case 'slider':
+              setupComponents += `        self.slider_${safeId} = tk.Scale(root,
+            from_=${component.props.from || 0},
+            to=${component.props.to || 100},
+            orient="${component.props.orient === 'vertical' ? 'vertical' : 'horizontal'}",
+            background="${component.props.bgColor || '#e2e8f0'}",
+            troughcolor="${component.props.troughColor || '#3b82f6'}",
+            sliderlength=16,
+            showvalue=True)
+        self.slider_${safeId}.set(${component.props.value || 50})
+        self.slider_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})\n\n`;
+              break;
+            
+            case 'frame':
+              setupComponents += `        self.frame_${safeId} = tk.Frame(root,
+            bg="${component.props.bgColor || '#ffffff'}",
+            borderwidth=${component.props.borderwidth || 1},
+            relief="${component.props.relief || 'flat'}")
+        self.frame_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})\n\n`;
+              break;
+            
+            case 'checkbox':
+              setupComponents += `        self.var_${safeId} = tk.BooleanVar(value=${component.props.checked ? 'True' : 'False'})
+        self.checkbox_${safeId} = tk.Checkbutton(root,
+            text="${component.props.text}",
+            fg="${component.props.fgColor || '#000000'}",
+            variable=self.var_${safeId},
+            onvalue=True,
+            offvalue=False)
+        self.checkbox_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})\n\n`;
+              break;
+  
+            case 'dropdown':
+              const options = (component.props.options || 'Option 1,Option 2,Option 3').split(',').map((o: string) => o.trim());
+              setupComponents += `        self.var_${safeId} = tk.StringVar(value="${component.props.selected || options[0]}")
+        self.dropdown_${safeId} = ttk.Combobox(root,
+            values=[${options.map(o => `"${o}"`).join(', ')}],
+            textvariable=self.var_${safeId},
+            state="readonly")
+        self.dropdown_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})\n\n`;
+              break;
+            
+            case 'image':
+              if (!includeImageData || !component.props.src || component.props.src.startsWith('/placeholder')) {
+                setupComponents += `        self.image_${safeId} = tk.Label(root, text="Image", bg="light gray")
+        self.image_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+        # Note: Add your image file to the same directory and update the code:
+        # img = tk.PhotoImage(file="your_image.png")
+        # self.image_${safeId}.configure(image=img)
+        # self.image_${safeId}.image = img  # Keep a reference\n\n`;
+              }
+              break;
+          }
+        });
+      });
+    } else {
+      // Use the standard approach (no optimization)
+      setupComponents = components.map(component => {
+        const safeId = sanitizeId(component.id);
+        
+        // Skip image components if they're handled separately
+        if (component.type === 'image' && includeImageData && component.props.src && !component.props.src.startsWith('/placeholder')) {
+          return '';
+        }
+        
+        switch (component.type) {
+          case 'button':
+            return `        self.button_${safeId} = tk.Button(root, 
             text="${component.props.text}",
             bg="${component.props.bgColor}",
             fg="${component.props.fgColor}",
@@ -255,24 +378,24 @@ class ${appName.replace(/\s+/g, '')}:
             borderwidth=1,
             relief="solid")
         self.button_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-        
-        case 'label':
-          return `        self.label_${safeId} = tk.Label(root, 
+          
+          case 'label':
+            return `        self.label_${safeId} = tk.Label(root, 
             text="${component.props.text}",
             fg="${component.props.fgColor}",
             font=("TkDefaultFont", ${component.props.fontSize || 12}),
             anchor="w")
         self.label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-        
-        case 'entry':
-          return `        self.entry_${safeId} = tk.Entry(root,
+          
+          case 'entry':
+            return `        self.entry_${safeId} = tk.Entry(root,
             bg="${component.props.bgColor}",
             borderwidth=1,
             relief="solid")
         self.entry_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-        
-        case 'slider':
-          return `        self.slider_${safeId} = tk.Scale(root,
+          
+          case 'slider':
+            return `        self.slider_${safeId} = tk.Scale(root,
             from_=${component.props.from || 0},
             to=${component.props.to || 100},
             orient="${component.props.orient === 'vertical' ? 'vertical' : 'horizontal'}",
@@ -282,16 +405,16 @@ class ${appName.replace(/\s+/g, '')}:
             showvalue=True)
         self.slider_${safeId}.set(${component.props.value || 50})
         self.slider_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-        
-        case 'frame':
-          return `        self.frame_${safeId} = tk.Frame(root,
+          
+          case 'frame':
+            return `        self.frame_${safeId} = tk.Frame(root,
             bg="${component.props.bgColor || '#ffffff'}",
             borderwidth=${component.props.borderwidth || 1},
             relief="${component.props.relief || 'flat'}")
         self.frame_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-        
-        case 'checkbox':
-          return `        self.var_${safeId} = tk.BooleanVar(value=${component.props.checked ? 'True' : 'False'})
+          
+          case 'checkbox':
+            return `        self.var_${safeId} = tk.BooleanVar(value=${component.props.checked ? 'True' : 'False'})
         self.checkbox_${safeId} = tk.Checkbutton(root,
             text="${component.props.text}",
             fg="${component.props.fgColor || '#000000'}",
@@ -300,30 +423,31 @@ class ${appName.replace(/\s+/g, '')}:
             offvalue=False)
         self.checkbox_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
 
-        case 'dropdown':
-          const options = (component.props.options || 'Option 1,Option 2,Option 3').split(',').map((o: string) => o.trim());
-          return `        self.var_${safeId} = tk.StringVar(value="${component.props.selected || options[0]}")
+          case 'dropdown':
+            const options = (component.props.options || 'Option 1,Option 2,Option 3').split(',').map((o: string) => o.trim());
+            return `        self.var_${safeId} = tk.StringVar(value="${component.props.selected || options[0]}")
         self.dropdown_${safeId} = ttk.Combobox(root,
             values=[${options.map(o => `"${o}"`).join(', ')}],
             textvariable=self.var_${safeId},
             state="readonly")
         self.dropdown_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-        
-        case 'image':
-          if (!includeImageData || !component.props.src || component.props.src.startsWith('/placeholder')) {
-            return `        self.image_${safeId} = tk.Label(root, text="Image", bg="light gray")
+          
+          case 'image':
+            if (!includeImageData || !component.props.src || component.props.src.startsWith('/placeholder')) {
+              return `        self.image_${safeId} = tk.Label(root, text="Image", bg="light gray")
         self.image_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
         # Note: Add your image file to the same directory and update the code:
         # img = tk.PhotoImage(file="your_image.png")
         # self.image_${safeId}.configure(image=img)
         # self.image_${safeId}.image = img  # Keep a reference`;
-          }
-          return ''; // Already handled in imageSetup
-          
-        default:
-          return '';
-      }
-    }).join('\n\n');
+            }
+            return ''; // Already handled in imageSetup
+            
+          default:
+            return '';
+        }
+      }).join('\n\n');
+    }
 
     const main = `
 if __name__ == "__main__":
@@ -344,7 +468,7 @@ pip install pillow
     return requirements + '\n\n' + imports + imageData + '        # Setup UI components\n' + (imageSetup ? imageSetup : '') + setupComponents + main;
   };
 
-  const generateCustomTkinterCode = (components: any[], appName: string, windowTitle: string, includeImageData: boolean, customImports: string) => {
+  const generateCustomTkinterCode = (components: any[], appName: string, windowTitle: string, includeImageData: boolean, customImports: string, optimize: boolean) => {
     const imports = `import customtkinter as ctk
 from PIL import Image
 import os
@@ -416,51 +540,70 @@ class ${appName.replace(/\s+/g, '')}:
       });
     }
 
-    const setupComponents = components.map(component => {
-      const safeId = sanitizeId(component.id);
+    let setupComponents = '';
+    
+    if (optimize) {
+      // Use optimized grouped components approach
+      const compsByType = optimizeComponents(components);
       
-      // Skip image components if they're handled separately
-      if (component.type === 'image' && includeImageData && component.props.src && !component.props.src.startsWith('/placeholder')) {
-        return '';
-      }
-      
-      switch (component.type) {
-        case 'button':
-          return `        self.button_${safeId} = ctk.CTkButton(self.root, 
+      // Generate code for each type separately
+      Object.entries(compsByType).forEach(([type, comps]) => {
+        // Skip image components if they're handled separately
+        if (type === 'image' && includeImageData) {
+          const relevantComps = comps.filter(c => !c.props.src || c.props.src.startsWith('/placeholder'));
+          if (relevantComps.length === 0) return;
+        }
+        
+        setupComponents += `\n        # Setup ${type} components\n`;
+        
+        comps.forEach(component => {
+          const safeId = sanitizeId(component.id);
+          
+          // Skip image components if they're handled separately
+          if (component.type === 'image' && includeImageData && component.props.src && !component.props.src.startsWith('/placeholder')) {
+            return;
+          }
+          
+          switch (component.type) {
+            case 'button':
+              setupComponents += `        self.button_${safeId} = ctk.CTkButton(self.root, 
             text="${component.props.text}",
             fg_color="${component.props.bgColor || '#ffffff'}",
             text_color="${component.props.fgColor || '#000000'}",
             hover_color="${component.props.hoverColor || '#f0f0f0'}",
             border_color="${component.props.borderColor || '#e2e8f0'}",
             corner_radius=${component.props.cornerRadius || 8})
-        self.button_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-      
-      case 'image':
-        if (!includeImageData || !component.props.src || component.props.src.startsWith('/placeholder')) {
-          return `        # Placeholder image - replace with your own image
+        self.button_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})\n\n`;
+              break;
+            
+            case 'image':
+              if (!includeImageData || !component.props.src || component.props.src.startsWith('/placeholder')) {
+                setupComponents += `        # Placeholder image - replace with your own image
         self.image_${safeId} = ctk.CTkLabel(self.root, text="Image", fg_color="gray70")
-        self.image_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-        }
-        return ''; // Already handled in imageSetup
-
-      case 'label':
-        return `        self.label_${safeId} = ctk.CTkLabel(self.root, 
+        self.image_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})\n\n`;
+              }
+              break;
+  
+            case 'label':
+              setupComponents += `        self.label_${safeId} = ctk.CTkLabel(self.root, 
             text="${component.props.text}",
             text_color="${component.props.fgColor || '#000000'}",
             font=("TkDefaultFont", ${component.props.fontSize || 12}),
             anchor="w")
-        self.label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-      
-      case 'entry':
-        return `        self.entry_${safeId} = ctk.CTkEntry(self.root,
+        self.label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})\n\n`;
+              break;
+            
+            case 'entry':
+              setupComponents += `        self.entry_${safeId} = ctk.CTkEntry(self.root,
             fg_color="${component.props.bgColor || '#ffffff'}",
             border_color="${component.props.borderColor || '#e2e8f0'}",
             corner_radius=${component.props.cornerRadius || 8},
             placeholder_text="${component.props.placeholder || ''}")
-        self.entry_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-      
-      case 'slider':
-        return `        self.slider_${safeId} = ctk.CTkSlider(self.root,
+        self.entry_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})\n\n`;
+              break;
+            
+            case 'slider':
+              setupComponents += `        self.slider_${safeId} = ctk.CTkSlider(self.root,
             from_=${component.props.from || 0},
             to=${component.props.to || 100},
             orientation="${component.props.orient === 'vertical' ? 'vertical' : 'horizontal'}",
@@ -468,205 +611,50 @@ class ${appName.replace(/\s+/g, '')}:
             button_hover_color="${adjustColor(component.props.troughColor || '#3b82f6', -20)}",
             progress_color="${component.props.troughColor || '#3b82f6'}")
         self.slider_${safeId}.set(${component.props.value || 50})
-        self.slider_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-      
-      case 'frame':
-        return `        self.frame_${safeId} = ctk.CTkFrame(self.root,
+        self.slider_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})\n\n`;
+              break;
+            
+            case 'frame':
+              setupComponents += `        self.frame_${safeId} = ctk.CTkFrame(self.root,
             fg_color="${component.props.bgColor || '#ffffff'}",
             border_width=${component.props.borderwidth || 1},
             border_color="${component.props.borderColor || '#e2e8f0'}",
             corner_radius=${component.props.cornerRadius || 8})
-        self.frame_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-      
-      case 'checkbox':
-        return `        self.checkbox_${safeId} = ctk.CTkCheckBox(self.root,
+        self.frame_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})\n\n`;
+              break;
+            
+            case 'checkbox':
+              setupComponents += `        self.checkbox_${safeId} = ctk.CTkCheckBox(self.root,
             text="${component.props.text}",
             text_color="${component.props.fgColor || '#000000'}")
         ${component.props.checked ? 'self.checkbox_' + safeId + '.select()' : 'self.checkbox_' + safeId + '.deselect()'}
-        self.checkbox_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-      
-      case 'dropdown':
-        const options = (component.props.options || 'Option 1,Option 2,Option 3').split(',').map((o: string) => o.trim());
-        return `        self.dropdown_${safeId} = ctk.CTkOptionMenu(self.root,
+        self.checkbox_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})\n\n`;
+              break;
+            
+            case 'dropdown':
+              const options = (component.props.options || 'Option 1,Option 2,Option 3').split(',').map((o: string) => o.trim());
+              setupComponents += `        self.dropdown_${safeId} = ctk.CTkOptionMenu(self.root,
             values=[${options.map(o => `"${o}"`).join(', ')}],
             fg_color="${component.props.bgColor || '#ffffff'}",
             text_color="${component.props.fgColor || '#000000'}")
         self.dropdown_${safeId}.set("${component.props.selected || options[0]}")
-        self.dropdown_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
-
-      default:
-        return '';
-      }
-    }).join('\n\n');
-
-    const requirements = `"""
-Requirements:
-- Python 3.6+
-- CustomTkinter
-- Pillow (PIL)
-- Requests (for loading images from URLs)
-
-To install dependencies:
-pip install customtkinter pillow requests
-"""`;
-
-    const main = `
-
-if __name__ == "__main__":
-    app = ${appName.replace(/\s+/g, '')}()
-    app.root.mainloop()`;
-
-    return requirements + '\n\n' + imports + '\n        # Setup UI components\n' + (imageSetup ? imageSetup : '') + setupComponents + main;
-  };
-
-  const adjustColor = (hex: string, amount: number) => {
-    try {
-      const r = parseInt(hex.slice(1, 3), 16);
-      const g = parseInt(hex.slice(3, 5), 16);
-      const b = parseInt(hex.slice(5, 7), 16);
-
-      const newR = Math.max(0, Math.min(255, r + amount));
-      const newG = Math.max(0, Math.min(255, g + amount));
-      const newB = Math.max(0, Math.min(255, b + amount));
-
-      return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
-    } catch {
-      return amount > 0 ? '#f0f0f0' : '#d0d0d0';
-    }
-  };
-
-  return (
-    <>
-      <div className="toolbar">
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="icon"
-            onClick={onUndo}
-            disabled={!canUndo}
-            className="h-8 w-8"
-          >
-            <Undo2 size={16} />
-          </Button>
-          <Button 
-            variant="outline" 
-            size="icon"
-            onClick={onRedo}
-            disabled={!canRedo}
-            className="h-8 w-8"
-          >
-            <Redo2 size={16} />
-          </Button>
-        </div>
-
-        <div className="toolbar-divider" />
-
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" className="h-8 w-8">
-            <Grid size={16} />
-          </Button>
-          <Button variant="outline" size="icon" className="h-8 w-8">
-            <Eye size={16} />
-          </Button>
-        </div>
-
-        <div className="toolbar-divider" />
-
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">Tkinter</span>
-          <Switch
-            checked={!isTkinter}
-            onCheckedChange={(checked) => setIsTkinter(!checked)}
-          />
-          <span className="text-sm font-medium">CustomTkinter</span>
-        </div>
-
-        <div className="ml-auto flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="icon"
-            onClick={toggleDarkMode} 
-            className="h-8 w-8"
-          >
-            {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setIsSettingsOpen(true)}>
-            <Settings size={16} className="mr-2" />
-            Settings
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleCopyCode}>
-            <Copy size={16} className="mr-2" />
-            Copy Code
-          </Button>
-          <Button variant="default" size="sm" onClick={handleExportCode}>
-            <Download size={16} className="mr-2" />
-            Export .py
-          </Button>
-        </div>
-      </div>
-
-      <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Export Settings</DialogTitle>
-            <DialogDescription>
-              Configure how your Python GUI code will be generated
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="app-name">Application Class Name</Label>
-              <Input
-                id="app-name"
-                value={appName}
-                onChange={(e) => setAppName(e.target.value)}
-                placeholder="MyGUIApp"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="window-title">Window Title</Label>
-              <Input
-                id="window-title"
-                value={windowTitle}
-                onChange={(e) => setWindowTitle(e.target.value)}
-                placeholder="My GUI Application"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="export-filename">Export Filename</Label>
-              <Input
-                id="export-filename"
-                value={exportFilename}
-                onChange={(e) => setExportFilename(e.target.value.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, ''))}
-                placeholder="my_app"
-              />
-              <p className="text-xs text-muted-foreground">This will be the name of the Python file</p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="custom-imports">Custom Imports (optional)</Label>
-              <Textarea
-                id="custom-imports"
-                value={customImports}
-                onChange={(e) => setCustomImports(e.target.value)}
-                placeholder="import numpy as np\nimport pandas as pd"
-                className="resize-y min-h-[80px]"
-              />
-              <p className="text-xs text-muted-foreground">Add any additional imports you need</p>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="include-images"
-                checked={includeImageData}
-                onCheckedChange={setIncludeImageData}
-              />
-              <Label htmlFor="include-images">Include image processing code</Label>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setIsSettingsOpen(false)}>Save Settings</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
-  );
-};
+        self.dropdown_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})\n\n`;
+              break;
+          }
+        });
+      });
+    } else {
+      // Use the standard approach (no optimization)
+      setupComponents = components.map(component => {
+        const safeId = sanitizeId(component.id);
+        
+        // Skip image components if they're handled separately
+        if (component.type === 'image' && includeImageData && component.props.src && !component.props.src.startsWith('/placeholder')) {
+          return '';
+        }
+        
+        switch (component.type) {
+          case 'button':
+            return `        self.button_${safeId} = ctk.CTkButton(self.root, 
+            text="${component.props.text}",
+            fg_

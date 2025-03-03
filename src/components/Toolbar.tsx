@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -9,10 +8,7 @@ import {
   Redo2, 
   Download, 
   Copy, 
-  Grid, 
-  Eye,
   Settings,
-  File
 } from "lucide-react";
 import {
   Dialog,
@@ -27,7 +23,6 @@ import { toast } from "sonner";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { generateCode } from "@/utils/codeGenerator";
-import { adjustColor } from "@/utils/colorUtils";
 
 interface ToolbarProps {
   isTkinter: boolean;
@@ -145,9 +140,8 @@ This is a Python GUI application built with ${isTkinter ? 'Tkinter' : 'CustomTki
   };
 
   const handleTkinterToggle = (checked: boolean) => {
-    // Update the parent component through the prop
     setIsTkinter(!checked);
-    console.log("Setting isTkinter to:", !checked);
+    toast.info(`Switched to ${!checked ? "Tkinter" : "CustomTkinter"} mode`);
   };
 
   return (
@@ -309,4 +303,3 @@ This is a Python GUI application built with ${isTkinter ? 'Tkinter' : 'CustomTki
     </div>
   );
 };
-

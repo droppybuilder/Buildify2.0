@@ -21,39 +21,95 @@ export function generateCode(
   customImports: string = "",
   optimizeCode: boolean = true
 ): string {
+  if (components.length === 0) {
+    return isTkinter ? 
+      `import tkinter as tk
+from tkinter import ttk
+import os
+import base64
+from io import BytesIO
+from PIL import Image, ImageTk
+${customImports ? customImports : ''}
+
+class ${appName}:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("${windowTitle}")
+        self.root.geometry("800x600")
+        self.images = []  # Keep references to images to prevent garbage collection
+        # Setup UI components
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = ${appName}(root)
+    root.mainloop()` :
+      `import customtkinter as ctk
+from PIL import Image, ImageTk
+import os
+import base64
+from io import BytesIO
+${customImports ? customImports : ''}
+
+class ${appName}:
+    def __init__(self):
+        self.root = ctk.CTk()
+        self.root.title("${windowTitle}")
+        self.root.geometry("800x600")
+        ctk.set_appearance_mode("dark")
+        ctk.set_default_color_theme("blue")
+        self.images = []  # Keep references to images
+        self._create_widgets()
+        
+    def _create_widgets(self):
+        # UI Components here
+        pass
+
+if __name__ == "__main__":
+    app = ${appName}()
+    app.root.mainloop()`;
+  }
+
   // Prepare the imports section
   const imports = isTkinter
     ? `import tkinter as tk
-from tkinter import font as tkFont
+from tkinter import ttk
+import os
+import base64
+from io import BytesIO
 from PIL import Image, ImageTk
 ${customImports ? customImports : ''}`
     : `import customtkinter as ctk
 from PIL import Image, ImageTk
+import os
+import base64
+from io import BytesIO
 ${customImports ? customImports : ''}`;
 
   // Prepare the window setup code
   const setupCode = isTkinter
-    ? `class ${appName}(tk.Tk):
-    def __init__(self):
-        super().__init__()
-        self.title("${windowTitle}")
-        self.geometry("800x600")
+    ? `class ${appName}:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("${windowTitle}")
+        self.root.geometry("800x600")
         self.configure(bg="#f0f0f0")
+        self.images = []  # Keep references to images
         self.setup_ui()
         
     def setup_ui(self):
         # UI Components
 `
-    : `class ${appName}(ctk.CTk):
+    : `class ${appName}:
     def __init__(self):
-        super().__init__()
-        self.title("${windowTitle}")
-        self.geometry("800x600")
+        self.root = ctk.CTk()
+        self.root.title("${windowTitle}")
+        self.root.geometry("800x600")
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("blue")
-        self.setup_ui()
+        self.images = []  # Keep references to images
+        self._create_widgets()
         
-    def setup_ui(self):
+    def _create_widgets(self):
         # UI Components
 `;
 
@@ -87,9 +143,14 @@ ${customImports ? customImports : ''}`;
   }
 
   // Generate the main application code
-  const mainCode = `\nif __name__ == "__main__":
+  const mainCode = isTkinter ?
+    `\nif __name__ == "__main__":
+    root = tk.Tk()
+    app = ${appName}(root)
+    root.mainloop()` :
+    `\nif __name__ == "__main__":
     app = ${appName}()
-    app.mainloop()`;
+    app.root.mainloop()`;
 
   // Combine all sections
   return `${imports}\n\n${setupCode}${componentsCode}\n${mainCode}`;
@@ -102,13 +163,50 @@ ${customImports ? customImports : ''}`;
  * @returns The generated code as a string.
  */
 export function generateComponentCode(component: any, isTkinter: boolean): string {
+  const safeId = component.id.replace(/[^a-zA-Z0-9_]/g, '_');
+  
   switch (component.type) {
     case 'button':
-      return generateButtonCode(component, isTkinter);
+      return isTkinter ? 
+        `self.button_${safeId} = tk.Button(self.root, 
+            text="${component.props?.text || 'Button'}",
+            bg="${component.props?.bgColor || '#e0e0e0'}",
+            fg="${component.props?.fgColor || '#000000'}",
+            activebackground="${component.props?.hoverColor || '#f0f0f0'}")
+self.button_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})` :
+        `self.button_${safeId} = ctk.CTkButton(self.root, 
+            text="${component.props?.text || 'Button'}",
+            fg_color="${component.props?.bgColor || '#3b82f6'}",
+            text_color="${component.props?.fgColor || '#ffffff'}",
+            hover_color="${component.props?.hoverColor || '#2563eb'}")
+self.button_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+      
     case 'label':
-      return generateLabelCode(component, isTkinter);
+      return isTkinter ?
+        `self.label_${safeId} = tk.Label(self.root, 
+            text="${component.props?.text || 'Label'}",
+            fg="${component.props?.fgColor || '#000000'}",
+            bg="${component.props?.bgColor || '#ffffff'}",
+            font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}))
+self.label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})` :
+        `self.label_${safeId} = ctk.CTkLabel(self.root, 
+            text="${component.props?.text || 'Label'}",
+            text_color="${component.props?.fgColor || '#ffffff'}",
+            font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}))
+self.label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+      
     case 'entry':
-      return generateEntryCode(component, isTkinter);
+      return isTkinter ?
+        `self.entry_${safeId} = tk.Entry(self.root,
+            bg="${component.props?.bgColor || '#ffffff'}",
+            fg="${component.props?.fgColor || '#000000'}")
+self.entry_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})` :
+        `self.entry_${safeId} = ctk.CTkEntry(self.root,
+            fg_color="${component.props?.bgColor || 'transparent'}",
+            text_color="${component.props?.fgColor || '#ffffff'}",
+            placeholder_text="${component.props?.placeholder || ''}")
+self.entry_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+    
     case 'image':
       return generateImageCode(component, isTkinter);
     case 'slider':

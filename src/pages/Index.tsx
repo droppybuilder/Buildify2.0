@@ -37,6 +37,7 @@ const Index = () => {
     }
   }, []);
   
+  // Save components whenever they change
   useEffect(() => {
     try {
       localStorage.setItem('guiBuilderComponents', JSON.stringify(components));
@@ -49,6 +50,7 @@ const Index = () => {
   useEffect(() => {
     try {
       localStorage.setItem('guiBuilderIsTkinter', String(isTkinter));
+      console.log("Saved isTkinter preference:", isTkinter);
     } catch (error) {
       console.error('Failed to save Tkinter preference:', error);
     }
@@ -108,8 +110,8 @@ const Index = () => {
   }, [components, handleComponentsChange, selectedComponents]);
   
   const handleToggleTkinter = useCallback((value: boolean) => {
+    console.log("Toggling Tkinter mode to:", value);
     setIsTkinter(value);
-    console.log("Toggled to:", value ? "Tkinter" : "CustomTkinter");
   }, []);
   
   useEffect(() => {

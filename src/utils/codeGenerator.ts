@@ -23,6 +23,9 @@ const optimizeComponents = (components: any[]): Record<string, any[]> => {
   return compsByType;
 };
 
+// Import the adjustColor function from colorUtils
+import { adjustColor } from './colorUtils';
+
 /**
  * Generates Tkinter code from components
  */

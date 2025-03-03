@@ -1,4 +1,3 @@
-
 import { useEffect, useRef } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-python';
@@ -13,7 +12,6 @@ export const CodePreview = ({ components, isTkinter }: CodePreviewProps) => {
   const codeRef = useRef<HTMLPreElement>(null);
 
   const generateTkinterCode = (components: any[]) => {
-    // TKinter code generation function
     const imports = `import tkinter as tk
 from tkinter import ttk
 import os
@@ -119,7 +117,6 @@ if __name__ == "__main__":
   };
 
   const generateCustomTkinterCode = (components: any[]) => {
-    // CustomTKinter code generation function
     const imports = `import customtkinter as ctk
 from PIL import Image
 import os
@@ -241,12 +238,10 @@ if __name__ == "__main__":
 
   useEffect(() => {
     if (codeRef.current) {
-      // Force re-highlighting on every code change
       Prism.highlightElement(codeRef.current);
     }
   }, [code, isTkinter]);
 
-  // Also highlight on component mount
   useEffect(() => {
     if (codeRef.current) {
       Prism.highlightElement(codeRef.current);
@@ -255,12 +250,14 @@ if __name__ == "__main__":
 
   return (
     <div className="flex-1 overflow-hidden flex flex-col">
-      <div className="code-preview-header">
-        <span>Code Preview</span>
-        <span className="text-xs text-muted-foreground">{isTkinter ? "Tkinter" : "CustomTkinter"}</span>
+      <div className="code-preview-header p-3 border-b flex justify-between items-center">
+        <span className="font-semibold">Code Preview</span>
+        <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+          {isTkinter ? "Tkinter" : "CustomTkinter"}
+        </span>
       </div>
-      <div className="code-preview-container">
-        <pre className="code-preview language-python" ref={codeRef}>
+      <div className="code-preview-container flex-1 overflow-auto p-3">
+        <pre className="code-preview language-python h-full m-0" ref={codeRef}>
           <code className="language-python">{code}</code>
         </pre>
       </div>

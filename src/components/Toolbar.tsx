@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -65,20 +64,16 @@ export const Toolbar = ({
     try {
       const mainCode = generateCode(components, isTkinter, appName, windowTitle, includeImageData, customImports, optimizeCode);
       
-      // Create a zip file with the code and requirements
       const zip = new JSZip();
       const fileName = exportFilename || 'my_app';
       
-      // Add main Python file
       zip.file(`${fileName}.py`, mainCode);
       
-      // Add requirements.txt
       const requirements = isTkinter 
         ? "pillow==9.5.0" 
         : "customtkinter==5.2.0\npillow==9.5.0\nrequests==2.31.0";
       zip.file("requirements.txt", requirements);
       
-      // Add README
       const readme = `# ${appName} GUI Application
 
 This is a Python GUI application built with ${isTkinter ? 'Tkinter' : 'CustomTkinter'}.
@@ -107,25 +102,20 @@ This is a Python GUI application built with ${isTkinter ? 'Tkinter' : 'CustomTki
 `;
       zip.file("README.md", readme);
       
-      // Handle image files if needed
       const imageComponents = components.filter(c => c.type === 'image' && c.props.src && !c.props.src.startsWith('/placeholder'));
       
       if (imageComponents.length > 0 && includeImageData) {
-        // Create an images folder
         const imgFolder = zip.folder("images");
         
-        // Add image files
         for (let i = 0; i < imageComponents.length; i++) {
           const comp = imageComponents[i];
           const imgSrc = comp.props.src;
           
           try {
-            // Handle data URLs
             if (imgSrc.startsWith('data:image')) {
               const base64Data = imgSrc.split(',')[1];
               imgFolder.file(`image_${i}.png`, base64Data, {base64: true});
             } 
-            // Handle Blob URLs (from URL.createObjectURL)
             else if (imgSrc.startsWith('blob:')) {
               const response = await fetch(imgSrc);
               const blob = await response.blob();
@@ -137,7 +127,6 @@ This is a Python GUI application built with ${isTkinter ? 'Tkinter' : 'CustomTki
         }
       }
       
-      // Generate and download the zip file
       const content = await zip.generateAsync({type: "blob"});
       saveAs(content, `${fileName}_${isTkinter ? 'tkinter' : 'customtkinter'}.zip`);
       toast.success("Code and resources exported successfully!");
@@ -152,6 +141,11 @@ This is a Python GUI application built with ${isTkinter ? 'Tkinter' : 'CustomTki
     navigator.clipboard.writeText(code)
       .then(() => toast.success("Code copied to clipboard!"))
       .catch(() => toast.error("Failed to copy code"));
+  };
+
+  const handleTkinterToggle = (checked: boolean) => {
+    setIsTkinter(!checked);
+    console.log("Setting isTkinter to:", !checked);
   };
 
   return (
@@ -182,7 +176,7 @@ This is a Python GUI application built with ${isTkinter ? 'Tkinter' : 'CustomTki
           <span className="text-sm font-medium">Tkinter</span>
           <Switch
             checked={!isTkinter}
-            onCheckedChange={(checked) => setIsTkinter(!checked)}
+            onCheckedChange={handleTkinterToggle}
           />
           <span className="text-sm font-medium">CustomTkinter</span>
         </div>

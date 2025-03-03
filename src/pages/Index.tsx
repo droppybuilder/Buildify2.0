@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect, useContext } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import Canvas from '@/components/Canvas';
@@ -92,6 +91,11 @@ const Index = () => {
     }
   }, [components, handleComponentsChange, selectedComponents]);
   
+  const handleToggleTkinter = useCallback((value: boolean) => {
+    setIsTkinter(value);
+    console.log("Toggled to:", value ? "Tkinter" : "CustomTkinter");
+  }, []);
+  
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (inputFocused) {
@@ -136,7 +140,7 @@ const Index = () => {
       <main className="flex-1 flex flex-col overflow-hidden">
         <Toolbar
           isTkinter={isTkinter}
-          setIsTkinter={setIsTkinter}
+          setIsTkinter={handleToggleTkinter}
           components={components}
           onUndo={handleUndo}
           onRedo={handleRedo}

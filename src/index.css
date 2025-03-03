@@ -44,4 +44,121 @@
   .dark .lucide {
     color: hsl(var(--sidebar-foreground));
   }
+
+  /* Code preview styling */
+  .code-preview-header {
+    @apply p-3 border-b flex justify-between items-center;
+  }
+
+  .code-preview-container {
+    @apply flex-1 overflow-auto p-3;
+  }
+
+  .code-preview {
+    @apply h-full m-0 p-4 overflow-auto;
+    background-color: hsl(var(--background));
+    border-radius: 0.5rem;
+  }
+
+  /* Dark mode code syntax highlighting */
+  .dark .token.comment,
+  .dark .token.prolog,
+  .dark .token.doctype,
+  .dark .token.cdata {
+    color: #6a9955;
+  }
+
+  .dark .token.punctuation {
+    color: #d4d4d4;
+  }
+
+  .dark .token.property,
+  .dark .token.tag,
+  .dark .token.boolean,
+  .dark .token.number,
+  .dark .token.constant,
+  .dark .token.symbol,
+  .dark .token.deleted {
+    color: #b5cea8;
+  }
+
+  .dark .token.selector,
+  .dark .token.attr-name,
+  .dark .token.string,
+  .dark .token.char,
+  .dark .token.builtin,
+  .dark .token.inserted {
+    color: #ce9178;
+  }
+
+  .dark .token.operator,
+  .dark .token.entity,
+  .dark .token.url,
+  .dark .language-css .token.string,
+  .dark .style .token.string {
+    color: #d4d4d4;
+  }
+
+  .dark .token.atrule,
+  .dark .token.attr-value,
+  .dark .token.keyword {
+    color: #569cd6;
+  }
+
+  .dark .token.function {
+    color: #dcdcaa;
+  }
+
+  .dark .token.regex,
+  .dark .token.important,
+  .dark .token.variable {
+    color: #d16969;
+  }
+
+  .dark .token.important,
+  .dark .token.bold {
+    font-weight: bold;
+  }
+
+  .dark .token.italic {
+    font-style: italic;
+  }
+
+  /* Resize handles styling */
+  .resize-handle {
+    @apply bg-primary z-20;
+  }
+
+  /* Window styling */
+  .macos-window {
+    @apply shadow-lg rounded-lg overflow-hidden;
+  }
+  
+  .window-titlebar {
+    @apply flex items-center p-2 bg-card/80 backdrop-blur-sm border-b;
+  }
+  
+  .window-buttons {
+    @apply flex items-center space-x-2 ml-2;
+  }
+  
+  .window-button {
+    @apply w-3 h-3 rounded-full flex items-center justify-center;
+  }
+  
+  .window-close {
+    @apply bg-red-500;
+  }
+  
+  .window-minimize {
+    @apply bg-yellow-500;
+  }
+  
+  .window-maximize {
+    @apply bg-green-500;
+  }
+  
+  .window-title {
+    @apply flex-1 text-center text-xs;
+  }
 }

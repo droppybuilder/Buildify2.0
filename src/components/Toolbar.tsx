@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -144,6 +145,7 @@ This is a Python GUI application built with ${isTkinter ? 'Tkinter' : 'CustomTki
   };
 
   const handleTkinterToggle = (checked: boolean) => {
+    // Update the parent component through the prop
     setIsTkinter(!checked);
     console.log("Setting isTkinter to:", !checked);
   };
@@ -177,6 +179,7 @@ This is a Python GUI application built with ${isTkinter ? 'Tkinter' : 'CustomTki
           <Switch
             checked={!isTkinter}
             onCheckedChange={handleTkinterToggle}
+            id="tkinter-toggle"
           />
           <span className="text-sm font-medium">CustomTkinter</span>
         </div>
@@ -306,3 +309,4 @@ This is a Python GUI application built with ${isTkinter ? 'Tkinter' : 'CustomTki
     </div>
   );
 };
+

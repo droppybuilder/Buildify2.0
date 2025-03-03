@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect, useContext } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import Canvas from '@/components/Canvas';
@@ -25,6 +26,12 @@ const Index = () => {
         setComponents(parsedComponents);
         addToHistory(parsedComponents);
       }
+      
+      // Load isTkinter preference
+      const savedTkinterPref = localStorage.getItem('guiBuilderIsTkinter');
+      if (savedTkinterPref !== null) {
+        setIsTkinter(savedTkinterPref === 'true');
+      }
     } catch (error) {
       console.error('Failed to load saved components:', error);
     }
@@ -37,6 +44,15 @@ const Index = () => {
       console.error('Failed to save components:', error);
     }
   }, [components]);
+  
+  // Save Tkinter/CustomTkinter preference
+  useEffect(() => {
+    try {
+      localStorage.setItem('guiBuilderIsTkinter', String(isTkinter));
+    } catch (error) {
+      console.error('Failed to save Tkinter preference:', error);
+    }
+  }, [isTkinter]);
   
   const addToHistory = useCallback((newComponents: any[]) => {
     if (JSON.stringify(newComponents) !== JSON.stringify(history[historyIndex])) {
@@ -156,6 +172,8 @@ const Index = () => {
               selectedComponent={selectedComponent}
               setSelectedComponent={setSelectedComponent}
               onDeleteComponent={handleDeleteComponent}
+              selectedComponents={selectedComponents}
+              setSelectedComponents={setSelectedComponents}
             />
           </div>
           

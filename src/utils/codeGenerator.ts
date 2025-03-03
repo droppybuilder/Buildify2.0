@@ -15,11 +15,11 @@ import { adjustColor } from './colorUtils';
 export function generateCode(
   components: any[],
   isTkinter: boolean,
-  appName: string,
-  windowTitle: string,
-  includeImageData: boolean,
-  customImports: string,
-  optimizeCode: boolean
+  appName: string = "MyGUIApp",
+  windowTitle: string = "GUI Application",
+  includeImageData: boolean = true,
+  customImports: string = "",
+  optimizeCode: boolean = true
 ): string {
   // Prepare the imports section
   const imports = isTkinter
@@ -101,7 +101,7 @@ ${customImports ? customImports : ''}`;
  * @param isTkinter - A boolean indicating whether to generate Tkinter code.
  * @returns The generated code as a string.
  */
-function generateComponentCode(component: any, isTkinter: boolean): string {
+export function generateComponentCode(component: any, isTkinter: boolean): string {
   switch (component.type) {
     case 'button':
       return generateButtonCode(component, isTkinter);
@@ -138,7 +138,7 @@ function generateComponentCode(component: any, isTkinter: boolean): string {
  * @param isTkinter - A boolean indicating whether to generate Tkinter code.
  * @returns The generated code as a string.
  */
-function generateButtonCode(component: any, isTkinter: boolean): string {
+export function generateButtonCode(component: any, isTkinter: boolean): string {
   const { text, backgroundColor, textColor, width, height, x, y, padding } = component;
   const adjustedBackgroundColor = adjustColor(backgroundColor, -10);
 
@@ -173,7 +173,7 @@ button.place(x=${x}, y=${y})
  * @param isTkinter - A boolean indicating whether to generate Tkinter code.
  * @returns The generated code as a string.
  */
-function generateLabelCode(component: any, isTkinter: boolean): string {
+export function generateLabelCode(component: any, isTkinter: boolean): string {
   const { text, textColor, backgroundColor, font, fontSize, x, y } = component;
 
   if (isTkinter) {
@@ -202,7 +202,7 @@ label.place(x=${x}, y=${y})
  * @param isTkinter - A boolean indicating whether to generate Tkinter code.
  * @returns The generated code as a string.
  */
-function generateEntryCode(component: any, isTkinter: boolean): string {
+export function generateEntryCode(component: any, isTkinter: boolean): string {
   const { width, textColor, backgroundColor, x, y } = component;
 
   if (isTkinter) {
@@ -233,7 +233,7 @@ entry.place(x=${x}, y=${y})
  * @param isTkinter - A boolean indicating whether to generate Tkinter code.
  * @returns The generated code as a string.
  */
-function generateImageCode(component: any, isTkinter: boolean): string {
+export function generateImageCode(component: any, isTkinter: boolean): string {
   const { source, width, height, x, y } = component;
 
   if (isTkinter) {
@@ -262,7 +262,7 @@ image_label.place(x=${x}, y=${y})
  * @param isTkinter - A boolean indicating whether to generate Tkinter code.
  * @returns The generated code as a string.
  */
-function generateSliderCode(component: any, isTkinter: boolean): string {
+export function generateSliderCode(component: any, isTkinter: boolean): string {
   const { from, to, orient, length, x, y } = component;
 
   if (isTkinter) {
@@ -288,7 +288,7 @@ slider.place(x=${x}, y=${y})
  * @param isTkinter - A boolean indicating whether to generate Tkinter code.
  * @returns The generated code as a string.
  */
-function generateCheckboxCode(component: any, isTkinter: boolean): string {
+export function generateCheckboxCode(component: any, isTkinter: boolean): string {
   const { text, x, y } = component;
 
   if (isTkinter) {
@@ -321,7 +321,7 @@ checkbox.place(x=${x}, y=${y})
  * @param isTkinter - A boolean indicating whether to generate Tkinter code.
  * @returns The generated code as a string.
  */
-function generateDatePickerCode(component: any, isTkinter: boolean): string {
+export function generateDatePickerCode(component: any, isTkinter: boolean): string {
   const { x, y } = component;
 
   if (isTkinter) {
@@ -351,7 +351,7 @@ date_picker.place(x=${x}, y=${y})
  * @param isTkinter - A boolean indicating whether to generate Tkinter code.
  * @returns The generated code as a string.
  */
-function generateProgressBarCode(component: any, isTkinter: boolean): string {
+export function generateProgressBarCode(component: any, isTkinter: boolean): string {
   const { length, x, y } = component;
 
   if (isTkinter) {
@@ -382,7 +382,7 @@ progressbar.start()  # Start animation
  * @param isTkinter - A boolean indicating whether to generate Tkinter code.
  * @returns The generated code as a string.
  */
-function generateFrameCode(component: any, isTkinter: boolean): string {
+export function generateFrameCode(component: any, isTkinter: boolean): string {
   const { width, height, backgroundColor, x, y } = component;
 
   if (isTkinter) {
@@ -412,7 +412,7 @@ frame.place(x=${x}, y=${y})
  * @param isTkinter - A boolean indicating whether to generate Tkinter code.
  * @returns The generated code as a string.
  */
-function generateNotebookCode(component: any, isTkinter: boolean): string {
+export function generateNotebookCode(component: any, isTkinter: boolean): string {
   const { width, height, x, y } = component;
 
   if (isTkinter) {
@@ -448,7 +448,7 @@ notebook.add(frame1, text='Tab 1')
  * @param isTkinter - A boolean indicating whether to generate Tkinter code.
  * @returns The generated code as a string.
  */
-function generateListboxCode(component: any, isTkinter: boolean): string {
+export function generateListboxCode(component: any, isTkinter: boolean): string {
   const { width, height, items, x, y } = component;
 
   if (isTkinter) {
@@ -478,7 +478,7 @@ listbox.place(x=${x}, y=${y})
  * @param isTkinter - A boolean indicating whether to generate Tkinter code.
  * @returns The generated code as a string.
  */
-function generateCanvasCode(component: any, isTkinter: boolean): string {
+export function generateCanvasCode(component: any, isTkinter: boolean): string {
   const { width, height, x, y } = component;
 
   if (isTkinter) {

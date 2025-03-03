@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+
+import { useEffect, useRef, useState } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-python';
 import 'prismjs/themes/prism.css'; // Base theme which we'll override with our custom CSS
@@ -10,6 +11,8 @@ interface CodePreviewProps {
 
 export const CodePreview = ({ components, isTkinter }: CodePreviewProps) => {
   const codeRef = useRef<HTMLPreElement>(null);
+  // Add state to force re-render
+  const [code, setCode] = useState<string>("");
 
   const generateTkinterCode = (components: any[]) => {
     const imports = `import tkinter as tk
@@ -101,6 +104,54 @@ class MyGUIApp:
         # self.image_${safeId}.configure(image=img)
         # self.image_${safeId}.image = img  # Keep a reference`;
         
+        case 'progressbar':
+          return `        self.progressbar_${safeId} = ttk.Progressbar(root,
+            orient="horizontal",
+            length=${Math.round(component.size.width)},
+            mode="${component.props.mode || 'determinate'}")
+        self.progressbar_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+        self.progressbar_${safeId}["value"] = ${component.props.value || 50}`;
+          
+        case 'datepicker':
+          return `        # Requires tkcalendar library: pip install tkcalendar
+        from tkcalendar import DateEntry
+        self.datepicker_${safeId} = DateEntry(root,
+            width=${Math.round(component.size.width/8)},
+            background="${component.props.bgColor || '#0066cc'}",
+            foreground="${component.props.fgColor || '#ffffff'}",
+            borderwidth=${component.props.borderwidth || 2})
+        self.datepicker_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+        
+        case 'canvas':
+          return `        self.canvas_${safeId} = tk.Canvas(root,
+            bg="${component.props.bgColor || '#ffffff'}",
+            borderwidth=${component.props.borderwidth || 1},
+            relief="${component.props.relief || 'flat'}")
+        self.canvas_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+        # Draw a sample shape
+        self.canvas_${safeId}.create_rectangle(10, 10, ${Math.round(component.size.width/2)}, ${Math.round(component.size.height/2)}, fill="${component.props.fillColor || '#3b82f6'}")`;
+          
+        case 'listbox':
+          const items = (component.props.items || 'Item 1,Item 2,Item 3').split(',').map((i: string) => i.trim());
+          return `        self.listbox_${safeId} = tk.Listbox(root,
+            bg="${component.props.bgColor || '#ffffff'}",
+            fg="${component.props.fgColor || '#000000'}",
+            selectbackground="${component.props.selectBgColor || '#3b82f6'}",
+            selectforeground="${component.props.selectFgColor || '#ffffff'}",
+            borderwidth=${component.props.borderwidth || 1},
+            relief="${component.props.relief || 'solid'}")
+        self.listbox_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+        ${items.map((item, idx) => `self.listbox_${safeId}.insert(${idx}, "${item}")`).join('\n        ')}`;
+        
+        case 'notebook':
+          return `        self.notebook_${safeId} = ttk.Notebook(root)
+        self.notebook_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+        # Add sample tabs
+        self.tab1_${safeId} = tk.Frame(self.notebook_${safeId})
+        self.tab2_${safeId} = tk.Frame(self.notebook_${safeId})
+        self.notebook_${safeId}.add(self.tab1_${safeId}, text='Tab 1')
+        self.notebook_${safeId}.add(self.tab2_${safeId}, text='Tab 2')`;
+
         default:
           return '';
       }
@@ -128,6 +179,8 @@ class MyGUIApp:
         self.root = ctk.CTk()
         self.root.title("CustomTkinter GUI App")
         self.root.geometry("800x600")
+        ctk.set_appearance_mode("dark")  # Use "dark" or "light"
+        ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
         self.images = []  # Keep references to images
         self._create_widgets()
         
@@ -138,72 +191,165 @@ class MyGUIApp:
       switch (component.type) {
         case 'button':
           return `        self.button_${safeId} = ctk.CTkButton(self.root, 
-            text="${component.props.text}",
-            fg_color="${component.props.bgColor || '#ffffff'}",
-            text_color="${component.props.fgColor || '#000000'}",
-            hover_color="${component.props.hoverColor || '#f0f0f0'}",
-            border_color="${component.props.borderColor || '#e2e8f0'}",
+            text="${component.props.text || 'Button'}",
+            fg_color="${component.props.bgColor || '#3b82f6'}",
+            text_color="${component.props.fgColor || '#ffffff'}",
+            hover_color="${component.props.hoverColor || '#2563eb'}",
+            border_color="${component.props.borderColor || 'transparent'}",
             corner_radius=${component.props.cornerRadius || 8})
         self.button_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
       
-      case 'image':
-        return `        # Placeholder image - replace with your own image
+        case 'image':
+          return `        # Placeholder image - replace with your own image
         self.image_${safeId} = ctk.CTkLabel(self.root, text="Image", fg_color="gray70")
-        self.image_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+        self.image_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+        # To use an actual image:
+        # img = ctk.CTkImage(light_image=Image.open("path/to/image.png"), size=(${Math.round(component.size.width)}, ${Math.round(component.size.height)}))
+        # self.image_${safeId}.configure(image=img)
+        # self.images.append(img)  # Keep a reference`;
 
-      case 'label':
-        return `        self.label_${safeId} = ctk.CTkLabel(self.root, 
-            text="${component.props.text}",
-            text_color="${component.props.fgColor || '#000000'}",
+        case 'label':
+          return `        self.label_${safeId} = ctk.CTkLabel(self.root, 
+            text="${component.props.text || 'Label'}",
+            text_color="${component.props.fgColor || '#ffffff'}",
             font=("TkDefaultFont", ${component.props.fontSize || 12}),
             anchor="w")
         self.label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
       
-      case 'entry':
-        return `        self.entry_${safeId} = ctk.CTkEntry(self.root,
-            fg_color="${component.props.bgColor || '#ffffff'}",
-            border_color="${component.props.borderColor || '#e2e8f0'}",
+        case 'entry':
+          return `        self.entry_${safeId} = ctk.CTkEntry(self.root,
+            fg_color="${component.props.bgColor || 'transparent'}",
+            text_color="${component.props.fgColor || '#ffffff'}",
+            border_color="${component.props.borderColor || '#3b82f6'}",
             corner_radius=${component.props.cornerRadius || 8},
             placeholder_text="${component.props.placeholder || ''}")
         self.entry_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
       
-      case 'slider':
-        return `        self.slider_${safeId} = ctk.CTkSlider(self.root,
+        case 'slider':
+          return `        self.slider_${safeId} = ctk.CTkSlider(self.root,
             from_=${component.props.from || 0},
             to=${component.props.to || 100},
             orientation="${component.props.orient === 'vertical' ? 'vertical' : 'horizontal'}",
             button_color="${component.props.troughColor || '#3b82f6'}",
-            button_hover_color="${adjustColor(component.props.troughColor || '#3b82f6', -20)}",
+            button_hover_color="${component.props.hoverColor || '#2563eb'}",
             progress_color="${component.props.troughColor || '#3b82f6'}")
         self.slider_${safeId}.set(${component.props.value || 50})
         self.slider_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
       
-      case 'frame':
-        return `        self.frame_${safeId} = ctk.CTkFrame(self.root,
-            fg_color="${component.props.bgColor || '#ffffff'}",
+        case 'frame':
+          return `        self.frame_${safeId} = ctk.CTkFrame(self.root,
+            fg_color="${component.props.bgColor || 'transparent'}",
             border_width=${component.props.borderwidth || 1},
-            border_color="${component.props.borderColor || '#e2e8f0'}",
+            border_color="${component.props.borderColor || '#3b82f6'}",
             corner_radius=${component.props.cornerRadius || 8})
         self.frame_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
       
-      case 'checkbox':
-        return `        self.checkbox_${safeId} = ctk.CTkCheckBox(self.root,
-            text="${component.props.text}",
-            text_color="${component.props.fgColor || '#000000'}")
+        case 'checkbox':
+          return `        self.checkbox_${safeId} = ctk.CTkCheckBox(self.root,
+            text="${component.props.text || 'Checkbox'}",
+            text_color="${component.props.fgColor || '#ffffff'}",
+            fg_color="${component.props.bgColor || '#3b82f6'}",
+            hover_color="${component.props.hoverColor || '#2563eb'}")
         ${component.props.checked ? 'self.checkbox_' + safeId + '.select()' : 'self.checkbox_' + safeId + '.deselect()'}
         self.checkbox_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
       
-      case 'dropdown':
-        const options = (component.props.options || 'Option 1,Option 2,Option 3').split(',').map((o: string) => o.trim());
-        return `        self.dropdown_${safeId} = ctk.CTkOptionMenu(self.root,
+        case 'dropdown':
+          const options = (component.props.options || 'Option 1,Option 2,Option 3').split(',').map((o: string) => o.trim());
+          return `        self.dropdown_${safeId} = ctk.CTkOptionMenu(self.root,
             values=[${options.map(o => `"${o}"`).join(', ')}],
-            fg_color="${component.props.bgColor || '#ffffff'}",
-            text_color="${component.props.fgColor || '#000000'}")
+            fg_color="${component.props.bgColor || '#3b82f6'}",
+            button_color="${component.props.bgColor || '#3b82f6'}",
+            button_hover_color="${component.props.hoverColor || '#2563eb'}",
+            text_color="${component.props.fgColor || '#ffffff'}")
         self.dropdown_${safeId}.set("${component.props.selected || options[0]}")
         self.dropdown_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+        
+        case 'progressbar':
+          return `        self.progressbar_${safeId} = ctk.CTkProgressBar(self.root,
+            orientation="${component.props.orient === 'vertical' ? 'vertical' : 'horizontal'}",
+            progress_color="${component.props.progressColor || '#3b82f6'}")
+        self.progressbar_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+        self.progressbar_${safeId}.set(${(component.props.value || 50) / 100})`;
+          
+        case 'datepicker':
+          return `        # CustomTkinter doesn't have a built-in DateEntry
+        # This is a label placeholder that would open a date dialog when clicked
+        self.datepicker_${safeId} = ctk.CTkButton(self.root,
+            text="${component.props.dateText || 'Select Date'}",
+            fg_color="${component.props.bgColor || '#3b82f6'}",
+            text_color="${component.props.fgColor || '#ffffff'}",
+            command=self._show_date_dialog_${safeId})
+        self.datepicker_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+        
+    def _show_date_dialog_${safeId}(self):
+        # This would show a date selection dialog
+        # For now, this is just a placeholder
+        print("Date dialog would show here")`;
+          
+        case 'canvas':
+          return `        # CustomTkinter doesn't have a direct equivalent to Canvas
+        # Using a Frame with label for visualization
+        self.canvas_${safeId} = ctk.CTkFrame(self.root,
+            fg_color="${component.props.bgColor || '#1e293b'}",
+            border_width=${component.props.borderwidth || 1},
+            border_color="${component.props.borderColor || '#3b82f6'}",
+            corner_radius=${component.props.cornerRadius || 8})
+        self.canvas_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+        
+        # Add a label inside to explain
+        self.canvas_label_${safeId} = ctk.CTkLabel(self.canvas_${safeId},
+            text="Canvas Element\\n(Create shapes in code)",
+            text_color="${component.props.fgColor || '#ffffff'}")
+        self.canvas_label_${safeId}.place(relx=0.5, rely=0.5, anchor="center")`;
+        
+        case 'listbox':
+          return `        # Placeholder for values
+        items_${safeId} = ${JSON.stringify((component.props.items || 'Item 1,Item 2,Item 3').split(',').map(i => i.trim()))}
+        
+        # CustomTkinter scrollable frame for listbox
+        self.listbox_container_${safeId} = ctk.CTkScrollableFrame(self.root,
+            fg_color="${component.props.bgColor || 'transparent'}",
+            border_width=${component.props.borderwidth || 1},
+            border_color="${component.props.borderColor || '#3b82f6'}",
+            corner_radius=${component.props.cornerRadius || 8},
+            width=${Math.round(component.size.width-20)},
+            height=${Math.round(component.size.height-20)})
+        self.listbox_container_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})
+        
+        # Add items as labels or buttons
+        self.listbox_items_${safeId} = []
+        for i, item in enumerate(items_${safeId}):
+            label = ctk.CTkLabel(self.listbox_container_${safeId}, 
+                text=item,
+                text_color="${component.props.fgColor || '#ffffff'}",
+                fg_color="transparent",
+                anchor="w",
+                padx=5, pady=2)
+            label.pack(fill="x", padx=2, pady=2)
+            self.listbox_items_${safeId}.append(label)`;
+        
+        case 'notebook':
+          return `        # CustomTkinter TabView
+        self.notebook_${safeId} = ctk.CTkTabview(self.root,
+            fg_color="${component.props.bgColor || 'transparent'}",
+            border_width=${component.props.borderwidth || 1},
+            border_color="${component.props.borderColor || '#3b82f6'}",
+            corner_radius=${component.props.cornerRadius || 8},
+            segmented_button_fg_color="${component.props.tabColor || '#1e293b'}",
+            segmented_button_selected_color="${component.props.selectedTabColor || '#3b82f6'}",
+            segmented_button_selected_hover_color="${component.props.hoverColor || '#2563eb'}")
+        self.notebook_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+        
+        # Add tabs
+        self.tab1_${safeId} = self.notebook_${safeId}.add("Tab 1")
+        self.tab2_${safeId} = self.notebook_${safeId}.add("Tab 2")
+        
+        # Add sample content to tabs
+        ctk.CTkLabel(self.tab1_${safeId}, text="Tab 1 Content").pack(padx=20, pady=20)
+        ctk.CTkLabel(self.tab2_${safeId}, text="Tab 2 Content").pack(padx=20, pady=20)`;
 
-      default:
-        return '';
+        default:
+          return '';
       }
     }).join('\n\n');
 
@@ -216,37 +362,25 @@ if __name__ == "__main__":
     return imports + '\n        # Setup UI components\n' + setupComponents + main;
   };
 
-  const adjustColor = (hex: string, amount: number) => {
-    try {
-      const r = parseInt(hex.slice(1, 3), 16);
-      const g = parseInt(hex.slice(3, 5), 16);
-      const b = parseInt(hex.slice(5, 7), 16);
-
-      const newR = Math.max(0, Math.min(255, r + amount));
-      const newG = Math.max(0, Math.min(255, g + amount));
-      const newB = Math.max(0, Math.min(255, b + amount));
-
-      return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
-    } catch {
-      return amount > 0 ? '#f0f0f0' : '#d0d0d0';
+  // Generate code when components or isTkinter changes
+  useEffect(() => {
+    const generatedCode = isTkinter 
+      ? generateTkinterCode(components)
+      : generateCustomTkinterCode(components);
+    
+    setCode(generatedCode);
+    
+    if (codeRef.current) {
+      Prism.highlightElement(codeRef.current);
     }
-  };
+  }, [components, isTkinter]);
 
-  const code = isTkinter 
-    ? generateTkinterCode(components)
-    : generateCustomTkinterCode(components);
-
+  // Additional effect to ensure syntax highlighting is applied
   useEffect(() => {
     if (codeRef.current) {
       Prism.highlightElement(codeRef.current);
     }
-  }, [code, isTkinter]);
-
-  useEffect(() => {
-    if (codeRef.current) {
-      Prism.highlightElement(codeRef.current);
-    }
-  }, []);
+  }, [code]);
 
   return (
     <div className="flex-1 overflow-hidden flex flex-col">

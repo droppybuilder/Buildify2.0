@@ -10,12 +10,18 @@ import { generateCode } from '@/utils/codeGenerator';
 interface CodePreviewProps {
   components: any[];
   isTkinter: boolean;
+  showPreview?: boolean;
 }
 
-export const CodePreview = ({ components, isTkinter }: CodePreviewProps) => {
+export const CodePreview = ({ components, isTkinter, showPreview = true }: CodePreviewProps) => {
   const codeRef = useRef<HTMLPreElement>(null);
   const [code, setCode] = useState<string>("");
   const [codeType, setCodeType] = useState<"python" | "html" | "javascript">("python");
+  
+  // If preview is hidden, return null
+  if (!showPreview) {
+    return null;
+  }
   
   // Generate code when components or isTkinter changes
   useEffect(() => {
@@ -239,7 +245,7 @@ async function updateComponent(componentId, properties) {
             </div>
           )}
           <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded ml-2">
-            {isTkinter ? "Tkinter" : "Eel"}
+            Eel
           </span>
         </div>
       </div>

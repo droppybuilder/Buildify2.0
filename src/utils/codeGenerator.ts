@@ -1,4 +1,3 @@
-
 import { adjustColor } from './colorUtils';
 import {
   generateButtonCode,
@@ -85,15 +84,8 @@ class ${appName}:
     def start(self, dev_mode=False):
         """Start the Eel application"""
         try:
-            # Set web app options
-            web_app_options = {
-                'mode': 'chrome',
-                'port': 8080,
-                'chromeFlags': ['--disable-http-cache']
-            }
-            
-            # Start the app
-            eel.start('index.html', options=web_app_options, block=True)
+            # Start the app (with suppress_error=True to avoid deprecation warning)
+            eel.start('index.html', size=(800, 600), suppress_error=True)
         except Exception as e:
             print(f"Error starting Eel application: {e}")
             sys.exit(1)
@@ -256,15 +248,8 @@ class ${appName}:
             # Register components
             self.register_components()
             
-            # Set web app options
-            web_app_options = {
-                'mode': 'chrome',
-                'port': 8080,
-                'chromeFlags': ['--disable-http-cache']
-            }
-            
-            # Start the app
-            eel.start('index.html', options=web_app_options, block=True)
+            # Start the app (with suppress_error=True to avoid deprecation warning)
+            eel.start('index.html', size=(800, 600), suppress_error=True)
         except Exception as e:
             print(f"Error starting Eel application: {e}")
             sys.exit(1)

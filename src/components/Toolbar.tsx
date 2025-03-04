@@ -26,8 +26,6 @@ import { saveAs } from "file-saver";
 import { generateCode } from "@/utils/codeGenerator";
 
 interface ToolbarProps {
-  isTkinter: boolean;
-  setIsTkinter: (value: boolean) => void;
   components: any[];
   onUndo: () => void;
   onRedo: () => void;
@@ -36,8 +34,6 @@ interface ToolbarProps {
 }
 
 export const Toolbar = ({ 
-  isTkinter, 
-  setIsTkinter,
   components,
   onUndo,
   onRedo,
@@ -59,7 +55,8 @@ export const Toolbar = ({
     }
 
     try {
-      const mainPythonCode = generateCode(components, isTkinter, appName, windowTitle, includeImageData, customImports, optimizeCode);
+      // Always use Eel (isTkinter = false)
+      const mainPythonCode = generateCode(components, false, appName, windowTitle, includeImageData, customImports, optimizeCode);
       
       const zip = new JSZip();
       const fileName = exportFilename || 'my_app';
@@ -67,16 +64,14 @@ export const Toolbar = ({
       // Add main Python file
       zip.file(`${fileName}.py`, mainPythonCode);
       
-      // Add requirements.txt based on UI mode
-      const requirements = isTkinter 
-        ? "pillow==9.5.0" 
-        : "eel==0.15.0\npillow==9.5.0\nrequests==2.31.0";
+      // Add requirements.txt
+      const requirements = "eel==0.15.0\npillow==9.5.0\nrequests==2.31.0";
       zip.file("requirements.txt", requirements);
       
       // Add readme
       const readme = `# ${appName} GUI Application
 
-This is a ${isTkinter ? 'Tkinter' : 'Eel'} GUI application built with Python.
+This is an Eel GUI application built with Python.
 
 ## Requirements
 
@@ -97,22 +92,18 @@ This is a ${isTkinter ? 'Tkinter' : 'Eel'} GUI application built with Python.
 
 ## Notes
 
-${isTkinter 
-  ? '- If you encounter any image loading issues, make sure the image paths are correct.'
-  : '- Eel requires Chrome to be installed on your system or another compatible browser.'}
+- Eel requires Chrome to be installed on your system or another compatible browser.
 `;
       zip.file("README.md", readme);
       
-      // If using Eel, create web folder structure
-      if (!isTkinter) {
-        // Create web folder and subfolders
-        const webFolder = zip.folder("web");
-        const cssFolder = webFolder.folder("css");
-        const jsFolder = webFolder.folder("js");
-        const imagesFolder = webFolder.folder("images");
-        
-        // Add HTML file
-        webFolder.file("index.html", `<!DOCTYPE html>
+      // Create web folder structure
+      const webFolder = zip.folder("web");
+      const cssFolder = webFolder.folder("css");
+      const jsFolder = webFolder.folder("js");
+      const imagesFolder = webFolder.folder("images");
+      
+      // Add HTML file
+      webFolder.file("index.html", `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -131,9 +122,9 @@ ${isTkinter
     <script src="js/app.js"></script>
 </body>
 </html>`);
-        
-        // Add CSS file
-        cssFolder.file("styles.css", `body {
+      
+      // Add CSS file
+      cssFolder.file("styles.css", `body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
@@ -205,9 +196,9 @@ ${isTkinter
     max-width: 100%;
     max-height: 100%;
 }`);
-        
-        // Add JavaScript file
-        jsFolder.file("app.js", `// Main application JavaScript for Eel
+      
+      // Add JavaScript file
+      jsFolder.file("app.js", `// Main application JavaScript for Eel
 document.addEventListener('DOMContentLoaded', async function() {
     // Initialize the application
     await initApp();
@@ -329,12 +320,11 @@ async function updateComponent(componentId, properties) {
         console.error('Error updating component:', error);
     }
 }`);
-      }
       
       const imageComponents = components.filter(c => c.type === 'image' && c.props.src && !c.props.src.startsWith('/placeholder'));
       
       if (imageComponents.length > 0 && includeImageData) {
-        const imgFolder = isTkinter ? zip.folder("images") : zip.folder("web").folder("images");
+        const imgFolder = zip.folder("web").folder("images");
         
         for (let i = 0; i < imageComponents.length; i++) {
           const comp = imageComponents[i];
@@ -357,7 +347,7 @@ async function updateComponent(componentId, properties) {
       }
       
       const content = await zip.generateAsync({type: "blob"});
-      saveAs(content, `${fileName}_${isTkinter ? 'tkinter' : 'eel'}.zip`);
+      saveAs(content, `${fileName}_eel.zip`);
       toast.success("Code and resources exported successfully!");
     } catch (error) {
       console.error("Export error:", error);
@@ -366,16 +356,11 @@ async function updateComponent(componentId, properties) {
   };
 
   const handleCopyCode = () => {
-    const code = generateCode(components, isTkinter, appName, windowTitle, includeImageData, customImports, optimizeCode);
+    // Always use Eel (isTkinter = false)
+    const code = generateCode(components, false, appName, windowTitle, includeImageData, customImports, optimizeCode);
     navigator.clipboard.writeText(code)
       .then(() => toast.success("Code copied to clipboard!"))
       .catch(() => toast.error("Failed to copy code"));
-  };
-
-  const handleTkinterToggle = (checked: boolean) => {
-    console.log("Toolbar - Switching to:", checked ? "Eel" : "Tkinter");
-    setIsTkinter(!checked);
-    toast.info(`Switched to ${!checked ? "Tkinter" : "Eel"} mode`);
   };
 
   return (
@@ -402,16 +387,6 @@ async function updateComponent(componentId, properties) {
       </div>
       
       <div className="flex items-center space-x-4">
-        <div className="flex items-center space-x-2">
-          <span className="text-sm font-medium">Tkinter</span>
-          <Switch
-            checked={!isTkinter}
-            onCheckedChange={handleTkinterToggle}
-            id="tkinter-toggle"
-          />
-          <span className="text-sm font-medium">Eel</span>
-        </div>
-        
         <Button
           variant="outline"
           size="sm"

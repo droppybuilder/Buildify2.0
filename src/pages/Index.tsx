@@ -10,7 +10,6 @@ import { toast } from 'sonner';
 const Index = () => {
   const [selectedComponent, setSelectedComponent] = useState(null);
   const [components, setComponents] = useState([]);
-  const [isTkinter, setIsTkinter] = useState(false); // Default to Eel instead of Tkinter
   const [history, setHistory] = useState<any[][]>([[]]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [inputFocused, setInputFocused] = useState(false);
@@ -25,12 +24,6 @@ const Index = () => {
         setComponents(parsedComponents);
         addToHistory(parsedComponents);
       }
-      
-      // Load isTkinter preference
-      const savedTkinterPref = localStorage.getItem('guiBuilderIsTkinter');
-      if (savedTkinterPref !== null) {
-        setIsTkinter(savedTkinterPref === 'true');
-      }
     } catch (error) {
       console.error('Failed to load saved components:', error);
     }
@@ -44,16 +37,6 @@ const Index = () => {
       console.error('Failed to save components:', error);
     }
   }, [components]);
-  
-  // Save Tkinter/Eel preference
-  useEffect(() => {
-    try {
-      localStorage.setItem('guiBuilderIsTkinter', String(isTkinter));
-      console.log("Index - Saved isTkinter preference:", isTkinter ? "Tkinter" : "Eel");
-    } catch (error) {
-      console.error('Failed to save Tkinter preference:', error);
-    }
-  }, [isTkinter]);
   
   const addToHistory = useCallback((newComponents: any[]) => {
     if (JSON.stringify(newComponents) !== JSON.stringify(history[historyIndex])) {
@@ -109,11 +92,6 @@ const Index = () => {
     }
   }, [components, handleComponentsChange, selectedComponents]);
   
-  const handleToggleTkinter = useCallback((value: boolean) => {
-    console.log("Index - Toggling Tkinter mode to:", value ? "Tkinter" : "Eel");
-    setIsTkinter(value);
-  }, []);
-  
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (inputFocused) {
@@ -157,8 +135,6 @@ const Index = () => {
       
       <main className="flex-1 flex flex-col overflow-hidden">
         <Toolbar
-          isTkinter={isTkinter}
-          setIsTkinter={handleToggleTkinter}
           components={components}
           onUndo={handleUndo}
           onRedo={handleRedo}
@@ -186,10 +162,7 @@ const Index = () => {
               setInputFocused={setInputFocused}
               inputFocused={inputFocused}
             />
-            <CodePreview
-              components={components}
-              isTkinter={isTkinter}
-            />
+            {/* Code preview is hidden now */}
           </div>
         </div>
       </main>

@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-python';
-import 'prismjs/themes/prism.css'; // Base theme which we'll override with our custom CSS
+import 'prismjs/themes/prism.css';
 import { generateCode } from '@/utils/codeGenerator';
 
 interface CodePreviewProps {
@@ -16,7 +16,9 @@ export const CodePreview = ({ components, isTkinter }: CodePreviewProps) => {
 
   // Generate code when components or isTkinter changes
   useEffect(() => {
-    console.log("Generating code, isTkinter:", isTkinter);
+    console.log("CodePreview - Generating code with mode:", isTkinter ? "Tkinter" : "CustomTkinter");
+    console.log("CodePreview - Components count:", components.length);
+    
     try {
       const generatedCode = generateCode(components, isTkinter);
       setCode(generatedCode);
@@ -26,15 +28,11 @@ export const CodePreview = ({ components, isTkinter }: CodePreviewProps) => {
       }
     } catch (error) {
       console.error("Error generating code:", error);
-      // Fallback code if generation fails
-      const fallbackCode = isTkinter 
-        ? `import tkinter as tk\n# Error generating code: ${error}`
-        : `import customtkinter as ctk\n# Error generating code: ${error}`;
-      setCode(fallbackCode);
+      setCode(`# Error generating code: ${error}`);
     }
   }, [components, isTkinter]);
 
-  // Additional effect to ensure syntax highlighting is applied
+  // Apply syntax highlighting whenever code changes
   useEffect(() => {
     if (codeRef.current) {
       Prism.highlightElement(codeRef.current);
@@ -42,7 +40,7 @@ export const CodePreview = ({ components, isTkinter }: CodePreviewProps) => {
   }, [code]);
 
   return (
-    <div className="flex-1 overflow-hidden flex flex-col">
+    <div className="flex-1 overflow-hidden flex flex-col bg-white">
       <div className="code-preview-header p-3 border-b flex justify-between items-center">
         <span className="font-semibold">Code Preview</span>
         <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">

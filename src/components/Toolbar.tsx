@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -46,7 +45,7 @@ export const Toolbar = ({
 }: ToolbarProps) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [appName, setAppName] = useState("MyGUIApp");
-  const [windowTitle, setWindowTitle] = useState("Tkinter GUI App");
+  const [windowTitle, setWindowTitle] = useState("GUI Application");
   const [includeImageData, setIncludeImageData] = useState(true);
   const [exportFilename, setExportFilename] = useState("my_app");
   const [customImports, setCustomImports] = useState("");
@@ -140,14 +139,14 @@ This is a Python GUI application built with ${isTkinter ? 'Tkinter' : 'CustomTki
       .catch(() => toast.error("Failed to copy code"));
   };
 
-  // Fixed Tkinter toggle to correctly reflect and set isTkinter state
   const handleTkinterToggle = (checked: boolean) => {
+    console.log("Toolbar - Switching to:", checked ? "CustomTkinter" : "Tkinter");
     setIsTkinter(!checked);
     toast.info(`Switched to ${!checked ? "Tkinter" : "CustomTkinter"} mode`);
   };
 
   return (
-    <div className="border-b flex items-center justify-between p-2 bg-card">
+    <div className="border-b flex items-center justify-between p-2 bg-white">
       <div className="flex items-center space-x-2">
         <Button
           variant="ghost"

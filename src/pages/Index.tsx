@@ -16,6 +16,7 @@ const Index = () => {
   const [inputFocused, setInputFocused] = useState(false);
   const [selectedComponents, setSelectedComponents] = useState<string[]>([]);
   
+  // Load saved components and preferences on mount
   useEffect(() => {
     try {
       const savedComponents = localStorage.getItem('guiBuilderComponents');
@@ -48,7 +49,7 @@ const Index = () => {
   useEffect(() => {
     try {
       localStorage.setItem('guiBuilderIsTkinter', String(isTkinter));
-      console.log("Saved isTkinter preference:", isTkinter);
+      console.log("Index - Saved isTkinter preference:", isTkinter ? "Tkinter" : "CustomTkinter");
     } catch (error) {
       console.error('Failed to save Tkinter preference:', error);
     }
@@ -64,6 +65,7 @@ const Index = () => {
   }, [history, historyIndex]);
 
   const handleComponentsChange = useCallback((newComponents: any[]) => {
+    console.log("Index - Components changed, count:", newComponents.length);
     setComponents([...newComponents]);
     addToHistory([...newComponents]);
   }, [addToHistory]);
@@ -108,7 +110,7 @@ const Index = () => {
   }, [components, handleComponentsChange, selectedComponents]);
   
   const handleToggleTkinter = useCallback((value: boolean) => {
-    console.log("Toggling Tkinter mode to:", value);
+    console.log("Index - Toggling Tkinter mode to:", value ? "Tkinter" : "CustomTkinter");
     setIsTkinter(value);
   }, []);
   
@@ -150,7 +152,7 @@ const Index = () => {
   }, [selectedComponent, selectedComponents, handleDeleteComponent, handleUndo, handleRedo, inputFocused, components, handleComponentsChange]);
   
   return (
-    <div className="h-screen flex overflow-hidden">
+    <div className="h-screen flex overflow-hidden bg-white">
       <Sidebar />
       
       <main className="flex-1 flex flex-col overflow-hidden">
@@ -177,7 +179,7 @@ const Index = () => {
             />
           </div>
           
-          <div className="w-80 border-l flex flex-col overflow-hidden border-border bg-card">
+          <div className="w-80 border-l flex flex-col overflow-hidden border-border bg-gray-50">
             <PropertyPanel
               selectedComponent={selectedComponent}
               onUpdate={handleComponentUpdate}

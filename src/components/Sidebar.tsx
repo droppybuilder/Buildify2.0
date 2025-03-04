@@ -22,8 +22,8 @@ export const Sidebar = () => {
   };
 
   return (
-    <div className="w-64 border-r flex flex-col shadow-sm bg-white/95 border-border">
-      <div className="h-14 border-b flex items-center px-4 bg-white/95">
+    <div className="w-64 border-r flex flex-col shadow-sm bg-white border-border">
+      <div className="h-14 border-b flex items-center px-4 bg-white">
         <span className="font-semibold text-gray-800">Design Widgets</span>
       </div>
       

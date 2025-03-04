@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,10 +11,6 @@ import "./App.css";
 const queryClient = new QueryClient();
 
 const App = () => {
-  // Remove dark mode classes
-  document.documentElement.classList.remove('dark');
-  document.documentElement.classList.add('light');
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect, useContext } from 'react';
+
+import { useState, useRef, useEffect } from 'react';
 import { toast } from "sonner";
 import { Maximize2, Minimize2, X, Copy, Scissors, Trash } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { ThemeContext } from '../App';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -37,7 +37,6 @@ const Canvas = ({
   selectedComponents,
   setSelectedComponents,
 }: CanvasProps) => {
-  const { isDarkMode } = useContext(ThemeContext);
   const canvasRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -351,52 +350,44 @@ const Canvas = ({
   };
 
   const getDefaultProps = (type: string) => {
-    const isDark = isDarkMode;
-    
     const commonLightProps = {
       bgColor: '#ffffff',
       fgColor: '#000000',
       borderColor: '#e2e8f0'
     };
     
-    const commonDarkProps = {
-      bgColor: '#222222',
-      fgColor: '#e6e6e6',
-      borderColor: '#333333'
-    };
-    
-    const commonProps = isDark ? commonDarkProps : commonLightProps;
+    const commonProps = commonLightProps;
     
     switch (type) {
       case 'button':
         return { 
           text: 'Button', 
-          bgColor: isDark ? '#333333' : '#ffffff',
-          fgColor: isDark ? '#e6e6e6' : '#000000',
-          hoverColor: isDark ? '#444444' : '#f0f0f0',
+          bgColor: '#ffffff',
+          fgColor: '#000000',
+          hoverColor: '#f0f0f0',
           cornerRadius: 8,
-          borderColor: isDark ? '#444444' : '#e2e8f0'
+          borderColor: '#e2e8f0'
         };
       case 'label':
         return { 
           text: 'Label', 
           font: 'Default', 
           fontSize: 12, 
-          fgColor: isDark ? '#e6e6e6' : '#000000' 
+          fgColor: '#000000' 
         };
       case 'entry':
         return { 
           placeholder: 'Enter text...',
-          bgColor: isDark ? '#333333' : '#ffffff',
+          bgColor: '#ffffff',
           cornerRadius: 8,
-          borderColor: isDark ? '#444444' : '#e2e8f0'
+          borderColor: '#e2e8f0'
         };
       case 'image':
         return { 
           src: '/placeholder.svg',
           fit: 'contain',
           cornerRadius: 8,
-          borderColor: isDark ? '#444444' : '#e2e8f0'
+          borderColor: '#e2e8f0'
         };
       case 'slider':
         return { 
@@ -404,58 +395,58 @@ const Canvas = ({
           to: 100,
           value: 50,
           orient: 'horizontal',
-          bgColor: isDark ? '#444444' : '#e2e8f0',
-          troughColor: isDark ? '#666666' : '#3b82f6'
+          bgColor: '#e2e8f0',
+          troughColor: '#3b82f6'
         };
       case 'frame':
         return { 
           relief: 'flat',
           borderwidth: 1,
-          bgColor: isDark ? '#333333' : '#ffffff',
-          borderColor: isDark ? '#444444' : '#e2e8f0',
+          bgColor: '#ffffff',
+          borderColor: '#e2e8f0',
           cornerRadius: 4
         };
       case 'checkbox':
         return { 
           text: 'Checkbox',
           checked: false,
-          fgColor: isDark ? '#e6e6e6' : '#000000'
+          fgColor: '#000000'
         };
       case 'datepicker':
         return { 
           format: 'yyyy-mm-dd',
-          bgColor: isDark ? '#333333' : '#ffffff',
-          fgColor: isDark ? '#e6e6e6' : '#000000',
+          bgColor: '#ffffff',
+          fgColor: '#000000',
           cornerRadius: 8,
-          borderColor: isDark ? '#444444' : '#e2e8f0'
+          borderColor: '#e2e8f0'
         };
       case 'progressbar':
         return { 
           value: 50,
           maxValue: 100,
-          progressColor: isDark ? '#666666' : '#3b82f6',
-          bgColor: isDark ? '#444444' : '#e2e8f0',
+          progressColor: '#3b82f6',
+          bgColor: '#e2e8f0',
           cornerRadius: 4
         };
       case 'notebook':
         return { 
           tabs: 'Tab 1,Tab 2,Tab 3',
           selectedTab: 'Tab 1',
-          bgColor: isDark ? '#333333' : '#ffffff',
-          fgColor: isDark ? '#e6e6e6' : '#000000'
+          bgColor: '#ffffff',
+          fgColor: '#000000'
         };
       case 'listbox':
         return { 
           items: 'Item 1,Item 2,Item 3,Item 4,Item 5',
-          bgColor: isDark ? '#333333' : '#ffffff',
-          fgColor: isDark ? '#e6e6e6' : '#000000',
-          borderColor: isDark ? '#444444' : '#e2e8f0'
+          bgColor: '#ffffff',
+          fgColor: '#000000',
+          borderColor: '#e2e8f0'
         };
       case 'canvas':
         return { 
-          bgColor: isDark ? '#333333' : '#ffffff',
+          bgColor: '#ffffff',
           borderwidth: 1,
-          borderColor: isDark ? '#444444' : '#e2e8f0',
+          borderColor: '#e2e8f0',
           cornerRadius: 4
         };
       default:
@@ -512,7 +503,7 @@ const Canvas = ({
   return (
     <div className="w-full h-full p-8 flex items-center justify-center">
       <div 
-        className={`macos-window ${isDarkMode ? 'dark' : 'light'} flex flex-col`}
+        className="macos-window light flex flex-col"
         style={{ 
           width: windowSize.width, 
           height: windowSize.height,
@@ -554,7 +545,7 @@ const Canvas = ({
 
         <div
           ref={canvasRef}
-          className={`flex-1 canvas-grid relative overflow-auto`}
+          className="flex-1 canvas-grid relative overflow-auto"
           onDragOver={onDragOver}
           onDrop={onDrop}
           onMouseDown={handleCanvasMouseDown}
@@ -603,7 +594,7 @@ const Canvas = ({
                   onMouseDown={(e) => handleMouseDown(e, component)}
                   onContextMenu={(e) => handleContextMenu(e, component)}
                 >
-                  <ComponentPreview component={component} isDarkMode={isDarkMode} />
+                  <ComponentPreview component={component} />
                   {selectedComponent?.id === component.id && (
                     <>
                       <div className="resize-handle absolute w-2 h-2 rounded-full top-0 left-0 -translate-x-1/2 -translate-y-1/2 cursor-nw-resize" data-direction="nw" />
@@ -636,17 +627,17 @@ const Canvas = ({
   );
 };
 
-const ComponentPreview = ({ component, isDarkMode }: { component: Component, isDarkMode: boolean }) => {
+const ComponentPreview = ({ component }: { component: Component }) => {
   switch (component.type) {
     case 'button':
       return (
         <button 
           className="w-full h-full border shadow-sm hover:bg-gray-50 transition-colors"
           style={{
-            backgroundColor: component.props.bgColor || (isDarkMode ? '#333333' : '#ffffff'),
-            color: component.props.fgColor || (isDarkMode ? '#e6e6e6' : '#000000'),
+            backgroundColor: component.props.bgColor || '#ffffff',
+            color: component.props.fgColor || '#000000',
             borderRadius: `${component.props.cornerRadius || 8}px`,
-            borderColor: component.props.borderColor || (isDarkMode ? '#444444' : '#e2e8f0')
+            borderColor: component.props.borderColor || '#e2e8f0'
           }}
         >
           {component.props.text || 'Button'}
@@ -657,7 +648,7 @@ const ComponentPreview = ({ component, isDarkMode }: { component: Component, isD
         <div 
           className="w-full h-full flex items-center"
           style={{
-            color: component.props.fgColor || (isDarkMode ? '#e6e6e6' : '#000000'),
+            color: component.props.fgColor || '#000000',
             fontSize: `${component.props.fontSize || 12}px`,
             fontFamily: component.props.font || 'system-ui',
           }}
@@ -672,10 +663,10 @@ const ComponentPreview = ({ component, isDarkMode }: { component: Component, isD
           className="w-full h-full px-3 border"
           placeholder={component.props.placeholder || 'Enter text...'}
           style={{
-            backgroundColor: component.props.bgColor || (isDarkMode ? '#333333' : '#ffffff'),
+            backgroundColor: component.props.bgColor || '#ffffff',
             borderRadius: `${component.props.cornerRadius || 8}px`,
-            borderColor: component.props.borderColor || (isDarkMode ? '#444444' : '#e2e8f0'),
-            color: isDarkMode ? '#e6e6e6' : '#000000'
+            borderColor: component.props.borderColor || '#e2e8f0',
+            color: '#000000'
           }}
           readOnly
         />
@@ -686,7 +677,7 @@ const ComponentPreview = ({ component, isDarkMode }: { component: Component, isD
           className="w-full h-full border overflow-hidden"
           style={{
             borderRadius: `${component.props.cornerRadius || 8}px`,
-            borderColor: component.props.borderColor || (isDarkMode ? '#444444' : '#e2e8f0')
+            borderColor: component.props.borderColor || '#e2e8f0'
           }}
         >
           <img 
@@ -719,14 +710,14 @@ const ComponentPreview = ({ component, isDarkMode }: { component: Component, isD
             style={{
               width: component.props.orient === 'vertical' ? '8px' : '100%',
               height: component.props.orient === 'vertical' ? '100%' : '8px',
-              backgroundColor: component.props.bgColor || (isDarkMode ? '#444444' : '#e2e8f0'),
+              backgroundColor: component.props.bgColor || '#e2e8f0',
               borderRadius: '4px',
             }}
           >
             <div
               style={{
                 position: 'absolute',
-                backgroundColor: component.props.troughColor || (isDarkMode ? '#666666' : '#3b82f6'),
+                backgroundColor: component.props.troughColor || '#3b82f6',
                 borderRadius: '4px',
                 ...(component.props.orient === 'vertical' 
                   ? {
@@ -746,10 +737,10 @@ const ComponentPreview = ({ component, isDarkMode }: { component: Component, isD
                 position: 'absolute',
                 width: '16px',
                 height: '16px',
-                backgroundColor: isDarkMode ? '#666666' : 'white',
+                backgroundColor: 'white',
                 borderRadius: '50%',
-                border: `1px solid ${isDarkMode ? '#777777' : '#d1d5db'}`,
-                boxShadow: isDarkMode ? '0 1px 2px rgba(0, 0, 0, 0.3)' : '0 1px 2px rgba(0, 0, 0, 0.1)',
+                border: '1px solid #d1d5db',
+                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
                 ...(component.props.orient === 'vertical'
                   ? {
                       left: '50%',
@@ -772,9 +763,9 @@ const ComponentPreview = ({ component, isDarkMode }: { component: Component, isD
         <div 
           className="w-full h-full"
           style={{
-            backgroundColor: component.props.bgColor || (isDarkMode ? '#333333' : '#ffffff'),
+            backgroundColor: component.props.bgColor || '#ffffff',
             borderWidth: `${component.props.borderwidth || 1}px`,
-            borderColor: component.props.borderColor || (isDarkMode ? '#444444' : '#e2e8f0'),
+            borderColor: component.props.borderColor || '#e2e8f0',
             borderStyle: 
               component.props.relief === 'flat' ? 'solid' :
               component.props.relief === 'groove' ? 'groove' :
@@ -791,11 +782,8 @@ const ComponentPreview = ({ component, isDarkMode }: { component: Component, isD
             className="w-4 h-4 rounded border-gray-300"
             defaultChecked={component.props.checked}
             readOnly
-            style={{
-              accentColor: isDarkMode ? '#666666' : undefined
-            }}
           />
-          <span style={{ color: component.props.fgColor || (isDarkMode ? '#e6e6e6' : '#000000') }}>
+          <span style={{ color: component.props.fgColor || '#000000' }}>
             {component.props.text || 'Checkbox'}
           </span>
         </label>
@@ -805,10 +793,10 @@ const ComponentPreview = ({ component, isDarkMode }: { component: Component, isD
         <div 
           className="w-full h-full flex items-center border px-3"
           style={{
-            backgroundColor: component.props.bgColor || (isDarkMode ? '#333333' : '#ffffff'),
+            backgroundColor: component.props.bgColor || '#ffffff',
             borderRadius: `${component.props.cornerRadius || 8}px`,
-            borderColor: component.props.borderColor || (isDarkMode ? '#444444' : '#e2e8f0'),
-            color: component.props.fgColor || (isDarkMode ? '#e6e6e6' : '#000000'),
+            borderColor: component.props.borderColor || '#e2e8f0',
+            color: component.props.fgColor || '#000000',
           }}
         >
           <div className="flex justify-between w-full items-center">
@@ -827,7 +815,7 @@ const ComponentPreview = ({ component, isDarkMode }: { component: Component, isD
           <div 
             className="w-full h-3 rounded-full overflow-hidden"
             style={{
-              backgroundColor: component.props.bgColor || (isDarkMode ? '#444444' : '#e2e8f0'),
+              backgroundColor: component.props.bgColor || '#e2e8f0',
               borderRadius: `${component.props.cornerRadius || 4}px`,
             }}
           >
@@ -835,7 +823,7 @@ const ComponentPreview = ({ component, isDarkMode }: { component: Component, isD
               className="h-full"
               style={{
                 width: `${(component.props.value / component.props.maxValue) * 100}%`,
-                backgroundColor: component.props.progressColor || (isDarkMode ? '#666666' : '#3b82f6'),
+                backgroundColor: component.props.progressColor || '#3b82f6',
                 transition: 'width 0.3s ease-in-out'
               }}
             />
@@ -847,12 +835,12 @@ const ComponentPreview = ({ component, isDarkMode }: { component: Component, isD
         <div 
           className="w-full h-full flex flex-col border"
           style={{
-            backgroundColor: component.props.bgColor || (isDarkMode ? '#333333' : '#ffffff'),
-            color: component.props.fgColor || (isDarkMode ? '#e6e6e6' : '#000000'),
-            borderColor: isDarkMode ? '#444444' : '#e2e8f0',
+            backgroundColor: component.props.bgColor || '#ffffff',
+            color: component.props.fgColor || '#000000',
+            borderColor: '#e2e8f0',
           }}
         >
-          <div className="flex border-b" style={{ borderColor: isDarkMode ? '#444444' : '#e2e8f0' }}>
+          <div className="flex border-b" style={{ borderColor: '#e2e8f0' }}>
             {(component.props.tabs || 'Tab 1,Tab 2,Tab 3')
               .split(',')
               .map((tab: string, i: number) => (
@@ -861,11 +849,10 @@ const ComponentPreview = ({ component, isDarkMode }: { component: Component, isD
                   className={`px-4 py-2 cursor-default ${
                     tab.trim() === (component.props.selectedTab || 'Tab 1')
                       ? 'border-b-2 font-medium'
-                      : isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                      : 'text-gray-500'
                   }`}
                   style={{
-                    borderColor: tab.trim() === (component.props.selectedTab || 'Tab 1') ? 
-                      (isDarkMode ? '#666666' : '#3b82f6') : 'transparent'
+                    borderColor: tab.trim() === (component.props.selectedTab || 'Tab 1') ? '#3b82f6' : 'transparent'
                   }}
                 >
                   {tab.trim()}
@@ -874,7 +861,7 @@ const ComponentPreview = ({ component, isDarkMode }: { component: Component, isD
           </div>
           <div className="flex-1 p-4">
             <div className="h-full w-full flex items-center justify-center text-sm" 
-              style={{ color: isDarkMode ? 'rgba(230, 230, 230, 0.5)' : 'rgba(0, 0, 0, 0.4)' }}>
+              style={{ color: 'rgba(0, 0, 0, 0.4)' }}>
               Content for {component.props.selectedTab || 'Tab 1'}
             </div>
           </div>
@@ -885,9 +872,9 @@ const ComponentPreview = ({ component, isDarkMode }: { component: Component, isD
         <div 
           className="w-full h-full border overflow-y-auto"
           style={{
-            backgroundColor: component.props.bgColor || (isDarkMode ? '#333333' : '#ffffff'),
-            color: component.props.fgColor || (isDarkMode ? '#e6e6e6' : '#000000'),
-            borderColor: component.props.borderColor || (isDarkMode ? '#444444' : '#e2e8f0'),
+            backgroundColor: component.props.bgColor || '#ffffff',
+            color: component.props.fgColor || '#000000',
+            borderColor: component.props.borderColor || '#e2e8f0',
           }}
         >
           {(component.props.items || 'Item 1,Item 2,Item 3,Item 4,Item 5')
@@ -895,7 +882,7 @@ const ComponentPreview = ({ component, isDarkMode }: { component: Component, isD
             .map((item: string, i: number) => (
               <div
                 key={i}
-                className={`px-3 py-1 cursor-default ${i === 0 ? (isDarkMode ? 'bg-gray-700/50' : 'bg-blue-100') : (isDarkMode ? 'hover:bg-gray-700/20' : 'hover:bg-gray-50')}`}
+                className={`px-3 py-1 cursor-default ${i === 0 ? 'bg-blue-100' : 'hover:bg-gray-50'}`}
               >
                 {item.trim()}
               </div>
@@ -907,15 +894,15 @@ const ComponentPreview = ({ component, isDarkMode }: { component: Component, isD
         <div 
           className="w-full h-full"
           style={{
-            backgroundColor: component.props.bgColor || (isDarkMode ? '#333333' : '#ffffff'),
+            backgroundColor: component.props.bgColor || '#ffffff',
             borderWidth: `${component.props.borderwidth || 1}px`,
-            borderColor: component.props.borderColor || (isDarkMode ? '#444444' : '#e2e8f0'),
+            borderColor: component.props.borderColor || '#e2e8f0',
             borderStyle: 'solid',
             borderRadius: `${component.props.cornerRadius || 4}px`,
           }}
         >
           <div className="h-full w-full flex items-center justify-center text-sm"
-               style={{ color: isDarkMode ? 'rgba(230, 230, 230, 0.5)' : 'rgba(0, 0, 0, 0.4)' }}>
+               style={{ color: 'rgba(0, 0, 0, 0.4)' }}>
             Canvas Area
           </div>
         </div>

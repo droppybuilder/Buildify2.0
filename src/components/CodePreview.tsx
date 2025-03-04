@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-python';
 import 'prismjs/components/prism-javascript';
-import 'prismjs/components/prism-html';
+// Remove the problematic import for HTML highlighting
 import 'prismjs/themes/prism.css';
 import { generateCode } from '@/utils/codeGenerator';
 
@@ -38,6 +38,11 @@ export const CodePreview = ({ components, isTkinter }: CodePreviewProps) => {
       }
       
       if (codeRef.current) {
+        // For HTML, since we don't have prism-html component, we can use markup
+        // which is included in the core Prism package
+        if (codeType === "html") {
+          codeRef.current.className = "code-preview language-markup";
+        }
         Prism.highlightElement(codeRef.current);
       }
     } catch (error) {
@@ -49,9 +54,13 @@ export const CodePreview = ({ components, isTkinter }: CodePreviewProps) => {
   // Apply syntax highlighting whenever code changes
   useEffect(() => {
     if (codeRef.current) {
+      // For HTML, since we don't have prism-html component, we can use markup
+      if (codeType === "html") {
+        codeRef.current.className = "code-preview language-markup";
+      }
       Prism.highlightElement(codeRef.current);
     }
-  }, [code]);
+  }, [code, codeType]);
   
   // Generate HTML template for Eel
   const generateHtmlTemplate = () => {
@@ -235,8 +244,11 @@ async function updateComponent(componentId, properties) {
         </div>
       </div>
       <div className="code-preview-container flex-1 overflow-auto p-3">
-        <pre className={`code-preview language-${codeType} h-full m-0`} ref={codeRef}>
-          <code className={`language-${codeType}`}>{code}</code>
+        <pre 
+          className={`code-preview ${codeType === "html" ? "language-markup" : `language-${codeType}`} h-full m-0`} 
+          ref={codeRef}
+        >
+          <code className={codeType === "html" ? "language-markup" : `language-${codeType}`}>{code}</code>
         </pre>
       </div>
     </div>

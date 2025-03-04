@@ -1,15 +1,13 @@
 
-import { useState, useCallback, useEffect, useContext } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import Canvas from '@/components/Canvas';
 import { PropertyPanel } from '@/components/PropertyPanel';
 import { CodePreview } from '@/components/CodePreview';
 import { Toolbar } from '@/components/Toolbar';
 import { toast } from 'sonner';
-import { ThemeContext } from '../App';
 
 const Index = () => {
-  const { isDarkMode } = useContext(ThemeContext);
   const [selectedComponent, setSelectedComponent] = useState(null);
   const [components, setComponents] = useState([]);
   const [isTkinter, setIsTkinter] = useState(true);

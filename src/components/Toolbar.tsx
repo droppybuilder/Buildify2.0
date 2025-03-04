@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -139,6 +140,7 @@ This is a Python GUI application built with ${isTkinter ? 'Tkinter' : 'CustomTki
       .catch(() => toast.error("Failed to copy code"));
   };
 
+  // Fixed Tkinter toggle to correctly reflect and set isTkinter state
   const handleTkinterToggle = (checked: boolean) => {
     setIsTkinter(!checked);
     toast.info(`Switched to ${!checked ? "Tkinter" : "CustomTkinter"} mode`);

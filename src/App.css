@@ -11,39 +11,8 @@
   padding: 0;
 }
 
-/* Dark mode styles - Dracula inspired */
-.dark {
-  --background: 231 15% 18%;
-  --foreground: 60 30% 96%;
-  --card: 232 14% 22%;
-  --card-foreground: 60 30% 96%;
-  --popover: 232 14% 22%;
-  --popover-foreground: 60 30% 96%;
-  --primary: 326 100% 74%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 232 14% 25%;
-  --secondary-foreground: 60 30% 96%;
-  --muted: 232 14% 25%;
-  --muted-foreground: 240 5% 64.9%;
-  --accent: 232 14% 25%;
-  --accent-foreground: 60 30% 96%;
-  --destructive: 0 85% 60%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 232 14% 25%;
-  --input: 232 14% 25%;
-  --ring: 240 4% 70%;
-  --sidebar-background: 230 15% 15%;
-  --sidebar-foreground: 60 30% 96%;
-  --sidebar-primary: 326 100% 74%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 232 14% 25%;
-  --sidebar-accent-foreground: 60 30% 96%;
-  --sidebar-border: 232 14% 25%;
-  --sidebar-ring: 232 14% 25%;
-}
-
 /* Light mode styles */
-.light {
+:root {
   --background: 0 0% 100%;
   --foreground: 0 0% 10%;
   --card: 0 0% 98%;
@@ -78,16 +47,6 @@
   background-size: 20px 20px;
   border-radius: 0;
   transition: all 0.3s ease;
-}
-
-.dark .canvas-grid {
-  background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
-  background-color: hsl(231, 15%, 16%);
-}
-
-.light .canvas-grid {
   background-image: 
     linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
@@ -101,15 +60,6 @@
   overflow: hidden;
   transition: all 0.2s ease;
   border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.dark .macos-window {
-  background-color: hsl(232, 14%, 20%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
-}
-
-.light .macos-window {
   background-color: white;
   border: 1px solid rgba(0, 0, 0, 0.08);
 }
@@ -120,14 +70,6 @@
   align-items: center;
   padding: 0 12px;
   user-select: none;
-}
-
-.dark .window-titlebar {
-  background: hsl(232, 14%, 22%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.light .window-titlebar {
   background: #f2f2f2;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
@@ -174,13 +116,6 @@
   text-align: center;
   font-size: 13px;
   font-weight: 500;
-}
-
-.dark .window-title {
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.light .window-title {
   color: rgba(0, 0, 0, 0.7);
 }
 
@@ -188,29 +123,18 @@
 .component-preview {
   transition: all 0.2s ease;
   border: 2px solid transparent;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .component-preview.selected {
   border: 2px solid hsl(var(--primary));
 }
 
-.dark .component-preview {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-}
-
-.light .component-preview {
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-}
-
-.dark .resize-handle {
+.resize-handle {
   background-color: hsl(var(--primary));
 }
 
-.light .resize-handle {
-  background-color: hsl(var(--primary));
-}
-
-/* Code highlighting styles - Dracula theme */
+/* Code highlighting styles - Light theme */
 .code-preview {
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
@@ -222,54 +146,50 @@
   margin: 0;
   width: 100%;
   height: 100%;
+  background-color: #f8f8f8 !important;
+  color: #333 !important;
 }
 
-/* Dark code preview (Dracula theme) */
-.code-preview {
-  background-color: #282a36 !important;
-  color: #f8f8f2 !important;
-}
-
-/* Prism syntax highlighting - Dracula theme */
+/* Prism syntax highlighting - Light theme */
 .token.comment {
-  color: #6272a4;
+  color: #6a9955;
   font-style: italic;
 }
 
 .token.string {
-  color: #f1fa8c;
+  color: #a31515;
 }
 
 .token.number {
-  color: #bd93f9;
+  color: #0000ff;
 }
 
 .token.keyword, 
 .token.function {
-  color: #ff79c6;
+  color: #0070c1;
 }
 
 .token.operator {
-  color: #ff79c6;
+  color: #333333;
 }
 
 .token.punctuation {
-  color: #f8f8f2;
+  color: #333333;
 }
 
 .token.class-name, 
 .token.builtin {
-  color: #8be9fd;
+  color: #2b91af;
 }
 
 .token.boolean,
 .token.constant {
-  color: #bd93f9;
+  color: #0000ff;
 }
 
 .token.property,
 .token.symbol {
-  color: #ffb86c;
+  color: #795e26;
 }
 
 /* Fix unwanted spacing in property panel */
@@ -307,7 +227,7 @@
 .code-preview-container {
   @apply flex-1 overflow-auto;
   padding: 0;
-  background-color: #282a36; /* Dracula background */
+  background-color: #f8f8f8;
 }
 
 /* Fix sidebar styling */
@@ -334,7 +254,7 @@
   @apply text-sm font-medium;
 }
 
-/* Custom scrollbar - Dracula style */
+/* Custom scrollbar - Light style */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -349,11 +269,11 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(98, 114, 164, 0.6);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(98, 114, 164, 0.8);
+  background: rgba(0, 0, 0, 0.3);
 }
 
 /* Toolbar improvements */

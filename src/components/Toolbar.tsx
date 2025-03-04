@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -44,8 +45,8 @@ export const Toolbar = ({
   canRedo
 }: ToolbarProps) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [appName, setAppName] = useState("MyGUIApp");
-  const [windowTitle, setWindowTitle] = useState("GUI Application");
+  const [appName, setAppName] = useState("MyEelApp");
+  const [windowTitle, setWindowTitle] = useState("Eel GUI Application");
   const [includeImageData, setIncludeImageData] = useState(true);
   const [exportFilename, setExportFilename] = useState("my_app");
   const [customImports, setCustomImports] = useState("");
@@ -58,21 +59,24 @@ export const Toolbar = ({
     }
 
     try {
-      const mainCode = generateCode(components, isTkinter, appName, windowTitle, includeImageData, customImports, optimizeCode);
+      const mainPythonCode = generateCode(components, isTkinter, appName, windowTitle, includeImageData, customImports, optimizeCode);
       
       const zip = new JSZip();
       const fileName = exportFilename || 'my_app';
       
-      zip.file(`${fileName}.py`, mainCode);
+      // Add main Python file
+      zip.file(`${fileName}.py`, mainPythonCode);
       
+      // Add requirements.txt based on UI mode
       const requirements = isTkinter 
         ? "pillow==9.5.0" 
-        : "customtkinter==5.2.0\npillow==9.5.0\nrequests==2.31.0";
+        : "eel==0.15.0\npillow==9.5.0\nrequests==2.31.0";
       zip.file("requirements.txt", requirements);
       
+      // Add readme
       const readme = `# ${appName} GUI Application
 
-This is a Python GUI application built with ${isTkinter ? 'Tkinter' : 'CustomTkinter'}.
+This is a ${isTkinter ? 'Tkinter' : 'Eel'} GUI application built with Python.
 
 ## Requirements
 
@@ -93,15 +97,244 @@ This is a Python GUI application built with ${isTkinter ? 'Tkinter' : 'CustomTki
 
 ## Notes
 
-- If you encounter any image loading issues, make sure the image paths are correct.
-- For any issues with CustomTkinter, please refer to the official documentation.
+${isTkinter 
+  ? '- If you encounter any image loading issues, make sure the image paths are correct.'
+  : '- Eel requires Chrome to be installed on your system or another compatible browser.'}
 `;
       zip.file("README.md", readme);
+      
+      // If using Eel, create web folder structure
+      if (!isTkinter) {
+        // Create web folder and subfolders
+        const webFolder = zip.folder("web");
+        const cssFolder = webFolder.folder("css");
+        const jsFolder = webFolder.folder("js");
+        const imagesFolder = webFolder.folder("images");
+        
+        // Add HTML file
+        webFolder.file("index.html", `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${windowTitle}</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <div id="componentContainer" class="component-container">
+            <!-- Components will be rendered here dynamically -->
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="/eel.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>`);
+        
+        // Add CSS file
+        cssFolder.file("styles.css", `body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+}
+
+.app-container {
+    width: 100%;
+    height: 100vh;
+    position: relative;
+}
+
+.component-container {
+    position: relative;
+    width: 800px;
+    height: 600px;
+    margin: 0 auto;
+    background-color: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Component styles */
+.component {
+    position: absolute;
+}
+
+.eel-button {
+    width: 100%;
+    height: 100%;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.eel-button:hover {
+    background-color: #2563eb;
+}
+
+.eel-label {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+}
+
+.eel-entry {
+    width: 100%;
+    height: 100%;
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.eel-slider {
+    width: 100%;
+}
+
+.eel-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.eel-image {
+    max-width: 100%;
+    max-height: 100%;
+}`);
+        
+        // Add JavaScript file
+        jsFolder.file("app.js", `// Main application JavaScript for Eel
+document.addEventListener('DOMContentLoaded', async function() {
+    // Initialize the application
+    await initApp();
+});
+
+// Initialize the application
+async function initApp() {
+    try {
+        // Get components from Python
+        const components = await eel.get_components()();
+        
+        // Render components
+        renderComponents(components);
+        
+        // Set up event listeners
+        setupEventListeners();
+    } catch (error) {
+        console.error('Error initializing app:', error);
+    }
+}
+
+// Render components based on data from Python
+function renderComponents(components) {
+    const container = document.getElementById('componentContainer');
+    container.innerHTML = ''; // Clear existing components
+    
+    components.forEach(component => {
+        const element = createComponentElement(component);
+        container.appendChild(element);
+    });
+}
+
+// Create DOM element for a component
+function createComponentElement(component) {
+    const element = document.createElement('div');
+    element.id = \`component-\${component.id}\`;
+    element.className = \`component component-\${component.type}\`;
+    element.style.position = 'absolute';
+    element.style.left = \`\${component.position.x}px\`;
+    element.style.top = \`\${component.position.y}px\`;
+    element.style.width = \`\${component.size.width}px\`;
+    element.style.height = \`\${component.size.height}px\`;
+    
+    // Create inner content based on component type
+    switch(component.type) {
+        case 'button':
+            element.innerHTML = \`<button class="eel-button">\${component.props.text || 'Button'}</button>\`;
+            element.querySelector('button').addEventListener('click', () => {
+                handleComponentAction(component.id, 'click');
+            });
+            break;
+            
+        case 'label':
+            element.innerHTML = \`<div class="eel-label">\${component.props.text || 'Label'}</div>\`;
+            break;
+            
+        case 'entry':
+            element.innerHTML = \`<input type="text" class="eel-entry" placeholder="\${component.props.placeholder || ''}">\`;
+            element.querySelector('input').addEventListener('change', (e) => {
+                handleComponentAction(component.id, 'change', { value: e.target.value });
+            });
+            break;
+            
+        case 'image':
+            element.innerHTML = \`<img src="images/image_\${component.id}.png" class="eel-image" alt="Image">\`;
+            break;
+            
+        case 'slider':
+            element.innerHTML = \`<input type="range" min="\${component.props.min || 0}" max="\${component.props.max || 100}" class="eel-slider">\`;
+            element.querySelector('input').addEventListener('input', (e) => {
+                handleComponentAction(component.id, 'change', { value: e.target.value });
+            });
+            break;
+            
+        case 'checkbox':
+            element.innerHTML = \`<label class="eel-checkbox"><input type="checkbox"><span>\${component.props.text || 'Checkbox'}</span></label>\`;
+            element.querySelector('input').addEventListener('change', (e) => {
+                handleComponentAction(component.id, 'change', { checked: e.target.checked });
+            });
+            break;
+            
+        default:
+            element.innerHTML = \`<div class="eel-unknown">\${component.type}</div>\`;
+    }
+    
+    return element;
+}
+
+// Handle component actions
+async function handleComponentAction(componentId, action, data = null) {
+    try {
+        const result = await eel.handle_component_action(componentId, action, data)();
+        console.log('Action result:', result);
+    } catch (error) {
+        console.error('Error handling component action:', error);
+    }
+}
+
+// Set up global event listeners
+function setupEventListeners() {
+    // Example global event listener
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            console.log('Escape key pressed');
+        }
+    });
+}
+
+// Update a specific component
+async function updateComponent(componentId, properties) {
+    try {
+        const result = await eel.update_component(componentId, properties)();
+        if (result.status === 'success') {
+            // Refresh components to reflect changes
+            const components = await eel.get_components()();
+            renderComponents(components);
+        }
+    } catch (error) {
+        console.error('Error updating component:', error);
+    }
+}`);
+      }
       
       const imageComponents = components.filter(c => c.type === 'image' && c.props.src && !c.props.src.startsWith('/placeholder'));
       
       if (imageComponents.length > 0 && includeImageData) {
-        const imgFolder = zip.folder("images");
+        const imgFolder = isTkinter ? zip.folder("images") : zip.folder("web").folder("images");
         
         for (let i = 0; i < imageComponents.length; i++) {
           const comp = imageComponents[i];
@@ -110,12 +343,12 @@ This is a Python GUI application built with ${isTkinter ? 'Tkinter' : 'CustomTki
           try {
             if (imgSrc.startsWith('data:image')) {
               const base64Data = imgSrc.split(',')[1];
-              imgFolder.file(`image_${i}.png`, base64Data, {base64: true});
+              imgFolder.file(`image_${comp.id}.png`, base64Data, {base64: true});
             } 
             else if (imgSrc.startsWith('blob:')) {
               const response = await fetch(imgSrc);
               const blob = await response.blob();
-              imgFolder.file(`image_${i}.png`, blob);
+              imgFolder.file(`image_${comp.id}.png`, blob);
             }
           } catch (error) {
             console.error(`Error processing image ${i}:`, error);
@@ -124,7 +357,7 @@ This is a Python GUI application built with ${isTkinter ? 'Tkinter' : 'CustomTki
       }
       
       const content = await zip.generateAsync({type: "blob"});
-      saveAs(content, `${fileName}_${isTkinter ? 'tkinter' : 'customtkinter'}.zip`);
+      saveAs(content, `${fileName}_${isTkinter ? 'tkinter' : 'eel'}.zip`);
       toast.success("Code and resources exported successfully!");
     } catch (error) {
       console.error("Export error:", error);
@@ -140,9 +373,9 @@ This is a Python GUI application built with ${isTkinter ? 'Tkinter' : 'CustomTki
   };
 
   const handleTkinterToggle = (checked: boolean) => {
-    console.log("Toolbar - Switching to:", checked ? "CustomTkinter" : "Tkinter");
+    console.log("Toolbar - Switching to:", checked ? "Eel" : "Tkinter");
     setIsTkinter(!checked);
-    toast.info(`Switched to ${!checked ? "Tkinter" : "CustomTkinter"} mode`);
+    toast.info(`Switched to ${!checked ? "Tkinter" : "Eel"} mode`);
   };
 
   return (
@@ -176,7 +409,7 @@ This is a Python GUI application built with ${isTkinter ? 'Tkinter' : 'CustomTki
             onCheckedChange={handleTkinterToggle}
             id="tkinter-toggle"
           />
-          <span className="text-sm font-medium">CustomTkinter</span>
+          <span className="text-sm font-medium">Eel</span>
         </div>
         
         <Button
@@ -256,7 +489,7 @@ This is a Python GUI application built with ${isTkinter ? 'Tkinter' : 'CustomTki
                 id="customImports"
                 value={customImports}
                 onChange={(e) => setCustomImports(e.target.value)}
-                placeholder="from tkinter import filedialog"
+                placeholder="import requests"
                 className="col-span-2 h-20"
               />
             </div>

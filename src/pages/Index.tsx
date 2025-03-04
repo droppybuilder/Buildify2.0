@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 const Index = () => {
   const [selectedComponent, setSelectedComponent] = useState(null);
   const [components, setComponents] = useState([]);
-  const [isTkinter, setIsTkinter] = useState(true);
+  const [isTkinter, setIsTkinter] = useState(false); // Default to Eel instead of Tkinter
   const [history, setHistory] = useState<any[][]>([[]]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [inputFocused, setInputFocused] = useState(false);
@@ -45,11 +45,11 @@ const Index = () => {
     }
   }, [components]);
   
-  // Save Tkinter/CustomTkinter preference
+  // Save Tkinter/Eel preference
   useEffect(() => {
     try {
       localStorage.setItem('guiBuilderIsTkinter', String(isTkinter));
-      console.log("Index - Saved isTkinter preference:", isTkinter ? "Tkinter" : "CustomTkinter");
+      console.log("Index - Saved isTkinter preference:", isTkinter ? "Tkinter" : "Eel");
     } catch (error) {
       console.error('Failed to save Tkinter preference:', error);
     }
@@ -110,7 +110,7 @@ const Index = () => {
   }, [components, handleComponentsChange, selectedComponents]);
   
   const handleToggleTkinter = useCallback((value: boolean) => {
-    console.log("Index - Toggling Tkinter mode to:", value ? "Tkinter" : "CustomTkinter");
+    console.log("Index - Toggling Tkinter mode to:", value ? "Tkinter" : "Eel");
     setIsTkinter(value);
   }, []);
   

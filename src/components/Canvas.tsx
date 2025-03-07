@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { toast } from "sonner";
 import { Maximize2, Minimize2, X, Copy, Scissors, Trash } from "lucide-react";
@@ -318,6 +317,13 @@ const Canvas = ({
     }
   };
 
+  const handleComponentUpdate = (updatedComponent: Component) => {
+    const newComponents = components.map(comp => 
+      comp.id === updatedComponent.id ? updatedComponent : comp
+    );
+    setComponents(newComponents);
+  };
+
   const getDefaultSize = (type: string) => {
     switch (type) {
       case 'button':
@@ -632,12 +638,15 @@ const ComponentPreview = ({ component }: { component: Component }) => {
     case 'button':
       return (
         <button 
-          className="w-full h-full border shadow-sm hover:bg-gray-50 transition-colors"
+          className="w-full h-full border transition-colors"
           style={{
             backgroundColor: component.props.bgColor || '#ffffff',
             color: component.props.fgColor || '#000000',
             borderRadius: `${component.props.cornerRadius || 8}px`,
-            borderColor: component.props.borderColor || '#e2e8f0'
+            borderColor: component.props.borderColor || '#e2e8f0',
+            borderWidth: `${component.props.borderWidth || 1}px`,
+            borderStyle: 'solid',
+            cursor: 'default'
           }}
         >
           {component.props.text || 'Button'}
@@ -660,12 +669,14 @@ const ComponentPreview = ({ component }: { component: Component }) => {
       return (
         <input
           type="text"
-          className="w-full h-full px-3 border"
+          className="w-full h-full px-3"
           placeholder={component.props.placeholder || 'Enter text...'}
           style={{
             backgroundColor: component.props.bgColor || '#ffffff',
             borderRadius: `${component.props.cornerRadius || 8}px`,
             borderColor: component.props.borderColor || '#e2e8f0',
+            borderWidth: `${component.props.borderWidth || 1}px`,
+            borderStyle: 'solid',
             color: '#000000'
           }}
           readOnly
@@ -674,10 +685,12 @@ const ComponentPreview = ({ component }: { component: Component }) => {
     case 'image':
       return (
         <div 
-          className="w-full h-full border overflow-hidden"
+          className="w-full h-full overflow-hidden"
           style={{
             borderRadius: `${component.props.cornerRadius || 8}px`,
-            borderColor: component.props.borderColor || '#e2e8f0'
+            borderColor: component.props.borderColor || '#e2e8f0',
+            borderWidth: `${component.props.borderWidth || 1}px`,
+            borderStyle: 'solid'
           }}
         >
           <img 
@@ -717,7 +730,7 @@ const ComponentPreview = ({ component }: { component: Component }) => {
             <div
               style={{
                 position: 'absolute',
-                backgroundColor: component.props.troughColor || '#3b82f6',
+                backgroundColor: component.props.progressColor || '#3b82f6',
                 borderRadius: '4px',
                 ...(component.props.orient === 'vertical' 
                   ? {
@@ -739,7 +752,7 @@ const ComponentPreview = ({ component }: { component: Component }) => {
                 height: '16px',
                 backgroundColor: 'white',
                 borderRadius: '50%',
-                border: '1px solid #d1d5db',
+                border: `1px solid ${component.props.borderColor || '#d1d5db'}`,
                 boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
                 ...(component.props.orient === 'vertical'
                   ? {
@@ -764,7 +777,7 @@ const ComponentPreview = ({ component }: { component: Component }) => {
           className="w-full h-full"
           style={{
             backgroundColor: component.props.bgColor || '#ffffff',
-            borderWidth: `${component.props.borderwidth || 1}px`,
+            borderWidth: `${component.props.borderWidth || 1}px`,
             borderColor: component.props.borderColor || '#e2e8f0',
             borderStyle: 
               component.props.relief === 'flat' ? 'solid' :
@@ -779,8 +792,12 @@ const ComponentPreview = ({ component }: { component: Component }) => {
         <label className="flex items-center gap-2 h-full cursor-default">
           <input 
             type="checkbox" 
-            className="w-4 h-4 rounded border-gray-300"
+            className="w-4 h-4 rounded"
             defaultChecked={component.props.checked}
+            style={{
+              borderColor: component.props.borderColor || '#d1d5db',
+              accentColor: component.props.checkedColor || '#3b82f6',
+            }}
             readOnly
           />
           <span style={{ color: component.props.fgColor || '#000000' }}>
@@ -791,11 +808,13 @@ const ComponentPreview = ({ component }: { component: Component }) => {
     case 'datepicker':
       return (
         <div 
-          className="w-full h-full flex items-center border px-3"
+          className="w-full h-full flex items-center px-3"
           style={{
             backgroundColor: component.props.bgColor || '#ffffff',
             borderRadius: `${component.props.cornerRadius || 8}px`,
             borderColor: component.props.borderColor || '#e2e8f0',
+            borderWidth: `${component.props.borderWidth || 1}px`,
+            borderStyle: 'solid',
             color: component.props.fgColor || '#000000',
           }}
         >
@@ -813,10 +832,13 @@ const ComponentPreview = ({ component }: { component: Component }) => {
           className="w-full h-full flex items-center"
         >
           <div 
-            className="w-full h-3 rounded-full overflow-hidden"
+            className="w-full h-3 overflow-hidden"
             style={{
               backgroundColor: component.props.bgColor || '#e2e8f0',
               borderRadius: `${component.props.cornerRadius || 4}px`,
+              borderColor: component.props.borderColor || '#e2e8f0',
+              borderWidth: `${component.props.borderWidth || 0}px`,
+              borderStyle: 'solid',
             }}
           >
             <div 
@@ -833,14 +855,17 @@ const ComponentPreview = ({ component }: { component: Component }) => {
     case 'notebook':
       return (
         <div 
-          className="w-full h-full flex flex-col border"
+          className="w-full h-full flex flex-col"
           style={{
             backgroundColor: component.props.bgColor || '#ffffff',
             color: component.props.fgColor || '#000000',
-            borderColor: '#e2e8f0',
+            borderColor: component.props.borderColor || '#e2e8f0',
+            borderWidth: `${component.props.borderWidth || 1}px`,
+            borderStyle: 'solid',
+            borderRadius: `${component.props.cornerRadius || 4}px`,
           }}
         >
-          <div className="flex border-b" style={{ borderColor: '#e2e8f0' }}>
+          <div className="flex border-b" style={{ borderColor: component.props.borderColor || '#e2e8f0' }}>
             {(component.props.tabs || 'Tab 1,Tab 2,Tab 3')
               .split(',')
               .map((tab: string, i: number) => (
@@ -852,7 +877,8 @@ const ComponentPreview = ({ component }: { component: Component }) => {
                       : 'text-gray-500'
                   }`}
                   style={{
-                    borderColor: tab.trim() === (component.props.selectedTab || 'Tab 1') ? '#3b82f6' : 'transparent'
+                    borderColor: tab.trim() === (component.props.selectedTab || 'Tab 1') ? 
+                      (component.props.activeTabColor || '#3b82f6') : 'transparent'
                   }}
                 >
                   {tab.trim()}
@@ -870,11 +896,14 @@ const ComponentPreview = ({ component }: { component: Component }) => {
     case 'listbox':
       return (
         <div 
-          className="w-full h-full border overflow-y-auto"
+          className="w-full h-full overflow-y-auto"
           style={{
             backgroundColor: component.props.bgColor || '#ffffff',
             color: component.props.fgColor || '#000000',
             borderColor: component.props.borderColor || '#e2e8f0',
+            borderWidth: `${component.props.borderWidth || 1}px`,
+            borderStyle: 'solid',
+            borderRadius: `${component.props.cornerRadius || 4}px`,
           }}
         >
           {(component.props.items || 'Item 1,Item 2,Item 3,Item 4,Item 5')
@@ -883,6 +912,9 @@ const ComponentPreview = ({ component }: { component: Component }) => {
               <div
                 key={i}
                 className={`px-3 py-1 cursor-default ${i === 0 ? 'bg-blue-100' : 'hover:bg-gray-50'}`}
+                style={{
+                  backgroundColor: i === 0 ? (component.props.selectedColor || '#3b82f6') + '20' : 'transparent'
+                }}
               >
                 {item.trim()}
               </div>
@@ -895,7 +927,7 @@ const ComponentPreview = ({ component }: { component: Component }) => {
           className="w-full h-full"
           style={{
             backgroundColor: component.props.bgColor || '#ffffff',
-            borderWidth: `${component.props.borderwidth || 1}px`,
+            borderWidth: `${component.props.borderWidth || 1}px`,
             borderColor: component.props.borderColor || '#e2e8f0',
             borderStyle: 'solid',
             borderRadius: `${component.props.cornerRadius || 4}px`,

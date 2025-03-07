@@ -18,10 +18,11 @@ export const CodePreview: React.FC<CodePreviewProps> = ({ components, visible })
 
   useEffect(() => {
     if (visible) {
-      // Ensure component properties are correctly prepared
+      // Generate code for components, using props instead of properties
       const preparedComponents = components.map(component => ({
         ...component,
-        properties: component.properties || {}
+        // Ensure props always exists
+        props: component.props || {}
       }));
       
       const pythonCode = generatePythonCode(preparedComponents);
@@ -43,10 +44,10 @@ export const CodePreview: React.FC<CodePreviewProps> = ({ components, visible })
   const handleExport = async () => {
     try {
       setIsExporting(true);
-      // Ensure component properties are correctly prepared
+      // Ensure props always exists for components
       const preparedComponents = components.map(component => ({
         ...component,
-        properties: component.properties || {}
+        props: component.props || {}
       }));
       
       await exportProject(preparedComponents);
@@ -91,6 +92,13 @@ If you encounter errors:
 1. Make sure you have the correct version of CustomTkinter installed (5.2.0+)
 2. Check that all required packages are installed
 3. Verify Python version is 3.7 or later
+4. For layout issues, adjust the window size or component placement
+5. If you see "width and height arguments must be passed to the constructor" error, make sure to pass width and height in the constructor, not in place()
+
+## Reference
+For more information on CustomTkinter API:
+- [CustomTkinter Documentation](https://customtkinter.tomschimansky.com/documentation/)
+- [GitHub Repository](https://github.com/TomSchimansky/CustomTkinter)
 `;
 
   if (!visible) {
@@ -158,7 +166,7 @@ If you encounter errors:
         <p className="text-sm text-muted-foreground mb-4">
           {codeTab === 'preview' && "This code creates a CustomTkinter application with all your designed components."}
           {codeTab === 'requirements' && "Required packages to run the application."}
-          {codeTab === 'readme' && "README documentation for your project."}
+          {codeTab === 'readme' && "Documentation and troubleshooting for your project."}
         </p>
         
         <div className="relative">
@@ -182,6 +190,16 @@ If you encounter errors:
           <li>Install the required dependencies with <code className="bg-muted-foreground/20 px-1 rounded">pip install -r requirements.txt</code></li>
           <li>Run the application with <code className="bg-muted-foreground/20 px-1 rounded">python app.py</code></li>
         </ol>
+        
+        <div className="mt-6 p-4 border border-muted-foreground/20 rounded-md">
+          <h4 className="font-medium text-foreground mb-2">Troubleshooting Tips:</h4>
+          <ul className="list-disc list-inside space-y-1 ml-2">
+            <li>Make sure you have CustomTkinter version 5.2.0 or later installed</li>
+            <li>For widget placement issues, ensure all width/height are specified in the widget constructor</li>
+            <li>For color issues, try using hex color values (e.g. "#ff0000" for red)</li>
+            <li>If images don't display, verify the path is correct and the image files are included</li>
+          </ul>
+        </div>
       </div>
     </div>
   );

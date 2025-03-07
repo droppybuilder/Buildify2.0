@@ -69,7 +69,7 @@ export const Toolbar = ({
       </div>
       
       <div className="flex items-center">
-        <h1 className="text-lg font-semibold text-gray-800">Tkinter GUI Builder</h1>
+        <h1 className="text-lg font-semibold text-gray-800">CustomTkinter GUI Builder</h1>
       </div>
       
       <div className="flex items-center space-x-2">

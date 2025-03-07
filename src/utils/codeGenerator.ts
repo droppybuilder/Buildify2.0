@@ -4,21 +4,20 @@ import { saveAs } from 'file-saver';
 
 export const generatePythonCode = (components: any[]) => {
   // Import statements
-  let code = `import tkinter as tk
-from tkinter import ttk
-from tkinter import filedialog
+  let code = `import customtkinter as ctk
 from PIL import Image, ImageTk
 import os
 import sys
 
-class Application(tk.Tk):
+# Set appearance mode and default color theme
+ctk.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
+ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
+
+class Application(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.title("My Tkinter Application")
+        self.title("My CustomTkinter Application")
         self.geometry("800x600")
-        
-        # Set theme and appearance
-        self.configure(bg="#f0f0f0")
         
         # Create components
         self.create_widgets()
@@ -52,52 +51,56 @@ const generateComponentCode = (component: any, indent: number): string => {
   const width = component.size?.width || 100;
   const height = component.size?.height || 30;
   
+  // Generate a valid Python variable name from component id
+  // Replace any non-alphanumeric characters with underscores
+  const varName = `self.${component.id.replace(/[^a-zA-Z0-9_]/g, '_')}`;
+  
   // Component specific code
   switch (component.type) {
     case 'button':
-      code += `${spaces}self.${component.id} = tk.Button(self, text="${component.properties?.text || 'Button'}", bg="${component.properties?.backgroundColor || '#e0e0e0'}", fg="${component.properties?.textColor || 'black'}")\n`;
-      code += `${spaces}self.${component.id}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
+      code += `${spaces}${varName} = ctk.CTkButton(self, text="${component.properties?.text || 'Button'}", fg_color="${component.properties?.backgroundColor || '#3b82f6'}", text_color="${component.properties?.textColor || 'white'}")\n`;
+      code += `${spaces}${varName}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
       if (component.properties?.onClick) {
-        code += `${spaces}self.${component.id}.config(command=self.${component.id}_click)\n`;
-        code += `\n${spaces}def ${component.id}_click(self):\n`;
-        code += `${spaces}    print("${component.id} clicked")\n`;
+        code += `${spaces}${varName}.configure(command=self.${component.id.replace(/[^a-zA-Z0-9_]/g, '_')}_click)\n`;
+        code += `\n${spaces}def ${component.id.replace(/[^a-zA-Z0-9_]/g, '_')}_click(self):\n`;
+        code += `${spaces}    print("${component.id.replace(/[^a-zA-Z0-9_]/g, '_')} clicked")\n`;
       }
       break;
       
     case 'label':
-      code += `${spaces}self.${component.id} = tk.Label(self, text="${component.properties?.text || 'Label'}", bg="${component.properties?.backgroundColor || '#f0f0f0'}", fg="${component.properties?.textColor || 'black'}")\n`;
-      code += `${spaces}self.${component.id}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
+      code += `${spaces}${varName} = ctk.CTkLabel(self, text="${component.properties?.text || 'Label'}", bg_color="transparent", text_color="${component.properties?.textColor || '#000000'}")\n`;
+      code += `${spaces}${varName}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
       break;
       
     case 'textbox':
-      code += `${spaces}self.${component.id} = tk.Entry(self, bg="${component.properties?.backgroundColor || 'white'}", fg="${component.properties?.textColor || 'black'}")\n`;
-      code += `${spaces}self.${component.id}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
+    case 'entry':
+      code += `${spaces}${varName} = ctk.CTkEntry(self, fg_color="${component.properties?.backgroundColor || 'transparent'}", text_color="${component.properties?.textColor || '#000000'}")\n`;
+      code += `${spaces}${varName}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
       if (component.properties?.placeholder) {
-        code += `${spaces}self.${component.id}.insert(0, "${component.properties.placeholder}")\n`;
+        code += `${spaces}${varName}.insert(0, "${component.properties.placeholder}")\n`;
       }
       break;
       
     case 'checkbox':
-      code += `${spaces}self.${component.id}_var = tk.BooleanVar(value=${component.properties?.checked ? 'True' : 'False'})\n`;
-      code += `${spaces}self.${component.id} = tk.Checkbutton(self, text="${component.properties?.text || 'Checkbox'}", variable=self.${component.id}_var, bg="${component.properties?.backgroundColor || '#f0f0f0'}")\n`;
-      code += `${spaces}self.${component.id}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
+      code += `${spaces}${varName}_var = ctk.BooleanVar(value=${component.properties?.checked ? 'True' : 'False'})\n`;
+      code += `${spaces}${varName} = ctk.CTkCheckBox(self, text="${component.properties?.text || 'Checkbox'}", variable=${varName}_var, text_color="${component.properties?.textColor || '#000000'}")\n`;
+      code += `${spaces}${varName}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
       break;
       
     case 'dropdown':
-      code += `${spaces}self.${component.id}_var = tk.StringVar()\n`;
       const options = component.properties?.options || ['Option 1', 'Option 2', 'Option 3'];
-      code += `${spaces}self.${component.id} = ttk.Combobox(self, textvariable=self.${component.id}_var, values=${JSON.stringify(options).replace(/"/g, "'").replace("[", "[").replace("]", "]")})\n`;
-      code += `${spaces}self.${component.id}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
+      code += `${spaces}${varName} = ctk.CTkOptionMenu(self, values=${JSON.stringify(options).replace(/"/g, "'").replace("[", "[").replace("]", "]")})\n`;
+      code += `${spaces}${varName}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
       if (component.properties?.defaultValue) {
-        code += `${spaces}self.${component.id}.set("${component.properties.defaultValue}")\n`;
+        code += `${spaces}${varName}.set("${component.properties.defaultValue}")\n`;
       }
       break;
       
     case 'image':
       code += `${spaces}# Load image for ${component.id}\n`;
-      code += `${spaces}self.${component.id}_img = self.load_image("path_to_image.png", (${width}, ${height}))\n`;
-      code += `${spaces}self.${component.id} = tk.Label(self, image=self.${component.id}_img, bg="${component.properties?.backgroundColor || '#f0f0f0'}")\n`;
-      code += `${spaces}self.${component.id}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
+      code += `${spaces}${varName}_img = self.load_image("path_to_image.png", (${width}, ${height}))\n`;
+      code += `${spaces}${varName} = ctk.CTkLabel(self, image=${varName}_img, text="")\n`;
+      code += `${spaces}${varName}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
       
       // Add image loading function if it's the first image
       if (!code.includes('def load_image')) {
@@ -111,39 +114,42 @@ const generateComponentCode = (component: any, indent: number): string => {
       break;
       
     case 'slider':
-      code += `${spaces}self.${component.id}_var = tk.DoubleVar(value=${component.properties?.value || 0})\n`;
-      code += `${spaces}self.${component.id} = ttk.Scale(self, from_=${component.properties?.min || 0}, to=${component.properties?.max || 100}, variable=self.${component.id}_var, orient=tk.HORIZONTAL)\n`;
-      code += `${spaces}self.${component.id}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
+      code += `${spaces}${varName} = ctk.CTkSlider(self, from_=${component.properties?.min || 0}, to=${component.properties?.max || 100}, number_of_steps=${component.properties?.max ? component.properties.max - (component.properties?.min || 0) : 100})\n`;
+      code += `${spaces}${varName}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
+      code += `${spaces}${varName}.set(${component.properties?.value || 0})\n`;
       break;
       
     case 'frame':
-      code += `${spaces}self.${component.id} = tk.Frame(self, bg="${component.properties?.backgroundColor || '#f0f0f0'}", bd=${component.properties?.borderWidth || 1}, relief=${component.properties?.borderStyle ? `"${component.properties.borderStyle}"` : '"flat"'})\n`;
-      code += `${spaces}self.${component.id}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
+      code += `${spaces}${varName} = ctk.CTkFrame(self, fg_color="${component.properties?.backgroundColor || '#ffffff'}", border_width=${component.properties?.borderWidth || 0})\n`;
+      code += `${spaces}${varName}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
       break;
       
     case 'progressbar':
-      code += `${spaces}self.${component.id} = ttk.Progressbar(self, orient=tk.HORIZONTAL, length=${width}, mode="determinate")\n`;
-      code += `${spaces}self.${component.id}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
-      code += `${spaces}self.${component.id}["value"] = ${component.properties?.value || 0}\n`;
+      code += `${spaces}${varName} = ctk.CTkProgressBar(self, orientation="horizontal", width=${width})\n`;
+      code += `${spaces}${varName}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
+      code += `${spaces}${varName}.set(${(component.properties?.value || 0) / (component.properties?.maxValue || 100)})\n`;
       break;
       
     case 'listbox':
-      code += `${spaces}self.${component.id} = tk.Listbox(self, bg="${component.properties?.backgroundColor || 'white'}", fg="${component.properties?.textColor || 'black'}")\n`;
-      code += `${spaces}self.${component.id}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
+      // CustomTkinter doesn't have a direct listbox equivalent, so we'll create a scrollable frame with labels
+      code += `${spaces}# Create a scrollable frame for listbox functionality\n`;
+      code += `${spaces}${varName}_frame = ctk.CTkScrollableFrame(self, fg_color="${component.properties?.backgroundColor || '#ffffff'}")\n`;
+      code += `${spaces}${varName}_frame.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
       
       if (component.properties?.items) {
         const items = component.properties.items;
         items.forEach((item: string, index: number) => {
-          code += `${spaces}self.${component.id}.insert(${index}, "${item}")\n`;
+          code += `${spaces}${varName}_item${index} = ctk.CTkLabel(${varName}_frame, text="${item}", text_color="${component.properties?.textColor || '#000000'}", anchor="w")\n`;
+          code += `${spaces}${varName}_item${index}.pack(fill="x", padx=5, pady=2)\n`;
         });
       }
       break;
       
     case 'textarea':
-      code += `${spaces}self.${component.id} = tk.Text(self, bg="${component.properties?.backgroundColor || 'white'}", fg="${component.properties?.textColor || 'black'}")\n`;
-      code += `${spaces}self.${component.id}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
+      code += `${spaces}${varName} = ctk.CTkTextbox(self, fg_color="${component.properties?.backgroundColor || '#ffffff'}", text_color="${component.properties?.textColor || '#000000'}")\n`;
+      code += `${spaces}${varName}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
       if (component.properties?.defaultValue) {
-        code += `${spaces}self.${component.id}.insert(tk.END, "${component.properties.defaultValue}")\n`;
+        code += `${spaces}${varName}.insert("0.0", "${component.properties.defaultValue}")\n`;
       }
       break;
       
@@ -163,17 +169,18 @@ export const exportProject = async (components: any[]) => {
   zip.file("app.py", pythonCode);
   
   // Create a requirements.txt file
-  const requirements = `Pillow>=9.0.0
+  const requirements = `customtkinter>=5.2.0
+Pillow>=9.0.0
 `;
   zip.file("requirements.txt", requirements);
   
   // Create a README.md file
-  const readme = `# Tkinter GUI Application
+  const readme = `# CustomTkinter GUI Application
 
-This is a simple Tkinter GUI application generated from the GUI Builder.
+This is a modern CustomTkinter GUI application generated from the GUI Builder.
 
 ## Requirements
-- Python 3.6 or later
+- Python 3.7 or later
 - Packages listed in requirements.txt
 
 ## Installation
@@ -189,7 +196,7 @@ python app.py
   
   // Generate the ZIP file and download it
   const content = await zip.generateAsync({ type: "blob" });
-  saveAs(content, "tkinter-gui-app.zip");
+  saveAs(content, "customtkinter-gui-app.zip");
   
   return true;
 };

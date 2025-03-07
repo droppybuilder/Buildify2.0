@@ -14,6 +14,7 @@ const Index = () => {
   const [historyIndex, setHistoryIndex] = useState(0);
   const [inputFocused, setInputFocused] = useState(false);
   const [selectedComponents, setSelectedComponents] = useState<string[]>([]);
+  const [showCodePreview, setShowCodePreview] = useState(false);
   
   // Load saved components and preferences on mount
   useEffect(() => {
@@ -92,6 +93,10 @@ const Index = () => {
     }
   }, [components, handleComponentsChange, selectedComponents]);
   
+  const toggleCodePreview = useCallback(() => {
+    setShowCodePreview(prev => !prev);
+  }, []);
+  
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (inputFocused) {
@@ -140,20 +145,26 @@ const Index = () => {
           onRedo={handleRedo}
           canUndo={historyIndex > 0}
           canRedo={historyIndex < history.length - 1}
+          onToggleCodePreview={toggleCodePreview}
+          showCodePreview={showCodePreview}
         />
         
         <div className="flex-1 flex overflow-hidden">
-          <div className="flex-1 overflow-auto bg-background p-6">
-            <Canvas
-              components={components}
-              setComponents={handleComponentsChange}
-              selectedComponent={selectedComponent}
-              setSelectedComponent={setSelectedComponent}
-              onDeleteComponent={handleDeleteComponent}
-              selectedComponents={selectedComponents}
-              setSelectedComponents={setSelectedComponents}
-            />
-          </div>
+          {showCodePreview ? (
+            <CodePreview components={components} visible={showCodePreview} />
+          ) : (
+            <div className="flex-1 overflow-auto bg-background p-6">
+              <Canvas
+                components={components}
+                setComponents={handleComponentsChange}
+                selectedComponent={selectedComponent}
+                setSelectedComponent={setSelectedComponent}
+                onDeleteComponent={handleDeleteComponent}
+                selectedComponents={selectedComponents}
+                setSelectedComponents={setSelectedComponents}
+              />
+            </div>
+          )}
           
           <div className="w-80 border-l flex flex-col overflow-hidden border-border bg-gray-50">
             <PropertyPanel
@@ -162,7 +173,6 @@ const Index = () => {
               setInputFocused={setInputFocused}
               inputFocused={inputFocused}
             />
-            {/* Code preview is hidden now */}
           </div>
         </div>
       </main>

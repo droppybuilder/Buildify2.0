@@ -46,21 +46,28 @@ const generateComponentCode = (component: any, indent: number): string => {
   let code = '';
   
   // Generate positioning
-  const x = component.position?.x || 0;
-  const y = component.position?.y || 0;
-  const width = component.size?.width || 100;
-  const height = component.size?.height || 30;
+  const x = Math.round(component.position?.x || 0);
+  const y = Math.round(component.position?.y || 0);
+  const width = Math.round(component.size?.width || 100);
+  const height = Math.round(component.size?.height || 30);
   
   // Generate a valid Python variable name from component id
   // Replace any non-alphanumeric characters with underscores
   const varName = `self.${component.id.replace(/[^a-zA-Z0-9_]/g, '_')}`;
   
+  // Get properties with fallbacks to avoid undefined
+  const props = component.properties || {};
+  const bgColor = props.bgColor || '#ffffff';
+  const fgColor = props.fgColor || '#000000';
+  const textColor = props.textColor || '#000000';
+  const text = props.text || 'Text';
+  
   // Component specific code
   switch (component.type) {
     case 'button':
-      code += `${spaces}${varName} = ctk.CTkButton(self, text="${component.properties?.text || 'Button'}", fg_color="${component.properties?.backgroundColor || '#3b82f6'}", text_color="${component.properties?.textColor || 'white'}")\n`;
-      code += `${spaces}${varName}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
-      if (component.properties?.onClick) {
+      code += `${spaces}${varName} = ctk.CTkButton(self, text="${props.text || 'Button'}", width=${width}, height=${height}, fg_color="${props.bgColor || '#3b82f6'}", text_color="${props.fgColor || 'white'}")\n`;
+      code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
+      if (props.onClick) {
         code += `${spaces}${varName}.configure(command=self.${component.id.replace(/[^a-zA-Z0-9_]/g, '_')}_click)\n`;
         code += `\n${spaces}def ${component.id.replace(/[^a-zA-Z0-9_]/g, '_')}_click(self):\n`;
         code += `${spaces}    print("${component.id.replace(/[^a-zA-Z0-9_]/g, '_')} clicked")\n`;
@@ -68,39 +75,39 @@ const generateComponentCode = (component: any, indent: number): string => {
       break;
       
     case 'label':
-      code += `${spaces}${varName} = ctk.CTkLabel(self, text="${component.properties?.text || 'Label'}", bg_color="transparent", text_color="${component.properties?.textColor || '#000000'}")\n`;
-      code += `${spaces}${varName}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
+      code += `${spaces}${varName} = ctk.CTkLabel(self, text="${props.text || 'Label'}", width=${width}, height=${height}, bg_color="transparent", text_color="${props.fgColor || '#000000'}")\n`;
+      code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
       break;
       
     case 'textbox':
     case 'entry':
-      code += `${spaces}${varName} = ctk.CTkEntry(self, fg_color="${component.properties?.backgroundColor || 'transparent'}", text_color="${component.properties?.textColor || '#000000'}")\n`;
-      code += `${spaces}${varName}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
-      if (component.properties?.placeholder) {
-        code += `${spaces}${varName}.insert(0, "${component.properties.placeholder}")\n`;
+      code += `${spaces}${varName} = ctk.CTkEntry(self, width=${width}, height=${height}, fg_color="${props.bgColor || 'transparent'}", text_color="${props.fgColor || '#000000'}")\n`;
+      code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
+      if (props.placeholder) {
+        code += `${spaces}${varName}.insert(0, "${props.placeholder}")\n`;
       }
       break;
       
     case 'checkbox':
-      code += `${spaces}${varName}_var = ctk.BooleanVar(value=${component.properties?.checked ? 'True' : 'False'})\n`;
-      code += `${spaces}${varName} = ctk.CTkCheckBox(self, text="${component.properties?.text || 'Checkbox'}", variable=${varName}_var, text_color="${component.properties?.textColor || '#000000'}")\n`;
-      code += `${spaces}${varName}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
+      code += `${spaces}${varName}_var = ctk.BooleanVar(value=${props.checked ? 'True' : 'False'})\n`;
+      code += `${spaces}${varName} = ctk.CTkCheckBox(self, text="${props.text || 'Checkbox'}", width=${width}, height=${height}, variable=${varName}_var, text_color="${props.fgColor || '#000000'}")\n`;
+      code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
       break;
       
     case 'dropdown':
-      const options = component.properties?.options || ['Option 1', 'Option 2', 'Option 3'];
-      code += `${spaces}${varName} = ctk.CTkOptionMenu(self, values=${JSON.stringify(options).replace(/"/g, "'").replace("[", "[").replace("]", "]")})\n`;
-      code += `${spaces}${varName}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
-      if (component.properties?.defaultValue) {
-        code += `${spaces}${varName}.set("${component.properties.defaultValue}")\n`;
+      const options = props.options || ['Option 1', 'Option 2', 'Option 3'];
+      code += `${spaces}${varName} = ctk.CTkOptionMenu(self, values=${JSON.stringify(options).replace(/"/g, "'").replace("[", "[").replace("]", "]")}, width=${width}, height=${height})\n`;
+      code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
+      if (props.defaultValue) {
+        code += `${spaces}${varName}.set("${props.defaultValue}")\n`;
       }
       break;
       
     case 'image':
       code += `${spaces}# Load image for ${component.id}\n`;
       code += `${spaces}${varName}_img = self.load_image("path_to_image.png", (${width}, ${height}))\n`;
-      code += `${spaces}${varName} = ctk.CTkLabel(self, image=${varName}_img, text="")\n`;
-      code += `${spaces}${varName}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
+      code += `${spaces}${varName} = ctk.CTkLabel(self, image=${varName}_img, width=${width}, height=${height}, text="")\n`;
+      code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
       
       // Add image loading function if it's the first image
       if (!code.includes('def load_image')) {
@@ -114,42 +121,42 @@ const generateComponentCode = (component: any, indent: number): string => {
       break;
       
     case 'slider':
-      code += `${spaces}${varName} = ctk.CTkSlider(self, from_=${component.properties?.min || 0}, to=${component.properties?.max || 100}, number_of_steps=${component.properties?.max ? component.properties.max - (component.properties?.min || 0) : 100})\n`;
-      code += `${spaces}${varName}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
-      code += `${spaces}${varName}.set(${component.properties?.value || 0})\n`;
+      code += `${spaces}${varName} = ctk.CTkSlider(self, from_=${props.min || 0}, to=${props.max || 100}, width=${width}, height=${height}, number_of_steps=${props.max ? Math.round(props.max - (props.min || 0)) : 100})\n`;
+      code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
+      code += `${spaces}${varName}.set(${props.value || 0})\n`;
       break;
       
     case 'frame':
-      code += `${spaces}${varName} = ctk.CTkFrame(self, fg_color="${component.properties?.backgroundColor || '#ffffff'}", border_width=${component.properties?.borderWidth || 0})\n`;
-      code += `${spaces}${varName}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
+      code += `${spaces}${varName} = ctk.CTkFrame(self, width=${width}, height=${height}, fg_color="${props.bgColor || '#ffffff'}", border_width=${props.borderWidth || 0})\n`;
+      code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
       break;
       
     case 'progressbar':
-      code += `${spaces}${varName} = ctk.CTkProgressBar(self, orientation="horizontal", width=${width})\n`;
-      code += `${spaces}${varName}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
-      code += `${spaces}${varName}.set(${(component.properties?.value || 0) / (component.properties?.maxValue || 100)})\n`;
+      code += `${spaces}${varName} = ctk.CTkProgressBar(self, width=${width}, height=${height}, orientation="horizontal")\n`;
+      code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
+      code += `${spaces}${varName}.set(${Math.round((props.value || 0) / (props.maxValue || 100)) / 100})\n`;
       break;
       
     case 'listbox':
       // CustomTkinter doesn't have a direct listbox equivalent, so we'll create a scrollable frame with labels
       code += `${spaces}# Create a scrollable frame for listbox functionality\n`;
-      code += `${spaces}${varName}_frame = ctk.CTkScrollableFrame(self, fg_color="${component.properties?.backgroundColor || '#ffffff'}")\n`;
-      code += `${spaces}${varName}_frame.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
+      code += `${spaces}${varName}_frame = ctk.CTkScrollableFrame(self, width=${width}, height=${height}, fg_color="${props.bgColor || '#ffffff'}")\n`;
+      code += `${spaces}${varName}_frame.place(x=${x}, y=${y})\n`;
       
-      if (component.properties?.items) {
-        const items = component.properties.items;
+      if (props.items) {
+        const items = props.items;
         items.forEach((item: string, index: number) => {
-          code += `${spaces}${varName}_item${index} = ctk.CTkLabel(${varName}_frame, text="${item}", text_color="${component.properties?.textColor || '#000000'}", anchor="w")\n`;
+          code += `${spaces}${varName}_item${index} = ctk.CTkLabel(${varName}_frame, text="${item}", text_color="${props.fgColor || '#000000'}", anchor="w")\n`;
           code += `${spaces}${varName}_item${index}.pack(fill="x", padx=5, pady=2)\n`;
         });
       }
       break;
       
     case 'textarea':
-      code += `${spaces}${varName} = ctk.CTkTextbox(self, fg_color="${component.properties?.backgroundColor || '#ffffff'}", text_color="${component.properties?.textColor || '#000000'}")\n`;
-      code += `${spaces}${varName}.place(x=${x}, y=${y}, width=${width}, height=${height})\n`;
-      if (component.properties?.defaultValue) {
-        code += `${spaces}${varName}.insert("0.0", "${component.properties.defaultValue}")\n`;
+      code += `${spaces}${varName} = ctk.CTkTextbox(self, width=${width}, height=${height}, fg_color="${props.bgColor || '#ffffff'}", text_color="${props.fgColor || '#000000'}")\n`;
+      code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
+      if (props.defaultValue) {
+        code += `${spaces}${varName}.insert("0.0", "${props.defaultValue}")\n`;
       }
       break;
       

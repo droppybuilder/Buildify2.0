@@ -23,8 +23,6 @@ export const PropertyPanel = ({
 }: PropertyPanelProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
-  // We don't need the local state anymore as we're using the one passed from the parent
-  // const [inputFocused, setInputFocused] = useState(false);
 
   // Draggable panel functionality
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -70,16 +68,17 @@ export const PropertyPanel = ({
     );
   }
 
+  // Updated to use properties directly rather than using props
   const handlePropertyChange = (key: string, value: any) => {
-    const updatedProps = {
-      ...selectedComponent.props,
-      [key]: value
+    const updatedComponent = {
+      ...selectedComponent,
+      properties: {
+        ...selectedComponent.properties,
+        [key]: value
+      }
     };
 
-    onUpdate({
-      ...selectedComponent,
-      props: updatedProps
-    });
+    onUpdate(updatedComponent);
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -115,6 +114,9 @@ export const PropertyPanel = ({
     setInputFocused(false);
   };
 
+  // Ensure properties object exists
+  const properties = selectedComponent.properties || {};
+
   return (
     <div className="flex-1 overflow-hidden flex flex-col">
       <div 
@@ -136,7 +138,7 @@ export const PropertyPanel = ({
               <Label>X Position</Label>
               <Input
                 type="number"
-                defaultValue={Math.round(selectedComponent.position.x)}
+                value={Math.round(selectedComponent.position.x)}
                 onChange={(e) => onUpdate({
                   ...selectedComponent,
                   position: {
@@ -153,7 +155,7 @@ export const PropertyPanel = ({
               <Label>Y Position</Label>
               <Input
                 type="number"
-                defaultValue={Math.round(selectedComponent.position.y)}
+                value={Math.round(selectedComponent.position.y)}
                 onChange={(e) => onUpdate({
                   ...selectedComponent,
                   position: {
@@ -170,7 +172,7 @@ export const PropertyPanel = ({
               <Label>Width</Label>
               <Input
                 type="number"
-                defaultValue={Math.round(selectedComponent.size.width)}
+                value={Math.round(selectedComponent.size.width)}
                 onChange={(e) => onUpdate({
                   ...selectedComponent,
                   size: {
@@ -187,7 +189,7 @@ export const PropertyPanel = ({
               <Label>Height</Label>
               <Input
                 type="number"
-                defaultValue={Math.round(selectedComponent.size.height)}
+                value={Math.round(selectedComponent.size.height)}
                 onChange={(e) => onUpdate({
                   ...selectedComponent,
                   size: {
@@ -215,7 +217,7 @@ export const PropertyPanel = ({
                 <Label>Text</Label>
                 <Input
                   type="text"
-                  defaultValue={selectedComponent.props.text || ''}
+                  value={properties.text || ''}
                   onChange={(e) => handlePropertyChange('text', e.target.value)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
@@ -227,13 +229,13 @@ export const PropertyPanel = ({
                 <div className="flex gap-2 mt-1">
                   <Input
                     type="color"
-                    defaultValue={selectedComponent.props.fgColor || '#000000'}
+                    value={properties.fgColor || '#000000'}
                     onChange={(e) => handlePropertyChange('fgColor', e.target.value)}
                     className="w-20 h-10 p-1"
                   />
                   <Input
                     type="text"
-                    defaultValue={selectedComponent.props.fgColor || '#000000'}
+                    value={properties.fgColor || '#000000'}
                     onChange={(e) => handlePropertyChange('fgColor', e.target.value)}
                     onFocus={() => setInputFocused(true)}
                     onBlur={() => setInputFocused(false)}
@@ -252,13 +254,13 @@ export const PropertyPanel = ({
                 <div className="flex gap-2 mt-1">
                   <Input
                     type="color"
-                    defaultValue={selectedComponent.props.bgColor || '#ffffff'}
+                    value={properties.bgColor || '#ffffff'}
                     onChange={(e) => handlePropertyChange('bgColor', e.target.value)}
                     className="w-20 h-10 p-1"
                   />
                   <Input
                     type="text"
-                    defaultValue={selectedComponent.props.bgColor || '#ffffff'}
+                    value={properties.bgColor || '#ffffff'}
                     onChange={(e) => handlePropertyChange('bgColor', e.target.value)}
                     onFocus={() => setInputFocused(true)}
                     onBlur={() => setInputFocused(false)}
@@ -270,7 +272,7 @@ export const PropertyPanel = ({
                 <Label>Corner Radius</Label>
                 <Input
                   type="number"
-                  defaultValue={selectedComponent.props.cornerRadius || 8}
+                  value={properties.cornerRadius || 8}
                   onChange={(e) => handlePropertyChange('cornerRadius', parseInt(e.target.value) || 0)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
@@ -283,13 +285,13 @@ export const PropertyPanel = ({
                 <div className="flex gap-2 mt-1">
                   <Input
                     type="color"
-                    defaultValue={selectedComponent.props.borderColor || '#e2e8f0'}
+                    value={properties.borderColor || '#e2e8f0'}
                     onChange={(e) => handlePropertyChange('borderColor', e.target.value)}
                     className="w-20 h-10 p-1"
                   />
                   <Input
                     type="text"
-                    defaultValue={selectedComponent.props.borderColor || '#e2e8f0'}
+                    value={properties.borderColor || '#e2e8f0'}
                     onChange={(e) => handlePropertyChange('borderColor', e.target.value)}
                     onFocus={() => setInputFocused(true)}
                     onBlur={() => setInputFocused(false)}
@@ -307,13 +309,13 @@ export const PropertyPanel = ({
               <div className="flex gap-2 mt-1">
                 <Input
                   type="color"
-                  defaultValue={selectedComponent.props.hoverColor || '#f0f0f0'}
+                  value={properties.hoverColor || '#f0f0f0'}
                   onChange={(e) => handlePropertyChange('hoverColor', e.target.value)}
                   className="w-20 h-10 p-1"
                 />
                 <Input
                   type="text"
-                  defaultValue={selectedComponent.props.hoverColor || '#f0f0f0'}
+                  value={properties.hoverColor || '#f0f0f0'}
                   onChange={(e) => handlePropertyChange('hoverColor', e.target.value)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
@@ -329,7 +331,7 @@ export const PropertyPanel = ({
               <Label>Placeholder</Label>
               <Input
                 type="text"
-                defaultValue={selectedComponent.props.placeholder || ''}
+                value={properties.placeholder || ''}
                 onChange={(e) => handlePropertyChange('placeholder', e.target.value)}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
@@ -356,7 +358,7 @@ export const PropertyPanel = ({
                 <Label>Image Source URL</Label>
                 <Input
                   type="text"
-                  defaultValue={selectedComponent.props.src || '/placeholder.svg'}
+                  value={properties.src || '/placeholder.svg'}
                   onChange={(e) => handlePropertyChange('src', e.target.value)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
@@ -367,7 +369,7 @@ export const PropertyPanel = ({
                 <Label>Fit</Label>
                 <div onFocus={handleSelectFocus} onBlur={handleSelectBlur}>
                   <Select 
-                    defaultValue={selectedComponent.props.fit || 'contain'}
+                    value={properties.fit || 'contain'}
                     onValueChange={(value) => handlePropertyChange('fit', value)}
                   >
                     <option value="contain">Contain</option>
@@ -380,7 +382,7 @@ export const PropertyPanel = ({
                 <Label>Border Radius</Label>
                 <Input
                   type="number"
-                  defaultValue={selectedComponent.props.cornerRadius || 8}
+                  value={properties.cornerRadius || 8}
                   onChange={(e) => handlePropertyChange('cornerRadius', parseInt(e.target.value) || 0)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
@@ -393,13 +395,13 @@ export const PropertyPanel = ({
                 <div className="flex gap-2 mt-1">
                   <Input
                     type="color"
-                    defaultValue={selectedComponent.props.borderColor || '#e2e8f0'}
+                    value={properties.borderColor || '#e2e8f0'}
                     onChange={(e) => handlePropertyChange('borderColor', e.target.value)}
                     className="w-20 h-10 p-1"
                   />
                   <Input
                     type="text"
-                    defaultValue={selectedComponent.props.borderColor || '#e2e8f0'}
+                    value={properties.borderColor || '#e2e8f0'}
                     onChange={(e) => handlePropertyChange('borderColor', e.target.value)}
                     onFocus={() => setInputFocused(true)}
                     onBlur={() => setInputFocused(false)}
@@ -417,7 +419,7 @@ export const PropertyPanel = ({
                 <Label>Minimum Value</Label>
                 <Input
                   type="number"
-                  defaultValue={selectedComponent.props.from || 0}
+                  value={properties.from || 0}
                   onChange={(e) => handlePropertyChange('from', parseInt(e.target.value) || 0)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
@@ -428,7 +430,7 @@ export const PropertyPanel = ({
                 <Label>Maximum Value</Label>
                 <Input
                   type="number"
-                  defaultValue={selectedComponent.props.to || 100}
+                  value={properties.to || 100}
                   onChange={(e) => handlePropertyChange('to', parseInt(e.target.value) || 100)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
@@ -439,7 +441,7 @@ export const PropertyPanel = ({
                 <Label>Current Value</Label>
                 <Input
                   type="number"
-                  defaultValue={selectedComponent.props.value || 50}
+                  value={properties.value || 50}
                   onChange={(e) => handlePropertyChange('value', parseInt(e.target.value) || 50)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
@@ -450,7 +452,7 @@ export const PropertyPanel = ({
                 <Label>Orientation</Label>
                 <div onFocus={handleSelectFocus} onBlur={handleSelectBlur}>
                   <Select
-                    defaultValue={selectedComponent.props.orient || 'horizontal'}
+                    value={properties.orient || 'horizontal'}
                     onValueChange={(value) => handlePropertyChange('orient', value)}
                   >
                     <option value="horizontal">Horizontal</option>
@@ -468,7 +470,7 @@ export const PropertyPanel = ({
                 <Label>Border Style</Label>
                 <div onFocus={handleSelectFocus} onBlur={handleSelectBlur}>
                   <Select
-                    defaultValue={selectedComponent.props.relief || 'flat'}
+                    value={properties.relief || 'flat'}
                     onValueChange={(value) => handlePropertyChange('relief', value)}
                   >
                     <option value="flat">Flat</option>
@@ -482,7 +484,7 @@ export const PropertyPanel = ({
                 <Label>Border Width</Label>
                 <Input
                   type="number"
-                  defaultValue={selectedComponent.props.borderwidth || 1}
+                  value={properties.borderwidth || 1}
                   onChange={(e) => handlePropertyChange('borderwidth', parseInt(e.target.value) || 1)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
@@ -500,7 +502,7 @@ export const PropertyPanel = ({
               <div className="flex items-center space-x-2">
                 <Switch
                   id="checked-status"
-                  checked={selectedComponent.props.checked || false}
+                  checked={properties.checked || false}
                   onCheckedChange={(value) => handlePropertyChange('checked', value)}
                 />
                 <Label htmlFor="checked-status">Checked</Label>
@@ -515,7 +517,7 @@ export const PropertyPanel = ({
                 <Label>Date Format</Label>
                 <Input
                   type="text"
-                  defaultValue={selectedComponent.props.format || 'yyyy-mm-dd'}
+                  value={properties.format || 'yyyy-mm-dd'}
                   onChange={(e) => handlePropertyChange('format', e.target.value)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
@@ -532,12 +534,12 @@ export const PropertyPanel = ({
                 <Label>Current Value</Label>
                 <Input
                   type="number"
-                  defaultValue={selectedComponent.props.value || 50}
+                  value={properties.value || 50}
                   onChange={(e) => handlePropertyChange('value', parseInt(e.target.value) || 0)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
                   min="0"
-                  max={selectedComponent.props.maxValue || 100}
+                  max={properties.maxValue || 100}
                   className="mt-1"
                 />
               </div>
@@ -545,7 +547,7 @@ export const PropertyPanel = ({
                 <Label>Maximum Value</Label>
                 <Input
                   type="number"
-                  defaultValue={selectedComponent.props.maxValue || 100}
+                  value={properties.maxValue || 100}
                   onChange={(e) => handlePropertyChange('maxValue', parseInt(e.target.value) || 100)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
@@ -558,13 +560,13 @@ export const PropertyPanel = ({
                 <div className="flex gap-2 mt-1">
                   <Input
                     type="color"
-                    defaultValue={selectedComponent.props.progressColor || '#3b82f6'}
+                    value={properties.progressColor || '#3b82f6'}
                     onChange={(e) => handlePropertyChange('progressColor', e.target.value)}
                     className="w-20 h-10 p-1"
                   />
                   <Input
                     type="text"
-                    defaultValue={selectedComponent.props.progressColor || '#3b82f6'}
+                    value={properties.progressColor || '#3b82f6'}
                     onChange={(e) => handlePropertyChange('progressColor', e.target.value)}
                     onFocus={() => setInputFocused(true)}
                     onBlur={() => setInputFocused(false)}
@@ -582,7 +584,7 @@ export const PropertyPanel = ({
                 <Label>Tabs (comma separated)</Label>
                 <Input
                   type="text"
-                  defaultValue={selectedComponent.props.tabs || 'Tab 1,Tab 2,Tab 3'}
+                  value={properties.tabs || 'Tab 1,Tab 2,Tab 3'}
                   onChange={(e) => handlePropertyChange('tabs', e.target.value)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
@@ -593,7 +595,7 @@ export const PropertyPanel = ({
                 <Label>Selected Tab</Label>
                 <Input
                   type="text"
-                  defaultValue={selectedComponent.props.selectedTab || 'Tab 1'}
+                  value={properties.selectedTab || 'Tab 1'}
                   onChange={(e) => handlePropertyChange('selectedTab', e.target.value)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
@@ -610,7 +612,7 @@ export const PropertyPanel = ({
                 <Label>Items (comma separated)</Label>
                 <Input
                   type="text"
-                  defaultValue={selectedComponent.props.items || 'Item 1,Item 2,Item 3,Item 4,Item 5'}
+                  value={properties.items || 'Item 1,Item 2,Item 3,Item 4,Item 5'}
                   onChange={(e) => handlePropertyChange('items', e.target.value)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
@@ -627,7 +629,7 @@ export const PropertyPanel = ({
                 <Label>Border Width</Label>
                 <Input
                   type="number"
-                  defaultValue={selectedComponent.props.borderwidth || 1}
+                  value={properties.borderwidth || 1}
                   onChange={(e) => handlePropertyChange('borderwidth', parseInt(e.target.value) || 1)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}

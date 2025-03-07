@@ -16,7 +16,13 @@ export const CodePreview: React.FC<CodePreviewProps> = ({ components, visible })
 
   useEffect(() => {
     if (visible) {
-      const pythonCode = generatePythonCode(components);
+      // Ensure component properties are correctly prepared
+      const preparedComponents = components.map(component => ({
+        ...component,
+        properties: component.properties || {}
+      }));
+      
+      const pythonCode = generatePythonCode(preparedComponents);
       setCode(pythonCode);
     }
   }, [components, visible]);

@@ -57,10 +57,6 @@ const generateComponentCode = (component: any, indent: number): string => {
   
   // Get properties with fallbacks to avoid undefined
   const props = component.properties || {};
-  const bgColor = props.bgColor || '#ffffff';
-  const fgColor = props.fgColor || '#000000';
-  const textColor = props.textColor || '#000000';
-  const text = props.text || 'Text';
   
   // Component specific code
   switch (component.type) {
@@ -75,7 +71,7 @@ const generateComponentCode = (component: any, indent: number): string => {
       break;
       
     case 'label':
-      code += `${spaces}${varName} = ctk.CTkLabel(self, text="${props.text || 'Label'}", width=${width}, height=${height}, bg_color="transparent", text_color="${props.fgColor || '#000000'}")\n`;
+      code += `${spaces}${varName} = ctk.CTkLabel(self, text="${props.text || 'Label'}", width=${width}, height=${height}, text_color="${props.fgColor || '#000000'}")\n`;
       code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
       break;
       
@@ -123,7 +119,9 @@ const generateComponentCode = (component: any, indent: number): string => {
     case 'slider':
       code += `${spaces}${varName} = ctk.CTkSlider(self, from_=${props.min || 0}, to=${props.max || 100}, width=${width}, height=${height}, number_of_steps=${props.max ? Math.round(props.max - (props.min || 0)) : 100})\n`;
       code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
-      code += `${spaces}${varName}.set(${props.value || 0})\n`;
+      if (props.value !== undefined) {
+        code += `${spaces}${varName}.set(${Math.round(props.value) || 0})\n`;
+      }
       break;
       
     case 'frame':
@@ -134,7 +132,9 @@ const generateComponentCode = (component: any, indent: number): string => {
     case 'progressbar':
       code += `${spaces}${varName} = ctk.CTkProgressBar(self, width=${width}, height=${height}, orientation="horizontal")\n`;
       code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
-      code += `${spaces}${varName}.set(${Math.round((props.value || 0) / (props.maxValue || 100)) / 100})\n`;
+      // Ensure proper value calculation for progress bar (between 0 and 1)
+      const progressValue = (props.value || 0) / (props.maxValue || 100);
+      code += `${spaces}${varName}.set(${Math.min(1, Math.max(0, progressValue))})\n`;
       break;
       
     case 'listbox':
@@ -144,9 +144,9 @@ const generateComponentCode = (component: any, indent: number): string => {
       code += `${spaces}${varName}_frame.place(x=${x}, y=${y})\n`;
       
       if (props.items) {
-        const items = props.items;
+        const items = Array.isArray(props.items) ? props.items : props.items.split(',');
         items.forEach((item: string, index: number) => {
-          code += `${spaces}${varName}_item${index} = ctk.CTkLabel(${varName}_frame, text="${item}", text_color="${props.fgColor || '#000000'}", anchor="w")\n`;
+          code += `${spaces}${varName}_item${index} = ctk.CTkLabel(${varName}_frame, text="${item.trim()}", text_color="${props.fgColor || '#000000'}", anchor="w")\n`;
           code += `${spaces}${varName}_item${index}.pack(fill="x", padx=5, pady=2)\n`;
         });
       }
@@ -198,8 +198,53 @@ This is a modern CustomTkinter GUI application generated from the GUI Builder.
 \`\`\`
 python app.py
 \`\`\`
+
+## Troubleshooting
+If you encounter an error about width and height in the place method, make sure you're using CustomTkinter version 5.2.0 or later.
 `;
   zip.file("README.md", readme);
+
+  // Add a sample image file
+  zip.file("sample_image.png", await fetchSampleImage(), {binary: true});
+  
+  // Add a more detailed documentation file
+  const documentation = `# CustomTkinter GUI Application Documentation
+
+## Overview
+This application was created using the CustomTkinter GUI Builder. It uses the CustomTkinter library, 
+which is a modern-looking UI framework for Python based on Tkinter.
+
+## Project Structure
+- \`app.py\`: The main application file
+- \`requirements.txt\`: Python dependencies
+- \`sample_image.png\`: A sample image that can be used in your application
+
+## Customizing the Application
+You can modify the application by editing the \`app.py\` file. Here are some common customizations:
+
+### Changing the appearance mode
+\`\`\`python
+ctk.set_appearance_mode("Dark")  # Options: "System", "Dark", "Light"
+\`\`\`
+
+### Changing the color theme
+\`\`\`python
+ctk.set_default_color_theme("green")  # Options: "blue", "green", "dark-blue"
+\`\`\`
+
+### Changing the window size
+\`\`\`python
+self.geometry("1024x768")
+\`\`\`
+
+## Adding Event Handlers
+To add functionality to buttons or other widgets, locate the event handler functions in the code and add your logic there.
+
+## Further Resources
+- CustomTkinter documentation: https://github.com/TomSchimansky/CustomTkinter/wiki
+- Tkinter documentation: https://docs.python.org/3/library/tkinter.html
+`;
+  zip.file("documentation.md", documentation);
   
   // Generate the ZIP file and download it
   const content = await zip.generateAsync({ type: "blob" });
@@ -207,3 +252,25 @@ python app.py
   
   return true;
 };
+
+// Helper function to fetch a sample image
+async function fetchSampleImage() {
+  try {
+    const response = await fetch('/placeholder.svg');
+    const blob = await response.blob();
+    return blob;
+  } catch (error) {
+    console.error('Error fetching sample image:', error);
+    // Return a minimal 1x1 transparent PNG as fallback
+    return new Blob([
+      new Uint8Array([
+        0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D,
+        0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+        0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4, 0x89, 0x00, 0x00, 0x00,
+        0x0A, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
+        0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00, 0x49,
+        0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82
+      ])
+    ], { type: 'image/png' });
+  }
+}

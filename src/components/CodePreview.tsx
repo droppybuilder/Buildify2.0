@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { generatePythonCode, exportProject } from '@/utils/codeGenerator';
 import Prism from 'prismjs';
 import { Button } from '@/components/ui/button';
-import { Copy, Download, Clipboard } from 'lucide-react';
+import { Copy, Download, Clipboard, Code, File } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface CodePreviewProps {
@@ -14,6 +14,7 @@ interface CodePreviewProps {
 export const CodePreview: React.FC<CodePreviewProps> = ({ components, visible }) => {
   const [code, setCode] = useState('');
   const [isExporting, setIsExporting] = useState(false);
+  const [codeTab, setCodeTab] = useState<'preview' | 'requirements' | 'readme'>('preview');
 
   useEffect(() => {
     if (visible) {
@@ -32,7 +33,7 @@ export const CodePreview: React.FC<CodePreviewProps> = ({ components, visible })
     if (visible) {
       Prism.highlightAll();
     }
-  }, [code, visible]);
+  }, [code, visible, codeTab]);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(code);
@@ -57,6 +58,40 @@ export const CodePreview: React.FC<CodePreviewProps> = ({ components, visible })
       setIsExporting(false);
     }
   };
+
+  const requirementsCode = `customtkinter>=5.2.0
+Pillow>=9.0.0
+`;
+
+  const readmeCode = `# CustomTkinter GUI Application
+
+This is a modern CustomTkinter GUI application generated with GUI Builder.
+
+## Requirements
+- Python 3.7 or later
+- Packages listed in requirements.txt
+
+## Installation
+1. Install Python from https://www.python.org/downloads/
+2. Install dependencies: \`pip install -r requirements.txt\`
+
+## Running the application
+\`\`\`
+python app.py
+\`\`\`
+
+## Features
+- Modern UI with CustomTkinter
+- Responsive layout
+- Customizable components
+- Cross-platform compatibility (Windows, macOS, Linux)
+
+## Troubleshooting
+If you encounter errors:
+1. Make sure you have the correct version of CustomTkinter installed (5.2.0+)
+2. Check that all required packages are installed
+3. Verify Python version is 3.7 or later
+`;
 
   if (!visible) {
     return null;
@@ -89,15 +124,56 @@ export const CodePreview: React.FC<CodePreviewProps> = ({ components, visible })
             </Button>
           </div>
         </div>
+        
+        <div className="flex space-x-2 mb-4 border-b">
+          <Button 
+            variant={codeTab === 'preview' ? 'default' : 'ghost'} 
+            size="sm" 
+            onClick={() => setCodeTab('preview')}
+            className="flex items-center gap-1 rounded-b-none"
+          >
+            <Code className="h-4 w-4" />
+            <span>app.py</span>
+          </Button>
+          <Button 
+            variant={codeTab === 'requirements' ? 'default' : 'ghost'} 
+            size="sm" 
+            onClick={() => setCodeTab('requirements')}
+            className="flex items-center gap-1 rounded-b-none"
+          >
+            <File className="h-4 w-4" />
+            <span>requirements.txt</span>
+          </Button>
+          <Button 
+            variant={codeTab === 'readme' ? 'default' : 'ghost'} 
+            size="sm" 
+            onClick={() => setCodeTab('readme')}
+            className="flex items-center gap-1 rounded-b-none"
+          >
+            <File className="h-4 w-4" />
+            <span>README.md</span>
+          </Button>
+        </div>
+        
         <p className="text-sm text-muted-foreground mb-4">
-          This code will create a CustomTkinter application with all your designed components.
+          {codeTab === 'preview' && "This code creates a CustomTkinter application with all your designed components."}
+          {codeTab === 'requirements' && "Required packages to run the application."}
+          {codeTab === 'readme' && "README documentation for your project."}
         </p>
+        
         <div className="relative">
           <pre className="overflow-x-auto rounded-md bg-[#282c34] p-4">
-            <code className="language-python">{code}</code>
+            <code className={`language-${codeTab === 'preview' ? 'python' : codeTab === 'readme' ? 'markdown' : 'bash'}`}>
+              {codeTab === 'preview' 
+                ? code 
+                : codeTab === 'requirements' 
+                  ? requirementsCode 
+                  : readmeCode}
+            </code>
           </pre>
         </div>
       </div>
+      
       <div className="text-sm text-muted-foreground">
         <h3 className="font-medium text-foreground mb-2">Usage Instructions:</h3>
         <ol className="list-decimal list-inside space-y-1 ml-2">

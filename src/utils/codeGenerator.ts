@@ -61,7 +61,28 @@ const generateComponentCode = (component: any, indent: number): string => {
   // Component specific code
   switch (component.type) {
     case 'button':
-      code += `${spaces}${varName} = ctk.CTkButton(self, text="${props.text || 'Button'}", width=${width}, height=${height}, fg_color="${props.bgColor || '#3b82f6'}", text_color="${props.fgColor || 'white'}")\n`;
+      code += `${spaces}${varName} = ctk.CTkButton(self, text="${props.text || 'Button'}", width=${width}, height=${height}, fg_color="${props.bgColor || '#3b82f6'}", text_color="${props.fgColor || 'white'}"`;
+      
+      // Add hover color if provided
+      if (props.hoverColor) {
+        code += `, hover_color="${props.hoverColor}"`;
+      }
+      
+      // Add border width and color if provided
+      if (props.borderWidth) {
+        code += `, border_width=${props.borderWidth}`;
+      }
+      
+      if (props.borderColor) {
+        code += `, border_color="${props.borderColor}"`;
+      }
+      
+      // Add corner radius if provided
+      if (props.cornerRadius !== undefined) {
+        code += `, corner_radius=${props.cornerRadius}`;
+      }
+      
+      code += `)\n`;
       code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
       if (props.onClick) {
         code += `${spaces}${varName}.configure(command=self.${component.id.replace(/[^a-zA-Z0-9_]/g, '_')}_click)\n`;
@@ -71,28 +92,101 @@ const generateComponentCode = (component: any, indent: number): string => {
       break;
       
     case 'label':
-      code += `${spaces}${varName} = ctk.CTkLabel(self, text="${props.text || 'Label'}", width=${width}, height=${height}, text_color="${props.fgColor || '#000000'}")\n`;
+      code += `${spaces}${varName} = ctk.CTkLabel(self, text="${props.text || 'Label'}", width=${width}, height=${height}, text_color="${props.fgColor || '#000000'}"`;
+      
+      // Add corner radius and bg color if provided
+      if (props.cornerRadius !== undefined) {
+        code += `, corner_radius=${props.cornerRadius}`;
+      }
+      
+      if (props.bgColor) {
+        code += `, fg_color="${props.bgColor}"`;
+      }
+      
+      code += `)\n`;
       code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
       break;
       
     case 'textbox':
     case 'entry':
-      code += `${spaces}${varName} = ctk.CTkEntry(self, width=${width}, height=${height}, fg_color="${props.bgColor || 'transparent'}", text_color="${props.fgColor || '#000000'}")\n`;
+    case 'textarea':
+      const isMultiline = component.type === 'textarea' || component.type === 'textbox';
+      const entryClass = isMultiline ? 'CTkTextbox' : 'CTkEntry';
+      
+      code += `${spaces}${varName} = ctk.${entryClass}(self, width=${width}, height=${height}, fg_color="${props.bgColor || 'transparent'}", text_color="${props.fgColor || '#000000'}"`;
+      
+      // Add border width and color if provided
+      if (props.borderWidth) {
+        code += `, border_width=${props.borderWidth}`;
+      }
+      
+      if (props.borderColor) {
+        code += `, border_color="${props.borderColor}"`;
+      }
+      
+      // Add corner radius if provided
+      if (props.cornerRadius !== undefined) {
+        code += `, corner_radius=${props.cornerRadius}`;
+      }
+      
+      code += `)\n`;
       code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
-      if (props.placeholder) {
+      if (props.placeholder && !isMultiline) {
         code += `${spaces}${varName}.insert(0, "${props.placeholder}")\n`;
+      } else if (props.defaultValue && isMultiline) {
+        code += `${spaces}${varName}.insert("0.0", "${props.defaultValue}")\n`;
       }
       break;
       
     case 'checkbox':
       code += `${spaces}${varName}_var = ctk.BooleanVar(value=${props.checked ? 'True' : 'False'})\n`;
-      code += `${spaces}${varName} = ctk.CTkCheckBox(self, text="${props.text || 'Checkbox'}", width=${width}, height=${height}, variable=${varName}_var, text_color="${props.fgColor || '#000000'}")\n`;
+      code += `${spaces}${varName} = ctk.CTkCheckBox(self, text="${props.text || 'Checkbox'}", width=${width}, height=${height}, variable=${varName}_var, text_color="${props.fgColor || '#000000'}"`;
+      
+      // Add border width and color if provided
+      if (props.borderWidth) {
+        code += `, border_width=${props.borderWidth}`;
+      }
+      
+      if (props.borderColor) {
+        code += `, border_color="${props.borderColor}"`;
+      }
+      
+      // Add checked color if provided
+      if (props.checkedColor) {
+        code += `, fg_color="${props.checkedColor}", hover_color="${props.checkedColor}"`;
+      }
+      
+      code += `)\n`;
       code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
       break;
       
     case 'dropdown':
       const options = props.options || ['Option 1', 'Option 2', 'Option 3'];
-      code += `${spaces}${varName} = ctk.CTkOptionMenu(self, values=${JSON.stringify(options).replace(/"/g, "'").replace("[", "[").replace("]", "]")}, width=${width}, height=${height})\n`;
+      code += `${spaces}${varName} = ctk.CTkOptionMenu(self, values=${JSON.stringify(options).replace(/"/g, "'").replace("[", "[").replace("]", "]")}, width=${width}, height=${height}`;
+      
+      // Add colors if provided
+      if (props.bgColor) {
+        code += `, fg_color="${props.bgColor}"`;
+      }
+      
+      if (props.buttonColor) {
+        code += `, button_color="${props.buttonColor}"`;
+      }
+      
+      if (props.fgColor) {
+        code += `, text_color="${props.fgColor}"`;
+      }
+      
+      // Add border properties
+      if (props.borderWidth) {
+        code += `, border_width=${props.borderWidth}`;
+      }
+      
+      if (props.borderColor) {
+        code += `, border_color="${props.borderColor}"`;
+      }
+      
+      code += `)\n`;
       code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
       if (props.defaultValue) {
         code += `${spaces}${varName}.set("${props.defaultValue}")\n`;
@@ -102,7 +196,23 @@ const generateComponentCode = (component: any, indent: number): string => {
     case 'image':
       code += `${spaces}# Load image for ${component.id}\n`;
       code += `${spaces}${varName}_img = self.load_image("path_to_image.png", (${width}, ${height}))\n`;
-      code += `${spaces}${varName} = ctk.CTkLabel(self, image=${varName}_img, width=${width}, height=${height}, text="")\n`;
+      code += `${spaces}${varName} = ctk.CTkLabel(self, image=${varName}_img, width=${width}, height=${height}, text=""`;
+      
+      // Add border properties if provided
+      if (props.borderWidth) {
+        code += `, border_width=${props.borderWidth}`;
+      }
+      
+      if (props.borderColor) {
+        code += `, border_color="${props.borderColor}"`;
+      }
+      
+      // Add corner radius if provided
+      if (props.cornerRadius !== undefined) {
+        code += `, corner_radius=${props.cornerRadius}`;
+      }
+      
+      code += `)\n`;
       code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
       
       // Add image loading function if it's the first image
@@ -117,7 +227,36 @@ const generateComponentCode = (component: any, indent: number): string => {
       break;
       
     case 'slider':
-      code += `${spaces}${varName} = ctk.CTkSlider(self, from_=${props.min || 0}, to=${props.max || 100}, width=${width}, height=${height}, number_of_steps=${props.max ? Math.round(props.max - (props.min || 0)) : 100})\n`;
+      code += `${spaces}${varName} = ctk.CTkSlider(self, from_=${props.from || 0}, to=${props.to || 100}, width=${width}, height=${height}`;
+      
+      // Add colors if provided
+      if (props.progressColor) {
+        code += `, progress_color="${props.progressColor}"`;
+      }
+      
+      if (props.buttonColor) {
+        code += `, button_color="${props.buttonColor}"`;
+      }
+      
+      if (props.bgColor) {
+        code += `, fg_color="${props.bgColor}"`;
+      }
+      
+      // Add border properties
+      if (props.borderWidth) {
+        code += `, border_width=${props.borderWidth}`;
+      }
+      
+      if (props.borderColor) {
+        code += `, border_color="${props.borderColor}"`;
+      }
+      
+      // Add orientation if vertical
+      if (props.orient === 'vertical') {
+        code += `, orientation="vertical"`;
+      }
+      
+      code += `)\n`;
       code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
       if (props.value !== undefined) {
         code += `${spaces}${varName}.set(${Math.round(props.value) || 0})\n`;
@@ -125,38 +264,143 @@ const generateComponentCode = (component: any, indent: number): string => {
       break;
       
     case 'frame':
-      code += `${spaces}${varName} = ctk.CTkFrame(self, width=${width}, height=${height}, fg_color="${props.bgColor || '#ffffff'}", border_width=${props.borderWidth || 0})\n`;
+      code += `${spaces}${varName} = ctk.CTkFrame(self, width=${width}, height=${height}, fg_color="${props.bgColor || '#ffffff'}"`;
+      
+      // Add border properties
+      if (props.borderWidth !== undefined) {
+        code += `, border_width=${props.borderWidth}`;
+      }
+      
+      if (props.borderColor) {
+        code += `, border_color="${props.borderColor}"`;
+      }
+      
+      // Add corner radius if provided
+      if (props.cornerRadius !== undefined) {
+        code += `, corner_radius=${props.cornerRadius}`;
+      }
+      
+      code += `)\n`;
       code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
       break;
       
     case 'progressbar':
-      code += `${spaces}${varName} = ctk.CTkProgressBar(self, width=${width}, height=${height}, orientation="horizontal")\n`;
+      code += `${spaces}${varName} = ctk.CTkProgressBar(self, width=${width}, height=${height}, orientation="horizontal"`;
+      
+      // Add colors if provided
+      if (props.progressColor) {
+        code += `, progress_color="${props.progressColor}"`;
+      }
+      
+      if (props.bgColor) {
+        code += `, fg_color="${props.bgColor}"`;
+      }
+      
+      // Add border properties
+      if (props.borderWidth) {
+        code += `, border_width=${props.borderWidth}`;
+      }
+      
+      if (props.borderColor) {
+        code += `, border_color="${props.borderColor}"`;
+      }
+      
+      // Add corner radius if provided
+      if (props.cornerRadius !== undefined) {
+        code += `, corner_radius=${props.cornerRadius}`;
+      }
+      
+      code += `)\n`;
       code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
       // Ensure proper value calculation for progress bar (between 0 and 1)
       const progressValue = (props.value || 0) / (props.maxValue || 100);
-      code += `${spaces}${varName}.set(${Math.min(1, Math.max(0, progressValue))})\n`;
+      code += `${spaces}${varName}.set(${Math.min(1, Math.max(0, progressValue)).toFixed(2)})\n`;
       break;
       
     case 'listbox':
       // CustomTkinter doesn't have a direct listbox equivalent, so we'll create a scrollable frame with labels
       code += `${spaces}# Create a scrollable frame for listbox functionality\n`;
-      code += `${spaces}${varName}_frame = ctk.CTkScrollableFrame(self, width=${width}, height=${height}, fg_color="${props.bgColor || '#ffffff'}")\n`;
+      code += `${spaces}${varName}_frame = ctk.CTkScrollableFrame(self, width=${width}, height=${height}, fg_color="${props.bgColor || '#ffffff'}"`;
+      
+      // Add border properties
+      if (props.borderWidth) {
+        code += `, border_width=${props.borderWidth}`;
+      }
+      
+      if (props.borderColor) {
+        code += `, border_color="${props.borderColor}"`;
+      }
+      
+      // Add corner radius if provided
+      if (props.cornerRadius !== undefined) {
+        code += `, corner_radius=${props.cornerRadius}`;
+      }
+      
+      code += `)\n`;
       code += `${spaces}${varName}_frame.place(x=${x}, y=${y})\n`;
       
       if (props.items) {
         const items = Array.isArray(props.items) ? props.items : props.items.split(',');
         items.forEach((item: string, index: number) => {
-          code += `${spaces}${varName}_item${index} = ctk.CTkLabel(${varName}_frame, text="${item.trim()}", text_color="${props.fgColor || '#000000'}", anchor="w")\n`;
+          code += `${spaces}${varName}_item${index} = ctk.CTkLabel(${varName}_frame, text="${item.trim()}", text_color="${props.fgColor || '#000000'}", anchor="w"`;
+          
+          // Add selected color if it's the first item (just for demonstration)
+          if (index === 0 && props.selectedColor) {
+            code += `, fg_color="${props.selectedColor}"`;
+          }
+          
+          code += `)\n`;
           code += `${spaces}${varName}_item${index}.pack(fill="x", padx=5, pady=2)\n`;
         });
       }
       break;
       
-    case 'textarea':
-      code += `${spaces}${varName} = ctk.CTkTextbox(self, width=${width}, height=${height}, fg_color="${props.bgColor || '#ffffff'}", text_color="${props.fgColor || '#000000'}")\n`;
+    case 'notebook':
+      // CustomTkinter has TabView for notebook-like functionality
+      code += `${spaces}${varName} = ctk.CTkTabview(self, width=${width}, height=${height}`;
+      
+      // Add colors if provided
+      if (props.bgColor) {
+        code += `, fg_color="${props.bgColor}"`;
+      }
+      
+      if (props.tabColor) {
+        code += `, segmented_button_fg_color="${props.tabColor}"`;
+      }
+      
+      if (props.activeTabColor) {
+        code += `, segmented_button_selected_color="${props.activeTabColor}"`;
+      }
+      
+      // Add border properties
+      if (props.borderWidth) {
+        code += `, border_width=${props.borderWidth}`;
+      }
+      
+      if (props.borderColor) {
+        code += `, border_color="${props.borderColor}"`;
+      }
+      
+      // Add corner radius if provided
+      if (props.cornerRadius !== undefined) {
+        code += `, corner_radius=${props.cornerRadius}`;
+      }
+      
+      code += `)\n`;
       code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
-      if (props.defaultValue) {
-        code += `${spaces}${varName}.insert("0.0", "${props.defaultValue}")\n`;
+      
+      // Create tabs
+      if (props.tabs) {
+        const tabs = Array.isArray(props.tabs) ? props.tabs : props.tabs.split(',');
+        tabs.forEach((tab: string) => {
+          const tabName = tab.trim();
+          code += `${spaces}${varName}.add("${tabName}")\n`;
+        });
+        
+        // Set initial tab
+        if (props.selectedTab) {
+          code += `${spaces}${varName}.set("${props.selectedTab}")\n`;
+        }
       }
       break;
       
@@ -199,8 +443,19 @@ This is a modern CustomTkinter GUI application generated from the GUI Builder.
 python app.py
 \`\`\`
 
+## Features
+- Modern UI with CustomTkinter
+- Responsive layout
+- Customizable components
+- Cross-platform compatibility (Windows, macOS, Linux)
+
 ## Troubleshooting
 If you encounter an error about width and height in the place method, make sure you're using CustomTkinter version 5.2.0 or later.
+
+### Common issues:
+1. **Width/height error in place method**: In CustomTkinter, width and height are set in the widget constructor, not in the place method.
+2. **Module not found**: Make sure all required packages are installed via pip.
+3. **Display issues**: CustomTkinter works best with Python 3.7+ and recent operating systems.
 `;
   zip.file("README.md", readme);
 
@@ -239,6 +494,15 @@ self.geometry("1024x768")
 
 ## Adding Event Handlers
 To add functionality to buttons or other widgets, locate the event handler functions in the code and add your logic there.
+
+## Working with CustomTkinter
+CustomTkinter is a modern UI library that enhances the standard Tkinter with modern styling and widgets.
+
+### Key differences from standard Tkinter:
+1. Widget styling is done through parameters like fg_color, text_color, etc.
+2. Width and height must be provided in the constructor, not in place/pack/grid methods
+3. More modern widgets like CTkTabview, CTkScrollableFrame are available
+4. Better support for themes and appearance modes
 
 ## Further Resources
 - CustomTkinter documentation: https://github.com/TomSchimansky/CustomTkinter/wiki

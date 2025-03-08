@@ -57,7 +57,6 @@ const Canvas = ({
   const [isSelecting, setIsSelecting] = useState(false);
   const [isMultiSelectKeyDown, setIsMultiSelectKeyDown] = useState(false);
   
-  // Track multi-select key (Ctrl/Command)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey) {
@@ -104,7 +103,6 @@ const Canvas = ({
 
   const handleCanvasClick = (e: React.MouseEvent) => {
     if (e.target === canvasRef.current) {
-      // Only clear selection if not multi-selecting
       if (!isMultiSelectKeyDown) {
         setSelectedComponent(null);
         setSelectedComponents([]);
@@ -123,7 +121,6 @@ const Canvas = ({
         end: { x: e.clientX - rect.left, y: e.clientY - rect.top }
       });
       
-      // Clear selection if not multi-selecting
       if (!isMultiSelectKeyDown) {
         setSelectedComponent(null);
         setSelectedComponents([]);
@@ -161,7 +158,6 @@ const Canvas = ({
       
       if (selected.length > 0) {
         if (isMultiSelectKeyDown) {
-          // Add to existing selection
           const newSelection = [
             ...selectedComponents,
             ...selected.map(c => c.id).filter(id => !selectedComponents.includes(id))
@@ -175,7 +171,6 @@ const Canvas = ({
             setSelectedComponent(null);
           }
         } else {
-          // Replace selection
           setSelectedComponents(selected.map(c => c.id));
           if (selected.length === 1) {
             setSelectedComponent(selected[0]);
@@ -201,7 +196,6 @@ const Canvas = ({
     e.stopPropagation();
     
     if (isMultiSelectKeyDown) {
-      // Toggle component selection
       if (selectedComponents.includes(component.id)) {
         const newSelected = selectedComponents.filter(id => id !== component.id);
         setSelectedComponents(newSelected);
@@ -221,7 +215,6 @@ const Canvas = ({
         }
       }
     } else {
-      // Single select
       setSelectedComponent(component);
       setSelectedComponents([component.id]);
     }
@@ -408,7 +401,6 @@ const Canvas = ({
   };
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Removed as this is now handled by the WindowProperties component
   };
 
   const handleTitleBlur = () => {
@@ -916,4 +908,112 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
           style={{
             backgroundColor: component.props.bgColor || '#ffffff',
             borderRadius: `${component.props.cornerRadius || 8}px`,
-            borderColor: component.props.borderColor || '#e2e8
+            borderColor: component.props.borderColor || '#e2e8f0',
+            borderWidth: `${component.props.borderWidth || 1}px`,
+            borderStyle: 'solid',
+            color: component.props.fgColor || '#000000'
+          }}
+        >
+          {component.props.format || 'yyyy-mm-dd'}
+        </div>
+      );
+    case 'progressbar':
+      return (
+        <div 
+          className="w-full h-full flex items-center"
+          style={{
+            borderRadius: `${component.props.cornerRadius || 4}px`,
+            overflow: 'hidden'
+          }}
+        >
+          <div 
+            className="h-full"
+            style={{
+              width: `${(component.props.value / component.props.maxValue) * 100}%`,
+              backgroundColor: component.props.progressColor || '#3b82f6'
+            }}
+          />
+          <div 
+            className="h-full flex-1"
+            style={{
+              backgroundColor: component.props.bgColor || '#e2e8f0'
+            }}
+          />
+        </div>
+      );
+    case 'notebook':
+      return (
+        <div 
+          className="w-full h-full flex flex-col"
+          style={{
+            backgroundColor: component.props.bgColor || '#ffffff',
+            borderRadius: `${component.props.cornerRadius || 4}px`,
+            borderColor: component.props.borderColor || '#e2e8f0',
+            borderWidth: `${component.props.borderWidth || 1}px`,
+            borderStyle: 'solid',
+            overflow: 'hidden'
+          }}
+        >
+          <div className="flex border-b border-gray-200">
+            {component.props.tabs && component.props.tabs.split(',').map((tab: string, index: number) => (
+              <div 
+                key={index}
+                className={`px-4 py-2 text-sm cursor-default ${
+                  component.props.selectedTab === tab.trim() 
+                    ? 'border-b-2 border-primary text-primary' 
+                    : 'text-gray-600'
+                }`}
+              >
+                {tab.trim()}
+              </div>
+            ))}
+          </div>
+          <div className="flex-1" />
+        </div>
+      );
+    case 'listbox':
+      return (
+        <div 
+          className="w-full h-full overflow-auto"
+          style={{
+            backgroundColor: component.props.bgColor || '#ffffff',
+            borderRadius: `${component.props.cornerRadius || 4}px`,
+            borderColor: component.props.borderColor || '#e2e8f0',
+            borderWidth: `${component.props.borderWidth || 1}px`,
+            borderStyle: 'solid'
+          }}
+        >
+          <div className="py-1">
+            {component.props.items && component.props.items.split(',').map((item: string, index: number) => (
+              <div 
+                key={index} 
+                className="px-4 py-2 text-sm hover:bg-gray-100 cursor-default"
+                style={{
+                  color: component.props.fgColor || '#000000'
+                }}
+              >
+                {item.trim()}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    case 'canvas':
+      return (
+        <div 
+          className="w-full h-full"
+          style={{
+            backgroundColor: component.props.bgColor || '#ffffff',
+            borderRadius: `${component.props.cornerRadius || 4}px`,
+            borderColor: component.props.borderColor || '#e2e8f0',
+            borderWidth: `${component.props.borderWidth || 1}px`,
+            borderStyle: 'solid'
+          }}
+        />
+      );
+    default:
+      return null;
+  }
+};
+
+export default Canvas;

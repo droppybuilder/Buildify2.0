@@ -23,11 +23,20 @@ class Application(ctk.CTk):
     
     def load_image(self, path, size):
         """Helper function to load images with proper error handling"""
-        if not os.path.exists(path):
-            print(f"Warning: Image file {path} not found")
-            return None
         try:
-            img = Image.open(path)
+            # Handle both absolute and relative paths
+            if os.path.isabs(path):
+                img_path = path
+            else:
+                # Get the directory where the script is located
+                script_dir = os.path.dirname(os.path.abspath(__file__))
+                img_path = os.path.join(script_dir, path)
+            
+            if not os.path.exists(img_path):
+                print(f"Warning: Image file {img_path} not found")
+                return None
+                
+            img = Image.open(img_path)
             img = img.resize(size, Image.Resampling.LANCZOS)
             photo = ImageTk.PhotoImage(img)
             # Keep a reference to prevent garbage collection
@@ -245,20 +254,18 @@ const generateComponentCode = (component: any, indent: number): string => {
       const imageName = `${component.id.replace(/[^a-zA-Z0-9_]/g, '_')}.png`;
       code += `${spaces}# Load image for ${component.id}\n`;
       code += `${spaces}${varName}_img = self.load_image("${imageName}", (${width}, ${height}))\n`;
+      
+      // Use a CTkLabel for images but without border properties that are not supported
       code += `${spaces}${varName} = ctk.CTkLabel(self, image=${varName}_img, width=${width}, height=${height}, text=""`;
       
-      // Add border properties if provided
-      if (props.borderWidth !== undefined) {
-        code += `, border_width=${props.borderWidth}`;
-      }
-      
-      if (props.borderColor) {
-        code += `, border_color="${props.borderColor}"`;
-      }
-      
-      // Add corner radius if provided
+      // Add corner radius if provided, but skip border properties
       if (props.cornerRadius !== undefined) {
         code += `, corner_radius=${props.cornerRadius}`;
+      }
+      
+      // Add background color if provided
+      if (props.bgColor) {
+        code += `, fg_color="${props.bgColor}"`;
       }
       
       code += `)\n`;
@@ -512,6 +519,7 @@ If you encounter errors:
 2. Make sure you have CustomTkinter version 5.2.0 or later installed
 3. Check that Python 3.7 or later is installed
 4. For missing modules, run: \`pip install -r requirements.txt\`
+5. For "unsupported arguments" errors, check the CustomTkinter documentation for supported properties
 `;
   zip.file("README.md", readme);
 
@@ -522,12 +530,15 @@ If you encounter errors:
     const props = imageComp.props || {};
     if (props.src) {
       try {
-        // Try to fetch the image if it's a URL
+        // Try to fetch the image if it's a URL or local file path
         let imageBlob = null;
         
-        if (props.src.startsWith('http') || props.src.startsWith('/')) {
+        if (props.src.startsWith('http') || props.src.startsWith('/') || props.src.startsWith('blob:')) {
           try {
             const response = await fetch(props.src);
+            if (!response.ok) {
+              throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+            }
             imageBlob = await response.blob();
           } catch (error) {
             console.error('Error fetching image:', error);
@@ -535,7 +546,18 @@ If you encounter errors:
           }
         } else {
           // Handle data URLs or other formats
-          imageBlob = await fetchSampleImage();
+          try {
+            // Convert data URL to blob if needed
+            if (props.src.startsWith('data:')) {
+              const response = await fetch(props.src);
+              imageBlob = await response.blob();
+            } else {
+              imageBlob = await fetchSampleImage();
+            }
+          } catch (error) {
+            console.error('Error processing image data URL:', error);
+            imageBlob = await fetchSampleImage();
+          }
         }
         
         // Save the image with the component's ID as the filename
@@ -570,11 +592,16 @@ If you see: "AttributeError: '_tkinter.tkapp' object has no attribute 'load_imag
 - You have not renamed or removed the load_image method in the Application class
 - All image files are in the same directory as app.py
 
+### "Unsupported arguments" error
+If you see an error like "['border_width', 'border_color'] are not supported arguments":
+- This means CustomTkinter's widgets don't support all the properties you've set
+- Remove or change the unsupported properties
+- Check the CustomTkinter documentation for the supported properties for each widget
+
 ### Other common issues:
 1. **Image file not found**: Ensure all .png files are in the same directory as app.py
 2. **Module not found**: Run \`pip install -r requirements.txt\`
 3. **Display issues**: CustomTkinter works best with Python 3.7+ and recent operating systems
-4. **Widget errors**: Make sure width and height are provided in the constructor, not in place() method
 
 ## Working with CustomTkinter
 CustomTkinter is a modern UI library that enhances the standard Tkinter with modern styling and widgets.

@@ -36,11 +36,12 @@ export const ColorInput: React.FC<ColorInputProps> = ({
 
   const handleInputBlur = () => {
     let color = inputValue;
-    // Ensure the color value is valid
+    // Ensure the color value is valid and starts with #
     if (!color.startsWith('#')) {
       color = `#${color}`;
     }
     
+    // Validate the color format (for 3 or 6 digit hex)
     if (!/^#([0-9A-F]{3}){1,2}$/i.test(color)) {
       // Fallback to a default color if invalid
       color = '#ffffff';

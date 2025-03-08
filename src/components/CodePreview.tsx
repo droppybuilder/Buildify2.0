@@ -18,10 +18,9 @@ export const CodePreview: React.FC<CodePreviewProps> = ({ components, visible })
 
   useEffect(() => {
     if (visible) {
-      // Generate code for components, using props instead of properties
+      // Generate code for components, ensuring they have properly initialized props
       const preparedComponents = components.map(component => ({
         ...component,
-        // Ensure props always exists
         props: component.props || {}
       }));
       
@@ -94,6 +93,7 @@ If you encounter errors:
 3. Verify Python version is 3.7 or later
 4. For layout issues, adjust the window size or component placement
 5. If you see "width and height arguments must be passed to the constructor" error, make sure to pass width and height in the constructor, not in place()
+6. If you see "load_image" error, make sure the load_image method is defined in your app class
 
 ## Reference
 For more information on CustomTkinter API:
@@ -197,7 +197,8 @@ For more information on CustomTkinter API:
             <li>Make sure you have CustomTkinter version 5.2.0 or later installed</li>
             <li>For widget placement issues, ensure all width/height are specified in the widget constructor</li>
             <li>For color issues, try using hex color values (e.g. "#ff0000" for red)</li>
-            <li>If images don't display, verify the path is correct and the image files are included</li>
+            <li>If images don't display, verify the image files are in the same directory as your app.py</li>
+            <li>If you see a "load_image" error, make sure the function is defined in your Application class</li>
           </ul>
         </div>
       </div>

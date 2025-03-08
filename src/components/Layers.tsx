@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Grip, Eye, EyeOff, Lock, Unlock, ChevronRight, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -23,23 +23,31 @@ export const Layers = ({
   onOrderChange,
   visible
 }: LayersProps) => {
-  const [visibilityStates, setVisibilityStates] = useState<Record<string, boolean>>(
-    components.reduce((acc, component) => {
-      acc[component.id] = true;
-      return acc;
-    }, {})
-  );
-
-  const [lockStates, setLockStates] = useState<Record<string, boolean>>(
-    components.reduce((acc, component) => {
-      acc[component.id] = false;
-      return acc;
-    }, {})
-  );
-
+  // Use component IDs for visibility and lock state tracking
+  const [visibilityStates, setVisibilityStates] = useState<Record<string, boolean>>({});
+  const [lockStates, setLockStates] = useState<Record<string, boolean>>({});
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   
-  const toggleVisibility = (id: string) => {
+  // Initialize states from components when they change
+  useEffect(() => {
+    const initialVisibility: Record<string, boolean> = {};
+    const initialLockStates: Record<string, boolean> = {};
+    
+    components.forEach(component => {
+      // Use existing visibility from component props if available
+      initialVisibility[component.id] = component.visible !== false; // Default to true
+      
+      // Use existing lock state from component props if available
+      initialLockStates[component.id] = component.locked === true; // Default to false
+    });
+    
+    setVisibilityStates(initialVisibility);
+    setLockStates(initialLockStates);
+  }, [components]);
+  
+  const toggleVisibility = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent selecting the component
+    
     setVisibilityStates(prev => {
       const newVisibility = {
         ...prev,
@@ -62,7 +70,9 @@ export const Layers = ({
     });
   };
   
-  const toggleLock = (id: string) => {
+  const toggleLock = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent selecting the component
+    
     setLockStates(prev => {
       const newLockState = {
         ...prev,
@@ -81,6 +91,13 @@ export const Layers = ({
       });
       
       onComponentsChange(updatedComponents);
+      
+      if (newLockState[id]) {
+        toast.info(`"${c => c.type || 'Component'}" locked`);
+      } else {
+        toast.info(`"${c => c.type || 'Component'}" unlocked`);
+      }
+      
       return newLockState;
     });
   };
@@ -106,7 +123,12 @@ export const Layers = ({
   };
   
   const handleLayerClick = (component: any) => {
-    setSelectedComponent(component);
+    // If the component is not locked, allow selection
+    if (!lockStates[component.id]) {
+      setSelectedComponent(component);
+    } else {
+      toast.error('This component is locked. Unlock it to select.');
+    }
   };
   
   // Reverse the components array for display so that the top-most layer appears at the top
@@ -134,68 +156,73 @@ export const Layers = ({
                   No components found. Add some components to see them here.
                 </div>
               ) : (
-                displayComponents.map((component, index) => (
-                  <Draggable 
-                    key={component.id} 
-                    draggableId={component.id}
-                    index={index}
-                    isDragDisabled={lockStates[component.id]}
-                  >
-                    {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        className={`mb-1 p-2 rounded transition-colors ${
-                          selectedComponent?.id === component.id 
-                            ? 'bg-primary/10 border border-primary/30' 
-                            : 'hover:bg-gray-100 border border-transparent'
-                        }`}
-                        onClick={() => handleLayerClick(component)}
-                      >
-                        <div className="flex items-center">
-                          <div {...provided.dragHandleProps} className="mr-2 cursor-grab active:cursor-grabbing">
-                            <Grip size={16} className="text-muted-foreground" />
-                          </div>
-                          
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() => toggleVisibility(component.id)}
-                          >
-                            {visibilityStates[component.id] ? (
-                              <Eye size={14} className="text-muted-foreground" />
-                            ) : (
-                              <EyeOff size={14} className="text-muted-foreground" />
-                            )}
-                          </Button>
-                          
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 mr-2"
-                            onClick={() => toggleLock(component.id)}
-                          >
-                            {lockStates[component.id] ? (
-                              <Lock size={14} className="text-muted-foreground" />
-                            ) : (
-                              <Unlock size={14} className="text-muted-foreground" />
-                            )}
-                          </Button>
-                          
-                          <div 
-                            className={`flex-1 truncate text-sm ${!visibilityStates[component.id] ? 'text-muted-foreground' : ''}`}
-                          >
-                            {component.type}{' '}
-                            <span className="text-xs text-muted-foreground">
-                              ({component.id.split('-')[1]})
-                            </span>
+                displayComponents.map((component, index) => {
+                  const isVisible = visibilityStates[component.id] !== false;
+                  const isLocked = lockStates[component.id] === true;
+                  
+                  return (
+                    <Draggable 
+                      key={component.id} 
+                      draggableId={component.id}
+                      index={index}
+                      isDragDisabled={isLocked}
+                    >
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          className={`mb-1 p-2 rounded transition-colors ${
+                            selectedComponent?.id === component.id 
+                              ? 'bg-primary/10 border border-primary/30' 
+                              : 'hover:bg-gray-100 border border-transparent'
+                          }`}
+                          onClick={() => handleLayerClick(component)}
+                        >
+                          <div className="flex items-center">
+                            <div {...provided.dragHandleProps} className="mr-2 cursor-grab active:cursor-grabbing">
+                              <Grip size={16} className="text-muted-foreground" />
+                            </div>
+                            
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={(e) => toggleVisibility(component.id, e)}
+                            >
+                              {isVisible ? (
+                                <Eye size={14} className="text-muted-foreground" />
+                              ) : (
+                                <EyeOff size={14} className="text-muted-foreground" />
+                              )}
+                            </Button>
+                            
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 mr-2"
+                              onClick={(e) => toggleLock(component.id, e)}
+                            >
+                              {isLocked ? (
+                                <Lock size={14} className="text-muted-foreground" />
+                              ) : (
+                                <Unlock size={14} className="text-muted-foreground" />
+                              )}
+                            </Button>
+                            
+                            <div 
+                              className={`flex-1 truncate text-sm ${!isVisible ? 'text-muted-foreground' : ''}`}
+                            >
+                              {component.type}{' '}
+                              <span className="text-xs text-muted-foreground">
+                                ({component.id.split('-')[1]})
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )}
-                  </Draggable>
-                ))
+                      )}
+                    </Draggable>
+                  );
+                })
               )}
               {provided.placeholder}
             </div>

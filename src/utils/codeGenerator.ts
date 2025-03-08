@@ -25,6 +25,27 @@ class Application(ctk.CTk):
     def create_widgets(self):
 `;
 
+  // First, check if we need the image loading function
+  const hasImages = components.some(comp => comp.type === 'image');
+  
+  // Add image loading function if needed
+  if (hasImages) {
+    code += `        # Helper function to load images
+        def load_image(self, path, size):
+            if not os.path.exists(path):
+                print(f"Warning: Image file {path} not found")
+                return None
+            try:
+                img = Image.open(path)
+                img = img.resize(size, Image.Resampling.LANCZOS)
+                return ImageTk.PhotoImage(img)
+            except Exception as e:
+                print(f"Error loading image {path}: {e}")
+                return None
+                
+`;
+  }
+
   // Add components
   components.forEach(component => {
     // Add component creation code based on its type
@@ -56,12 +77,21 @@ const generateComponentCode = (component: any, indent: number): string => {
   const varName = `self.${component.id.replace(/[^a-zA-Z0-9_]/g, '_')}`;
   
   // Get properties with fallbacks to avoid undefined
-  const props = component.properties || {};
+  const props = component.props || {};
   
   // Component specific code
   switch (component.type) {
     case 'button':
-      code += `${spaces}${varName} = ctk.CTkButton(self, text="${props.text || 'Button'}", width=${width}, height=${height}, fg_color="${props.bgColor || '#3b82f6'}", text_color="${props.fgColor || 'white'}"`;
+      code += `${spaces}${varName} = ctk.CTkButton(self, text="${props.text || 'Button'}", width=${width}, height=${height}`;
+      
+      // Add colors (with fallbacks)
+      if (props.bgColor) {
+        code += `, fg_color="${props.bgColor}"`;
+      }
+      
+      if (props.fgColor) {
+        code += `, text_color="${props.fgColor}"`;
+      }
       
       // Add hover color if provided
       if (props.hoverColor) {
@@ -69,7 +99,7 @@ const generateComponentCode = (component: any, indent: number): string => {
       }
       
       // Add border width and color if provided
-      if (props.borderWidth) {
+      if (props.borderWidth !== undefined) {
         code += `, border_width=${props.borderWidth}`;
       }
       
@@ -92,7 +122,12 @@ const generateComponentCode = (component: any, indent: number): string => {
       break;
       
     case 'label':
-      code += `${spaces}${varName} = ctk.CTkLabel(self, text="${props.text || 'Label'}", width=${width}, height=${height}, text_color="${props.fgColor || '#000000'}"`;
+      code += `${spaces}${varName} = ctk.CTkLabel(self, text="${props.text || 'Label'}", width=${width}, height=${height}`;
+      
+      // Add colors
+      if (props.fgColor) {
+        code += `, text_color="${props.fgColor}"`;
+      }
       
       // Add corner radius and bg color if provided
       if (props.cornerRadius !== undefined) {
@@ -113,10 +148,19 @@ const generateComponentCode = (component: any, indent: number): string => {
       const isMultiline = component.type === 'textarea' || component.type === 'textbox';
       const entryClass = isMultiline ? 'CTkTextbox' : 'CTkEntry';
       
-      code += `${spaces}${varName} = ctk.${entryClass}(self, width=${width}, height=${height}, fg_color="${props.bgColor || 'transparent'}", text_color="${props.fgColor || '#000000'}"`;
+      code += `${spaces}${varName} = ctk.${entryClass}(self, width=${width}, height=${height}`;
+      
+      // Add colors
+      if (props.bgColor) {
+        code += `, fg_color="${props.bgColor}"`;
+      }
+      
+      if (props.fgColor) {
+        code += `, text_color="${props.fgColor}"`;
+      }
       
       // Add border width and color if provided
-      if (props.borderWidth) {
+      if (props.borderWidth !== undefined) {
         code += `, border_width=${props.borderWidth}`;
       }
       
@@ -140,10 +184,15 @@ const generateComponentCode = (component: any, indent: number): string => {
       
     case 'checkbox':
       code += `${spaces}${varName}_var = ctk.BooleanVar(value=${props.checked ? 'True' : 'False'})\n`;
-      code += `${spaces}${varName} = ctk.CTkCheckBox(self, text="${props.text || 'Checkbox'}", width=${width}, height=${height}, variable=${varName}_var, text_color="${props.fgColor || '#000000'}"`;
+      code += `${spaces}${varName} = ctk.CTkCheckBox(self, text="${props.text || 'Checkbox'}", width=${width}, height=${height}, variable=${varName}_var`;
+      
+      // Add colors
+      if (props.fgColor) {
+        code += `, text_color="${props.fgColor}"`;
+      }
       
       // Add border width and color if provided
-      if (props.borderWidth) {
+      if (props.borderWidth !== undefined) {
         code += `, border_width=${props.borderWidth}`;
       }
       
@@ -178,7 +227,7 @@ const generateComponentCode = (component: any, indent: number): string => {
       }
       
       // Add border properties
-      if (props.borderWidth) {
+      if (props.borderWidth !== undefined) {
         code += `, border_width=${props.borderWidth}`;
       }
       
@@ -194,12 +243,14 @@ const generateComponentCode = (component: any, indent: number): string => {
       break;
       
     case 'image':
+      // For image widget, we need to include the actual image in the export
+      const imageName = `${component.id.replace(/[^a-zA-Z0-9_]/g, '_')}.png`;
       code += `${spaces}# Load image for ${component.id}\n`;
-      code += `${spaces}${varName}_img = self.load_image("path_to_image.png", (${width}, ${height}))\n`;
+      code += `${spaces}${varName}_img = self.load_image("${imageName}", (${width}, ${height}))\n`;
       code += `${spaces}${varName} = ctk.CTkLabel(self, image=${varName}_img, width=${width}, height=${height}, text=""`;
       
       // Add border properties if provided
-      if (props.borderWidth) {
+      if (props.borderWidth !== undefined) {
         code += `, border_width=${props.borderWidth}`;
       }
       
@@ -214,16 +265,6 @@ const generateComponentCode = (component: any, indent: number): string => {
       
       code += `)\n`;
       code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
-      
-      // Add image loading function if it's the first image
-      if (!code.includes('def load_image')) {
-        code = `${spaces}def load_image(self, path, size):\n` +
-               `${spaces}    if not os.path.exists(path):\n` +
-               `${spaces}        return None\n` +
-               `${spaces}    img = Image.open(path)\n` +
-               `${spaces}    img = img.resize(size, Image.LANCZOS)\n` +
-               `${spaces}    return ImageTk.PhotoImage(img)\n\n` + code;
-      }
       break;
       
     case 'slider':
@@ -243,7 +284,7 @@ const generateComponentCode = (component: any, indent: number): string => {
       }
       
       // Add border properties
-      if (props.borderWidth) {
+      if (props.borderWidth !== undefined) {
         code += `, border_width=${props.borderWidth}`;
       }
       
@@ -264,7 +305,12 @@ const generateComponentCode = (component: any, indent: number): string => {
       break;
       
     case 'frame':
-      code += `${spaces}${varName} = ctk.CTkFrame(self, width=${width}, height=${height}, fg_color="${props.bgColor || '#ffffff'}"`;
+      code += `${spaces}${varName} = ctk.CTkFrame(self, width=${width}, height=${height}`;
+      
+      // Add colors
+      if (props.bgColor) {
+        code += `, fg_color="${props.bgColor}"`;
+      }
       
       // Add border properties
       if (props.borderWidth !== undefined) {
@@ -297,7 +343,7 @@ const generateComponentCode = (component: any, indent: number): string => {
       }
       
       // Add border properties
-      if (props.borderWidth) {
+      if (props.borderWidth !== undefined) {
         code += `, border_width=${props.borderWidth}`;
       }
       
@@ -320,10 +366,15 @@ const generateComponentCode = (component: any, indent: number): string => {
     case 'listbox':
       // CustomTkinter doesn't have a direct listbox equivalent, so we'll create a scrollable frame with labels
       code += `${spaces}# Create a scrollable frame for listbox functionality\n`;
-      code += `${spaces}${varName}_frame = ctk.CTkScrollableFrame(self, width=${width}, height=${height}, fg_color="${props.bgColor || '#ffffff'}"`;
+      code += `${spaces}${varName}_frame = ctk.CTkScrollableFrame(self, width=${width}, height=${height}`;
+      
+      // Add colors
+      if (props.bgColor) {
+        code += `, fg_color="${props.bgColor}"`;
+      }
       
       // Add border properties
-      if (props.borderWidth) {
+      if (props.borderWidth !== undefined) {
         code += `, border_width=${props.borderWidth}`;
       }
       
@@ -342,14 +393,19 @@ const generateComponentCode = (component: any, indent: number): string => {
       if (props.items) {
         const items = Array.isArray(props.items) ? props.items : props.items.split(',');
         items.forEach((item: string, index: number) => {
-          code += `${spaces}${varName}_item${index} = ctk.CTkLabel(${varName}_frame, text="${item.trim()}", text_color="${props.fgColor || '#000000'}", anchor="w"`;
+          code += `${spaces}${varName}_item${index} = ctk.CTkLabel(${varName}_frame, text="${item.trim()}"`;
+          
+          // Add text color
+          if (props.fgColor) {
+            code += `, text_color="${props.fgColor}"`;
+          }
           
           // Add selected color if it's the first item (just for demonstration)
           if (index === 0 && props.selectedColor) {
             code += `, fg_color="${props.selectedColor}"`;
           }
           
-          code += `)\n`;
+          code += `, anchor="w")\n`;
           code += `${spaces}${varName}_item${index}.pack(fill="x", padx=5, pady=2)\n`;
         });
       }
@@ -373,7 +429,7 @@ const generateComponentCode = (component: any, indent: number): string => {
       }
       
       // Add border properties
-      if (props.borderWidth) {
+      if (props.borderWidth !== undefined) {
         code += `, border_width=${props.borderWidth}`;
       }
       
@@ -456,10 +512,43 @@ If you encounter an error about width and height in the place method, make sure 
 1. **Width/height error in place method**: In CustomTkinter, width and height are set in the widget constructor, not in the place method.
 2. **Module not found**: Make sure all required packages are installed via pip.
 3. **Display issues**: CustomTkinter works best with Python 3.7+ and recent operating systems.
+4. **Missing load_image method**: The code uses a custom method to handle image loading. Make sure it's included in your app.py.
 `;
   zip.file("README.md", readme);
 
-  // Add a sample image file
+  // Save images from components with type 'image'
+  const imageComponents = components.filter(comp => comp.type === 'image');
+  
+  for (const imageComp of imageComponents) {
+    const props = imageComp.props || {};
+    if (props.src) {
+      try {
+        // Try to fetch the image if it's a URL
+        let imageBlob = null;
+        
+        if (props.src.startsWith('http') || props.src.startsWith('/')) {
+          try {
+            const response = await fetch(props.src);
+            imageBlob = await response.blob();
+          } catch (error) {
+            console.error('Error fetching image:', error);
+            imageBlob = await fetchSampleImage();
+          }
+        } else {
+          // Handle data URLs or other formats
+          imageBlob = await fetchSampleImage();
+        }
+        
+        // Save the image with the component's ID as the filename
+        const imageName = `${imageComp.id.replace(/[^a-zA-Z0-9_]/g, '_')}.png`;
+        zip.file(imageName, imageBlob, {binary: true});
+      } catch (error) {
+        console.error('Error processing image:', error);
+      }
+    }
+  }
+  
+  // Add a sample image file as backup
   zip.file("sample_image.png", await fetchSampleImage(), {binary: true});
   
   // Add a more detailed documentation file
@@ -472,7 +561,7 @@ which is a modern-looking UI framework for Python based on Tkinter.
 ## Project Structure
 - \`app.py\`: The main application file
 - \`requirements.txt\`: Python dependencies
-- \`sample_image.png\`: A sample image that can be used in your application
+- \`*.png\`: Image files used in your application
 
 ## Customizing the Application
 You can modify the application by editing the \`app.py\` file. Here are some common customizations:

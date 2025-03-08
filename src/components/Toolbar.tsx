@@ -77,7 +77,7 @@ export const Toolbar = ({
               className="gap-2 text-xs"
             >
               <Code size={16} />
-              {!showCodePreview ? "Show Code" : "Hide Code"}
+              {!showCodePreview ? "Code" : "Hide Code"}
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -101,7 +101,7 @@ export const Toolbar = ({
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Toggle layers panel</p>
+              <p>Toggle layers panel (Figma style)</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

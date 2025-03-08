@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Undo2, Redo2, Code, Layers as LayersIcon } from "lucide-react";
+import { Undo2, Redo2, Code, Layers as LayersIcon, Settings } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -12,8 +12,10 @@ interface ToolbarProps {
   canRedo: boolean;
   onToggleCodePreview: () => void;
   onToggleLayers?: () => void;
+  onToggleWindowProperties?: () => void;
   showCodePreview: boolean;
   showLayers?: boolean;
+  showWindowProperties?: boolean;
 }
 
 export const Toolbar = ({
@@ -24,8 +26,10 @@ export const Toolbar = ({
   canRedo,
   onToggleCodePreview,
   onToggleLayers,
+  onToggleWindowProperties,
   showCodePreview,
-  showLayers = false
+  showLayers = false,
+  showWindowProperties = false
 }: ToolbarProps) => {
   return (
     <div className="h-12 border-b flex items-center px-4 gap-2">
@@ -102,6 +106,27 @@ export const Toolbar = ({
             </TooltipTrigger>
             <TooltipContent>
               <p>Toggle layers panel (Figma style)</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+
+      {onToggleWindowProperties && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={showWindowProperties ? "default" : "ghost"}
+                size="sm"
+                onClick={onToggleWindowProperties}
+                className="gap-2 text-xs"
+              >
+                <Settings size={16} />
+                {!showWindowProperties ? "Window" : "Hide Window"}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Toggle window properties</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

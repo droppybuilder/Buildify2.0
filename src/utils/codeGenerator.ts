@@ -1,4 +1,3 @@
-
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
@@ -21,31 +20,30 @@ class Application(ctk.CTk):
         
         # Create components
         self.create_widgets()
+    
+    def load_image(self, path, size):
+        """Helper function to load images with proper error handling"""
+        if not os.path.exists(path):
+            print(f"Warning: Image file {path} not found")
+            return None
+        try:
+            img = Image.open(path)
+            img = img.resize(size, Image.Resampling.LANCZOS)
+            photo = ImageTk.PhotoImage(img)
+            # Keep a reference to prevent garbage collection
+            self._image_references = getattr(self, '_image_references', [])
+            self._image_references.append(photo)
+            return photo
+        except Exception as e:
+            print(f"Error loading image {path}: {e}")
+            return None
         
     def create_widgets(self):
 `;
 
-  // First, check if we need the image loading function
+  // Check if we have any image components
   const hasImages = components.some(comp => comp.type === 'image');
   
-  // Add image loading function if needed
-  if (hasImages) {
-    code += `        # Helper function to load images
-        def load_image(self, path, size):
-            if not os.path.exists(path):
-                print(f"Warning: Image file {path} not found")
-                return None
-            try:
-                img = Image.open(path)
-                img = img.resize(size, Image.Resampling.LANCZOS)
-                return ImageTk.PhotoImage(img)
-            except Exception as e:
-                print(f"Error loading image {path}: {e}")
-                return None
-                
-`;
-  }
-
   // Add components
   components.forEach(component => {
     // Add component creation code based on its type
@@ -481,7 +479,7 @@ Pillow>=9.0.0
 `;
   zip.file("requirements.txt", requirements);
   
-  // Create a README.md file
+  // Create a README.md file with clear instructions
   const readme = `# CustomTkinter GUI Application
 
 This is a modern CustomTkinter GUI application generated from the GUI Builder.
@@ -499,6 +497,9 @@ This is a modern CustomTkinter GUI application generated from the GUI Builder.
 python app.py
 \`\`\`
 
+## Important Note
+Make sure all image files are in the same directory as app.py before running the application.
+
 ## Features
 - Modern UI with CustomTkinter
 - Responsive layout
@@ -506,13 +507,11 @@ python app.py
 - Cross-platform compatibility (Windows, macOS, Linux)
 
 ## Troubleshooting
-If you encounter an error about width and height in the place method, make sure you're using CustomTkinter version 5.2.0 or later.
-
-### Common issues:
-1. **Width/height error in place method**: In CustomTkinter, width and height are set in the widget constructor, not in the place method.
-2. **Module not found**: Make sure all required packages are installed via pip.
-3. **Display issues**: CustomTkinter works best with Python 3.7+ and recent operating systems.
-4. **Missing load_image method**: The code uses a custom method to handle image loading. Make sure it's included in your app.py.
+If you encounter errors:
+1. Ensure all image files are in the same directory as app.py
+2. Make sure you have CustomTkinter version 5.2.0 or later installed
+3. Check that Python 3.7 or later is installed
+4. For missing modules, run: \`pip install -r requirements.txt\`
 `;
   zip.file("README.md", readme);
 
@@ -551,7 +550,7 @@ If you encounter an error about width and height in the place method, make sure 
   // Add a sample image file as backup
   zip.file("sample_image.png", await fetchSampleImage(), {binary: true});
   
-  // Add a more detailed documentation file
+  // Add a more detailed documentation file with troubleshooting info
   const documentation = `# CustomTkinter GUI Application Documentation
 
 ## Overview
@@ -563,26 +562,19 @@ which is a modern-looking UI framework for Python based on Tkinter.
 - \`requirements.txt\`: Python dependencies
 - \`*.png\`: Image files used in your application
 
-## Customizing the Application
-You can modify the application by editing the \`app.py\` file. Here are some common customizations:
+## Common Issues and Solutions
 
-### Changing the appearance mode
-\`\`\`python
-ctk.set_appearance_mode("Dark")  # Options: "System", "Dark", "Light"
-\`\`\`
+### "load_image" attribute error
+If you see: "AttributeError: '_tkinter.tkapp' object has no attribute 'load_image'", make sure:
+- You're using the exact code provided without modifying the Application class
+- You have not renamed or removed the load_image method in the Application class
+- All image files are in the same directory as app.py
 
-### Changing the color theme
-\`\`\`python
-ctk.set_default_color_theme("green")  # Options: "blue", "green", "dark-blue"
-\`\`\`
-
-### Changing the window size
-\`\`\`python
-self.geometry("1024x768")
-\`\`\`
-
-## Adding Event Handlers
-To add functionality to buttons or other widgets, locate the event handler functions in the code and add your logic there.
+### Other common issues:
+1. **Image file not found**: Ensure all .png files are in the same directory as app.py
+2. **Module not found**: Run \`pip install -r requirements.txt\`
+3. **Display issues**: CustomTkinter works best with Python 3.7+ and recent operating systems
+4. **Widget errors**: Make sure width and height are provided in the constructor, not in place() method
 
 ## Working with CustomTkinter
 CustomTkinter is a modern UI library that enhances the standard Tkinter with modern styling and widgets.

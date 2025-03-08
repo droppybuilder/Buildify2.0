@@ -1,12 +1,12 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import Canvas from '@/components/Canvas';
 import { PropertyPanel } from '@/components/PropertyPanel';
 import { CodePreview } from '@/components/CodePreview';
 import { Toolbar } from '@/components/Toolbar';
-import { toast } from 'sonner';
 import { Layers } from '@/components/Layers';
+import { WindowProperties } from '@/components/WindowProperties';
+import { toast } from 'sonner';
 
 const Index = () => {
   const [selectedComponent, setSelectedComponent] = useState(null);
@@ -17,8 +17,12 @@ const Index = () => {
   const [selectedComponents, setSelectedComponents] = useState<string[]>([]);
   const [showCodePreview, setShowCodePreview] = useState(false);
   const [showLayers, setShowLayers] = useState(false);
+  const [showWindowProperties, setShowWindowProperties] = useState(false);
   
-  // Load saved components and preferences on mount
+  const [windowTitle, setWindowTitle] = useState("My CustomTkinter Application");
+  const [windowSize, setWindowSize] = useState({ width: 800, height: 600 });
+  const [windowBgColor, setWindowBgColor] = useState("#f0f0f0");
+  
   useEffect(() => {
     try {
       const savedComponents = localStorage.getItem('guiBuilderComponents');
@@ -27,12 +31,19 @@ const Index = () => {
         setComponents(parsedComponents);
         addToHistory(parsedComponents);
       }
+      
+      const savedWindowTitle = localStorage.getItem('guiBuilderWindowTitle');
+      const savedWindowSize = localStorage.getItem('guiBuilderWindowSize');
+      const savedWindowBgColor = localStorage.getItem('guiBuilderWindowBgColor');
+      
+      if (savedWindowTitle) setWindowTitle(savedWindowTitle);
+      if (savedWindowSize) setWindowSize(JSON.parse(savedWindowSize));
+      if (savedWindowBgColor) setWindowBgColor(savedWindowBgColor);
     } catch (error) {
       console.error('Failed to load saved components:', error);
     }
   }, []);
   
-  // Save components whenever they change
   useEffect(() => {
     try {
       localStorage.setItem('guiBuilderComponents', JSON.stringify(components));
@@ -40,6 +51,16 @@ const Index = () => {
       console.error('Failed to save components:', error);
     }
   }, [components]);
+  
+  useEffect(() => {
+    try {
+      localStorage.setItem('guiBuilderWindowTitle', windowTitle);
+      localStorage.setItem('guiBuilderWindowSize', JSON.stringify(windowSize));
+      localStorage.setItem('guiBuilderWindowBgColor', windowBgColor);
+    } catch (error) {
+      console.error('Failed to save window properties:', error);
+    }
+  }, [windowTitle, windowSize, windowBgColor]);
   
   const addToHistory = useCallback((newComponents: any[]) => {
     if (JSON.stringify(newComponents) !== JSON.stringify(history[historyIndex])) {
@@ -98,10 +119,18 @@ const Index = () => {
   const toggleCodePreview = useCallback(() => {
     setShowCodePreview(prev => !prev);
     setShowLayers(false);
+    setShowWindowProperties(false);
   }, []);
   
   const toggleLayers = useCallback(() => {
     setShowLayers(prev => !prev);
+    setShowCodePreview(false);
+    setShowWindowProperties(false);
+  }, []);
+  
+  const toggleWindowProperties = useCallback(() => {
+    setShowWindowProperties(prev => !prev);
+    setShowLayers(false);
     setShowCodePreview(false);
   }, []);
   
@@ -163,13 +192,18 @@ const Index = () => {
           canRedo={historyIndex < history.length - 1}
           onToggleCodePreview={toggleCodePreview}
           onToggleLayers={toggleLayers}
+          onToggleWindowProperties={toggleWindowProperties}
           showCodePreview={showCodePreview}
           showLayers={showLayers}
+          showWindowProperties={showWindowProperties}
         />
         
         <div className="flex-1 flex overflow-hidden">
           {showCodePreview ? (
-            <CodePreview components={components} visible={showCodePreview} />
+            <CodePreview 
+              components={components} 
+              visible={showCodePreview}
+            />
           ) : showLayers ? (
             <Layers 
               components={components}
@@ -178,6 +212,16 @@ const Index = () => {
               setSelectedComponent={setSelectedComponent}
               onOrderChange={handleComponentLayerOrderChange}
               visible={showLayers}
+            />
+          ) : showWindowProperties ? (
+            <WindowProperties
+              visible={showWindowProperties}
+              title={windowTitle}
+              setTitle={setWindowTitle}
+              size={windowSize}
+              setSize={setWindowSize}
+              bgColor={windowBgColor}
+              setBgColor={setWindowBgColor}
             />
           ) : (
             <div className="flex-1 overflow-auto bg-background p-6">
@@ -189,6 +233,9 @@ const Index = () => {
                 onDeleteComponent={handleDeleteComponent}
                 selectedComponents={selectedComponents}
                 setSelectedComponents={setSelectedComponents}
+                windowTitle={windowTitle}
+                windowSize={windowSize}
+                windowBgColor={windowBgColor}
               />
             </div>
           )}

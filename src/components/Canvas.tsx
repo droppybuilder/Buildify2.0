@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { toast } from "sonner";
 import { Maximize2, Minimize2, X, Copy, Scissors, Trash } from "lucide-react";
@@ -26,6 +25,9 @@ interface CanvasProps {
   onDeleteComponent?: (component: Component) => void;
   selectedComponents: string[];
   setSelectedComponents: (ids: string[]) => void;
+  windowTitle?: string;
+  windowSize?: { width: number; height: number };
+  windowBgColor?: string;
 }
 
 const Canvas = ({
@@ -36,15 +38,16 @@ const Canvas = ({
   onDeleteComponent,
   selectedComponents,
   setSelectedComponents,
+  windowTitle = "My CustomTkinter Application",
+  windowSize = { width: 800, height: 600 },
+  windowBgColor = "#f0f0f0"
 }: CanvasProps) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isResizing, setIsResizing] = useState(false);
   const [resizeDirection, setResizeDirection] = useState<string | null>(null);
-  const [windowTitle, setWindowTitle] = useState("Untitled Window");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [windowSize, setWindowSize] = useState({ width: 800, height: 600 });
   const [imageCache, setImageCache] = useState<Record<string, string>>({});
   const [clipboard, setClipboard] = useState<Component | null>(null);
   const [contextMenuPosition, setContextMenuPosition] = useState<{x: number, y: number} | null>(null);
@@ -52,6 +55,30 @@ const Canvas = ({
   
   const [selectionBox, setSelectionBox] = useState<{start: {x: number, y: number}, end: {x: number, y: number}} | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
+  const [isMultiSelectKeyDown, setIsMultiSelectKeyDown] = useState(false);
+  
+  // Track multi-select key (Ctrl/Command)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        setIsMultiSelectKeyDown(true);
+      }
+    };
+    
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (!e.ctrlKey && !e.metaKey) {
+        setIsMultiSelectKeyDown(false);
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
   
   useEffect(() => {
     const imageComponents = components.filter(c => c.type === 'image');
@@ -77,8 +104,11 @@ const Canvas = ({
 
   const handleCanvasClick = (e: React.MouseEvent) => {
     if (e.target === canvasRef.current) {
-      setSelectedComponent(null);
-      setSelectedComponents([]);
+      // Only clear selection if not multi-selecting
+      if (!isMultiSelectKeyDown) {
+        setSelectedComponent(null);
+        setSelectedComponents([]);
+      }
     }
   };
 
@@ -92,6 +122,12 @@ const Canvas = ({
         start: { x: e.clientX - rect.left, y: e.clientY - rect.top },
         end: { x: e.clientX - rect.left, y: e.clientY - rect.top }
       });
+      
+      // Clear selection if not multi-selecting
+      if (!isMultiSelectKeyDown) {
+        setSelectedComponent(null);
+        setSelectedComponents([]);
+      }
     }
   };
 
@@ -124,11 +160,28 @@ const Canvas = ({
       });
       
       if (selected.length > 0) {
-        setSelectedComponents(selected.map(c => c.id));
-        if (selected.length === 1) {
-          setSelectedComponent(selected[0]);
-        } else if (selected.length > 1) {
-          setSelectedComponent(null);
+        if (isMultiSelectKeyDown) {
+          // Add to existing selection
+          const newSelection = [
+            ...selectedComponents,
+            ...selected.map(c => c.id).filter(id => !selectedComponents.includes(id))
+          ];
+          setSelectedComponents(newSelection);
+          
+          if (newSelection.length === 1) {
+            const selectedComp = components.find(c => c.id === newSelection[0]) || null;
+            setSelectedComponent(selectedComp);
+          } else if (newSelection.length > 1) {
+            setSelectedComponent(null);
+          }
+        } else {
+          // Replace selection
+          setSelectedComponents(selected.map(c => c.id));
+          if (selected.length === 1) {
+            setSelectedComponent(selected[0]);
+          } else if (selected.length > 1) {
+            setSelectedComponent(null);
+          }
         }
       }
     }
@@ -147,8 +200,31 @@ const Canvas = ({
   const handleMouseDown = (e: React.MouseEvent, component: Component) => {
     e.stopPropagation();
     
-    setSelectedComponent(component);
-    setSelectedComponents([component.id]);
+    if (isMultiSelectKeyDown) {
+      // Toggle component selection
+      if (selectedComponents.includes(component.id)) {
+        const newSelected = selectedComponents.filter(id => id !== component.id);
+        setSelectedComponents(newSelected);
+        if (newSelected.length === 1) {
+          const selectedComp = components.find(c => c.id === newSelected[0]) || null;
+          setSelectedComponent(selectedComp);
+        } else {
+          setSelectedComponent(null);
+        }
+      } else {
+        const newSelected = [...selectedComponents, component.id];
+        setSelectedComponents(newSelected);
+        if (newSelected.length === 1) {
+          setSelectedComponent(component);
+        } else {
+          setSelectedComponent(null);
+        }
+      }
+    } else {
+      // Single select
+      setSelectedComponent(component);
+      setSelectedComponents([component.id]);
+    }
     
     const target = e.target as HTMLElement;
     if (target.classList.contains('resize-handle')) {
@@ -327,11 +403,22 @@ const Canvas = ({
     }
   };
 
-  const handleComponentUpdate = (updatedComponent: Component) => {
-    const newComponents = components.map(comp => 
-      comp.id === updatedComponent.id ? updatedComponent : comp
-    );
-    setComponents(newComponents);
+  const handleTitleClick = () => {
+    setIsEditingTitle(true);
+  };
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Removed as this is now handled by the WindowProperties component
+  };
+
+  const handleTitleBlur = () => {
+    setIsEditingTitle(false);
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      setIsEditingTitle(false);
+    }
   };
 
   const getDefaultSize = (type: string) => {
@@ -480,25 +567,7 @@ const Canvas = ({
         return commonProps;
     }
   };
-
-  const handleTitleClick = () => {
-    setIsEditingTitle(true);
-  };
-
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setWindowTitle(e.target.value);
-  };
-
-  const handleTitleBlur = () => {
-    setIsEditingTitle(false);
-  };
-
-  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      setIsEditingTitle(false);
-    }
-  };
-
+  
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (selectedComponent || selectedComponents.length > 0) {
@@ -534,6 +603,7 @@ const Canvas = ({
         style={{ 
           width: windowSize.width, 
           height: windowSize.height,
+          backgroundColor: windowBgColor || '#f0f0f0',
         }}
       >
         <div className="window-titlebar">
@@ -553,17 +623,14 @@ const Canvas = ({
               <Input
                 type="text"
                 value={windowTitle}
-                onChange={handleTitleChange}
                 onBlur={handleTitleBlur}
                 onKeyDown={handleTitleKeyDown}
                 className="w-48 mx-auto h-6 text-sm text-center bg-transparent"
                 autoFocus
+                readOnly
               />
             ) : (
-              <div 
-                className="cursor-pointer"
-                onClick={handleTitleClick}
-              >
+              <div>
                 {windowTitle}
               </div>
             )}
@@ -572,7 +639,8 @@ const Canvas = ({
 
         <div
           ref={canvasRef}
-          className="flex-1 canvas-grid relative overflow-auto"
+          className={`flex-1 canvas-grid relative overflow-auto`}
+          style={{ backgroundColor: windowBgColor || '#f0f0f0' }}
           onDragOver={onDragOver}
           onDrop={onDrop}
           onMouseDown={handleCanvasMouseDown}
@@ -848,136 +916,4 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
           style={{
             backgroundColor: component.props.bgColor || '#ffffff',
             borderRadius: `${component.props.cornerRadius || 8}px`,
-            borderColor: component.props.borderColor || '#e2e8f0',
-            borderWidth: `${component.props.borderWidth || 1}px`,
-            borderStyle: 'solid',
-            color: component.props.fgColor || '#000000',
-          }}
-        >
-          <div className="flex justify-between w-full items-center">
-            <span>{component.props.format || 'yyyy-mm-dd'}</span>
-            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-70">
-              <path d="M4.5 1C4.77614 1 5 1.22386 5 1.5V2H10V1.5C10 1.22386 10.2239 1 10.5 1C10.7761 1 11 1.22386 11 1.5V2H12.5C13.3284 2 14 2.67157 14 3.5V12.5C14 13.3284 13.3284 14 12.5 14H2.5C1.67157 14 1 13.3284 1 12.5V3.5C1 2.67157 1.67157 2 2.5 2H4V1.5C4 1.22386 4.22386 1 4.5 1ZM10 3V3.5C10 3.77614 10.2239 4 10.5 4C10.7761 4 11 3.77614 11 3.5V3H12.5C12.7761 3 13 3.22386 13 3.5V5H2V3.5C2 3.22386 2.22386 3 2.5 3H4V3.5C4 3.77614 4.22386 4 4.5 4C4.77614 4 5 3.77614 5 3.5V3H10ZM2 6V12.5C2 12.7761 2.22386 13 2.5 13H12.5C12.7761 13 13 12.7761 13 12.5V6H2Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path>
-            </svg>
-          </div>
-        </div>
-      );
-    case 'progressbar':
-      return (
-        <div 
-          className="w-full h-full flex items-center"
-        >
-          <div 
-            className="w-full h-3 overflow-hidden"
-            style={{
-              backgroundColor: component.props.bgColor || '#e2e8f0',
-              borderRadius: `${component.props.cornerRadius || 4}px`,
-              borderColor: component.props.borderColor || '#e2e8f0',
-              borderWidth: `${component.props.borderWidth || 0}px`,
-              borderStyle: 'solid',
-            }}
-          >
-            <div 
-              className="h-full"
-              style={{
-                width: `${(component.props.value / component.props.maxValue) * 100}%`,
-                backgroundColor: component.props.progressColor || '#3b82f6',
-                transition: 'width 0.3s ease-in-out'
-              }}
-            />
-          </div>
-        </div>
-      );
-    case 'notebook':
-      return (
-        <div 
-          className="w-full h-full flex flex-col"
-          style={{
-            backgroundColor: component.props.bgColor || '#ffffff',
-            color: component.props.fgColor || '#000000',
-            borderColor: component.props.borderColor || '#e2e8f0',
-            borderWidth: `${component.props.borderWidth || 1}px`,
-            borderStyle: 'solid',
-            borderRadius: `${component.props.cornerRadius || 4}px`,
-          }}
-        >
-          <div className="flex border-b" style={{ borderColor: component.props.borderColor || '#e2e8f0' }}>
-            {(component.props.tabs || 'Tab 1,Tab 2,Tab 3')
-              .split(',')
-              .map((tab: string, i: number) => (
-                <div
-                  key={i}
-                  className={`px-4 py-2 cursor-default ${
-                    tab.trim() === (component.props.selectedTab || 'Tab 1')
-                      ? 'border-b-2 font-medium'
-                      : 'text-gray-500'
-                  }`}
-                  style={{
-                    borderColor: tab.trim() === (component.props.selectedTab || 'Tab 1') ? 
-                      (component.props.activeTabColor || '#3b82f6') : 'transparent'
-                  }}
-                >
-                  {tab.trim()}
-                </div>
-              ))}
-          </div>
-          <div className="flex-1 p-4">
-            <div className="h-full w-full flex items-center justify-center text-sm" 
-              style={{ color: 'rgba(0, 0, 0, 0.4)' }}>
-              Content for {component.props.selectedTab || 'Tab 1'}
-            </div>
-          </div>
-        </div>
-      );
-    case 'listbox':
-      return (
-        <div 
-          className="w-full h-full overflow-y-auto"
-          style={{
-            backgroundColor: component.props.bgColor || '#ffffff',
-            color: component.props.fgColor || '#000000',
-            borderColor: component.props.borderColor || '#e2e8f0',
-            borderWidth: `${component.props.borderWidth || 1}px`,
-            borderStyle: 'solid',
-            borderRadius: `${component.props.cornerRadius || 4}px`,
-          }}
-        >
-          {(component.props.items || 'Item 1,Item 2,Item 3,Item 4,Item 5')
-            .split(',')
-            .map((item: string, i: number) => (
-              <div
-                key={i}
-                className={`px-3 py-1 cursor-default ${i === 0 ? 'bg-blue-100' : 'hover:bg-gray-50'}`}
-                style={{
-                  backgroundColor: i === 0 ? (component.props.selectedColor || '#3b82f6') + '20' : 'transparent'
-                }}
-              >
-                {item.trim()}
-              </div>
-            ))}
-        </div>
-      );
-    case 'canvas':
-      return (
-        <div 
-          className="w-full h-full"
-          style={{
-            backgroundColor: component.props.bgColor || '#ffffff',
-            borderWidth: `${component.props.borderWidth || 1}px`,
-            borderColor: component.props.borderColor || '#e2e8f0',
-            borderStyle: 'solid',
-            borderRadius: `${component.props.cornerRadius || 4}px`,
-          }}
-        >
-          <div className="h-full w-full flex items-center justify-center text-sm"
-               style={{ color: 'rgba(0, 0, 0, 0.4)' }}>
-            Canvas Area
-          </div>
-        </div>
-      );
-    default:
-      return null;
-  }
-};
-
-export default Canvas;
+            borderColor: component.props.borderColor || '#e2e8

@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { toast } from "sonner";
 import { Maximize2, Minimize2, X, Copy, Scissors, Trash } from "lucide-react";
@@ -47,6 +48,7 @@ const Canvas = ({
   const [imageCache, setImageCache] = useState<Record<string, string>>({});
   const [clipboard, setClipboard] = useState<Component | null>(null);
   const [contextMenuPosition, setContextMenuPosition] = useState<{x: number, y: number} | null>(null);
+  const [hoveredComponent, setHoveredComponent] = useState<string | null>(null);
   
   const [selectionBox, setSelectionBox] = useState<{start: {x: number, y: number}, end: {x: number, y: number}} | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
@@ -236,6 +238,14 @@ const Canvas = ({
     setResizeDirection(null);
   };
 
+  const handleComponentMouseEnter = (componentId: string) => {
+    setHoveredComponent(componentId);
+  };
+
+  const handleComponentMouseLeave = () => {
+    setHoveredComponent(null);
+  };
+
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
     
@@ -372,7 +382,8 @@ const Canvas = ({
           fgColor: '#000000',
           hoverColor: '#f0f0f0',
           cornerRadius: 8,
-          borderColor: '#e2e8f0'
+          borderColor: '#e2e8f0',
+          borderWidth: 1
         };
       case 'label':
         return { 
@@ -386,14 +397,16 @@ const Canvas = ({
           placeholder: 'Enter text...',
           bgColor: '#ffffff',
           cornerRadius: 8,
-          borderColor: '#e2e8f0'
+          borderColor: '#e2e8f0',
+          borderWidth: 1
         };
       case 'image':
         return { 
           src: '/placeholder.svg',
           fit: 'contain',
           cornerRadius: 8,
-          borderColor: '#e2e8f0'
+          borderColor: '#e2e8f0',
+          borderWidth: 1
         };
       case 'slider':
         return { 
@@ -402,12 +415,13 @@ const Canvas = ({
           value: 50,
           orient: 'horizontal',
           bgColor: '#e2e8f0',
-          troughColor: '#3b82f6'
+          progressColor: '#3b82f6',
+          borderWidth: 0
         };
       case 'frame':
         return { 
           relief: 'flat',
-          borderwidth: 1,
+          borderWidth: 1,
           bgColor: '#ffffff',
           borderColor: '#e2e8f0',
           cornerRadius: 4
@@ -416,7 +430,9 @@ const Canvas = ({
         return { 
           text: 'Checkbox',
           checked: false,
-          fgColor: '#000000'
+          fgColor: '#000000',
+          borderColor: '#e2e8f0',
+          checkedColor: '#3b82f6'
         };
       case 'datepicker':
         return { 
@@ -424,7 +440,8 @@ const Canvas = ({
           bgColor: '#ffffff',
           fgColor: '#000000',
           cornerRadius: 8,
-          borderColor: '#e2e8f0'
+          borderColor: '#e2e8f0',
+          borderWidth: 1
         };
       case 'progressbar':
         return { 
@@ -432,26 +449,30 @@ const Canvas = ({
           maxValue: 100,
           progressColor: '#3b82f6',
           bgColor: '#e2e8f0',
-          cornerRadius: 4
+          cornerRadius: 4,
+          borderWidth: 0
         };
       case 'notebook':
         return { 
           tabs: 'Tab 1,Tab 2,Tab 3',
           selectedTab: 'Tab 1',
           bgColor: '#ffffff',
-          fgColor: '#000000'
+          fgColor: '#000000',
+          borderColor: '#e2e8f0',
+          borderWidth: 1
         };
       case 'listbox':
         return { 
           items: 'Item 1,Item 2,Item 3,Item 4,Item 5',
           bgColor: '#ffffff',
           fgColor: '#000000',
-          borderColor: '#e2e8f0'
+          borderColor: '#e2e8f0',
+          borderWidth: 1
         };
       case 'canvas':
         return { 
           bgColor: '#ffffff',
-          borderwidth: 1,
+          borderWidth: 1,
           borderColor: '#e2e8f0',
           cornerRadius: 4
         };
@@ -599,14 +620,19 @@ const Canvas = ({
                   }}
                   onMouseDown={(e) => handleMouseDown(e, component)}
                   onContextMenu={(e) => handleContextMenu(e, component)}
+                  onMouseEnter={() => handleComponentMouseEnter(component.id)}
+                  onMouseLeave={handleComponentMouseLeave}
                 >
-                  <ComponentPreview component={component} />
+                  <ComponentPreview 
+                    component={component} 
+                    isHovered={hoveredComponent === component.id}
+                  />
                   {selectedComponent?.id === component.id && (
                     <>
-                      <div className="resize-handle absolute w-2 h-2 rounded-full top-0 left-0 -translate-x-1/2 -translate-y-1/2 cursor-nw-resize" data-direction="nw" />
-                      <div className="resize-handle absolute w-2 h-2 rounded-full top-0 right-0 translate-x-1/2 -translate-y-1/2 cursor-ne-resize" data-direction="ne" />
-                      <div className="resize-handle absolute w-2 h-2 rounded-full bottom-0 left-0 -translate-x-1/2 translate-y-1/2 cursor-sw-resize" data-direction="sw" />
-                      <div className="resize-handle absolute w-2 h-2 rounded-full bottom-0 right-0 translate-x-1/2 translate-y-1/2 cursor-se-resize" data-direction="se" />
+                      <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full top-0 left-0 -translate-x-1/2 -translate-y-1/2 cursor-nw-resize" data-direction="nw" />
+                      <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full top-0 right-0 translate-x-1/2 -translate-y-1/2 cursor-ne-resize" data-direction="ne" />
+                      <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full bottom-0 left-0 -translate-x-1/2 translate-y-1/2 cursor-sw-resize" data-direction="sw" />
+                      <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full bottom-0 right-0 translate-x-1/2 translate-y-1/2 cursor-se-resize" data-direction="se" />
                     </>
                   )}
                 </div>
@@ -633,14 +659,21 @@ const Canvas = ({
   );
 };
 
-const ComponentPreview = ({ component }: { component: Component }) => {
+interface ComponentPreviewProps {
+  component: Component;
+  isHovered: boolean;
+}
+
+const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
   switch (component.type) {
     case 'button':
       return (
         <button 
           className="w-full h-full border transition-colors"
           style={{
-            backgroundColor: component.props.bgColor || '#ffffff',
+            backgroundColor: isHovered && component.props.hoverColor 
+              ? component.props.hoverColor 
+              : component.props.bgColor || '#ffffff',
             color: component.props.fgColor || '#000000',
             borderRadius: `${component.props.cornerRadius || 8}px`,
             borderColor: component.props.borderColor || '#e2e8f0',
@@ -725,6 +758,9 @@ const ComponentPreview = ({ component }: { component: Component }) => {
               height: component.props.orient === 'vertical' ? '100%' : '8px',
               backgroundColor: component.props.bgColor || '#e2e8f0',
               borderRadius: '4px',
+              borderWidth: `${component.props.borderWidth || 0}px`,
+              borderStyle: 'solid',
+              borderColor: component.props.borderColor || 'transparent',
             }}
           >
             <div

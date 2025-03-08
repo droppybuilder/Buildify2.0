@@ -6,6 +6,7 @@ import { PropertyPanel } from '@/components/PropertyPanel';
 import { CodePreview } from '@/components/CodePreview';
 import { Toolbar } from '@/components/Toolbar';
 import { toast } from 'sonner';
+import { Layers } from '@/components/Layers';
 
 const Index = () => {
   const [selectedComponent, setSelectedComponent] = useState(null);
@@ -15,6 +16,7 @@ const Index = () => {
   const [inputFocused, setInputFocused] = useState(false);
   const [selectedComponents, setSelectedComponents] = useState<string[]>([]);
   const [showCodePreview, setShowCodePreview] = useState(false);
+  const [showLayers, setShowLayers] = useState(false);
   
   // Load saved components and preferences on mount
   useEffect(() => {
@@ -95,7 +97,21 @@ const Index = () => {
   
   const toggleCodePreview = useCallback(() => {
     setShowCodePreview(prev => !prev);
+    setShowLayers(false);
   }, []);
+  
+  const toggleLayers = useCallback(() => {
+    setShowLayers(prev => !prev);
+    setShowCodePreview(false);
+  }, []);
+  
+  const handleComponentLayerOrderChange = useCallback((fromIndex: number, toIndex: number) => {
+    const result = Array.from(components);
+    const [removed] = result.splice(fromIndex, 1);
+    result.splice(toIndex, 0, removed);
+    
+    handleComponentsChange(result);
+  }, [components, handleComponentsChange]);
   
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -146,12 +162,23 @@ const Index = () => {
           canUndo={historyIndex > 0}
           canRedo={historyIndex < history.length - 1}
           onToggleCodePreview={toggleCodePreview}
+          onToggleLayers={toggleLayers}
           showCodePreview={showCodePreview}
+          showLayers={showLayers}
         />
         
         <div className="flex-1 flex overflow-hidden">
           {showCodePreview ? (
             <CodePreview components={components} visible={showCodePreview} />
+          ) : showLayers ? (
+            <Layers 
+              components={components}
+              onComponentsChange={handleComponentsChange}
+              selectedComponent={selectedComponent}
+              setSelectedComponent={setSelectedComponent}
+              onOrderChange={handleComponentLayerOrderChange}
+              visible={showLayers}
+            />
           ) : (
             <div className="flex-1 overflow-auto bg-background p-6">
               <Canvas

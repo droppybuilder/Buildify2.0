@@ -34,21 +34,33 @@ export const ColorInput: React.FC<ColorInputProps> = ({
     onChange(newColor);
   };
 
+  const isValidHexColor = (color: string): boolean => {
+    return /^#([0-9A-F]{3}){1,2}$/i.test(color);
+  };
+
+  const formatColorValue = (color: string): string => {
+    // Ensure the color starts with #
+    let formattedColor = color.startsWith('#') ? color : `#${color}`;
+    
+    // Check for 3 or 6 digit hex
+    if (!isValidHexColor(formattedColor)) {
+      // Try to fix common issues
+      // Remove any non-hex characters
+      formattedColor = '#' + formattedColor.replace(/[^0-9A-F]/gi, '').substring(0, 6);
+      
+      // If still invalid after cleanup, return default white
+      if (!isValidHexColor(formattedColor)) {
+        return '#ffffff';
+      }
+    }
+    
+    return formattedColor;
+  };
+
   const handleInputBlur = () => {
-    let color = inputValue;
-    // Ensure the color value is valid and starts with #
-    if (!color.startsWith('#')) {
-      color = `#${color}`;
-    }
-    
-    // Validate the color format (for 3 or 6 digit hex)
-    if (!/^#([0-9A-F]{3}){1,2}$/i.test(color)) {
-      // Fallback to a default color if invalid
-      color = '#ffffff';
-    }
-    
-    setInputValue(color);
-    onChange(color);
+    const formattedColor = formatColorValue(inputValue);
+    setInputValue(formattedColor);
+    onChange(formattedColor);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -77,7 +89,7 @@ export const ColorInput: React.FC<ColorInputProps> = ({
                 variant="ghost"
                 size="icon"
                 className="absolute left-0 top-0 h-full aspect-square p-1 rounded-r-none"
-                style={{ backgroundColor: inputValue || '#ffffff' }}
+                style={{ backgroundColor: isValidHexColor(inputValue) ? inputValue : '#ffffff' }}
               >
                 <span className="sr-only">Open color picker</span>
               </Button>
@@ -85,7 +97,7 @@ export const ColorInput: React.FC<ColorInputProps> = ({
             <PopoverContent className="w-auto p-3" side="bottom" align="start">
               <input
                 type="color"
-                value={inputValue}
+                value={isValidHexColor(inputValue) ? inputValue : '#ffffff'}
                 onChange={handleColorChange}
                 className="w-32 h-32 cursor-pointer"
               />

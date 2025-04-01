@@ -1,3 +1,4 @@
+
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
@@ -20,6 +21,9 @@ class Application(ctk.CTk):
         
         # Create components
         self.create_widgets()
+        
+        # Store references to images to prevent garbage collection
+        self._image_references = []
     
     def load_image(self, path, size):
         """Helper function to load images with proper error handling"""
@@ -40,7 +44,6 @@ class Application(ctk.CTk):
             img = img.resize(size, Image.Resampling.LANCZOS)
             photo = ImageTk.PhotoImage(img)
             # Keep a reference to prevent garbage collection
-            self._image_references = getattr(self, '_image_references', [])
             self._image_references.append(photo)
             return photo
         except Exception as e:
@@ -255,15 +258,14 @@ const generateComponentCode = (component: any, indent: number): string => {
       code += `${spaces}# Load image for ${component.id}\n`;
       code += `${spaces}${varName}_img = self.load_image("${imageName}", (${width}, ${height}))\n`;
       
-      // Use a CTkLabel for images but without border properties that are not supported
+      // Use a CTkLabel for images but WITHOUT border_width and border_color since they're not supported
       code += `${spaces}${varName} = ctk.CTkLabel(self, image=${varName}_img, width=${width}, height=${height}, text=""`;
       
-      // Add corner radius if provided, but skip border properties
+      // Only add supported properties
       if (props.cornerRadius !== undefined) {
         code += `, corner_radius=${props.cornerRadius}`;
       }
       
-      // Add background color if provided
       if (props.bgColor) {
         code += `, fg_color="${props.bgColor}"`;
       }
@@ -345,15 +347,6 @@ const generateComponentCode = (component: any, indent: number): string => {
       
       if (props.bgColor) {
         code += `, fg_color="${props.bgColor}"`;
-      }
-      
-      // Add border properties
-      if (props.borderWidth !== undefined) {
-        code += `, border_width=${props.borderWidth}`;
-      }
-      
-      if (props.borderColor) {
-        code += `, border_color="${props.borderColor}"`;
       }
       
       // Add corner radius if provided
@@ -463,6 +456,50 @@ const generateComponentCode = (component: any, indent: number): string => {
           code += `${spaces}${varName}.set("${props.selectedTab}")\n`;
         }
       }
+      break;
+      
+    case 'datepicker':
+      // CustomTkinter doesn't have a built-in date picker, so we'll simulate it with an entry
+      code += `${spaces}${varName} = ctk.CTkEntry(self, width=${width}, height=${height}`;
+      
+      // Add colors if provided
+      if (props.bgColor) {
+        code += `, fg_color="${props.bgColor}"`;
+      }
+      
+      if (props.fgColor) {
+        code += `, text_color="${props.fgColor}"`;
+      }
+      
+      // Add border properties
+      if (props.borderWidth !== undefined) {
+        code += `, border_width=${props.borderWidth}`;
+      }
+      
+      if (props.borderColor) {
+        code += `, border_color="${props.borderColor}"`;
+      }
+      
+      // Add corner radius if provided
+      if (props.cornerRadius !== undefined) {
+        code += `, corner_radius=${props.cornerRadius}`;
+      }
+      
+      code += `)\n`;
+      code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
+      code += `${spaces}${varName}.insert(0, "${props.format || 'yyyy-mm-dd'}")\n`;
+      break;
+      
+    case 'canvas':
+      code += `${spaces}${varName} = ctk.CTkCanvas(self, width=${width}, height=${height}`;
+      
+      // Add background color if provided
+      if (props.bgColor) {
+        code += `, bg="${props.bgColor}"`;
+      }
+      
+      code += `)\n`;
+      code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
       break;
       
     default:
@@ -588,13 +625,12 @@ which is a modern-looking UI framework for Python based on Tkinter.
 
 ### "load_image" attribute error
 If you see: "AttributeError: '_tkinter.tkapp' object has no attribute 'load_image'", make sure:
-- You're using the exact code provided without modifying the Application class
-- You have not renamed or removed the load_image method in the Application class
+- You have not modified the Application class (the load_image method must be defined exactly as provided)
 - All image files are in the same directory as app.py
 
 ### "Unsupported arguments" error
 If you see an error like "['border_width', 'border_color'] are not supported arguments":
-- This means CustomTkinter's widgets don't support all the properties you've set
+- Some CustomTkinter widgets don't support certain properties (like CTkLabel doesn't support border_width)
 - Remove or change the unsupported properties
 - Check the CustomTkinter documentation for the supported properties for each widget
 

@@ -22,10 +22,8 @@ export const ColorInput: React.FC<ColorInputProps> = ({
 
   // Update local state when prop value changes
   useEffect(() => {
-    if (value !== inputValue) {
-      setInputValue(value || '#ffffff');
-    }
-  }, [value, inputValue]);
+    setInputValue(value || '#ffffff');
+  }, [value]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;

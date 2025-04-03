@@ -261,10 +261,10 @@ const generateComponentCode = (component: any, indent: number): string => {
       code += `${spaces}# Load image for ${component.id}\n`;
       code += `${spaces}${varName}_img = self.load_image("${imageName}", (${width}, ${height}))\n`;
       
-      // Use a CTkLabel for images - IMPORTANT: DON'T include border properties for labels with images
+      // Use a CTkLabel for images - DO NOT include border properties for labels with images
       code += `${spaces}${varName} = ctk.CTkLabel(self, image=${varName}_img, width=${width}, height=${height}, text=""`;
       
-      // Only add corner_radius and fg_color (bg color) which are supported
+      // Only add corner_radius and fg_color (bg color) which are supported for images
       if (props.cornerRadius !== undefined) {
         code += `, corner_radius=${props.cornerRadius}`;
       }

@@ -22,7 +22,9 @@ export const ColorInput: React.FC<ColorInputProps> = ({
 
   // Update local state when prop value changes
   useEffect(() => {
-    setInputValue(value || '#ffffff');
+    if (value && value !== inputValue) {
+      setInputValue(value);
+    }
   }, [value]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,6 +90,7 @@ export const ColorInput: React.FC<ColorInputProps> = ({
           <Popover open={isOpen} onOpenChange={setIsOpen}>
             <PopoverTrigger asChild>
               <Button
+                type="button"
                 variant="ghost"
                 size="icon"
                 className="absolute left-0 top-0 h-full aspect-square p-1 rounded-r-none"

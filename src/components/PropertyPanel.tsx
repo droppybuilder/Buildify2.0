@@ -1,446 +1,588 @@
 
-import { useState, useRef, useEffect, Dispatch, SetStateAction } from "react";
+import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { toast } from "sonner";
-import { GripVertical } from "lucide-react";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { ColorInput } from "@/components/ColorInput";
-import { 
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 interface PropertyPanelProps {
   selectedComponent: any;
-  onUpdate: (component: any) => void;
-  setInputFocused: Dispatch<SetStateAction<boolean>>;
-  inputFocused?: boolean;
+  onUpdate: (updatedComponent: any) => void;
+  setInputFocused: (focused: boolean) => void;
+  inputFocused: boolean;
 }
 
-export const PropertyPanel = ({ 
-  selectedComponent, 
-  onUpdate, 
-  setInputFocused, 
-  inputFocused = false
-}: PropertyPanelProps) => {
-  const [isDragging, setIsDragging] = useState(false);
-  const panelRef = useRef<HTMLDivElement>(null);
+export const PropertyPanel: React.FC<PropertyPanelProps> = ({
+  selectedComponent,
+  onUpdate,
+  setInputFocused,
+  inputFocused
+}) => {
+  const [localProps, setLocalProps] = useState<any>({});
   
-  // Form hook to manage all property values
-  const form = useForm({
-    defaultValues: selectedComponent?.props || {}
-  });
-
-  // Reset form when selected component changes
+  // Initialize local state with selected component props
   useEffect(() => {
-    if (selectedComponent && selectedComponent.props) {
-      // Reset form with new values 
-      const defaultValues = { ...selectedComponent.props };
+    if (selectedComponent) {
+      // Ensure props exist
+      const componentProps = selectedComponent.props || {};
+      setLocalProps({...componentProps});
+    } else {
+      setLocalProps({});
+    }
+  }, [selectedComponent]);
+
+  // Update component when a property changes
+  const handlePropertyChange = (property: string, value: any) => {
+    if (!selectedComponent) return;
+    
+    // Update local state first
+    const updatedProps = { ...localProps, [property]: value };
+    setLocalProps(updatedProps);
+    
+    // Then update the component with all props
+    const updatedComponent = {
+      ...selectedComponent,
+      props: updatedProps
+    };
+    
+    console.log(`Updating property ${property} to:`, value);
+    onUpdate(updatedComponent);
+  };
+
+  // Upload an image file
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0 || !selectedComponent) return;
+    
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = () => {
+      const imageDataUrl = reader.result as string;
       
-      // Update form values without triggering validation
-      Object.keys(defaultValues).forEach(key => {
-        form.setValue(key, defaultValues[key]);
-      });
-    }
-  }, [selectedComponent, form]);
-
-  // Draggable panel functionality
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!panelRef.current) return;
-    setIsDragging(true);
-    
-    const startY = e.clientY;
-    const startScroll = panelRef.current.scrollTop;
-    
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging || !panelRef.current) return;
-      const deltaY = e.clientY - startY;
-      panelRef.current.scrollTop = startScroll - deltaY;
+      // Update the src property
+      handlePropertyChange('src', imageDataUrl);
+      toast.success("Image uploaded successfully");
     };
     
-    const handleMouseUp = () => {
-      setIsDragging(false);
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+    reader.onerror = () => {
+      toast.error("Failed to upload image");
     };
     
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    reader.readAsDataURL(file);
   };
 
-  // Stop propagation of delete/backspace events when input is focused
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (inputFocused && (e.key === 'Delete' || e.key === 'Backspace')) {
-        e.stopPropagation();
-      }
-    };
-    
-    window.addEventListener('keydown', handleKeyDown, true);
-    return () => window.removeEventListener('keydown', handleKeyDown, true);
-  }, [inputFocused]);
-
-  // Handle positional changes
-  const updatePosition = (axis: 'x' | 'y', value: number) => {
-    const updatedComponent = {
-      ...selectedComponent,
-      position: {
-        ...selectedComponent.position,
-        [axis]: value
-      }
-    };
-    onUpdate(updatedComponent);
-  };
-
-  // Handle size changes
-  const updateSize = (dimension: 'width' | 'height', value: number) => {
-    const updatedComponent = {
-      ...selectedComponent,
-      size: {
-        ...selectedComponent.size,
-        [dimension]: value
-      }
-    };
-    onUpdate(updatedComponent);
-  };
-
-  // Handle property changes
-  const updateProperty = (key: string, value: any) => {
-    const updatedComponent = {
-      ...selectedComponent,
-      props: {
-        ...selectedComponent.props,
-        [key]: value
-      }
-    };
-    onUpdate(updatedComponent);
-  };
-
-  // Handle image file upload
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please upload an image file');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image size should be less than 5MB');
-      return;
-    }
-
-    try {
-      const objectUrl = URL.createObjectURL(file);
-      updateProperty('src', objectUrl);
-      toast.success('Image uploaded successfully');
-    } catch (error) {
-      toast.error('Failed to upload image');
-      console.error('Image upload error:', error);
-    }
-  };
-
+  // Return empty panel if no component is selected
   if (!selectedComponent) {
     return (
-      <div className="p-4 text-sm text-muted-foreground">
-        Select a component to edit its properties
+      <div className="p-4 flex flex-col h-full justify-center items-center text-center text-muted-foreground">
+        <p>Select a component to view and edit its properties</p>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 overflow-hidden flex flex-col">
-      <div 
-        className="h-10 bg-secondary flex items-center px-4 cursor-grab active:cursor-grabbing select-none"
-        onMouseDown={handleMouseDown}
-      >
-        <GripVertical size={16} className="mr-2 text-muted-foreground" />
-        <span className="text-sm font-medium">Properties: {selectedComponent.type}</span>
-      </div>
-
-      <div 
-        ref={panelRef}
-        className="flex-1 overflow-y-auto p-4 space-y-6"
-      >
-        {/* Position & Size */}
+    <ScrollArea className="h-full">
+      <div className="p-4 space-y-4">
         <div>
-          <h3 className="font-semibold mb-4">Position & Size</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>X Position</Label>
-              <Input
-                type="number"
-                value={Math.round(selectedComponent.position.x)}
-                onChange={(e) => updatePosition('x', parseInt(e.target.value) || 0)}
-                onFocus={() => setInputFocused(true)}
-                onBlur={() => setInputFocused(false)}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label>Y Position</Label>
-              <Input
-                type="number"
-                value={Math.round(selectedComponent.position.y)}
-                onChange={(e) => updatePosition('y', parseInt(e.target.value) || 0)}
-                onFocus={() => setInputFocused(true)}
-                onBlur={() => setInputFocused(false)}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label>Width</Label>
-              <Input
-                type="number"
-                value={Math.round(selectedComponent.size.width)}
-                onChange={(e) => updateSize('width', parseInt(e.target.value) || 0)}
-                onFocus={() => setInputFocused(true)}
-                onBlur={() => setInputFocused(false)}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label>Height</Label>
-              <Input
-                type="number"
-                value={Math.round(selectedComponent.size.height)}
-                onChange={(e) => updateSize('height', parseInt(e.target.value) || 0)}
-                onFocus={() => setInputFocused(true)}
-                onBlur={() => setInputFocused(false)}
-                className="mt-1"
-              />
-            </div>
-          </div>
+          <h2 className="text-lg font-semibold">Properties</h2>
+          <p className="text-sm text-muted-foreground">
+            {selectedComponent.type.charAt(0).toUpperCase() + selectedComponent.type.slice(1)} - {selectedComponent.id}
+          </p>
         </div>
-
+        
         <Separator />
-
-        {/* Component Properties */}
-        <div>
-          <h3 className="font-semibold mb-4">Properties</h3>
-          
-          {/* Text-based components */}
-          {['button', 'label', 'checkbox'].includes(selectedComponent.type) && (
-            <div className="space-y-4">
+        
+        <div className="space-y-4">
+          {/* Common properties section */}
+          <div>
+            <h3 className="text-md font-medium mb-2">Dimensions & Position</h3>
+            <div className="grid grid-cols-2 gap-2">
               <div>
-                <Label>Text</Label>
+                <Label htmlFor="width">Width</Label>
                 <Input
-                  type="text"
-                  value={selectedComponent.props.text || ''}
-                  onChange={(e) => updateProperty('text', e.target.value)}
+                  id="width"
+                  type="number"
+                  value={selectedComponent.size?.width || 0}
+                  onChange={(e) => {
+                    const updatedComponent = {
+                      ...selectedComponent,
+                      size: {
+                        ...selectedComponent.size,
+                        width: Number(e.target.value)
+                      }
+                    };
+                    onUpdate(updatedComponent);
+                  }}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
-                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="height">Height</Label>
+                <Input
+                  id="height"
+                  type="number"
+                  value={selectedComponent.size?.height || 0}
+                  onChange={(e) => {
+                    const updatedComponent = {
+                      ...selectedComponent,
+                      size: {
+                        ...selectedComponent.size,
+                        height: Number(e.target.value)
+                      }
+                    };
+                    onUpdate(updatedComponent);
+                  }}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="xPos">X Position</Label>
+                <Input
+                  id="xPos"
+                  type="number"
+                  value={selectedComponent.position?.x || 0}
+                  onChange={(e) => {
+                    const updatedComponent = {
+                      ...selectedComponent,
+                      position: {
+                        ...selectedComponent.position,
+                        x: Number(e.target.value)
+                      }
+                    };
+                    onUpdate(updatedComponent);
+                  }}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="yPos">Y Position</Label>
+                <Input
+                  id="yPos"
+                  type="number"
+                  value={selectedComponent.position?.y || 0}
+                  onChange={(e) => {
+                    const updatedComponent = {
+                      ...selectedComponent,
+                      position: {
+                        ...selectedComponent.position,
+                        y: Number(e.target.value)
+                      }
+                    };
+                    onUpdate(updatedComponent);
+                  }}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                />
+              </div>
+            </div>
+          </div>
+          
+          <Separator />
+
+          {/* Component-specific properties */}
+          {selectedComponent.type === 'button' && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="buttonText">Button Text</Label>
+                <Input
+                  id="buttonText"
+                  value={localProps.text || 'Button'}
+                  onChange={(e) => handlePropertyChange('text', e.target.value)}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                />
+              </div>
+              <div>
+                <Label>Background Color</Label>
+                <ColorInput
+                  value={localProps.bgColor || '#3b82f6'}
+                  onChange={(value) => handlePropertyChange('bgColor', value)}
+                  label=""
                 />
               </div>
               <div>
                 <Label>Text Color</Label>
                 <ColorInput
-                  value={selectedComponent.props.fgColor || '#000000'}
-                  onChange={(color) => updateProperty('fgColor', color)}
+                  value={localProps.fgColor || '#ffffff'}
+                  onChange={(value) => handlePropertyChange('fgColor', value)}
+                  label=""
                 />
               </div>
-            </div>
-          )}
-
-          {/* Components with background color */}
-          {['button', 'entry', 'frame', 'datepicker', 'listbox', 'notebook', 'canvas', 'textbox', 'textarea', 'progressbar', 'slider'].includes(selectedComponent.type) && (
-            <div className="space-y-4">
-              <div>
-                <Label>Background Color</Label>
-                <ColorInput
-                  value={selectedComponent.props.bgColor || '#ffffff'}
-                  onChange={(color) => updateProperty('bgColor', color)}
-                />
-              </div>
-              <div>
-                <Label>Corner Radius</Label>
-                <Input
-                  type="number"
-                  value={selectedComponent.props.cornerRadius ?? 8}
-                  onChange={(e) => updateProperty('cornerRadius', parseInt(e.target.value) || 0)}
-                  onFocus={() => setInputFocused(true)}
-                  onBlur={() => setInputFocused(false)}
-                  min="0"
-                  className="mt-1"
-                />
-              </div>
-              {/* Skip border properties for image component */}
-              {selectedComponent.type !== 'image' && (
-                <>
-                  <div>
-                    <Label>Border Color</Label>
-                    <ColorInput
-                      value={selectedComponent.props.borderColor || '#e2e8f0'}
-                      onChange={(color) => updateProperty('borderColor', color)}
-                    />
-                  </div>
-                  <div>
-                    <Label>Border Width</Label>
-                    <Input
-                      type="number"
-                      value={selectedComponent.props.borderWidth ?? 1}
-                      onChange={(e) => updateProperty('borderWidth', parseInt(e.target.value) || 0)}
-                      onFocus={() => setInputFocused(true)}
-                      onBlur={() => setInputFocused(false)}
-                      min="0"
-                      max="10"
-                      className="mt-1"
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-
-          {/* Button specific props */}
-          {selectedComponent.type === 'button' && (
-            <div className="space-y-4">
               <div>
                 <Label>Hover Color</Label>
                 <ColorInput
-                  value={selectedComponent.props.hoverColor || '#f0f0f0'}
-                  onChange={(color) => updateProperty('hoverColor', color)}
+                  value={localProps.hoverColor || '#2563eb'}
+                  onChange={(value) => handlePropertyChange('hoverColor', value)}
+                  label=""
+                />
+              </div>
+              <div>
+                <Label htmlFor="cornerRadius">Corner Radius</Label>
+                <Input
+                  id="cornerRadius"
+                  type="number"
+                  value={localProps.cornerRadius || 10}
+                  onChange={(e) => handlePropertyChange('cornerRadius', Number(e.target.value))}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="borderWidth">Border Width</Label>
+                <Input
+                  id="borderWidth"
+                  type="number"
+                  value={localProps.borderWidth || 0}
+                  onChange={(e) => handlePropertyChange('borderWidth', Number(e.target.value))}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                />
+              </div>
+              <div>
+                <Label>Border Color</Label>
+                <ColorInput
+                  value={localProps.borderColor || '#d1d5db'}
+                  onChange={(value) => handlePropertyChange('borderColor', value)}
+                  label=""
                 />
               </div>
             </div>
           )}
 
-          {/* Entry specific props */}
-          {selectedComponent.type === 'entry' && (
-            <div>
-              <Label>Placeholder</Label>
-              <Input
-                type="text"
-                value={selectedComponent.props.placeholder || ''}
-                onChange={(e) => updateProperty('placeholder', e.target.value)}
-                onFocus={() => setInputFocused(true)}
-                onBlur={() => setInputFocused(false)}
-                className="mt-1"
-              />
+          {selectedComponent.type === 'label' && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="labelText">Label Text</Label>
+                <Input
+                  id="labelText"
+                  value={localProps.text || 'Label'}
+                  onChange={(e) => handlePropertyChange('text', e.target.value)}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                />
+              </div>
+              <div>
+                <Label>Text Color</Label>
+                <ColorInput
+                  value={localProps.fgColor || '#000000'}
+                  onChange={(value) => handlePropertyChange('fgColor', value)}
+                  label=""
+                />
+              </div>
+              <div>
+                <Label>Background Color</Label>
+                <ColorInput
+                  value={localProps.bgColor || 'transparent'}
+                  onChange={(value) => handlePropertyChange('bgColor', value)}
+                  label=""
+                />
+              </div>
+              <div>
+                <Label htmlFor="cornerRadius">Corner Radius</Label>
+                <Input
+                  id="cornerRadius"
+                  type="number"
+                  value={localProps.cornerRadius || 0}
+                  onChange={(e) => handlePropertyChange('cornerRadius', Number(e.target.value))}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                />
+              </div>
             </div>
           )}
 
-          {/* Image specific props */}
+          {(selectedComponent.type === 'entry' || selectedComponent.type === 'textbox') && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="placeholder">Placeholder</Label>
+                <Input
+                  id="placeholder"
+                  value={localProps.placeholder || ''}
+                  onChange={(e) => handlePropertyChange('placeholder', e.target.value)}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                />
+              </div>
+              <div>
+                <Label>Background Color</Label>
+                <ColorInput
+                  value={localProps.bgColor || '#ffffff'}
+                  onChange={(value) => handlePropertyChange('bgColor', value)}
+                  label=""
+                />
+              </div>
+              <div>
+                <Label>Text Color</Label>
+                <ColorInput
+                  value={localProps.fgColor || '#000000'}
+                  onChange={(value) => handlePropertyChange('fgColor', value)}
+                  label=""
+                />
+              </div>
+              <div>
+                <Label htmlFor="borderWidth">Border Width</Label>
+                <Input
+                  id="borderWidth"
+                  type="number"
+                  value={localProps.borderWidth || 1}
+                  onChange={(e) => handlePropertyChange('borderWidth', Number(e.target.value))}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                />
+              </div>
+              <div>
+                <Label>Border Color</Label>
+                <ColorInput
+                  value={localProps.borderColor || '#d1d5db'}
+                  onChange={(value) => handlePropertyChange('borderColor', value)}
+                  label=""
+                />
+              </div>
+              <div>
+                <Label htmlFor="cornerRadius">Corner Radius</Label>
+                <Input
+                  id="cornerRadius"
+                  type="number"
+                  value={localProps.cornerRadius || 6}
+                  onChange={(e) => handlePropertyChange('cornerRadius', Number(e.target.value))}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                />
+              </div>
+            </div>
+          )}
+
+          {selectedComponent.type === 'checkbox' && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="checkboxText">Checkbox Text</Label>
+                <Input
+                  id="checkboxText"
+                  value={localProps.text || 'Checkbox'}
+                  onChange={(e) => handlePropertyChange('text', e.target.value)}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch 
+                  checked={localProps.checked || false}
+                  onCheckedChange={(checked) => handlePropertyChange('checked', checked)}
+                />
+                <Label>Default Checked</Label>
+              </div>
+              <div>
+                <Label>Text Color</Label>
+                <ColorInput
+                  value={localProps.fgColor || '#000000'}
+                  onChange={(value) => handlePropertyChange('fgColor', value)}
+                  label=""
+                />
+              </div>
+              <div>
+                <Label>Checked Color</Label>
+                <ColorInput
+                  value={localProps.checkedColor || '#3b82f6'}
+                  onChange={(value) => handlePropertyChange('checkedColor', value)}
+                  label=""
+                />
+              </div>
+              <div>
+                <Label htmlFor="borderWidth">Border Width</Label>
+                <Input
+                  id="borderWidth"
+                  type="number"
+                  value={localProps.borderWidth || 1}
+                  onChange={(e) => handlePropertyChange('borderWidth', Number(e.target.value))}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                />
+              </div>
+              <div>
+                <Label>Border Color</Label>
+                <ColorInput
+                  value={localProps.borderColor || '#d1d5db'}
+                  onChange={(value) => handlePropertyChange('borderColor', value)}
+                  label=""
+                />
+              </div>
+            </div>
+          )}
+
+          {selectedComponent.type === 'dropdown' && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="options">Options (comma separated)</Label>
+                <Input
+                  id="options"
+                  value={Array.isArray(localProps.options) ? localProps.options.join(', ') : (localProps.options || 'Option 1, Option 2, Option 3')}
+                  onChange={(e) => {
+                    const optionsArray = e.target.value.split(',').map((opt: string) => opt.trim());
+                    handlePropertyChange('options', optionsArray);
+                  }}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="defaultValue">Default Value</Label>
+                <Input
+                  id="defaultValue"
+                  value={localProps.defaultValue || ''}
+                  onChange={(e) => handlePropertyChange('defaultValue', e.target.value)}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                />
+              </div>
+              <div>
+                <Label>Background Color</Label>
+                <ColorInput
+                  value={localProps.bgColor || '#ffffff'}
+                  onChange={(value) => handlePropertyChange('bgColor', value)}
+                  label=""
+                />
+              </div>
+              <div>
+                <Label>Text Color</Label>
+                <ColorInput
+                  value={localProps.fgColor || '#000000'}
+                  onChange={(value) => handlePropertyChange('fgColor', value)}
+                  label=""
+                />
+              </div>
+              <div>
+                <Label>Button Color</Label>
+                <ColorInput
+                  value={localProps.buttonColor || '#e5e7eb'}
+                  onChange={(value) => handlePropertyChange('buttonColor', value)}
+                  label=""
+                />
+              </div>
+              <div>
+                <Label htmlFor="borderWidth">Border Width</Label>
+                <Input
+                  id="borderWidth"
+                  type="number"
+                  value={localProps.borderWidth || 1}
+                  onChange={(e) => handlePropertyChange('borderWidth', Number(e.target.value))}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                />
+              </div>
+              <div>
+                <Label>Border Color</Label>
+                <ColorInput
+                  value={localProps.borderColor || '#d1d5db'}
+                  onChange={(value) => handlePropertyChange('borderColor', value)}
+                  label=""
+                />
+              </div>
+            </div>
+          )}
+
           {selectedComponent.type === 'image' && (
             <div className="space-y-4">
               <div>
-                <Label>Upload Image</Label>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  onFocus={() => setInputFocused(true)}
-                  onBlur={() => setInputFocused(false)}
-                  className="mt-1"
+                <Label>Image</Label>
+                <div className="mt-2">
+                  <Button 
+                    variant="outline" 
+                    className="w-full" 
+                    onClick={() => document.getElementById('imageUpload')?.click()}
+                  >
+                    Upload Image
+                  </Button>
+                  <input 
+                    type="file"
+                    id="imageUpload"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                  />
+                </div>
+                {localProps.src && (
+                  <div className="mt-2 border rounded p-2">
+                    <img 
+                      src={localProps.src} 
+                      alt="Preview" 
+                      className="max-h-40 max-w-full mx-auto"
+                    />
+                  </div>
+                )}
+              </div>
+              <div>
+                <Label>Background Color</Label>
+                <ColorInput
+                  value={localProps.bgColor || 'transparent'}
+                  onChange={(value) => handlePropertyChange('bgColor', value)}
+                  label=""
                 />
               </div>
               <div>
-                <Label>Image Source URL</Label>
+                <Label htmlFor="cornerRadius">Corner Radius</Label>
                 <Input
-                  type="text"
-                  value={selectedComponent.props.src || '/placeholder.svg'}
-                  onChange={(e) => updateProperty('src', e.target.value)}
-                  onFocus={() => setInputFocused(true)}
-                  onBlur={() => setInputFocused(false)}
-                  className="mt-1"
-                />
-              </div>
-              <div className="mt-3">
-                <Label>Fit</Label>
-                <Select
-                  value={selectedComponent.props.fit || 'contain'}
-                  onValueChange={(value) => updateProperty('fit', value)}
-                  onOpenChange={(open) => setInputFocused(open)}
-                >
-                  <SelectTrigger className="mt-1 w-full">
-                    <SelectValue placeholder="Select fit type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="contain">Contain</SelectItem>
-                    <SelectItem value="cover">Cover</SelectItem>
-                    <SelectItem value="fill">Fill</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Corner Radius</Label>
-                <Input
+                  id="cornerRadius"
                   type="number"
-                  value={selectedComponent.props.cornerRadius ?? 8}
-                  onChange={(e) => updateProperty('cornerRadius', parseInt(e.target.value) || 0)}
+                  value={localProps.cornerRadius || 0}
+                  onChange={(e) => handlePropertyChange('cornerRadius', Number(e.target.value))}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
-                  min="0"
-                  className="mt-1"
                 />
-              </div>
-              <div className="p-3 bg-amber-50 border border-amber-200 rounded-md text-xs text-amber-800">
-                <p>Note: Border width and color are not supported for image components in CustomTkinter.</p>
               </div>
             </div>
           )}
 
-          {/* Slider specific props */}
           {selectedComponent.type === 'slider' && (
             <div className="space-y-4">
               <div>
-                <Label>Minimum Value</Label>
+                <Label htmlFor="minValue">Min Value</Label>
                 <Input
+                  id="minValue"
                   type="number"
-                  value={selectedComponent.props.from ?? 0}
-                  onChange={(e) => updateProperty('from', parseInt(e.target.value) || 0)}
+                  value={localProps.from || 0}
+                  onChange={(e) => handlePropertyChange('from', Number(e.target.value))}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
-                  className="mt-1"
                 />
               </div>
               <div>
-                <Label>Maximum Value</Label>
+                <Label htmlFor="maxValue">Max Value</Label>
                 <Input
+                  id="maxValue"
                   type="number"
-                  value={selectedComponent.props.to ?? 100}
-                  onChange={(e) => updateProperty('to', parseInt(e.target.value) || 0)}
+                  value={localProps.to || 100}
+                  onChange={(e) => handlePropertyChange('to', Number(e.target.value))}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
-                  className="mt-1"
                 />
               </div>
               <div>
-                <Label>Current Value</Label>
+                <Label htmlFor="currentValue">Current Value</Label>
                 <Input
+                  id="currentValue"
                   type="number"
-                  value={selectedComponent.props.value ?? 50}
-                  onChange={(e) => updateProperty('value', parseInt(e.target.value) || 0)}
+                  value={localProps.value || 50}
+                  onChange={(e) => handlePropertyChange('value', Number(e.target.value))}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
-                  className="mt-1"
                 />
               </div>
-              <div className="mt-3">
+              <div>
                 <Label>Orientation</Label>
-                <Select
-                  value={selectedComponent.props.orient || 'horizontal'}
-                  onValueChange={(value) => updateProperty('orient', value)}
-                  onOpenChange={(open) => setInputFocused(open)}
+                <Select 
+                  value={localProps.orient || 'horizontal'} 
+                  onValueChange={(value) => handlePropertyChange('orient', value)}
                 >
-                  <SelectTrigger className="mt-1 w-full">
+                  <SelectTrigger>
                     <SelectValue placeholder="Select orientation" />
                   </SelectTrigger>
                   <SelectContent>
@@ -450,182 +592,305 @@ export const PropertyPanel = ({
                 </Select>
               </div>
               <div>
+                <Label>Background Color</Label>
+                <ColorInput
+                  value={localProps.bgColor || '#e5e7eb'}
+                  onChange={(value) => handlePropertyChange('bgColor', value)}
+                  label=""
+                />
+              </div>
+              <div>
                 <Label>Progress Color</Label>
                 <ColorInput
-                  value={selectedComponent.props.progressColor || '#3b82f6'}
-                  onChange={(color) => updateProperty('progressColor', color)}
+                  value={localProps.progressColor || '#3b82f6'}
+                  onChange={(value) => handlePropertyChange('progressColor', value)}
+                  label=""
                 />
               </div>
-            </div>
-          )}
-
-          {/* Frame specific props */}
-          {selectedComponent.type === 'frame' && (
-            <div className="space-y-4">
-              <div className="mt-3">
-                <Label>Border Style</Label>
-                <Select
-                  value={selectedComponent.props.relief || 'flat'}
-                  onValueChange={(value) => updateProperty('relief', value)}
-                  onOpenChange={(open) => setInputFocused(open)}
-                >
-                  <SelectTrigger className="mt-1 w-full">
-                    <SelectValue placeholder="Select border style" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="flat">Flat</SelectItem>
-                    <SelectItem value="solid">Solid</SelectItem>
-                    <SelectItem value="groove">Groove</SelectItem>
-                    <SelectItem value="ridge">Ridge</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          )}
-
-          {/* Checkbox specific props */}
-          {selectedComponent.type === 'checkbox' && (
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="checked-status"
-                  checked={selectedComponent.props.checked || false}
-                  onCheckedChange={(checked) => updateProperty('checked', checked)}
+              <div>
+                <Label>Button Color</Label>
+                <ColorInput
+                  value={localProps.buttonColor || '#2563eb'}
+                  onChange={(value) => handlePropertyChange('buttonColor', value)}
+                  label=""
                 />
-                <Label htmlFor="checked-status">Checked</Label>
+              </div>
+              <div>
+                <Label htmlFor="borderWidth">Border Width</Label>
+                <Input
+                  id="borderWidth"
+                  type="number"
+                  value={localProps.borderWidth || 0}
+                  onChange={(e) => handlePropertyChange('borderWidth', Number(e.target.value))}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                />
               </div>
               <div>
                 <Label>Border Color</Label>
                 <ColorInput
-                  value={selectedComponent.props.borderColor || '#e2e8f0'}
-                  onChange={(color) => updateProperty('borderColor', color)}
-                />
-              </div>
-              <div>
-                <Label>Checked Color</Label>
-                <ColorInput
-                  value={selectedComponent.props.checkedColor || '#3b82f6'}
-                  onChange={(color) => updateProperty('checkedColor', color)}
+                  value={localProps.borderColor || '#d1d5db'}
+                  onChange={(value) => handlePropertyChange('borderColor', value)}
+                  label=""
                 />
               </div>
             </div>
           )}
 
-          {/* DatePicker specific props */}
-          {selectedComponent.type === 'datepicker' && (
+          {selectedComponent.type === 'frame' && (
             <div className="space-y-4">
               <div>
-                <Label>Date Format</Label>
+                <Label>Background Color</Label>
+                <ColorInput
+                  value={localProps.bgColor || '#f9fafb'}
+                  onChange={(value) => handlePropertyChange('bgColor', value)}
+                  label=""
+                />
+              </div>
+              <div>
+                <Label htmlFor="borderWidth">Border Width</Label>
                 <Input
-                  type="text"
-                  value={selectedComponent.props.format || 'yyyy-mm-dd'}
-                  onChange={(e) => updateProperty('format', e.target.value)}
+                  id="borderWidth"
+                  type="number"
+                  value={localProps.borderWidth || 1}
+                  onChange={(e) => handlePropertyChange('borderWidth', Number(e.target.value))}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
-                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Border Color</Label>
+                <ColorInput
+                  value={localProps.borderColor || '#d1d5db'}
+                  onChange={(value) => handlePropertyChange('borderColor', value)}
+                  label=""
+                />
+              </div>
+              <div>
+                <Label htmlFor="cornerRadius">Corner Radius</Label>
+                <Input
+                  id="cornerRadius"
+                  type="number"
+                  value={localProps.cornerRadius || 6}
+                  onChange={(e) => handlePropertyChange('cornerRadius', Number(e.target.value))}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
                 />
               </div>
             </div>
           )}
 
-          {/* ProgressBar specific props */}
           {selectedComponent.type === 'progressbar' && (
             <div className="space-y-4">
               <div>
-                <Label>Current Value</Label>
+                <Label htmlFor="value">Value (%)</Label>
                 <Input
+                  id="value"
                   type="number"
-                  value={selectedComponent.props.value ?? 50}
-                  onChange={(e) => updateProperty('value', parseInt(e.target.value) || 0)}
+                  min="0"
+                  max="100"
+                  value={localProps.value || 50}
+                  onChange={(e) => handlePropertyChange('value', Number(e.target.value))}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
-                  min="0"
-                  max={selectedComponent.props.maxValue || 100}
-                  className="mt-1"
                 />
               </div>
               <div>
-                <Label>Maximum Value</Label>
+                <Label htmlFor="maxValue">Max Value</Label>
                 <Input
+                  id="maxValue"
                   type="number"
-                  value={selectedComponent.props.maxValue ?? 100}
-                  onChange={(e) => updateProperty('maxValue', parseInt(e.target.value) || 0)}
+                  value={localProps.maxValue || 100}
+                  onChange={(e) => handlePropertyChange('maxValue', Number(e.target.value))}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
-                  min="1"
-                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Background Color</Label>
+                <ColorInput
+                  value={localProps.bgColor || '#e5e7eb'}
+                  onChange={(value) => handlePropertyChange('bgColor', value)}
+                  label=""
                 />
               </div>
               <div>
                 <Label>Progress Color</Label>
                 <ColorInput
-                  value={selectedComponent.props.progressColor || '#3b82f6'}
-                  onChange={(color) => updateProperty('progressColor', color)}
+                  value={localProps.progressColor || '#3b82f6'}
+                  onChange={(value) => handlePropertyChange('progressColor', value)}
+                  label=""
+                />
+              </div>
+              <div>
+                <Label htmlFor="cornerRadius">Corner Radius</Label>
+                <Input
+                  id="cornerRadius"
+                  type="number"
+                  value={localProps.cornerRadius || 3}
+                  onChange={(e) => handlePropertyChange('cornerRadius', Number(e.target.value))}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
                 />
               </div>
             </div>
           )}
 
-          {/* Notebook specific props */}
-          {selectedComponent.type === 'notebook' && (
-            <div className="space-y-4">
-              <div>
-                <Label>Tabs (comma separated)</Label>
-                <Input
-                  type="text"
-                  value={selectedComponent.props.tabs || 'Tab 1,Tab 2,Tab 3'}
-                  onChange={(e) => updateProperty('tabs', e.target.value)}
-                  onFocus={() => setInputFocused(true)}
-                  onBlur={() => setInputFocused(false)}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label>Selected Tab</Label>
-                <Input
-                  type="text"
-                  value={selectedComponent.props.selectedTab || 'Tab 1'}
-                  onChange={(e) => updateProperty('selectedTab', e.target.value)}
-                  onFocus={() => setInputFocused(true)}
-                  onBlur={() => setInputFocused(false)}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label>Active Tab Color</Label>
-                <ColorInput
-                  value={selectedComponent.props.activeTabColor || '#3b82f6'}
-                  onChange={(color) => updateProperty('activeTabColor', color)}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Listbox specific props */}
           {selectedComponent.type === 'listbox' && (
             <div className="space-y-4">
               <div>
-                <Label>Items (comma separated)</Label>
+                <Label htmlFor="items">Items (comma separated)</Label>
                 <Input
-                  type="text"
-                  value={selectedComponent.props.items || 'Item 1,Item 2,Item 3,Item 4,Item 5'}
-                  onChange={(e) => updateProperty('items', e.target.value)}
+                  id="items"
+                  value={Array.isArray(localProps.items) ? localProps.items.join(', ') : (localProps.items || 'Item 1, Item 2, Item 3')}
+                  onChange={(e) => {
+                    const itemsArray = e.target.value.split(',').map((item: string) => item.trim());
+                    handlePropertyChange('items', itemsArray);
+                  }}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
-                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Background Color</Label>
+                <ColorInput
+                  value={localProps.bgColor || '#ffffff'}
+                  onChange={(value) => handlePropertyChange('bgColor', value)}
+                  label=""
+                />
+              </div>
+              <div>
+                <Label>Text Color</Label>
+                <ColorInput
+                  value={localProps.fgColor || '#000000'}
+                  onChange={(value) => handlePropertyChange('fgColor', value)}
+                  label=""
                 />
               </div>
               <div>
                 <Label>Selected Item Color</Label>
                 <ColorInput
-                  value={selectedComponent.props.selectedColor || '#3b82f6'}
-                  onChange={(color) => updateProperty('selectedColor', color)}
+                  value={localProps.selectedColor || '#e5e7eb'}
+                  onChange={(value) => handlePropertyChange('selectedColor', value)}
+                  label=""
+                />
+              </div>
+              <div>
+                <Label htmlFor="borderWidth">Border Width</Label>
+                <Input
+                  id="borderWidth"
+                  type="number"
+                  value={localProps.borderWidth || 1}
+                  onChange={(e) => handlePropertyChange('borderWidth', Number(e.target.value))}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                />
+              </div>
+              <div>
+                <Label>Border Color</Label>
+                <ColorInput
+                  value={localProps.borderColor || '#d1d5db'}
+                  onChange={(value) => handlePropertyChange('borderColor', value)}
+                  label=""
+                />
+              </div>
+              <div>
+                <Label htmlFor="cornerRadius">Corner Radius</Label>
+                <Input
+                  id="cornerRadius"
+                  type="number"
+                  value={localProps.cornerRadius || 6}
+                  onChange={(e) => handlePropertyChange('cornerRadius', Number(e.target.value))}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                />
+              </div>
+            </div>
+          )}
+
+          {selectedComponent.type === 'notebook' && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="tabs">Tabs (comma separated)</Label>
+                <Input
+                  id="tabs"
+                  value={Array.isArray(localProps.tabs) ? localProps.tabs.join(', ') : (localProps.tabs || 'Tab 1, Tab 2, Tab 3')}
+                  onChange={(e) => {
+                    const tabsArray = e.target.value.split(',').map((tab: string) => tab.trim());
+                    handlePropertyChange('tabs', tabsArray);
+                  }}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="selectedTab">Selected Tab</Label>
+                <Input
+                  id="selectedTab"
+                  value={localProps.selectedTab || ''}
+                  onChange={(e) => handlePropertyChange('selectedTab', e.target.value)}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                />
+              </div>
+              <div>
+                <Label>Background Color</Label>
+                <ColorInput
+                  value={localProps.bgColor || '#ffffff'}
+                  onChange={(value) => handlePropertyChange('bgColor', value)}
+                  label=""
+                />
+              </div>
+              <div>
+                <Label>Tab Color</Label>
+                <ColorInput
+                  value={localProps.tabColor || '#f3f4f6'}
+                  onChange={(value) => handlePropertyChange('tabColor', value)}
+                  label=""
+                />
+              </div>
+              <div>
+                <Label>Active Tab Color</Label>
+                <ColorInput
+                  value={localProps.activeTabColor || '#60a5fa'}
+                  onChange={(value) => handlePropertyChange('activeTabColor', value)}
+                  label=""
+                />
+              </div>
+              <div>
+                <Label htmlFor="borderWidth">Border Width</Label>
+                <Input
+                  id="borderWidth"
+                  type="number"
+                  value={localProps.borderWidth || 1}
+                  onChange={(e) => handlePropertyChange('borderWidth', Number(e.target.value))}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                />
+              </div>
+              <div>
+                <Label>Border Color</Label>
+                <ColorInput
+                  value={localProps.borderColor || '#d1d5db'}
+                  onChange={(value) => handlePropertyChange('borderColor', value)}
+                  label=""
+                />
+              </div>
+              <div>
+                <Label htmlFor="cornerRadius">Corner Radius</Label>
+                <Input
+                  id="cornerRadius"
+                  type="number"
+                  value={localProps.cornerRadius || 6}
+                  onChange={(e) => handlePropertyChange('cornerRadius', Number(e.target.value))}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
                 />
               </div>
             </div>
           )}
         </div>
       </div>
-    </div>
+    </ScrollArea>
   );
 };

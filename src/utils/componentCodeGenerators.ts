@@ -66,12 +66,13 @@ export function generateImageCode(component: any, isTkinter: boolean): string {
   const safeId = component.id.replace(/[^a-zA-Z0-9_]/g, '_');
   
   if (isTkinter) {
-    return `# Image setup - Note: CustomTkinter CTkLabel with image doesn't support border properties
-self.img_${safeId} = Image.open("${safeId}.png")  # Adjust path as needed
-self.photo_${safeId} = ImageTk.PhotoImage(self.img_${safeId}.resize((${Math.round(component.size.width)}, ${Math.round(component.size.height)})))
-self.image_label_${safeId} = tk.Label(self.root, image=self.photo_${safeId}, bg="${component.props?.bgColor || '#ffffff'}")
+    return `# Image setup for ${safeId}
+self.img_${safeId} = self.load_image("${safeId}.png", (${Math.round(component.size.width)}, ${Math.round(component.size.height)}))
+self.image_label_${safeId} = ctk.CTkLabel(self, image=self.img_${safeId}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)}, text="")
+# Note: CTkLabel with image doesn't support border properties
 self.image_label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})
-self.images.append(self.photo_${safeId})  # Keep reference to prevent garbage collection`;
+# Keep reference to prevent garbage collection
+self._image_references.append(self.img_${safeId})`;
   } else {
     // For Eel, we just return a comment since components are handled via JSON
     return `# Image ${safeId} is managed in the JavaScript UI`;

@@ -25,7 +25,7 @@ export const ColorInput: React.FC<ColorInputProps> = ({
     if (value !== inputValue) {
       setInputValue(value || '#ffffff');
     }
-  }, [value]);
+  }, [value, inputValue]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;

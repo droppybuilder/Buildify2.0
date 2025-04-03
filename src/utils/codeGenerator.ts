@@ -36,8 +36,12 @@ class Application(ctk.CTk):
                 img_path = os.path.join(script_dir, path)
             
             if not os.path.exists(img_path):
-                print(f"Warning: Image file {img_path} not found")
-                return None
+                print(f"Warning: Image file {img_path} not found, using sample_image.png")
+                # Try to use the sample image as fallback
+                img_path = os.path.join(script_dir, "sample_image.png")
+                if not os.path.exists(img_path):
+                    print("Error: sample_image.png not found")
+                    return None
                 
             img = Image.open(img_path)
             img = img.resize(size, Image.Resampling.LANCZOS)
@@ -258,7 +262,6 @@ const generateComponentCode = (component: any, indent: number): string => {
       code += `${spaces}${varName}_img = self.load_image("${imageName}", (${width}, ${height}))\n`;
       
       // Use a CTkLabel for images - IMPORTANT: DON'T include border properties for labels with images
-      // These are not supported by CustomTkinter and cause errors
       code += `${spaces}${varName} = ctk.CTkLabel(self, image=${varName}_img, width=${width}, height=${height}, text=""`;
       
       // Only add corner_radius and fg_color (bg color) which are supported
@@ -272,6 +275,8 @@ const generateComponentCode = (component: any, indent: number): string => {
       
       code += `)\n`;
       code += `${spaces}${varName}.place(x=${x}, y=${y})\n`;
+      code += `${spaces}# Keep reference to prevent garbage collection\n`;
+      code += `${spaces}self._image_references.append(${varName}_img)\n`;
       break;
       
     case 'slider':
@@ -562,6 +567,7 @@ If you encounter errors:
 
   // Save images from components with type 'image'
   const imageComponents = components.filter(comp => comp.type === 'image');
+  let hasAddedSample = false;
   
   for (const imageComp of imageComponents) {
     const props = imageComp.props || {};
@@ -580,6 +586,7 @@ If you encounter errors:
           } catch (error) {
             console.error('Error fetching image:', error);
             imageBlob = await fetchSampleImage();
+            hasAddedSample = true;
           }
         } else {
           // Handle data URLs or other formats
@@ -590,10 +597,12 @@ If you encounter errors:
               imageBlob = await response.blob();
             } else {
               imageBlob = await fetchSampleImage();
+              hasAddedSample = true;
             }
           } catch (error) {
             console.error('Error processing image data URL:', error);
             imageBlob = await fetchSampleImage();
+            hasAddedSample = true;
           }
         }
         
@@ -606,8 +615,10 @@ If you encounter errors:
     }
   }
   
-  // Add a sample image file as backup
-  zip.file("sample_image.png", await fetchSampleImage(), {binary: true});
+  // Always add a sample image file as backup
+  if (!hasAddedSample) {
+    zip.file("sample_image.png", await fetchSampleImage(), {binary: true});
+  }
   
   // Add a more detailed documentation file with troubleshooting info
   const documentation = `# CustomTkinter GUI Application Documentation

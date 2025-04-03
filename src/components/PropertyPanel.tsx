@@ -32,6 +32,8 @@ export const PropertyPanel = ({
   useEffect(() => {
     if (selectedComponent && selectedComponent.props) {
       setPropertyInputs({...selectedComponent.props});
+    } else {
+      setPropertyInputs({});
     }
   }, [selectedComponent]);
 
@@ -96,6 +98,16 @@ export const PropertyPanel = ({
     };
 
     onUpdate(updatedComponent);
+  };
+
+  const handleInputChange = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    handlePropertyChange(key, value);
+  };
+
+  const handleNumberInputChange = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 0;
+    handlePropertyChange(key, value);
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -235,7 +247,7 @@ export const PropertyPanel = ({
                 <Input
                   type="text"
                   value={props.text || ''}
-                  onChange={(e) => handlePropertyChange('text', e.target.value)}
+                  onChange={(e) => handleInputChange('text', e)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
                   className="mt-1"
@@ -266,33 +278,38 @@ export const PropertyPanel = ({
                 <Input
                   type="number"
                   value={props.cornerRadius ?? 8}
-                  onChange={(e) => handlePropertyChange('cornerRadius', parseInt(e.target.value) || 0)}
+                  onChange={(e) => handleNumberInputChange('cornerRadius', e)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
                   min="0"
                   className="mt-1"
                 />
               </div>
-              <div>
-                <Label>Border Color</Label>
-                <ColorInput
-                  value={props.borderColor || '#e2e8f0'}
-                  onChange={(color) => handlePropertyChange('borderColor', color)}
-                />
-              </div>
-              <div>
-                <Label>Border Width</Label>
-                <Input
-                  type="number"
-                  value={props.borderWidth ?? 1}
-                  onChange={(e) => handlePropertyChange('borderWidth', parseInt(e.target.value))}
-                  onFocus={() => setInputFocused(true)}
-                  onBlur={() => setInputFocused(false)}
-                  min="0"
-                  max="10"
-                  className="mt-1"
-                />
-              </div>
+              {/* Skip border properties for image component */}
+              {selectedComponent.type !== 'image' && (
+                <>
+                  <div>
+                    <Label>Border Color</Label>
+                    <ColorInput
+                      value={props.borderColor || '#e2e8f0'}
+                      onChange={(color) => handlePropertyChange('borderColor', color)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Border Width</Label>
+                    <Input
+                      type="number"
+                      value={props.borderWidth ?? 1}
+                      onChange={(e) => handleNumberInputChange('borderWidth', e)}
+                      onFocus={() => setInputFocused(true)}
+                      onBlur={() => setInputFocused(false)}
+                      min="0"
+                      max="10"
+                      className="mt-1"
+                    />
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -316,7 +333,7 @@ export const PropertyPanel = ({
               <Input
                 type="text"
                 value={props.placeholder || ''}
-                onChange={(e) => handlePropertyChange('placeholder', e.target.value)}
+                onChange={(e) => handleInputChange('placeholder', e)}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
                 className="mt-1"
@@ -343,7 +360,7 @@ export const PropertyPanel = ({
                 <Input
                   type="text"
                   value={props.src || '/placeholder.svg'}
-                  onChange={(e) => handlePropertyChange('src', e.target.value)}
+                  onChange={(e) => handleInputChange('src', e)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
                   className="mt-1"
@@ -367,14 +384,13 @@ export const PropertyPanel = ({
                 <Input
                   type="number"
                   value={props.cornerRadius ?? 8}
-                  onChange={(e) => handlePropertyChange('cornerRadius', parseInt(e.target.value) || 0)}
+                  onChange={(e) => handleNumberInputChange('cornerRadius', e)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
                   min="0"
                   className="mt-1"
                 />
               </div>
-              {/* Note: Border width and color are commented out for image components in CustomTkinter */}
               <div className="p-3 bg-amber-50 border border-amber-200 rounded-md text-xs text-amber-800">
                 <p>Note: Border width and color are not supported for image components in CustomTkinter.</p>
               </div>
@@ -389,7 +405,7 @@ export const PropertyPanel = ({
                 <Input
                   type="number"
                   value={props.from ?? 0}
-                  onChange={(e) => handlePropertyChange('from', parseInt(e.target.value) || 0)}
+                  onChange={(e) => handleNumberInputChange('from', e)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
                   className="mt-1"
@@ -400,7 +416,7 @@ export const PropertyPanel = ({
                 <Input
                   type="number"
                   value={props.to ?? 100}
-                  onChange={(e) => handlePropertyChange('to', parseInt(e.target.value) || 100)}
+                  onChange={(e) => handleNumberInputChange('to', e)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
                   className="mt-1"
@@ -411,7 +427,7 @@ export const PropertyPanel = ({
                 <Input
                   type="number"
                   value={props.value ?? 50}
-                  onChange={(e) => handlePropertyChange('value', parseInt(e.target.value) || 50)}
+                  onChange={(e) => handleNumberInputChange('value', e)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
                   className="mt-1"
@@ -434,26 +450,6 @@ export const PropertyPanel = ({
                 <ColorInput
                   value={props.progressColor || '#3b82f6'}
                   onChange={(color) => handlePropertyChange('progressColor', color)}
-                />
-              </div>
-              <div>
-                <Label>Border Width</Label>
-                <Input
-                  type="number"
-                  value={props.borderWidth ?? 0}
-                  onChange={(e) => handlePropertyChange('borderWidth', parseInt(e.target.value))}
-                  onFocus={() => setInputFocused(true)}
-                  onBlur={() => setInputFocused(false)}
-                  min="0"
-                  max="10"
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label>Border Color</Label>
-                <ColorInput
-                  value={props.borderColor || '#e2e8f0'}
-                  onChange={(color) => handlePropertyChange('borderColor', color)}
                 />
               </div>
             </div>
@@ -515,7 +511,7 @@ export const PropertyPanel = ({
                 <Input
                   type="text"
                   value={props.format || 'yyyy-mm-dd'}
-                  onChange={(e) => handlePropertyChange('format', e.target.value)}
+                  onChange={(e) => handleInputChange('format', e)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
                   className="mt-1"
@@ -532,7 +528,7 @@ export const PropertyPanel = ({
                 <Input
                   type="number"
                   value={props.value ?? 50}
-                  onChange={(e) => handlePropertyChange('value', parseInt(e.target.value) || 0)}
+                  onChange={(e) => handleNumberInputChange('value', e)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
                   min="0"
@@ -545,7 +541,7 @@ export const PropertyPanel = ({
                 <Input
                   type="number"
                   value={props.maxValue ?? 100}
-                  onChange={(e) => handlePropertyChange('maxValue', parseInt(e.target.value) || 100)}
+                  onChange={(e) => handleNumberInputChange('maxValue', e)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
                   min="1"
@@ -559,19 +555,6 @@ export const PropertyPanel = ({
                   onChange={(color) => handlePropertyChange('progressColor', color)}
                 />
               </div>
-              <div>
-                <Label>Border Width</Label>
-                <Input
-                  type="number"
-                  value={props.borderWidth ?? 0}
-                  onChange={(e) => handlePropertyChange('borderWidth', parseInt(e.target.value))}
-                  onFocus={() => setInputFocused(true)}
-                  onBlur={() => setInputFocused(false)}
-                  min="0"
-                  max="10"
-                  className="mt-1"
-                />
-              </div>
             </div>
           )}
 
@@ -583,7 +566,7 @@ export const PropertyPanel = ({
                 <Input
                   type="text"
                   value={props.tabs || 'Tab 1,Tab 2,Tab 3'}
-                  onChange={(e) => handlePropertyChange('tabs', e.target.value)}
+                  onChange={(e) => handleInputChange('tabs', e)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
                   className="mt-1"
@@ -594,7 +577,7 @@ export const PropertyPanel = ({
                 <Input
                   type="text"
                   value={props.selectedTab || 'Tab 1'}
-                  onChange={(e) => handlePropertyChange('selectedTab', e.target.value)}
+                  onChange={(e) => handleInputChange('selectedTab', e)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
                   className="mt-1"
@@ -618,7 +601,7 @@ export const PropertyPanel = ({
                 <Input
                   type="text"
                   value={props.items || 'Item 1,Item 2,Item 3,Item 4,Item 5'}
-                  onChange={(e) => handlePropertyChange('items', e.target.value)}
+                  onChange={(e) => handleInputChange('items', e)}
                   onFocus={() => setInputFocused(true)}
                   onBlur={() => setInputFocused(false)}
                   className="mt-1"

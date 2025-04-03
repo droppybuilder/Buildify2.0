@@ -66,11 +66,10 @@ export function generateImageCode(component: any, isTkinter: boolean): string {
   const safeId = component.id.replace(/[^a-zA-Z0-9_]/g, '_');
   
   if (isTkinter) {
-    return `# Image setup
-image_path_${safeId} = "images/image_${safeId}.png"  # Adjust path as needed
-self.img_${safeId} = Image.open(image_path_${safeId})
+    return `# Image setup - Note: CustomTkinter CTkLabel with image doesn't support border properties
+self.img_${safeId} = Image.open("${safeId}.png")  # Adjust path as needed
 self.photo_${safeId} = ImageTk.PhotoImage(self.img_${safeId}.resize((${Math.round(component.size.width)}, ${Math.round(component.size.height)})))
-self.image_label_${safeId} = tk.Label(self.root, image=self.photo_${safeId})
+self.image_label_${safeId} = tk.Label(self.root, image=self.photo_${safeId}, bg="${component.props?.bgColor || '#ffffff'}")
 self.image_label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})
 self.images.append(self.photo_${safeId})  # Keep reference to prevent garbage collection`;
   } else {
@@ -155,7 +154,7 @@ self.date_picker_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math
 function generateProgressBarCode(component: any, safeId: string): string {
   return `self.progress_${safeId} = ttk.Progressbar(self.root, orient='horizontal', length=${Math.round(component.size.width)}, mode='determinate')
 self.progress_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})
-self.progress_${safeId}['value'] = 50  # Set initial value`;
+self.progress_${safeId}['value'] = ${component.props?.value || 50}  # Set initial value`;
 }
 
 function generateFrameCode(component: any, safeId: string): string {
@@ -179,14 +178,15 @@ self.notebook_${safeId}.add(self.tab2_${safeId}, text="Tab 2")`;
 
 function generateListboxCode(component: any, safeId: string): string {
   const items = component.props?.items || ["Item 1", "Item 2", "Item 3"];
+  const itemArray = typeof items === 'string' ? items.split(',') : items;
   
   let code = `self.listbox_${safeId} = tk.Listbox(self.root)
 self.listbox_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
 `;
   
   // Add items
-  items.forEach((item: string, index: number) => {
-    code += `self.listbox_${safeId}.insert(${index}, "${item}")\n`;
+  itemArray.forEach((item: string, index: number) => {
+    code += `self.listbox_${safeId}.insert(${index}, "${item.trim()}")\n`;
   });
   
   return code;

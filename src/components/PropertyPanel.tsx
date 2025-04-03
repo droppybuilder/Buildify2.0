@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select } from "@/components/ui/select";
 import { toast } from "sonner";
 import { GripVertical } from "lucide-react";
+import { ColorInput } from "@/components/ColorInput";
 
 interface PropertyPanelProps {
   selectedComponent: any;
@@ -30,15 +31,7 @@ export const PropertyPanel = ({
   // Initialize the local state when a component is selected
   useEffect(() => {
     if (selectedComponent && selectedComponent.props) {
-      const props = selectedComponent.props;
-      const newInputs: Record<string, any> = {};
-      
-      // Add all properties to the local state
-      Object.keys(props).forEach(key => {
-        newInputs[key] = props[key];
-      });
-      
-      setPropertyInputs(newInputs);
+      setPropertyInputs({...selectedComponent.props});
     }
   }, [selectedComponent]);
 
@@ -138,11 +131,8 @@ export const PropertyPanel = ({
     setInputFocused(false);
   };
 
-  // Access props directly and merge with local state for display
-  const props = {
-    ...selectedComponent.props,
-    ...propertyInputs
-  };
+  // Use merged props for display
+  const props = propertyInputs;
 
   return (
     <div className="flex-1 overflow-hidden flex flex-col">
@@ -253,22 +243,10 @@ export const PropertyPanel = ({
               </div>
               <div>
                 <Label>Text Color</Label>
-                <div className="flex gap-2 mt-1">
-                  <Input
-                    type="color"
-                    value={props.fgColor || '#000000'}
-                    onChange={(e) => handlePropertyChange('fgColor', e.target.value)}
-                    className="w-20 h-10 p-1"
-                  />
-                  <Input
-                    type="text"
-                    value={props.fgColor || '#000000'}
-                    onChange={(e) => handlePropertyChange('fgColor', e.target.value)}
-                    onFocus={() => setInputFocused(true)}
-                    onBlur={() => setInputFocused(false)}
-                    className="flex-1"
-                  />
-                </div>
+                <ColorInput
+                  value={props.fgColor || '#000000'}
+                  onChange={(color) => handlePropertyChange('fgColor', color)}
+                />
               </div>
             </div>
           )}
@@ -278,22 +256,10 @@ export const PropertyPanel = ({
             <div className="space-y-4">
               <div>
                 <Label>Background Color</Label>
-                <div className="flex gap-2 mt-1">
-                  <Input
-                    type="color"
-                    value={props.bgColor || '#ffffff'}
-                    onChange={(e) => handlePropertyChange('bgColor', e.target.value)}
-                    className="w-20 h-10 p-1"
-                  />
-                  <Input
-                    type="text"
-                    value={props.bgColor || '#ffffff'}
-                    onChange={(e) => handlePropertyChange('bgColor', e.target.value)}
-                    onFocus={() => setInputFocused(true)}
-                    onBlur={() => setInputFocused(false)}
-                    className="flex-1"
-                  />
-                </div>
+                <ColorInput
+                  value={props.bgColor || '#ffffff'}
+                  onChange={(color) => handlePropertyChange('bgColor', color)}
+                />
               </div>
               <div>
                 <Label>Corner Radius</Label>
@@ -309,22 +275,10 @@ export const PropertyPanel = ({
               </div>
               <div>
                 <Label>Border Color</Label>
-                <div className="flex gap-2 mt-1">
-                  <Input
-                    type="color"
-                    value={props.borderColor || '#e2e8f0'}
-                    onChange={(e) => handlePropertyChange('borderColor', e.target.value)}
-                    className="w-20 h-10 p-1"
-                  />
-                  <Input
-                    type="text"
-                    value={props.borderColor || '#e2e8f0'}
-                    onChange={(e) => handlePropertyChange('borderColor', e.target.value)}
-                    onFocus={() => setInputFocused(true)}
-                    onBlur={() => setInputFocused(false)}
-                    className="flex-1"
-                  />
-                </div>
+                <ColorInput
+                  value={props.borderColor || '#e2e8f0'}
+                  onChange={(color) => handlePropertyChange('borderColor', color)}
+                />
               </div>
               <div>
                 <Label>Border Width</Label>
@@ -347,22 +301,10 @@ export const PropertyPanel = ({
             <div className="space-y-4">
               <div>
                 <Label>Hover Color</Label>
-                <div className="flex gap-2 mt-1">
-                  <Input
-                    type="color"
-                    value={props.hoverColor || '#f0f0f0'}
-                    onChange={(e) => handlePropertyChange('hoverColor', e.target.value)}
-                    className="w-20 h-10 p-1"
-                  />
-                  <Input
-                    type="text"
-                    value={props.hoverColor || '#f0f0f0'}
-                    onChange={(e) => handlePropertyChange('hoverColor', e.target.value)}
-                    onFocus={() => setInputFocused(true)}
-                    onBlur={() => setInputFocused(false)}
-                    className="flex-1"
-                  />
-                </div>
+                <ColorInput
+                  value={props.hoverColor || '#f0f0f0'}
+                  onChange={(color) => handlePropertyChange('hoverColor', color)}
+                />
               </div>
             </div>
           )}
@@ -421,7 +363,7 @@ export const PropertyPanel = ({
                 </div>
               </div>
               <div>
-                <Label>Border Radius</Label>
+                <Label>Corner Radius</Label>
                 <Input
                   type="number"
                   value={props.cornerRadius ?? 8}
@@ -432,37 +374,9 @@ export const PropertyPanel = ({
                   className="mt-1"
                 />
               </div>
-              <div>
-                <Label>Border Color</Label>
-                <div className="flex gap-2 mt-1">
-                  <Input
-                    type="color"
-                    value={props.borderColor || '#e2e8f0'}
-                    onChange={(e) => handlePropertyChange('borderColor', e.target.value)}
-                    className="w-20 h-10 p-1"
-                  />
-                  <Input
-                    type="text"
-                    value={props.borderColor || '#e2e8f0'}
-                    onChange={(e) => handlePropertyChange('borderColor', e.target.value)}
-                    onFocus={() => setInputFocused(true)}
-                    onBlur={() => setInputFocused(false)}
-                    className="flex-1"
-                  />
-                </div>
-              </div>
-              <div>
-                <Label>Border Width</Label>
-                <Input
-                  type="number"
-                  value={props.borderWidth ?? 1}
-                  onChange={(e) => handlePropertyChange('borderWidth', parseInt(e.target.value))}
-                  onFocus={() => setInputFocused(true)}
-                  onBlur={() => setInputFocused(false)}
-                  min="0"
-                  max="10"
-                  className="mt-1"
-                />
+              {/* Note: Border width and color are commented out for image components in CustomTkinter */}
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-md text-xs text-amber-800">
+                <p>Note: Border width and color are not supported for image components in CustomTkinter.</p>
               </div>
             </div>
           )}
@@ -517,22 +431,10 @@ export const PropertyPanel = ({
               </div>
               <div>
                 <Label>Progress Color</Label>
-                <div className="flex gap-2 mt-1">
-                  <Input
-                    type="color"
-                    value={props.progressColor || '#3b82f6'}
-                    onChange={(e) => handlePropertyChange('progressColor', e.target.value)}
-                    className="w-20 h-10 p-1"
-                  />
-                  <Input
-                    type="text"
-                    value={props.progressColor || '#3b82f6'}
-                    onChange={(e) => handlePropertyChange('progressColor', e.target.value)}
-                    onFocus={() => setInputFocused(true)}
-                    onBlur={() => setInputFocused(false)}
-                    className="flex-1"
-                  />
-                </div>
+                <ColorInput
+                  value={props.progressColor || '#3b82f6'}
+                  onChange={(color) => handlePropertyChange('progressColor', color)}
+                />
               </div>
               <div>
                 <Label>Border Width</Label>
@@ -549,22 +451,10 @@ export const PropertyPanel = ({
               </div>
               <div>
                 <Label>Border Color</Label>
-                <div className="flex gap-2 mt-1">
-                  <Input
-                    type="color"
-                    value={props.borderColor || '#e2e8f0'}
-                    onChange={(e) => handlePropertyChange('borderColor', e.target.value)}
-                    className="w-20 h-10 p-1"
-                  />
-                  <Input
-                    type="text"
-                    value={props.borderColor || '#e2e8f0'}
-                    onChange={(e) => handlePropertyChange('borderColor', e.target.value)}
-                    onFocus={() => setInputFocused(true)}
-                    onBlur={() => setInputFocused(false)}
-                    className="flex-1"
-                  />
-                </div>
+                <ColorInput
+                  value={props.borderColor || '#e2e8f0'}
+                  onChange={(color) => handlePropertyChange('borderColor', color)}
+                />
               </div>
             </div>
           )}
@@ -602,41 +492,17 @@ export const PropertyPanel = ({
               </div>
               <div>
                 <Label>Border Color</Label>
-                <div className="flex gap-2 mt-1">
-                  <Input
-                    type="color"
-                    value={props.borderColor || '#e2e8f0'}
-                    onChange={(e) => handlePropertyChange('borderColor', e.target.value)}
-                    className="w-20 h-10 p-1"
-                  />
-                  <Input
-                    type="text"
-                    value={props.borderColor || '#e2e8f0'}
-                    onChange={(e) => handlePropertyChange('borderColor', e.target.value)}
-                    onFocus={() => setInputFocused(true)}
-                    onBlur={() => setInputFocused(false)}
-                    className="flex-1"
-                  />
-                </div>
+                <ColorInput
+                  value={props.borderColor || '#e2e8f0'}
+                  onChange={(color) => handlePropertyChange('borderColor', color)}
+                />
               </div>
               <div>
                 <Label>Checked Color</Label>
-                <div className="flex gap-2 mt-1">
-                  <Input
-                    type="color"
-                    value={props.checkedColor || '#3b82f6'}
-                    onChange={(e) => handlePropertyChange('checkedColor', e.target.value)}
-                    className="w-20 h-10 p-1"
-                  />
-                  <Input
-                    type="text"
-                    value={props.checkedColor || '#3b82f6'}
-                    onChange={(e) => handlePropertyChange('checkedColor', e.target.value)}
-                    onFocus={() => setInputFocused(true)}
-                    onBlur={() => setInputFocused(false)}
-                    className="flex-1"
-                  />
-                </div>
+                <ColorInput
+                  value={props.checkedColor || '#3b82f6'}
+                  onChange={(color) => handlePropertyChange('checkedColor', color)}
+                />
               </div>
             </div>
           )}
@@ -688,22 +554,10 @@ export const PropertyPanel = ({
               </div>
               <div>
                 <Label>Progress Color</Label>
-                <div className="flex gap-2 mt-1">
-                  <Input
-                    type="color"
-                    value={props.progressColor || '#3b82f6'}
-                    onChange={(e) => handlePropertyChange('progressColor', e.target.value)}
-                    className="w-20 h-10 p-1"
-                  />
-                  <Input
-                    type="text"
-                    value={props.progressColor || '#3b82f6'}
-                    onChange={(e) => handlePropertyChange('progressColor', e.target.value)}
-                    onFocus={() => setInputFocused(true)}
-                    onBlur={() => setInputFocused(false)}
-                    className="flex-1"
-                  />
-                </div>
+                <ColorInput
+                  value={props.progressColor || '#3b82f6'}
+                  onChange={(color) => handlePropertyChange('progressColor', color)}
+                />
               </div>
               <div>
                 <Label>Border Width</Label>
@@ -748,22 +602,10 @@ export const PropertyPanel = ({
               </div>
               <div>
                 <Label>Active Tab Color</Label>
-                <div className="flex gap-2 mt-1">
-                  <Input
-                    type="color"
-                    value={props.activeTabColor || '#3b82f6'}
-                    onChange={(e) => handlePropertyChange('activeTabColor', e.target.value)}
-                    className="w-20 h-10 p-1"
-                  />
-                  <Input
-                    type="text"
-                    value={props.activeTabColor || '#3b82f6'}
-                    onChange={(e) => handlePropertyChange('activeTabColor', e.target.value)}
-                    onFocus={() => setInputFocused(true)}
-                    onBlur={() => setInputFocused(false)}
-                    className="flex-1"
-                  />
-                </div>
+                <ColorInput
+                  value={props.activeTabColor || '#3b82f6'}
+                  onChange={(color) => handlePropertyChange('activeTabColor', color)}
+                />
               </div>
             </div>
           )}
@@ -784,22 +626,10 @@ export const PropertyPanel = ({
               </div>
               <div>
                 <Label>Selected Item Color</Label>
-                <div className="flex gap-2 mt-1">
-                  <Input
-                    type="color"
-                    value={props.selectedColor || '#3b82f6'}
-                    onChange={(e) => handlePropertyChange('selectedColor', e.target.value)}
-                    className="w-20 h-10 p-1"
-                  />
-                  <Input
-                    type="text"
-                    value={props.selectedColor || '#3b82f6'}
-                    onChange={(e) => handlePropertyChange('selectedColor', e.target.value)}
-                    onFocus={() => setInputFocused(true)}
-                    onBlur={() => setInputFocused(false)}
-                    className="flex-1"
-                  />
-                </div>
+                <ColorInput
+                  value={props.selectedColor || '#3b82f6'}
+                  onChange={(color) => handlePropertyChange('selectedColor', color)}
+                />
               </div>
             </div>
           )}

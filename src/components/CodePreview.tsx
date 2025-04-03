@@ -3,8 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { generatePythonCode, exportProject } from '@/utils/codeGenerator';
 import Prism from 'prismjs';
 import { Button } from '@/components/ui/button';
-import { Copy, Download, Clipboard, Code, File } from 'lucide-react';
+import { Copy, Download, Code, File } from 'lucide-react';
 import { toast } from 'sonner';
+import { CustomTkinterGuide } from './CustomTkinterGuide';
 
 interface CodePreviewProps {
   components: any[];
@@ -182,7 +183,9 @@ For more information on CustomTkinter API:
         </div>
       </div>
       
-      <div className="text-sm text-muted-foreground">
+      <CustomTkinterGuide />
+      
+      <div className="text-sm text-muted-foreground mt-6">
         <h3 className="font-medium text-foreground mb-2">Usage Instructions:</h3>
         <ol className="list-decimal list-inside space-y-1 ml-2">
           <li>Export the project using the button above</li>
@@ -190,17 +193,6 @@ For more information on CustomTkinter API:
           <li>Install the required dependencies with <code className="bg-muted-foreground/20 px-1 rounded">pip install -r requirements.txt</code></li>
           <li>Run the application with <code className="bg-muted-foreground/20 px-1 rounded">python app.py</code></li>
         </ol>
-        
-        <div className="mt-6 p-4 border border-muted-foreground/20 rounded-md">
-          <h4 className="font-medium text-foreground mb-2">Troubleshooting Tips:</h4>
-          <ul className="list-disc list-inside space-y-1 ml-2">
-            <li>Make sure you have CustomTkinter version 5.2.0 or later installed</li>
-            <li>For widget placement issues, ensure all width/height are specified in the widget constructor</li>
-            <li>For color issues, try using hex color values (e.g. "#ff0000" for red)</li>
-            <li>If images don't display, verify the image files are in the same directory as your app.py</li>
-            <li>If you see a "load_image" error, make sure the function is defined in your Application class</li>
-          </ul>
-        </div>
       </div>
     </div>
   );

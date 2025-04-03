@@ -20,12 +20,16 @@ export const ColorInput: React.FC<ColorInputProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Update local state when prop value changes
   useEffect(() => {
-    setInputValue(value || '#ffffff');
+    if (value !== inputValue) {
+      setInputValue(value || '#ffffff');
+    }
   }, [value]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
+    const newValue = e.target.value;
+    setInputValue(newValue);
   };
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,8 +52,8 @@ export const ColorInput: React.FC<ColorInputProps> = ({
       // Remove any non-hex characters
       formattedColor = '#' + formattedColor.replace(/[^0-9A-F]/gi, '').substring(0, 6);
       
-      // If still invalid after cleanup, return default white
-      if (!isValidHexColor(formattedColor)) {
+      // If still invalid after cleanup or too short, return default white
+      if (!isValidHexColor(formattedColor) || formattedColor.length < 4) {
         return '#ffffff';
       }
     }

@@ -1,4 +1,3 @@
-
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
@@ -19,11 +18,11 @@ class Application(ctk.CTk):
         self.title("My CustomTkinter Application")
         self.geometry("800x600")
         
-        # Create components
-        self.create_widgets()
-        
         # Store references to images to prevent garbage collection
         self._image_references = []
+        
+        # Create components
+        self.create_widgets()
     
     def load_image(self, path, size):
         """Helper function to load images with proper error handling"""
@@ -139,7 +138,7 @@ const generateComponentCode = (component: any, indent: number): string => {
         code += `, text_color="${props.fgColor}"`;
       }
       
-      // Add corner radius and bg color if provided
+      // Add corner radius if provided
       if (props.cornerRadius !== undefined) {
         code += `, corner_radius=${props.cornerRadius}`;
       }
@@ -258,10 +257,11 @@ const generateComponentCode = (component: any, indent: number): string => {
       code += `${spaces}# Load image for ${component.id}\n`;
       code += `${spaces}${varName}_img = self.load_image("${imageName}", (${width}, ${height}))\n`;
       
-      // Use a CTkLabel for images but WITHOUT border_width and border_color since they're not supported
+      // Use a CTkLabel for images - IMPORTANT: DON'T include border properties for labels with images
+      // These are not supported by CustomTkinter and cause errors
       code += `${spaces}${varName} = ctk.CTkLabel(self, image=${varName}_img, width=${width}, height=${height}, text=""`;
       
-      // Only add supported properties
+      // Only add corner_radius and fg_color (bg color) which are supported
       if (props.cornerRadius !== undefined) {
         code += `, corner_radius=${props.cornerRadius}`;
       }
@@ -612,47 +612,50 @@ If you encounter errors:
   // Add a more detailed documentation file with troubleshooting info
   const documentation = `# CustomTkinter GUI Application Documentation
 
-## Overview
-This application was created using the CustomTkinter GUI Builder. It uses the CustomTkinter library, 
-which is a modern-looking UI framework for Python based on Tkinter.
+## Custom Controls Compatibility
 
-## Project Structure
-- \`app.py\`: The main application file
-- \`requirements.txt\`: Python dependencies
-- \`*.png\`: Image files used in your application
+### Image Controls
+When using images in your CustomTkinter application, note that:
+- CTkLabel with image does NOT support border_width and border_color
+- Images must be loaded through the load_image function
+- Always keep a reference to avoid garbage collection
 
-## Common Issues and Solutions
+### Other Known Limitations
+- Some widgets don't support the same properties as standard Tkinter
+- Check the CustomTkinter documentation for supported properties
 
-### "load_image" attribute error
-If you see: "AttributeError: '_tkinter.tkapp' object has no attribute 'load_image'", make sure:
-- You have not modified the Application class (the load_image method must be defined exactly as provided)
-- All image files are in the same directory as app.py
+## Troubleshooting Common Errors
 
-### "Unsupported arguments" error
-If you see an error like "['border_width', 'border_color'] are not supported arguments":
-- Some CustomTkinter widgets don't support certain properties (like CTkLabel doesn't support border_width)
-- Remove or change the unsupported properties
-- Check the CustomTkinter documentation for the supported properties for each widget
+### "ValueError: ['border_width', 'border_color'] are not supported arguments"
+This occurs when you try to use properties that aren't supported by a particular widget:
+- Solution: Remove the unsupported properties from the widget configuration
+- Example fix: For CTkLabel with images, don't use border_width and border_color
 
-### Other common issues:
-1. **Image file not found**: Ensure all .png files are in the same directory as app.py
-2. **Module not found**: Run \`pip install -r requirements.txt\`
-3. **Display issues**: CustomTkinter works best with Python 3.7+ and recent operating systems
+### "No module named 'customtkinter'"
+This means the CustomTkinter package is not installed:
+- Solution: Run \`pip install customtkinter\` or \`pip install -r requirements.txt\`
 
-## Working with CustomTkinter
-CustomTkinter is a modern UI library that enhances the standard Tkinter with modern styling and widgets.
+### "No module named 'Pillow'"
+The Pillow package is missing:
+- Solution: Run \`pip install Pillow\` or \`pip install -r requirements.txt\`
 
-### Key differences from standard Tkinter:
-1. Widget styling is done through parameters like fg_color, text_color, etc.
-2. Width and height must be provided in the constructor, not in place/pack/grid methods
-3. More modern widgets like CTkTabview, CTkScrollableFrame are available
-4. Better support for themes and appearance modes
+### "AttributeError: 'Application' object has no attribute 'load_image'"
+The load_image method is missing or incorrectly defined:
+- Solution: Ensure the load_image method is defined exactly as provided
 
-## Further Resources
+### Images Not Displaying
+If images don't appear in your application:
+- Check that all image files are in the same directory as app.py
+- Verify the load_image method is properly implemented
+- Ensure you're keeping references to images to prevent garbage collection
+- Check console for any error messages about missing files
+
+## Resources
 - CustomTkinter documentation: https://github.com/TomSchimansky/CustomTkinter/wiki
 - Tkinter documentation: https://docs.python.org/3/library/tkinter.html
 `;
-  zip.file("documentation.md", documentation);
+
+  zip.file("troubleshooting.md", documentation);
   
   // Generate the ZIP file and download it
   const content = await zip.generateAsync({ type: "blob" });

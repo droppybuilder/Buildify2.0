@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -17,26 +17,13 @@ export const ColorInput: React.FC<ColorInputProps> = ({
   label
 }) => {
   const [inputValue, setInputValue] = useState(value || '#ffffff');
-  const [isOpen, setIsOpen] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  // Update local state when prop value changes
+  
+  // Update internal state when prop value changes
   useEffect(() => {
     if (value && value !== inputValue) {
       setInputValue(value);
     }
   }, [value]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    setInputValue(newValue);
-  };
-
-  const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newColor = e.target.value;
-    setInputValue(newColor);
-    onChange(newColor);
-  };
 
   const isValidHexColor = (color: string): boolean => {
     return /^#([0-9A-F]{3}){1,2}$/i.test(color);
@@ -46,69 +33,87 @@ export const ColorInput: React.FC<ColorInputProps> = ({
     // Ensure the color starts with #
     let formattedColor = color.startsWith('#') ? color : `#${color}`;
     
-    // Check for 3 or 6 digit hex
-    if (!isValidHexColor(formattedColor)) {
-      // Try to fix common issues
-      // Remove any non-hex characters
-      formattedColor = '#' + formattedColor.replace(/[^0-9A-F]/gi, '').substring(0, 6);
-      
-      // If still invalid after cleanup or too short, return default white
-      if (!isValidHexColor(formattedColor) || formattedColor.length < 4) {
-        return '#ffffff';
-      }
+    // Clean up the color value
+    formattedColor = '#' + formattedColor.replace(/[^0-9A-F]/gi, '').substring(0, 6);
+    
+    // If color is too short after cleanup, return default white
+    if (formattedColor.length < 4) {
+      return '#ffffff';
+    }
+    
+    // If it's a 3-digit hex, convert to 6-digit
+    if (formattedColor.length === 4) {
+      const r = formattedColor[1];
+      const g = formattedColor[2];
+      const b = formattedColor[3];
+      formattedColor = `#${r}${r}${g}${g}${b}${b}`;
+    }
+    
+    // Ensure we have a valid 6-digit hex
+    if (formattedColor.length !== 7) {
+      return '#ffffff';
     }
     
     return formattedColor;
   };
 
-  const handleInputBlur = () => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+  };
+
+  const handleColorPickerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newColor = e.target.value;
+    setInputValue(newColor);
+    onChange(newColor); // Immediately notify parent
+  };
+
+  const handleBlur = () => {
     const formattedColor = formatColorValue(inputValue);
     setInputValue(formattedColor);
-    onChange(formattedColor);
+    onChange(formattedColor); // Update parent with validated color
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      handleInputBlur();
-      inputRef.current?.blur();
+      handleBlur();
     }
   };
+
+  // Use the color as background if valid, otherwise use white
+  const displayColor = isValidHexColor(inputValue) ? inputValue : '#ffffff';
 
   return (
     <div className="flex flex-col space-y-1.5">
       {label && <Label>{label}</Label>}
-      <div className="flex space-x-2">
-        <div className="relative flex-1">
-          <Input
-            ref={inputRef}
-            value={inputValue}
-            onChange={handleInputChange}
-            onBlur={handleInputBlur}
-            onKeyDown={handleKeyDown}
-            className="pl-9"
-          />
-          <Popover open={isOpen} onOpenChange={setIsOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute left-0 top-0 h-full aspect-square p-1 rounded-r-none"
-                style={{ backgroundColor: isValidHexColor(inputValue) ? inputValue : '#ffffff' }}
-              >
-                <span className="sr-only">Open color picker</span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-3" side="bottom" align="start">
-              <input
-                type="color"
-                value={isValidHexColor(inputValue) ? inputValue : '#ffffff'}
-                onChange={handleColorChange}
-                className="w-32 h-32 cursor-pointer"
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
+      <div className="flex items-center space-x-2">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-10 h-10 p-0 border-2"
+              style={{ backgroundColor: displayColor }}
+            >
+              <span className="sr-only">Pick a color</span>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-3" side="right" align="center">
+            <input
+              type="color"
+              value={displayColor}
+              onChange={handleColorPickerChange}
+              className="w-32 h-32 cursor-pointer border-0"
+            />
+          </PopoverContent>
+        </Popover>
+        <Input
+          value={inputValue}
+          onChange={handleInputChange}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          className="font-mono"
+          placeholder="#ffffff"
+        />
       </div>
     </div>
   );

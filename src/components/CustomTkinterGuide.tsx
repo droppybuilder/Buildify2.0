@@ -14,7 +14,7 @@ export const CustomTkinterGuide = () => {
     <div className="p-4 bg-white rounded-lg border">
       <h2 className="text-lg font-semibold mb-3">CustomTkinter Troubleshooting Guide</h2>
       
-      <Alert variant="warning" className="mb-4">
+      <Alert variant="destructive" className="mb-4 border-amber-500 bg-amber-50 text-amber-800">
         <AlertTriangle className="h-4 w-4 mr-2" />
         <AlertTitle>Known Compatibility Issues</AlertTitle>
         <AlertDescription>

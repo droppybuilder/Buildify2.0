@@ -62,6 +62,22 @@ const Canvas = ({
       if (e.ctrlKey || e.metaKey) {
         setIsMultiSelectKeyDown(true);
       }
+      
+      if ((e.key === 'Delete' || e.key === 'Backspace') && 
+          !['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
+        e.preventDefault();
+        
+        if (selectedComponents.length > 1) {
+          const newComponents = components.filter(c => !selectedComponents.includes(c.id));
+          setComponents(newComponents);
+          setSelectedComponents([]);
+          setSelectedComponent(null);
+          toast.success("Multiple components deleted");
+        } else if (selectedComponent) {
+          handleDeleteComponent();
+          setSelectedComponent(null);
+        }
+      }
     };
     
     const handleKeyUp = (e: KeyboardEvent) => {
@@ -77,7 +93,7 @@ const Canvas = ({
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, []);
+  }, [selectedComponent, selectedComponents, components, setComponents, setSelectedComponents, setSelectedComponent]);
   
   useEffect(() => {
     const imageComponents = components.filter(c => c.type === 'image');
@@ -386,13 +402,14 @@ const Canvas = ({
       setSelectedComponent(null);
       toast.success("Components deleted");
     } else if (selectedComponent) {
-      const newComponents = components.filter(comp => comp.id !== selectedComponent.id);
-      setComponents(newComponents);
-      setSelectedComponent(null);
       if (onDeleteComponent) {
         onDeleteComponent(selectedComponent);
+      } else {
+        const newComponents = components.filter(comp => comp.id !== selectedComponent.id);
+        setComponents(newComponents);
+        setSelectedComponent(null);
+        toast.success("Component deleted");
       }
-      toast.success("Component deleted");
     }
   };
 
@@ -563,7 +580,9 @@ const Canvas = ({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (selectedComponent || selectedComponents.length > 0) {
-        if (e.key === 'Delete' || e.key === 'Backspace') {
+        if ((e.key === 'Delete' || e.key === 'Backspace') && 
+            !['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
+          e.preventDefault();
           handleDeleteComponent();
         }
         
@@ -586,7 +605,7 @@ const Canvas = ({
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedComponent, selectedComponents, clipboard, components]);
+  }, [selectedComponent, selectedComponents, clipboard, components, handleDeleteComponent]);
 
   return (
     <div className="w-full h-full p-8 flex items-center justify-center">
@@ -648,6 +667,7 @@ const Canvas = ({
               }
             }
           }}
+          tabIndex={0}
         >
           {isSelecting && selectionBox && (
             <div 

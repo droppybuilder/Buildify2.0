@@ -144,12 +144,11 @@ const Index = () => {
   
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (inputFocused) {
+      if (inputFocused || ['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
         return;
       }
       
-      if ((e.key === 'Delete' || e.key === 'Backspace') && 
-          !['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
+      if (e.key === 'Delete' || e.key === 'Backspace') {
         e.preventDefault();
         
         if (selectedComponents.length > 1) {

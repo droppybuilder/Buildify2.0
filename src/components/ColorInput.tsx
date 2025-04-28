@@ -1,9 +1,8 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useDebounce } from 'react-use';
 
 interface ColorInputProps {
   value: string;
@@ -58,26 +57,12 @@ export const ColorInput: React.FC<ColorInputProps> = ({
     return formattedColor;
   };
 
-  // Create a debounced value to use for onChange
-  const [debouncedValue, setDebouncedValue] = useState(inputValue);
-  
-  // Use the useDebounce hook correctly (it watches a value, not a callback)
-  useDebounce(
-    () => {
-      if (isValidHexColor(debouncedValue)) {
-        onChange(debouncedValue);
-      }
-    },
-    300,
-    [debouncedValue]
-  );
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setInputValue(newValue);
     
     if (isValidHexColor(newValue)) {
-      setDebouncedValue(newValue);
+      onChange(newValue);
     }
   };
 

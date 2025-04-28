@@ -61,7 +61,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
     onUpdate(updatedComponent);
   };
   
-  // Handle numeric input changes
+  // Handle numeric input changes - updated for immediate updates
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>, field: string, subfield?: string) => {
     const value = Number(e.target.value);
     if (subfield) {
@@ -71,7 +71,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
     }
   };
 
-  // Handle text input changes
+  // Handle text input changes - updated for immediate updates
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: string) => {
     updateProperty(field, e.target.value);
   };

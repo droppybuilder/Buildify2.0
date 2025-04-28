@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { debounce } from 'react-use';
+import { useDebounce } from 'react-use';
 
 interface ColorInputProps {
   value: string;
@@ -58,11 +58,14 @@ export const ColorInput: React.FC<ColorInputProps> = ({
     return formattedColor;
   };
 
-  // Debounced onChange handler
-  const debouncedOnChange = useCallback(
-    debounce((color: string) => {
-      onChange(color);
-    }, 300),
+  // Create debounced function for onChange using useCallback
+  const [debouncedCallback] = useDebounce(
+    (color: string) => {
+      if (isValidHexColor(color)) {
+        onChange(color);
+      }
+    },
+    300,
     [onChange]
   );
 
@@ -71,7 +74,7 @@ export const ColorInput: React.FC<ColorInputProps> = ({
     setInputValue(newValue);
     
     if (isValidHexColor(newValue)) {
-      debouncedOnChange(newValue);
+      debouncedCallback(newValue);
     }
   };
 

@@ -58,15 +58,18 @@ export const ColorInput: React.FC<ColorInputProps> = ({
     return formattedColor;
   };
 
-  // Create debounced function for onChange using useCallback
-  const [debouncedCallback] = useDebounce(
-    (color: string) => {
-      if (isValidHexColor(color)) {
-        onChange(color);
+  // Create a debounced value to use for onChange
+  const [debouncedValue, setDebouncedValue] = useState(inputValue);
+  
+  // Use the useDebounce hook correctly (it watches a value, not a callback)
+  useDebounce(
+    () => {
+      if (isValidHexColor(debouncedValue)) {
+        onChange(debouncedValue);
       }
     },
     300,
-    [onChange]
+    [debouncedValue]
   );
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,7 +77,7 @@ export const ColorInput: React.FC<ColorInputProps> = ({
     setInputValue(newValue);
     
     if (isValidHexColor(newValue)) {
-      debouncedCallback(newValue);
+      setDebouncedValue(newValue);
     }
   };
 

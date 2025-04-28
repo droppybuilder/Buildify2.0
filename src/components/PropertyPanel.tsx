@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -10,6 +10,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ColorInput } from "@/components/ColorInput";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface PropertyPanelProps {
   selectedComponent: any;
@@ -24,6 +26,8 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
   setInputFocused,
   inputFocused
 }) => {
+  const [dimensionsOpen, setDimensionsOpen] = useState(true);
+
   // Return empty panel if no component is selected
   if (!selectedComponent) {
     return (
@@ -57,6 +61,21 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
     onUpdate(updatedComponent);
   };
   
+  // Handle numeric input changes
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>, field: string, subfield?: string) => {
+    const value = Number(e.target.value);
+    if (subfield) {
+      updateDimension(field, subfield, value);
+    } else {
+      updateProperty(field, value);
+    }
+  };
+
+  // Handle text input changes
+  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: string) => {
+    updateProperty(field, e.target.value);
+  };
+  
   // Handle image file upload
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
@@ -81,8 +100,8 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
   const props = selectedComponent.props || {};
   
   return (
-    <ScrollArea className="h-full">
-      <div className="p-4 space-y-4">
+    <ScrollArea className="h-full px-4">
+      <div className="py-4 space-y-6">
         <div>
           <h2 className="text-lg font-semibold">Properties</h2>
           <p className="text-sm text-muted-foreground">
@@ -93,57 +112,68 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
         <Separator />
         
         {/* Dimensions & Position section */}
-        <div>
-          <h3 className="text-md font-medium mb-2">Dimensions & Position</h3>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <Label htmlFor="width">Width</Label>
-              <Input
-                id="width"
-                type="number"
-                value={selectedComponent.size?.width || 0}
-                onChange={(e) => updateDimension('size', 'width', Number(e.target.value))}
-                onFocus={() => setInputFocused(true)}
-                onBlur={() => setInputFocused(false)}
-              />
+        <Collapsible 
+          open={dimensionsOpen} 
+          onOpenChange={setDimensionsOpen}
+          className="border rounded-md overflow-hidden"
+        >
+          <CollapsibleTrigger className="flex items-center justify-between w-full bg-muted px-3 py-2">
+            <h3 className="text-sm font-medium">Dimensions & Position</h3>
+            {dimensionsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </CollapsibleTrigger>
+          <CollapsibleContent className="p-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="width" className="text-xs">Width</Label>
+                <Input
+                  id="width"
+                  type="number"
+                  value={selectedComponent.size?.width || 0}
+                  onChange={(e) => handleNumberChange(e, 'size', 'width')}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                  className="h-8"
+                />
+              </div>
+              <div>
+                <Label htmlFor="height" className="text-xs">Height</Label>
+                <Input
+                  id="height"
+                  type="number"
+                  value={selectedComponent.size?.height || 0}
+                  onChange={(e) => handleNumberChange(e, 'size', 'height')}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                  className="h-8"
+                />
+              </div>
+              <div>
+                <Label htmlFor="xPos" className="text-xs">X Position</Label>
+                <Input
+                  id="xPos"
+                  type="number"
+                  value={selectedComponent.position?.x || 0}
+                  onChange={(e) => handleNumberChange(e, 'position', 'x')}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                  className="h-8"
+                />
+              </div>
+              <div>
+                <Label htmlFor="yPos" className="text-xs">Y Position</Label>
+                <Input
+                  id="yPos"
+                  type="number"
+                  value={selectedComponent.position?.y || 0}
+                  onChange={(e) => handleNumberChange(e, 'position', 'y')}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                  className="h-8"
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="height">Height</Label>
-              <Input
-                id="height"
-                type="number"
-                value={selectedComponent.size?.height || 0}
-                onChange={(e) => updateDimension('size', 'height', Number(e.target.value))}
-                onFocus={() => setInputFocused(true)}
-                onBlur={() => setInputFocused(false)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="xPos">X Position</Label>
-              <Input
-                id="xPos"
-                type="number"
-                value={selectedComponent.position?.x || 0}
-                onChange={(e) => updateDimension('position', 'x', Number(e.target.value))}
-                onFocus={() => setInputFocused(true)}
-                onBlur={() => setInputFocused(false)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="yPos">Y Position</Label>
-              <Input
-                id="yPos"
-                type="number"
-                value={selectedComponent.position?.y || 0}
-                onChange={(e) => updateDimension('position', 'y', Number(e.target.value))}
-                onFocus={() => setInputFocused(true)}
-                onBlur={() => setInputFocused(false)}
-              />
-            </div>
-          </div>
-        </div>
-        
-        <Separator />
+          </CollapsibleContent>
+        </Collapsible>
 
         {/* Button properties */}
         {selectedComponent.type === 'button' && (
@@ -153,7 +183,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
               <Input
                 id="buttonText"
                 value={props.text || 'Button'}
-                onChange={(e) => updateProperty('text', e.target.value)}
+                onChange={(e) => handleTextChange(e, 'text')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -185,7 +215,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 id="cornerRadius"
                 type="number"
                 value={props.cornerRadius || 10}
-                onChange={(e) => updateProperty('cornerRadius', Number(e.target.value))}
+                onChange={(e) => handleNumberChange(e, 'cornerRadius')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -196,7 +226,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 id="borderWidth"
                 type="number"
                 value={props.borderWidth || 0}
-                onChange={(e) => updateProperty('borderWidth', Number(e.target.value))}
+                onChange={(e) => handleNumberChange(e, 'borderWidth')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -219,7 +249,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
               <Input
                 id="labelText"
                 value={props.text || 'Label'}
-                onChange={(e) => updateProperty('text', e.target.value)}
+                onChange={(e) => handleTextChange(e, 'text')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -244,7 +274,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 id="cornerRadius"
                 type="number"
                 value={props.cornerRadius || 0}
-                onChange={(e) => updateProperty('cornerRadius', Number(e.target.value))}
+                onChange={(e) => handleNumberChange(e, 'cornerRadius')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -260,7 +290,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
               <Input
                 id="placeholder"
                 value={props.placeholder || ''}
-                onChange={(e) => updateProperty('placeholder', e.target.value)}
+                onChange={(e) => handleTextChange(e, 'placeholder')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -285,7 +315,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 id="borderWidth"
                 type="number"
                 value={props.borderWidth || 1}
-                onChange={(e) => updateProperty('borderWidth', Number(e.target.value))}
+                onChange={(e) => handleNumberChange(e, 'borderWidth')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -303,7 +333,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 id="cornerRadius"
                 type="number"
                 value={props.cornerRadius || 6}
-                onChange={(e) => updateProperty('cornerRadius', Number(e.target.value))}
+                onChange={(e) => handleNumberChange(e, 'cornerRadius')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -319,7 +349,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
               <Input
                 id="checkboxText"
                 value={props.text || 'Checkbox'}
-                onChange={(e) => updateProperty('text', e.target.value)}
+                onChange={(e) => handleTextChange(e, 'text')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -351,7 +381,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 id="borderWidth"
                 type="number"
                 value={props.borderWidth || 1}
-                onChange={(e) => updateProperty('borderWidth', Number(e.target.value))}
+                onChange={(e) => handleNumberChange(e, 'borderWidth')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -387,7 +417,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
               <Input
                 id="defaultValue"
                 value={props.defaultValue || ''}
-                onChange={(e) => updateProperty('defaultValue', e.target.value)}
+                onChange={(e) => handleTextChange(e, 'defaultValue')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -419,7 +449,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 id="borderWidth"
                 type="number"
                 value={props.borderWidth || 1}
-                onChange={(e) => updateProperty('borderWidth', Number(e.target.value))}
+                onChange={(e) => handleNumberChange(e, 'borderWidth')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -478,7 +508,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 id="cornerRadius"
                 type="number"
                 value={props.cornerRadius || 0}
-                onChange={(e) => updateProperty('cornerRadius', Number(e.target.value))}
+                onChange={(e) => handleNumberChange(e, 'cornerRadius')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -495,7 +525,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 id="minValue"
                 type="number"
                 value={props.from || 0}
-                onChange={(e) => updateProperty('from', Number(e.target.value))}
+                onChange={(e) => handleNumberChange(e, 'from')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -506,7 +536,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 id="maxValue"
                 type="number"
                 value={props.to || 100}
-                onChange={(e) => updateProperty('to', Number(e.target.value))}
+                onChange={(e) => handleNumberChange(e, 'to')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -517,7 +547,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 id="currentValue"
                 type="number"
                 value={props.value || 50}
-                onChange={(e) => updateProperty('value', Number(e.target.value))}
+                onChange={(e) => handleNumberChange(e, 'value')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -564,7 +594,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 id="borderWidth"
                 type="number"
                 value={props.borderWidth || 0}
-                onChange={(e) => updateProperty('borderWidth', Number(e.target.value))}
+                onChange={(e) => handleNumberChange(e, 'borderWidth')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -595,7 +625,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 id="borderWidth"
                 type="number"
                 value={props.borderWidth || 1}
-                onChange={(e) => updateProperty('borderWidth', Number(e.target.value))}
+                onChange={(e) => handleNumberChange(e, 'borderWidth')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -613,7 +643,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 id="cornerRadius"
                 type="number"
                 value={props.cornerRadius || 6}
-                onChange={(e) => updateProperty('cornerRadius', Number(e.target.value))}
+                onChange={(e) => handleNumberChange(e, 'cornerRadius')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -632,7 +662,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 min="0"
                 max="100"
                 value={props.value || 50}
-                onChange={(e) => updateProperty('value', Number(e.target.value))}
+                onChange={(e) => handleNumberChange(e, 'value')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -643,7 +673,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 id="maxValue"
                 type="number"
                 value={props.maxValue || 100}
-                onChange={(e) => updateProperty('maxValue', Number(e.target.value))}
+                onChange={(e) => handleNumberChange(e, 'maxValue')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -668,7 +698,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 id="cornerRadius"
                 type="number"
                 value={props.cornerRadius || 3}
-                onChange={(e) => updateProperty('cornerRadius', Number(e.target.value))}
+                onChange={(e) => handleNumberChange(e, 'cornerRadius')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -719,7 +749,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 id="borderWidth"
                 type="number"
                 value={props.borderWidth || 1}
-                onChange={(e) => updateProperty('borderWidth', Number(e.target.value))}
+                onChange={(e) => handleNumberChange(e, 'borderWidth')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -737,7 +767,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 id="cornerRadius"
                 type="number"
                 value={props.cornerRadius || 6}
-                onChange={(e) => updateProperty('cornerRadius', Number(e.target.value))}
+                onChange={(e) => handleNumberChange(e, 'cornerRadius')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -766,7 +796,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
               <Input
                 id="selectedTab"
                 value={props.selectedTab || ''}
-                onChange={(e) => updateProperty('selectedTab', e.target.value)}
+                onChange={(e) => handleTextChange(e, 'selectedTab')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -798,7 +828,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 id="borderWidth"
                 type="number"
                 value={props.borderWidth || 1}
-                onChange={(e) => updateProperty('borderWidth', Number(e.target.value))}
+                onChange={(e) => handleNumberChange(e, 'borderWidth')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
@@ -816,7 +846,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 id="cornerRadius"
                 type="number"
                 value={props.cornerRadius || 6}
-                onChange={(e) => updateProperty('cornerRadius', Number(e.target.value))}
+                onChange={(e) => handleNumberChange(e, 'cornerRadius')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />

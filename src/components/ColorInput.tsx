@@ -1,9 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { debounce } from 'react-use';
 
 interface ColorInputProps {
   value: string;
@@ -17,6 +17,7 @@ export const ColorInput: React.FC<ColorInputProps> = ({
   label
 }) => {
   const [inputValue, setInputValue] = useState(value || '#ffffff');
+  const [isOpen, setIsOpen] = useState(false);
   
   // Update internal state when prop value changes
   useEffect(() => {
@@ -51,14 +52,27 @@ export const ColorInput: React.FC<ColorInputProps> = ({
     
     // Ensure we have a valid 6-digit hex
     if (formattedColor.length !== 7) {
-      return '#ffffff';
+      formattedColor = formattedColor.padEnd(7, '0');
     }
     
     return formattedColor;
   };
 
+  // Debounced onChange handler
+  const debouncedOnChange = useCallback(
+    debounce((color: string) => {
+      onChange(color);
+    }, 300),
+    [onChange]
+  );
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
+    const newValue = e.target.value;
+    setInputValue(newValue);
+    
+    if (isValidHexColor(newValue)) {
+      debouncedOnChange(newValue);
+    }
   };
 
   const handleColorPickerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,6 +85,7 @@ export const ColorInput: React.FC<ColorInputProps> = ({
     const formattedColor = formatColorValue(inputValue);
     setInputValue(formattedColor);
     onChange(formattedColor); // Update parent with validated color
+    setIsOpen(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -83,38 +98,37 @@ export const ColorInput: React.FC<ColorInputProps> = ({
   const displayColor = isValidHexColor(inputValue) ? inputValue : '#ffffff';
 
   return (
-    <div className="flex flex-col space-y-1.5">
-      {label && <Label>{label}</Label>}
-      <div className="flex items-center space-x-2">
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              type="button"
-              variant="outline"
-              className="w-10 h-10 p-0 border-2"
-              style={{ backgroundColor: displayColor }}
-            >
-              <span className="sr-only">Pick a color</span>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-3" side="right" align="center">
-            <input
-              type="color"
-              value={displayColor}
-              onChange={handleColorPickerChange}
-              className="w-32 h-32 cursor-pointer border-0"
-            />
-          </PopoverContent>
-        </Popover>
-        <Input
-          value={inputValue}
-          onChange={handleInputChange}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          className="font-mono"
-          placeholder="#ffffff"
-        />
-      </div>
+    <div className="flex items-center space-x-2">
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-10 h-10 p-0 border-2 flex-shrink-0"
+            style={{ backgroundColor: displayColor }}
+            onClick={() => setIsOpen(true)}
+          >
+            <span className="sr-only">Pick a color</span>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-3" side="right" align="start">
+          <input
+            type="color"
+            value={displayColor}
+            onChange={handleColorPickerChange}
+            onBlur={handleBlur}
+            className="w-32 h-32 cursor-pointer border-0"
+          />
+        </PopoverContent>
+      </Popover>
+      <Input
+        value={inputValue}
+        onChange={handleInputChange}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        className="font-mono"
+        placeholder="#ffffff"
+      />
     </div>
   );
 };

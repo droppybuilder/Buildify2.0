@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import Canvas from '@/components/Canvas';
@@ -63,6 +64,7 @@ const Index = () => {
   }, [windowTitle, windowSize, windowBgColor]);
   
   const addToHistory = useCallback((newComponents: any[]) => {
+    // Check if this is truly a new state to avoid unnecessary history entries
     if (JSON.stringify(newComponents) !== JSON.stringify(history[historyIndex])) {
       const newHistory = history.slice(0, historyIndex + 1);
       newHistory.push([...newComponents]);
@@ -96,11 +98,29 @@ const Index = () => {
   }, [history, historyIndex]);
 
   const handleComponentUpdate = useCallback((updatedComponent: any) => {
+    // Prevent updates to non-existent components
+    const componentExists = components.some(c => c.id === updatedComponent.id);
+    if (!componentExists) {
+      console.warn("Attempted to update a non-existent component", updatedComponent);
+      return;
+    }
+    
     const newComponents = components.map(c => 
       c.id === updatedComponent.id ? { ...updatedComponent } : c
     );
     handleComponentsChange(newComponents);
   }, [components, handleComponentsChange]);
+  
+  const handleComponentSelect = useCallback((component: any) => {
+    // This is a crucial fix to prevent the blank screen issue
+    // Only update if the component exists in our components array
+    if (component && !components.some(c => c.id === component.id)) {
+      console.warn("Attempted to select a non-existent component", component);
+      return;
+    }
+    
+    setSelectedComponent(component);
+  }, [components]);
   
   const handleDeleteComponent = useCallback((component: any) => {
     if (selectedComponents.length > 1) {
@@ -208,7 +228,7 @@ const Index = () => {
               components={components}
               onComponentsChange={handleComponentsChange}
               selectedComponent={selectedComponent}
-              setSelectedComponent={setSelectedComponent}
+              setSelectedComponent={handleComponentSelect}
               onOrderChange={handleComponentLayerOrderChange}
               visible={showLayers}
             />
@@ -228,7 +248,7 @@ const Index = () => {
                 components={components}
                 setComponents={handleComponentsChange}
                 selectedComponent={selectedComponent}
-                setSelectedComponent={setSelectedComponent}
+                setSelectedComponent={handleComponentSelect}
                 onDeleteComponent={handleDeleteComponent}
                 selectedComponents={selectedComponents}
                 setSelectedComponents={setSelectedComponents}

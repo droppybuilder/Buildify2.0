@@ -204,12 +204,24 @@ const Canvas = ({
 
   const handleContextMenu = (e: React.MouseEvent, component: Component) => {
     e.preventDefault();
-    setSelectedComponent(component);
-    setContextMenuPosition({ x: e.clientX, y: e.clientY });
+    e.stopPropagation();
+    
+    // Validate component exists before setting it as selected
+    if (component && components.some(c => c.id === component.id)) {
+      setSelectedComponent(component);
+      setContextMenuPosition({ x: e.clientX, y: e.clientY });
+    }
   };
 
   const handleMouseDown = (e: React.MouseEvent, component: Component) => {
     e.stopPropagation();
+    
+    // First, validate the component exists in our components array
+    const componentExists = components.some(c => c.id === component.id);
+    if (!componentExists) {
+      console.warn("Attempted to select non-existent component:", component.id);
+      return;
+    }
     
     if (isMultiSelectKeyDown) {
       if (selectedComponents.includes(component.id)) {
@@ -324,7 +336,10 @@ const Canvas = ({
   };
 
   const handleComponentMouseEnter = (componentId: string) => {
-    setHoveredComponent(componentId);
+    // Verify componentId exists in components array first
+    if (components.some(c => c.id === componentId)) {
+      setHoveredComponent(componentId);
+    }
   };
 
   const handleComponentMouseLeave = () => {

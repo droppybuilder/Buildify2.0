@@ -347,6 +347,7 @@ const Index = () => {
                 windowTitle={windowTitle}
                 windowSize={windowSize}
                 windowBgColor={windowBgColor}
+                setWindowTitle={setWindowTitle}
               />
             </div>
           )}

@@ -61,13 +61,16 @@ self.entry_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round
 
 /**
  * Generates code for an image component
+ * Modified to not export the actual image data, but instead references the file name
  */
 export function generateImageCode(component: any, isTkinter: boolean): string {
   const safeId = component.id.replace(/[^a-zA-Z0-9_]/g, '_');
+  const fileName = component.props?.fileName || `${safeId}.png`;
   
   if (isTkinter) {
     return `# Image setup for ${safeId}
-self.img_${safeId} = self.load_image("${safeId}.png", (${Math.round(component.size.width)}, ${Math.round(component.size.height)}))
+# Place the image file "${fileName}" in your project directory
+self.img_${safeId} = self.load_image("${fileName}", (${Math.round(component.size.width)}, ${Math.round(component.size.height)}))
 self.image_label_${safeId} = ctk.CTkLabel(self, image=self.img_${safeId}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)}, text="")
 # Note: CTkLabel with image doesn't support border properties
 self.image_label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})
@@ -75,7 +78,7 @@ self.image_label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math
 self._image_references.append(self.img_${safeId})`;
   } else {
     // For Eel, we just return a comment since components are handled via JSON
-    return `# Image ${safeId} is managed in the JavaScript UI`;
+    return `# Image ${safeId} (${fileName}) is managed in the JavaScript UI`;
   }
 }
 

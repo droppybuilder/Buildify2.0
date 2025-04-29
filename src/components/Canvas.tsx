@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { toast } from "sonner";
 import { Maximize2, Minimize2, X, Copy, Scissors, Trash } from "lucide-react";
@@ -28,6 +29,7 @@ interface CanvasProps {
   windowTitle?: string;
   windowSize?: { width: number; height: number };
   windowBgColor?: string;
+  setWindowTitle?: (title: string) => void;
 }
 
 const Canvas = ({
@@ -40,7 +42,8 @@ const Canvas = ({
   setSelectedComponents,
   windowTitle = "My CustomTkinter Application",
   windowSize = { width: 800, height: 600 },
-  windowBgColor = "#f0f0f0"
+  windowBgColor = "#f0f0f0",
+  setWindowTitle
 }: CanvasProps) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -48,6 +51,7 @@ const Canvas = ({
   const [isResizing, setIsResizing] = useState(false);
   const [resizeDirection, setResizeDirection] = useState<string | null>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [titleInput, setTitleInput] = useState(windowTitle || "");
   const [imageCache, setImageCache] = useState<Record<string, string>>({});
   const [clipboard, setClipboard] = useState<Component | null>(null);
   const [contextMenuPosition, setContextMenuPosition] = useState<{x: number, y: number} | null>(null);
@@ -56,6 +60,11 @@ const Canvas = ({
   const [selectionBox, setSelectionBox] = useState<{start: {x: number, y: number}, end: {x: number, y: number}} | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
   const [isMultiSelectKeyDown, setIsMultiSelectKeyDown] = useState(false);
+  
+  // Update titleInput when windowTitle changes
+  useEffect(() => {
+    setTitleInput(windowTitle || "");
+  }, [windowTitle]);
   
   // Safety function to validate component before operations
   const isValidComponent = (component: Component | null): boolean => {
@@ -106,15 +115,11 @@ const Canvas = ({
     const imageComponents = components.filter(c => c.type === 'image');
     
     imageComponents.forEach(comp => {
-      if (comp.props.src && !imageCache[comp.props.src]) {
-        const img = new Image();
-        img.src = comp.props.src;
-        img.onload = () => {
-          setImageCache(prev => ({
-            ...prev,
-            [comp.props.src]: comp.props.src
-          }));
-        };
+      if (comp.props.src && !imageCache[comp.props.src] && comp.props.src.startsWith('data:')) {
+        setImageCache(prev => ({
+          ...prev,
+          [comp.props.src]: comp.props.src
+        }));
       }
     });
   }, [components, imageCache]);
@@ -387,6 +392,13 @@ const Canvas = ({
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
 
+      // Special handling for image uploads
+      if (type === 'image' && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleImageDrop(e.dataTransfer.files[0], x, y);
+        return;
+      }
+
+      // Regular component creation
       const newComponent: Component = {
         id: `${type}-${Date.now()}`,
         type,
@@ -401,6 +413,52 @@ const Canvas = ({
       console.error("Error in drop handler:", error);
       toast.error("Failed to add component");
     }
+  };
+
+  // Handle image file uploads directly
+  const handleImageDrop = (file: File, x: number, y: number) => {
+    if (!file.type.startsWith('image/')) {
+      toast.error("Only image files are allowed");
+      return;
+    }
+    
+    const reader = new FileReader();
+    
+    reader.onload = (e) => {
+      try {
+        const imageResult = e.target?.result as string;
+        if (!imageResult) {
+          toast.error("Failed to load image");
+          return;
+        }
+        
+        const fileName = file.name || "Uploaded Image";
+        
+        const newComponent: Component = {
+          id: `image-${Date.now()}`,
+          type: 'image',
+          position: { x, y },
+          size: getDefaultSize('image'),
+          props: {
+            ...getDefaultProps('image'),
+            src: imageResult,
+            fileName: fileName
+          },
+        };
+        
+        setComponents([...components, newComponent]);
+        toast.success("Image added to canvas");
+      } catch (error) {
+        console.error("Error processing image file:", error);
+        toast.error("Failed to process image file");
+      }
+    };
+    
+    reader.onerror = () => {
+      toast.error("Failed to read image file");
+    };
+    
+    reader.readAsDataURL(file);
   };
 
   const handleCopyComponent = () => {
@@ -486,21 +544,35 @@ const Canvas = ({
     }
   };
 
-  const handleTitleClick = () => {
-    setIsEditingTitle(true);
+  // Handle double-click on title to enter edit mode
+  const handleTitleDoubleClick = () => {
+    if (!isEditingTitle) {
+      setIsEditingTitle(true);
+      setTitleInput(windowTitle || "");
+    }
   };
 
+  // Handle input changes for title
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Kept for potential future use
+    setTitleInput(e.target.value);
   };
 
-  const handleTitleBlur = () => {
+  // Handle saving title when done editing
+  const handleTitleSave = () => {
+    if (setWindowTitle && titleInput.trim()) {
+      setWindowTitle(titleInput.trim());
+      toast.success("Window title updated");
+    }
     setIsEditingTitle(false);
   };
 
+  // Handle Enter key press to save title
   const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
+      handleTitleSave();
+    } else if (e.key === 'Escape') {
       setIsEditingTitle(false);
+      setTitleInput(windowTitle || "");
     }
   };
 
@@ -576,7 +648,8 @@ const Canvas = ({
           fit: 'contain',
           cornerRadius: 8,
           borderColor: '#e2e8f0',
-          borderWidth: 1
+          borderWidth: 1,
+          fileName: 'placeholder.svg'
         };
       case 'slider':
         return { 
@@ -703,19 +776,19 @@ const Canvas = ({
               <Maximize2 size={8} className="text-green-800" />
             </div>
           </div>
-          <div className="window-title">
+          <div className="window-title" onDoubleClick={handleTitleDoubleClick}>
             {isEditingTitle ? (
               <Input
                 type="text"
-                value={windowTitle}
-                onBlur={handleTitleBlur}
+                value={titleInput}
+                onChange={handleTitleChange}
+                onBlur={handleTitleSave}
                 onKeyDown={handleTitleKeyDown}
                 className="w-48 mx-auto h-6 text-sm text-center bg-transparent"
                 autoFocus
-                readOnly
               />
             ) : (
-              <div>
+              <div className="cursor-pointer">
                 {windowTitle}
               </div>
             )}
@@ -870,31 +943,39 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
         />
       );
     case 'image':
+      // Improved image widget with filename display
       return (
-        <div 
-          className="w-full h-full overflow-hidden"
-          style={{
-            borderRadius: `${component.props.cornerRadius || 8}px`,
-            borderColor: component.props.borderColor || '#e2e8f0',
-            borderWidth: `${component.props.borderWidth || 1}px`,
-            borderStyle: 'solid'
-          }}
-        >
-          <img 
-            src={component.props.src || '/placeholder.svg'}
-            alt="Widget"
-            className="w-full h-full"
+        <div className="w-full h-full flex flex-col">
+          <div 
+            className="flex-1 overflow-hidden"
             style={{
-              objectFit: component.props.fit || 'contain',
-              imageRendering: 'auto'
+              borderRadius: `${component.props.cornerRadius || 8}px`,
+              borderColor: component.props.borderColor || '#e2e8f0',
+              borderWidth: `${component.props.borderWidth || 1}px`,
+              borderStyle: 'solid'
             }}
-            loading="eager"
-            decoding="async"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = '/placeholder.svg';
-            }}
-          />
+          >
+            <img 
+              src={component.props.src || '/placeholder.svg'}
+              alt={component.props.fileName || 'Image'}
+              className="w-full h-full"
+              style={{
+                objectFit: component.props.fit || 'contain',
+                imageRendering: 'auto'
+              }}
+              loading="eager"
+              decoding="async"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = '/placeholder.svg';
+              }}
+            />
+          </div>
+          {component.props.fileName && (
+            <div className="text-xs truncate text-center mt-1 text-gray-600">
+              {component.props.fileName}
+            </div>
+          )}
         </div>
       );
     case 'slider':

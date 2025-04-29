@@ -84,6 +84,11 @@ const Index = () => {
       const newIndex = historyIndex - 1;
       setHistoryIndex(newIndex);
       setComponents([...history[newIndex]]);
+      
+      // Reset selected component to prevent issues
+      setSelectedComponent(null);
+      setSelectedComponents([]);
+      
       toast.info("Undo successful");
     }
   }, [history, historyIndex]);
@@ -93,11 +98,22 @@ const Index = () => {
       const newIndex = historyIndex + 1;
       setHistoryIndex(newIndex);
       setComponents([...history[newIndex]]);
+      
+      // Reset selected component to prevent issues
+      setSelectedComponent(null);
+      setSelectedComponents([]);
+      
       toast.info("Redo successful");
     }
   }, [history, historyIndex]);
 
   const handleComponentUpdate = useCallback((updatedComponent: any) => {
+    // Validate component and its properties before update
+    if (!updatedComponent || !updatedComponent.id) {
+      console.warn("Attempted to update an invalid component", updatedComponent);
+      return;
+    }
+    
     // Prevent updates to non-existent components
     const componentExists = components.some(c => c.id === updatedComponent.id);
     if (!componentExists) {
@@ -105,16 +121,33 @@ const Index = () => {
       return;
     }
     
-    const newComponents = components.map(c => 
-      c.id === updatedComponent.id ? { ...updatedComponent } : c
-    );
-    handleComponentsChange(newComponents);
+    try {
+      const newComponents = components.map(c => 
+        c.id === updatedComponent.id ? { ...updatedComponent } : c
+      );
+      handleComponentsChange(newComponents);
+    } catch (error) {
+      console.error("Error updating component:", error);
+      toast.error("Failed to update component");
+    }
   }, [components, handleComponentsChange]);
   
   const handleComponentSelect = useCallback((component: any) => {
+    // Reset selection if component is null
+    if (!component) {
+      setSelectedComponent(null);
+      return;
+    }
+    
+    // Validate the component
+    if (!component.id) {
+      console.warn("Attempted to select an invalid component", component);
+      return;
+    }
+    
     // This is a crucial fix to prevent the blank screen issue
     // Only update if the component exists in our components array
-    if (component && !components.some(c => c.id === component.id)) {
+    if (!components.some(c => c.id === component.id)) {
       console.warn("Attempted to select a non-existent component", component);
       return;
     }
@@ -123,16 +156,39 @@ const Index = () => {
   }, [components]);
   
   const handleDeleteComponent = useCallback((component: any) => {
-    if (selectedComponents.length > 1) {
-      const newComponents = components.filter(c => !selectedComponents.includes(c.id));
-      handleComponentsChange(newComponents);
-      setSelectedComponents([]);
-      setSelectedComponent(null);
-      toast.info("Multiple components deleted");
-    } else if (component) {
-      const newComponents = components.filter(c => c.id !== component.id);
-      handleComponentsChange(newComponents);
-      toast.info("Component deleted");
+    try {
+      if (selectedComponents.length > 1) {
+        // Validate all components exist before deletion
+        const validComponentIds = selectedComponents.filter(id => 
+          components.some(c => c.id === id)
+        );
+        
+        if (validComponentIds.length !== selectedComponents.length) {
+          console.warn("Some selected components don't exist", 
+            selectedComponents.filter(id => !validComponentIds.includes(id))
+          );
+        }
+        
+        const newComponents = components.filter(c => !validComponentIds.includes(c.id));
+        handleComponentsChange(newComponents);
+        setSelectedComponents([]);
+        setSelectedComponent(null);
+        toast.info("Multiple components deleted");
+      } else if (component) {
+        // Validate component exists
+        if (!components.some(c => c.id === component.id)) {
+          console.warn("Attempted to delete a non-existent component", component);
+          return;
+        }
+        
+        const newComponents = components.filter(c => c.id !== component.id);
+        handleComponentsChange(newComponents);
+        setSelectedComponent(null);
+        toast.info("Component deleted");
+      }
+    } catch (error) {
+      console.error("Error deleting component:", error);
+      toast.error("Failed to delete component");
     }
   }, [components, handleComponentsChange, selectedComponents]);
   
@@ -172,12 +228,24 @@ const Index = () => {
         e.preventDefault();
         
         if (selectedComponents.length > 1) {
-          const newComponents = components.filter(c => !selectedComponents.includes(c.id));
+          // Validate all components exist
+          const validComponentIds = selectedComponents.filter(id => 
+            components.some(c => c.id === id)
+          );
+          
+          const newComponents = components.filter(c => !validComponentIds.includes(c.id));
           handleComponentsChange(newComponents);
           setSelectedComponents([]);
           setSelectedComponent(null);
           toast.info("Multiple components deleted");
         } else if (selectedComponent) {
+          // Validate component exists
+          if (!components.some(c => c.id === selectedComponent.id)) {
+            console.warn("Attempted to delete a non-existent component", selectedComponent);
+            setSelectedComponent(null);
+            return;
+          }
+          
           handleDeleteComponent(selectedComponent);
           setSelectedComponent(null);
         }

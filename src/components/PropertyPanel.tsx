@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,86 +38,118 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
       </div>
     );
   }
+
+  // Safety check - ensure selectedComponent has the required fields
+  if (!selectedComponent.type || !selectedComponent.id) {
+    console.error("Invalid component structure:", selectedComponent);
+    return (
+      <div className="p-4 flex flex-col h-full justify-center items-center text-center text-muted-foreground">
+        <p>Invalid component structure</p>
+      </div>
+    );
+  }
   
   // Initialize local values when component changes
   React.useEffect(() => {
     if (selectedComponent) {
-      const initialValues: Record<string, any> = {};
-      
-      // Size and position
-      if (selectedComponent.size) {
-        initialValues.width = selectedComponent.size.width;
-        initialValues.height = selectedComponent.size.height;
+      try {
+        const initialValues: Record<string, any> = {};
+        
+        // Size and position
+        if (selectedComponent.size) {
+          initialValues.width = selectedComponent.size.width;
+          initialValues.height = selectedComponent.size.height;
+        }
+        if (selectedComponent.position) {
+          initialValues.x = selectedComponent.position.x;
+          initialValues.y = selectedComponent.position.y;
+        }
+        
+        // Props
+        if (selectedComponent.props) {
+          Object.keys(selectedComponent.props).forEach(key => {
+            initialValues[key] = selectedComponent.props[key];
+          });
+        }
+        
+        setLocalInputValues(initialValues);
+      } catch (error) {
+        console.error("Error initializing property values:", error);
       }
-      if (selectedComponent.position) {
-        initialValues.x = selectedComponent.position.x;
-        initialValues.y = selectedComponent.position.y;
-      }
-      
-      // Props
-      if (selectedComponent.props) {
-        Object.keys(selectedComponent.props).forEach(key => {
-          initialValues[key] = selectedComponent.props[key];
-        });
-      }
-      
-      setLocalInputValues(initialValues);
     }
   }, [selectedComponent]);
   
   // Update component dimensions
   const updateDimension = (field: string, subfield: string, value: number) => {
-    // Update local state
-    setLocalInputValues(prev => ({
-      ...prev,
-      [subfield]: value
-    }));
-    
-    // Update component
-    const updatedComponent = {
-      ...selectedComponent,
-      [field]: {
-        ...selectedComponent[field],
+    try {
+      // Update local state
+      setLocalInputValues(prev => ({
+        ...prev,
         [subfield]: value
-      }
-    };
-    onUpdate(updatedComponent);
+      }));
+      
+      // Update component
+      const updatedComponent = {
+        ...selectedComponent,
+        [field]: {
+          ...selectedComponent[field],
+          [subfield]: value
+        }
+      };
+      onUpdate(updatedComponent);
+    } catch (error) {
+      console.error("Error updating dimension:", error);
+      toast.error("Failed to update property");
+    }
   };
   
   // Update component property
   const updateProperty = (propertyName: string, value: any) => {
-    // Update local state
-    setLocalInputValues(prev => ({
-      ...prev,
-      [propertyName]: value
-    }));
-    
-    // Update component
-    const updatedComponent = {
-      ...selectedComponent,
-      props: {
-        ...selectedComponent.props,
+    try {
+      // Update local state
+      setLocalInputValues(prev => ({
+        ...prev,
         [propertyName]: value
-      }
-    };
-    onUpdate(updatedComponent);
+      }));
+      
+      // Clone the component to avoid reference issues
+      const updatedComponent = {
+        ...selectedComponent,
+        props: {
+          ...selectedComponent.props || {},
+          [propertyName]: value
+        }
+      };
+      onUpdate(updatedComponent);
+    } catch (error) {
+      console.error("Error updating property:", error, propertyName, value);
+      toast.error("Failed to update property");
+    }
   };
   
   // Handle numeric input changes
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>, field: string, subfield?: string) => {
-    const value = Number(e.target.value);
-    
-    if (subfield) {
-      updateDimension(field, subfield, value);
-    } else {
-      updateProperty(field, value);
+    try {
+      const value = Number(e.target.value);
+      
+      if (subfield) {
+        updateDimension(field, subfield, value);
+      } else {
+        updateProperty(field, value);
+      }
+    } catch (error) {
+      console.error("Error handling number change:", error);
     }
   };
 
   // Handle text input changes
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: string) => {
-    const value = e.target.value;
-    updateProperty(field, value);
+    try {
+      const value = e.target.value;
+      updateProperty(field, value);
+    } catch (error) {
+      console.error("Error handling text change:", error);
+    }
   };
   
   // Handle image file upload
@@ -129,9 +160,14 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
     const reader = new FileReader();
     
     reader.onload = () => {
-      const imageDataUrl = reader.result as string;
-      updateProperty('src', imageDataUrl);
-      toast.success("Image uploaded successfully");
+      try {
+        const imageDataUrl = reader.result as string;
+        updateProperty('src', imageDataUrl);
+        toast.success("Image uploaded successfully");
+      } catch (error) {
+        console.error("Error processing image:", error);
+        toast.error("Failed to process image");
+      }
     };
     
     reader.onerror = () => {
@@ -225,7 +261,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
           </CollapsibleContent>
         </Collapsible>
 
-        {/* Button properties */}
+        {/* Component type specific properties - Only render relevant section */}
         {selectedComponent.type === 'button' && (
           <div className="space-y-4">
             <div>
@@ -291,7 +327,6 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
           </div>
         )}
 
-        {/* Label properties */}
         {selectedComponent.type === 'label' && (
           <div className="space-y-4">
             <div>
@@ -332,7 +367,6 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
           </div>
         )}
 
-        {/* Entry/Textbox properties */}
         {(selectedComponent.type === 'entry' || selectedComponent.type === 'textbox') && (
           <div className="space-y-4">
             <div>
@@ -391,7 +425,6 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
           </div>
         )}
 
-        {/* Checkbox properties */}
         {selectedComponent.type === 'checkbox' && (
           <div className="space-y-4">
             <div>
@@ -446,7 +479,6 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
           </div>
         )}
 
-        {/* Dropdown properties */}
         {selectedComponent.type === 'dropdown' && (
           <div className="space-y-4">
             <div>
@@ -514,7 +546,6 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
           </div>
         )}
 
-        {/* Image properties */}
         {selectedComponent.type === 'image' && (
           <div className="space-y-4">
             <div>
@@ -566,7 +597,6 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
           </div>
         )}
 
-        {/* Slider properties */}
         {selectedComponent.type === 'slider' && (
           <div className="space-y-4">
             <div>
@@ -659,7 +689,6 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
           </div>
         )}
 
-        {/* Frame properties */}
         {selectedComponent.type === 'frame' && (
           <div className="space-y-4">
             <div>
@@ -701,7 +730,6 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
           </div>
         )}
 
-        {/* Progressbar properties */}
         {selectedComponent.type === 'progressbar' && (
           <div className="space-y-4">
             <div>
@@ -756,7 +784,6 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
           </div>
         )}
 
-        {/* Listbox properties */}
         {selectedComponent.type === 'listbox' && (
           <div className="space-y-4">
             <div>
@@ -825,7 +852,6 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
           </div>
         )}
 
-        {/* Notebook properties */}
         {selectedComponent.type === 'notebook' && (
           <div className="space-y-4">
             <div>

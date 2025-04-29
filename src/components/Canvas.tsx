@@ -57,6 +57,13 @@ const Canvas = ({
   const [isSelecting, setIsSelecting] = useState(false);
   const [isMultiSelectKeyDown, setIsMultiSelectKeyDown] = useState(false);
   
+  // Safety function to validate component before operations
+  const isValidComponent = (component: Component | null): boolean => {
+    if (!component) return false;
+    if (!component.id) return false;
+    return components.some(c => c.id === component.id);
+  };
+  
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey) {
@@ -73,7 +80,7 @@ const Canvas = ({
           setSelectedComponents([]);
           setSelectedComponent(null);
           toast.success("Multiple components deleted");
-        } else if (selectedComponent) {
+        } else if (selectedComponent && isValidComponent(selectedComponent)) {
           handleDeleteComponent();
           setSelectedComponent(null);
         }
@@ -182,7 +189,9 @@ const Canvas = ({
           
           if (newSelection.length === 1) {
             const selectedComp = components.find(c => c.id === newSelection[0]) || null;
-            setSelectedComponent(selectedComp);
+            if (selectedComp) {
+              setSelectedComponent(selectedComp);
+            }
           } else if (newSelection.length > 1) {
             setSelectedComponent(null);
           }
@@ -206,126 +215,146 @@ const Canvas = ({
     e.preventDefault();
     e.stopPropagation();
     
-    // Validate component exists before setting it as selected
-    if (component && components.some(c => c.id === component.id)) {
+    try {
+      // Validate component exists before setting it as selected
+      if (!isValidComponent(component)) {
+        console.warn("Invalid component in context menu:", component?.id || "unknown");
+        return;
+      }
+      
       setSelectedComponent(component);
       setContextMenuPosition({ x: e.clientX, y: e.clientY });
+    } catch (error) {
+      console.error("Error in context menu:", error);
     }
   };
 
   const handleMouseDown = (e: React.MouseEvent, component: Component) => {
-    e.stopPropagation();
-    
-    // First, validate the component exists in our components array
-    const componentExists = components.some(c => c.id === component.id);
-    if (!componentExists) {
-      console.warn("Attempted to select non-existent component:", component.id);
-      return;
-    }
-    
-    if (isMultiSelectKeyDown) {
-      if (selectedComponents.includes(component.id)) {
-        const newSelected = selectedComponents.filter(id => id !== component.id);
-        setSelectedComponents(newSelected);
-        if (newSelected.length === 1) {
-          const selectedComp = components.find(c => c.id === newSelected[0]) || null;
-          setSelectedComponent(selectedComp);
+    try {
+      e.stopPropagation();
+      
+      // First, validate the component exists in our components array
+      if (!isValidComponent(component)) {
+        console.warn("Attempted to select non-existent component:", component?.id || "unknown");
+        return;
+      }
+      
+      if (isMultiSelectKeyDown) {
+        if (selectedComponents.includes(component.id)) {
+          const newSelected = selectedComponents.filter(id => id !== component.id);
+          setSelectedComponents(newSelected);
+          if (newSelected.length === 1) {
+            const selectedComp = components.find(c => c.id === newSelected[0]) || null;
+            if (selectedComp) {
+              setSelectedComponent(selectedComp);
+            } else {
+              setSelectedComponent(null);
+            }
+          } else {
+            setSelectedComponent(null);
+          }
         } else {
-          setSelectedComponent(null);
+          const newSelected = [...selectedComponents, component.id];
+          setSelectedComponents(newSelected);
+          if (newSelected.length === 1) {
+            setSelectedComponent(component);
+          } else {
+            setSelectedComponent(null);
+          }
         }
       } else {
-        const newSelected = [...selectedComponents, component.id];
-        setSelectedComponents(newSelected);
-        if (newSelected.length === 1) {
-          setSelectedComponent(component);
-        } else {
-          setSelectedComponent(null);
-        }
+        setSelectedComponent(component);
+        setSelectedComponents([component.id]);
       }
-    } else {
-      setSelectedComponent(component);
-      setSelectedComponents([component.id]);
-    }
-    
-    const target = e.target as HTMLElement;
-    if (target.classList.contains('resize-handle')) {
-      setIsResizing(true);
-      setResizeDirection(target.dataset.direction || null);
-    } else {
-      setIsDragging(true);
-    }
+      
+      const target = e.target as HTMLElement;
+      if (target.classList.contains('resize-handle')) {
+        setIsResizing(true);
+        setResizeDirection(target.dataset.direction || null);
+      } else {
+        setIsDragging(true);
+      }
 
-    setDragStart({
-      x: e.clientX - component.position.x,
-      y: e.clientY - component.position.y
-    });
+      setDragStart({
+        x: e.clientX - component.position.x,
+        y: e.clientY - component.position.y
+      });
+    } catch (error) {
+      console.error("Error in mouse down handler:", error);
+      setSelectedComponent(null);
+      setSelectedComponents([]);
+    }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!selectedComponent) return;
+    if (!selectedComponent || !isValidComponent(selectedComponent)) return;
 
-    if (isDragging) {
-      const newComponents = components.map(comp => {
-        if (comp.id === selectedComponent.id) {
-          const rect = canvasRef.current?.getBoundingClientRect();
-          if (!rect) return comp;
-          
-          let newX = e.clientX - dragStart.x;
-          let newY = e.clientY - dragStart.y;
-          
-          newX = Math.max(0, Math.min(newX, rect.width - comp.size.width));
-          newY = Math.max(0, Math.min(newY, rect.height - comp.size.height));
-          
-          return {
-            ...comp,
-            position: {
-              x: newX,
-              y: newY
+    try {
+      if (isDragging) {
+        const newComponents = components.map(comp => {
+          if (comp.id === selectedComponent.id) {
+            const rect = canvasRef.current?.getBoundingClientRect();
+            if (!rect) return comp;
+            
+            let newX = e.clientX - dragStart.x;
+            let newY = e.clientY - dragStart.y;
+            
+            newX = Math.max(0, Math.min(newX, rect.width - comp.size.width));
+            newY = Math.max(0, Math.min(newY, rect.height - comp.size.height));
+            
+            return {
+              ...comp,
+              position: {
+                x: newX,
+                y: newY
+              }
+            };
+          }
+          return comp;
+        });
+        setComponents(newComponents);
+      } else if (isResizing && resizeDirection) {
+        const rect = canvasRef.current?.getBoundingClientRect();
+        if (!rect) return;
+
+        const newComponents = components.map(comp => {
+          if (comp.id === selectedComponent.id) {
+            const newSize = { ...comp.size };
+            const newPosition = { ...comp.position };
+
+            if (resizeDirection.includes('e')) {
+              newSize.width = Math.max(50, e.clientX - rect.left - comp.position.x);
             }
-          };
-        }
-        return comp;
-      });
-      setComponents(newComponents);
-    } else if (isResizing && resizeDirection) {
-      const rect = canvasRef.current?.getBoundingClientRect();
-      if (!rect) return;
-
-      const newComponents = components.map(comp => {
-        if (comp.id === selectedComponent.id) {
-          const newSize = { ...comp.size };
-          const newPosition = { ...comp.position };
-
-          if (resizeDirection.includes('e')) {
-            newSize.width = Math.max(50, e.clientX - rect.left - comp.position.x);
-          }
-          if (resizeDirection.includes('s')) {
-            newSize.height = Math.max(50, e.clientY - rect.top - comp.position.y);
-          }
-          if (resizeDirection.includes('w')) {
-            const newWidth = Math.max(50, comp.size.width + (comp.position.x - (e.clientX - rect.left)));
-            if (newWidth >= 50) {
-              newPosition.x = e.clientX - rect.left;
-              newSize.width = newWidth;
+            if (resizeDirection.includes('s')) {
+              newSize.height = Math.max(50, e.clientY - rect.top - comp.position.y);
             }
-          }
-          if (resizeDirection.includes('n')) {
-            const newHeight = Math.max(50, comp.size.height + (comp.position.y - (e.clientY - rect.top)));
-            if (newHeight >= 50) {
-              newPosition.y = e.clientY - rect.top;
-              newSize.height = newHeight;
+            if (resizeDirection.includes('w')) {
+              const newWidth = Math.max(50, comp.size.width + (comp.position.x - (e.clientX - rect.left)));
+              if (newWidth >= 50) {
+                newPosition.x = e.clientX - rect.left;
+                newSize.width = newWidth;
+              }
             }
-          }
+            if (resizeDirection.includes('n')) {
+              const newHeight = Math.max(50, comp.size.height + (comp.position.y - (e.clientY - rect.top)));
+              if (newHeight >= 50) {
+                newPosition.y = e.clientY - rect.top;
+                newSize.height = newHeight;
+              }
+            }
 
-          return {
-            ...comp,
-            size: newSize,
-            position: newPosition
-          };
-        }
-        return comp;
-      });
-      setComponents(newComponents);
+            return {
+              ...comp,
+              size: newSize,
+              position: newPosition
+            };
+          }
+          return comp;
+        });
+        setComponents(newComponents);
+      }
+    } catch (error) {
+      console.error("Error in mouse move handler:", error);
     }
   };
 
@@ -349,82 +378,111 @@ const Canvas = ({
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
     
-    const type = e.dataTransfer.getData('componentType');
-    const rect = canvasRef.current?.getBoundingClientRect();
-    
-    if (!rect) return;
+    try {
+      const type = e.dataTransfer.getData('componentType');
+      const rect = canvasRef.current?.getBoundingClientRect();
+      
+      if (!rect) return;
 
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
 
-    const newComponent: Component = {
-      id: `${type}-${Date.now()}`,
-      type,
-      position: { x, y },
-      size: getDefaultSize(type),
-      props: getDefaultProps(type),
-    };
+      const newComponent: Component = {
+        id: `${type}-${Date.now()}`,
+        type,
+        position: { x, y },
+        size: getDefaultSize(type),
+        props: getDefaultProps(type),
+      };
 
-    setComponents([...components, newComponent]);
-    toast.success("Component added to canvas");
+      setComponents([...components, newComponent]);
+      toast.success("Component added to canvas");
+    } catch (error) {
+      console.error("Error in drop handler:", error);
+      toast.error("Failed to add component");
+    }
   };
 
   const handleCopyComponent = () => {
-    if (selectedComponent) {
-      setClipboard({...selectedComponent});
-      toast.success("Component copied to clipboard");
+    try {
+      if (selectedComponent && isValidComponent(selectedComponent)) {
+        setClipboard({...selectedComponent});
+        toast.success("Component copied to clipboard");
+      }
+    } catch (error) {
+      console.error("Error copying component:", error);
     }
   };
 
   const handleCutComponent = () => {
-    if (selectedComponent) {
-      setClipboard({...selectedComponent});
-      handleDeleteComponent();
-      toast.success("Component cut to clipboard");
+    try {
+      if (selectedComponent && isValidComponent(selectedComponent)) {
+        setClipboard({...selectedComponent});
+        handleDeleteComponent();
+        toast.success("Component cut to clipboard");
+      }
+    } catch (error) {
+      console.error("Error cutting component:", error);
     }
   };
 
-  const handlePasteComponent = (e: React.MouseEvent) => {
-    if (clipboard) {
-      const rect = canvasRef.current?.getBoundingClientRect();
-      if (!rect) return;
+  const handlePasteComponent = (e: React.MouseEvent | null) => {
+    try {
+      if (clipboard) {
+        const rect = canvasRef.current?.getBoundingClientRect();
+        if (!rect) return;
 
-      let x, y;
-      if (e) {
-        x = e.clientX - rect.left;
-        y = e.clientY - rect.top;
-      } else {
-        x = clipboard.position.x + 20;
-        y = clipboard.position.y + 20;
+        let x, y;
+        if (e) {
+          x = e.clientX - rect.left;
+          y = e.clientY - rect.top;
+        } else {
+          x = clipboard.position.x + 20;
+          y = clipboard.position.y + 20;
+        }
+
+        const newComponent: Component = {
+          ...clipboard,
+          id: `${clipboard.type}-${Date.now()}`,
+          position: { x, y }
+        };
+
+        setComponents([...components, newComponent]);
+        toast.success("Component pasted from clipboard");
       }
-
-      const newComponent: Component = {
-        ...clipboard,
-        id: `${clipboard.type}-${Date.now()}`,
-        position: { x, y }
-      };
-
-      setComponents([...components, newComponent]);
-      toast.success("Component pasted from clipboard");
+    } catch (error) {
+      console.error("Error pasting component:", error);
     }
   };
 
   const handleDeleteComponent = () => {
-    if (selectedComponents.length > 1) {
-      const newComponents = components.filter(comp => !selectedComponents.includes(comp.id));
-      setComponents(newComponents);
-      setSelectedComponents([]);
-      setSelectedComponent(null);
-      toast.success("Components deleted");
-    } else if (selectedComponent) {
-      if (onDeleteComponent) {
-        onDeleteComponent(selectedComponent);
-      } else {
-        const newComponents = components.filter(comp => comp.id !== selectedComponent.id);
+    try {
+      if (selectedComponents.length > 1) {
+        // Validate all components exist before deletion
+        const validComponentIds = selectedComponents.filter(id => 
+          components.some(c => c.id === id)
+        );
+        
+        const newComponents = components.filter(comp => !validComponentIds.includes(comp.id));
         setComponents(newComponents);
+        setSelectedComponents([]);
         setSelectedComponent(null);
-        toast.success("Component deleted");
+        toast.success("Components deleted");
+      } else if (selectedComponent && isValidComponent(selectedComponent)) {
+        if (onDeleteComponent) {
+          onDeleteComponent(selectedComponent);
+        } else {
+          const newComponents = components.filter(comp => comp.id !== selectedComponent.id);
+          setComponents(newComponents);
+          setSelectedComponent(null);
+          toast.success("Component deleted");
+        }
       }
+    } catch (error) {
+      console.error("Error deleting component:", error);
+      // In case of error, reset selections to be safe
+      setSelectedComponent(null);
+      setSelectedComponents([]);
     }
   };
 
@@ -433,6 +491,7 @@ const Canvas = ({
   };
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Kept for potential future use
   };
 
   const handleTitleBlur = () => {
@@ -594,7 +653,7 @@ const Canvas = ({
   
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (selectedComponent || selectedComponents.length > 0) {
+      if (selectedComponent && isValidComponent(selectedComponent) || selectedComponents.length > 0) {
         if ((e.key === 'Delete' || e.key === 'Backspace') && 
             !['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
           e.preventDefault();
@@ -612,7 +671,7 @@ const Canvas = ({
         }
         
         if ((e.ctrlKey || e.metaKey) && e.key === 'v' && clipboard) {
-          handlePasteComponent(null as any);
+          handlePasteComponent(null);
           e.preventDefault();
         }
       }
@@ -620,7 +679,7 @@ const Canvas = ({
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedComponent, selectedComponents, clipboard, components, handleDeleteComponent]);
+  }, [selectedComponent, selectedComponents, clipboard, components]);
 
   return (
     <div className="w-full h-full p-8 flex items-center justify-center">

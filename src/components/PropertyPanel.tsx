@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -30,27 +31,9 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
   // Local state for input values to ensure controlled components work properly
   const [localInputValues, setLocalInputValues] = useState<Record<string, any>>({});
 
-  // Return empty panel if no component is selected
-  if (!selectedComponent) {
-    return (
-      <div className="p-4 flex flex-col h-full justify-center items-center text-center text-muted-foreground">
-        <p>Select a component to view and edit its properties</p>
-      </div>
-    );
-  }
-
-  // Safety check - ensure selectedComponent has the required fields
-  if (!selectedComponent.type || !selectedComponent.id) {
-    console.error("Invalid component structure:", selectedComponent);
-    return (
-      <div className="p-4 flex flex-col h-full justify-center items-center text-center text-muted-foreground">
-        <p>Invalid component structure</p>
-      </div>
-    );
-  }
-  
   // Initialize local values when component changes
-  React.useEffect(() => {
+  // This useEffect must always be called, not conditionally
+  useEffect(() => {
     if (selectedComponent) {
       try {
         const initialValues: Record<string, any> = {};
@@ -76,6 +59,9 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
       } catch (error) {
         console.error("Error initializing property values:", error);
       }
+    } else {
+      // Reset local values when no component is selected
+      setLocalInputValues({});
     }
   }, [selectedComponent]);
   
@@ -177,13 +163,32 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
     reader.readAsDataURL(file);
   };
   
-  // Initialize props if needed
-  const props = selectedComponent.props || {};
-  
   // Helper function to get local value with fallback to component value
   const getValue = (field: string, defaultValue: any = '') => {
     return localInputValues[field] !== undefined ? localInputValues[field] : defaultValue;
   };
+  
+  // Return empty panel if no component is selected
+  if (!selectedComponent) {
+    return (
+      <div className="p-4 flex flex-col h-full justify-center items-center text-center text-muted-foreground">
+        <p>Select a component to view and edit its properties</p>
+      </div>
+    );
+  }
+
+  // Safety check - ensure selectedComponent has the required fields
+  if (!selectedComponent.type || !selectedComponent.id) {
+    console.error("Invalid component structure:", selectedComponent);
+    return (
+      <div className="p-4 flex flex-col h-full justify-center items-center text-center text-muted-foreground">
+        <p>Invalid component structure</p>
+      </div>
+    );
+  }
+  
+  // Initialize props if needed
+  const props = selectedComponent.props || {};
   
   return (
     <ScrollArea className="h-full px-4">

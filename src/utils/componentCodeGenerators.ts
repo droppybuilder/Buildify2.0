@@ -15,6 +15,7 @@ export function generateButtonCode(component: any, isTkinter: boolean): string {
         text="${component.props?.text || 'Button'}",
         bg="${component.props?.bgColor || '#e0e0e0'}",
         fg="${component.props?.fgColor || '#000000'}",
+        font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}),
         activebackground="${component.props?.hoverColor || '#f0f0f0'}")
 self.button_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
   } else {
@@ -30,11 +31,14 @@ export function generateLabelCode(component: any, isTkinter: boolean): string {
   const safeId = component.id.replace(/[^a-zA-Z0-9_]/g, '_');
   
   if (isTkinter) {
+    const fontWeight = component.props?.fontWeight === 'bold' ? 'bold' : 'normal';
+    const fontStyle = component.props?.fontStyle === 'italic' ? 'italic' : 'roman';
+    
     return `self.label_${safeId} = tk.Label(self.root, 
         text="${component.props?.text || 'Label'}",
         fg="${component.props?.fgColor || '#000000'}",
         bg="${component.props?.bgColor || '#ffffff'}",
-        font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}))
+        font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}, "${fontWeight} ${fontStyle}"))
 self.label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
   } else {
     // For Eel, we just return a comment since components are handled via JSON
@@ -51,7 +55,8 @@ export function generateEntryCode(component: any, isTkinter: boolean): string {
   if (isTkinter) {
     return `self.entry_${safeId} = tk.Entry(self.root,
         bg="${component.props?.bgColor || '#ffffff'}",
-        fg="${component.props?.fgColor || '#000000'}")
+        fg="${component.props?.fgColor || '#000000'}",
+        font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}))
 self.entry_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
   } else {
     // For Eel, we just return a comment since components are handled via JSON
@@ -65,19 +70,43 @@ self.entry_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round
  */
 export function generateImageCode(component: any, isTkinter: boolean): string {
   const safeId = component.id.replace(/[^a-zA-Z0-9_]/g, '_');
-  const fileName = component.props?.fileName || `${safeId}.png`;
+  const fileName = component.props?.fileName || "placeholder.png";
   
   if (isTkinter) {
     return `# Image setup for ${safeId}
 # Place the image file "${fileName}" in your project directory
 self.img_${safeId} = self.load_ctk_image("${fileName}", (${Math.round(component.size.width)}, ${Math.round(component.size.height)}))
-self.image_label_${safeId} = ctk.CTkLabel(self, image=self.img_${safeId}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)}, text="")
-self.image_label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})
+self.image_label_${safeId} = ctk.CTkLabel(self.root, image=self.img_${safeId}, text="")
+self.image_label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
 # Keep reference to prevent garbage collection
 self._image_references.append(self.img_${safeId})`;
   } else {
     // For Eel, we just return a comment since components are handled via JSON
     return `# Image ${safeId} (${fileName}) is managed in the JavaScript UI`;
+  }
+}
+
+/**
+ * Generates code for a paragraph component
+ */
+export function generateParagraphCode(component: any, isTkinter: boolean): string {
+  const safeId = component.id.replace(/[^a-zA-Z0-9_]/g, '_');
+  
+  if (isTkinter) {
+    const fontWeight = component.props?.fontWeight === 'bold' ? 'bold' : 'normal';
+    const fontStyle = component.props?.fontStyle === 'italic' ? 'italic' : 'roman';
+    
+    return `self.text_${safeId} = tk.Text(self.root, 
+        fg="${component.props?.fgColor || '#000000'}",
+        bg="${component.props?.bgColor || '#ffffff'}",
+        wrap="word",
+        font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}, "${fontWeight} ${fontStyle}"))
+self.text_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+self.text_${safeId}.insert("1.0", """${component.props?.text || 'Paragraph text'}""")
+self.text_${safeId}.config(state="disabled")  # Make read-only unless editing is needed`;
+  } else {
+    // For Eel, we just return a comment since components are handled via JSON
+    return `# Paragraph ${safeId} is managed in the JavaScript UI`;
   }
 }
 
@@ -109,6 +138,8 @@ export function generateCheckboxCode(component: any, isTkinter: boolean): string
     return `self.var_${safeId} = tk.BooleanVar()
 self.checkbox_${safeId} = tk.Checkbutton(self.root, 
         text="${component.props?.text || 'Checkbox'}", 
+        font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}),
+        fg="${component.props?.fgColor || '#000000'}",
         variable=self.var_${safeId})
 self.checkbox_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
   } else {
@@ -126,6 +157,8 @@ export function generateOtherComponentCode(component: any, isTkinter: boolean): 
   
   if (isTkinter) {
     switch (component.type) {
+      case 'paragraph':
+        return generateParagraphCode(component, isTkinter);
       case 'datepicker':
         return generateDatePickerCode(component, safeId);
       case 'progressbar':
@@ -183,7 +216,8 @@ function generateListboxCode(component: any, safeId: string): string {
   const items = component.props?.items || ["Item 1", "Item 2", "Item 3"];
   const itemArray = typeof items === 'string' ? items.split(',') : items;
   
-  let code = `self.listbox_${safeId} = tk.Listbox(self.root)
+  let code = `self.listbox_${safeId} = tk.Listbox(self.root, 
+      font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}))
 self.listbox_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
 `;
   

@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { toast } from "sonner";
 import { Maximize2, Minimize2, X, Copy, Scissors, Trash } from "lucide-react";
@@ -602,6 +601,8 @@ const Canvas = ({
         return { width: 200, height: 200 };
       case 'canvas':
         return { width: 300, height: 200 };
+      case 'paragraph':
+        return { width: 300, height: 150 };
       default:
         return { width: 120, height: 40 };
     }
@@ -625,14 +626,20 @@ const Canvas = ({
           hoverColor: '#f0f0f0',
           cornerRadius: 8,
           borderColor: '#e2e8f0',
-          borderWidth: 1
+          borderWidth: 1,
+          font: 'Arial',
+          fontSize: 12,
+          fontWeight: 'normal',
+          fontStyle: 'normal'
         };
       case 'label':
         return { 
           text: 'Label', 
-          font: 'Default', 
+          font: 'Arial', 
           fontSize: 12, 
-          fgColor: '#000000' 
+          fgColor: '#000000',
+          fontWeight: 'normal',
+          fontStyle: 'normal'
         };
       case 'entry':
         return { 
@@ -640,16 +647,36 @@ const Canvas = ({
           bgColor: '#ffffff',
           cornerRadius: 8,
           borderColor: '#e2e8f0',
-          borderWidth: 1
+          borderWidth: 1,
+          font: 'Arial',
+          fontSize: 12,
+          fontWeight: 'normal',
+          fontStyle: 'normal'
+        };
+      case 'paragraph':
+        return {
+          text: 'Paragraph text goes here. Double-click to edit.',
+          bgColor: '#ffffff',
+          fgColor: '#000000',
+          font: 'Arial',
+          fontSize: 12,
+          fontWeight: 'normal',
+          fontStyle: 'normal',
+          borderColor: '#e2e8f0',
+          borderWidth: 1,
+          cornerRadius: 8,
+          padding: 10,
+          lineHeight: 1.5
         };
       case 'image':
         return { 
-          src: '/placeholder.svg',
+          src: '',
           fit: 'contain',
           cornerRadius: 8,
           borderColor: '#e2e8f0',
           borderWidth: 1,
-          fileName: 'placeholder.svg'
+          fileName: 'placeholder.png',
+          alt: 'Image'
         };
       case 'slider':
         return { 
@@ -675,7 +702,11 @@ const Canvas = ({
           checked: false,
           fgColor: '#000000',
           borderColor: '#e2e8f0',
-          checkedColor: '#3b82f6'
+          checkedColor: '#3b82f6',
+          font: 'Arial',
+          fontSize: 12,
+          fontWeight: 'normal',
+          fontStyle: 'normal'
         };
       case 'datepicker':
         return { 
@@ -684,7 +715,9 @@ const Canvas = ({
           fgColor: '#000000',
           cornerRadius: 8,
           borderColor: '#e2e8f0',
-          borderWidth: 1
+          borderWidth: 1,
+          font: 'Arial',
+          fontSize: 12
         };
       case 'progressbar':
         return { 
@@ -702,7 +735,9 @@ const Canvas = ({
           bgColor: '#ffffff',
           fgColor: '#000000',
           borderColor: '#e2e8f0',
-          borderWidth: 1
+          borderWidth: 1,
+          font: 'Arial',
+          fontSize: 12
         };
       case 'listbox':
         return { 
@@ -710,7 +745,9 @@ const Canvas = ({
           bgColor: '#ffffff',
           fgColor: '#000000',
           borderColor: '#e2e8f0',
-          borderWidth: 1
+          borderWidth: 1,
+          font: 'Arial',
+          fontSize: 12
         };
       case 'canvas':
         return { 
@@ -906,7 +943,11 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
             borderColor: component.props.borderColor || '#e2e8f0',
             borderWidth: `${component.props.borderWidth || 1}px`,
             borderStyle: 'solid',
-            cursor: 'default'
+            cursor: 'default',
+            fontFamily: component.props.font || 'Arial',
+            fontSize: `${component.props.fontSize || 12}px`,
+            fontWeight: component.props.fontWeight || 'normal',
+            fontStyle: component.props.fontStyle || 'normal',
           }}
         >
           {component.props.text || 'Button'}
@@ -919,7 +960,9 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
           style={{
             color: component.props.fgColor || '#000000',
             fontSize: `${component.props.fontSize || 12}px`,
-            fontFamily: component.props.font || 'system-ui',
+            fontFamily: component.props.font || 'Arial',
+            fontWeight: component.props.fontWeight || 'normal',
+            fontStyle: component.props.fontStyle || 'normal',
           }}
         >
           {component.props.text || 'Label'}
@@ -937,10 +980,37 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
             borderColor: component.props.borderColor || '#e2e8f0',
             borderWidth: `${component.props.borderWidth || 1}px`,
             borderStyle: 'solid',
-            color: '#000000'
+            color: '#000000',
+            fontFamily: component.props.font || 'Arial',
+            fontSize: `${component.props.fontSize || 12}px`,
+            fontWeight: component.props.fontWeight || 'normal',
+            fontStyle: component.props.fontStyle || 'normal',
           }}
           readOnly
         />
+      );
+    case 'paragraph':
+      return (
+        <div 
+          className="w-full h-full overflow-auto"
+          style={{
+            backgroundColor: component.props.bgColor || '#ffffff',
+            color: component.props.fgColor || '#000000',
+            borderRadius: `${component.props.cornerRadius || 8}px`,
+            borderColor: component.props.borderColor || '#e2e8f0',
+            borderWidth: `${component.props.borderWidth || 1}px`,
+            borderStyle: 'solid',
+            padding: `${component.props.padding || 10}px`,
+            fontFamily: component.props.font || 'Arial',
+            fontSize: `${component.props.fontSize || 12}px`,
+            fontWeight: component.props.fontWeight || 'normal',
+            fontStyle: component.props.fontStyle || 'normal',
+            lineHeight: component.props.lineHeight || 1.5,
+            whiteSpace: 'pre-wrap',
+          }}
+        >
+          {component.props.text || 'Paragraph text goes here. Double-click to edit.'}
+        </div>
       );
     case 'image':
       // Improved image widget with filename display
@@ -952,30 +1022,35 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
               borderRadius: `${component.props.cornerRadius || 8}px`,
               borderColor: component.props.borderColor || '#e2e8f0',
               borderWidth: `${component.props.borderWidth || 1}px`,
-              borderStyle: 'solid'
+              borderStyle: 'solid',
+              backgroundColor: '#f0f0f0'
             }}
           >
-            <img 
-              src={component.props.src || '/placeholder.svg'}
-              alt={component.props.fileName || 'Image'}
-              className="w-full h-full"
-              style={{
-                objectFit: component.props.fit || 'contain',
-                imageRendering: 'auto'
-              }}
-              loading="eager"
-              decoding="async"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = '/placeholder.svg';
-              }}
-            />
+            {component.props.src ? (
+              <img 
+                src={component.props.src}
+                alt={component.props.alt || component.props.fileName || 'Image'}
+                className="w-full h-full"
+                style={{
+                  objectFit: component.props.fit || 'contain',
+                  imageRendering: 'auto'
+                }}
+                loading="eager"
+                decoding="async"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = '/placeholder.svg';
+                }}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
+                No Image Selected
+              </div>
+            )}
           </div>
-          {component.props.fileName && (
-            <div className="text-xs truncate text-center mt-1 text-gray-600">
-              {component.props.fileName}
-            </div>
-          )}
+          <div className="text-xs truncate text-center mt-1 text-gray-600">
+            {component.props.fileName || 'placeholder.png'}
+          </div>
         </div>
       );
     case 'slider':
@@ -1071,7 +1146,13 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
             }}
             readOnly
           />
-          <span style={{ color: component.props.fgColor || '#000000' }}>
+          <span style={{ 
+            color: component.props.fgColor || '#000000',
+            fontFamily: component.props.font || 'Arial',
+            fontSize: `${component.props.fontSize || 12}px`,
+            fontWeight: component.props.fontWeight || 'normal',
+            fontStyle: component.props.fontStyle || 'normal',
+          }}>
             {component.props.text || 'Checkbox'}
           </span>
         </label>
@@ -1086,7 +1167,9 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
             borderColor: component.props.borderColor || '#e2e8f0',
             borderWidth: `${component.props.borderWidth || 1}px`,
             borderStyle: 'solid',
-            color: component.props.fgColor || '#000000'
+            color: component.props.fgColor || '#000000',
+            fontFamily: component.props.font || 'Arial',
+            fontSize: `${component.props.fontSize || 12}px`,
           }}
         >
           {component.props.format || 'yyyy-mm-dd'}
@@ -1138,6 +1221,10 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
                     ? 'border-b-2 border-primary text-primary' 
                     : 'text-gray-600'
                 }`}
+                style={{
+                  fontFamily: component.props.font || 'Arial',
+                  fontSize: `${component.props.fontSize || 12}px`,
+                }}
               >
                 {tab.trim()}
               </div>
@@ -1164,7 +1251,9 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
                 key={index} 
                 className="px-4 py-2 text-sm hover:bg-gray-100 cursor-default"
                 style={{
-                  color: component.props.fgColor || '#000000'
+                  color: component.props.fgColor || '#000000',
+                  fontFamily: component.props.font || 'Arial',
+                  fontSize: `${component.props.fontSize || 12}px`,
                 }}
               >
                 {item.trim()}

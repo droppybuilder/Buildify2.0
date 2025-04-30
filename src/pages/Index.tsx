@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import Canvas from '@/components/Canvas';
@@ -71,15 +70,9 @@ const Index = () => {
     }
   }, []);
   
+  // Update document title when window title changes
   useEffect(() => {
-    try {
-      localStorage.setItem('guiBuilderComponents', JSON.stringify(components));
-    } catch (error) {
-      console.error('Failed to save components:', error);
-    }
-  }, [components]);
-  
-  useEffect(() => {
+    document.title = windowTitle;
     try {
       localStorage.setItem('guiBuilderWindowTitle', windowTitle);
       localStorage.setItem('guiBuilderWindowSize', JSON.stringify(windowSize));
@@ -88,6 +81,14 @@ const Index = () => {
       console.error('Failed to save window properties:', error);
     }
   }, [windowTitle, windowSize, windowBgColor]);
+  
+  useEffect(() => {
+    try {
+      localStorage.setItem('guiBuilderComponents', JSON.stringify(components));
+    } catch (error) {
+      console.error('Failed to save components:', error);
+    }
+  }, [components]);
   
   const addToHistory = useCallback((newComponents: any[]) => {
     // Check if this is truly a new state to avoid unnecessary history entries
@@ -314,6 +315,7 @@ const Index = () => {
             <CodePreview 
               components={components} 
               visible={showCodePreview}
+              windowTitle={windowTitle}
             />
           ) : showLayers ? (
             <Layers 

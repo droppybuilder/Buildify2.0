@@ -11,12 +11,20 @@ export function generateButtonCode(component: any, isTkinter: boolean): string {
   const safeId = component.id.replace(/[^a-zA-Z0-9_]/g, '_');
   
   if (isTkinter) {
-    return `self.button_${safeId} = tk.Button(self.root, 
+    // Add font weight and style to button font configuration
+    const fontWeight = component.props?.fontWeight === 'bold' ? 'bold' : 'normal';
+    const fontStyle = component.props?.fontStyle === 'italic' ? 'italic' : 'roman';
+    
+    return `self.button_${safeId} = ctk.CTkButton(self.root, 
         text="${component.props?.text || 'Button'}",
-        bg="${component.props?.bgColor || '#e0e0e0'}",
-        fg="${component.props?.fgColor || '#000000'}",
-        font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}),
-        activebackground="${component.props?.hoverColor || '#f0f0f0'}")
+        bg_color="${component.props?.bgColor || '#e0e0e0'}",
+        fg_color="${component.props?.bgColor || '#e0e0e0'}",
+        text_color="${component.props?.fgColor || '#000000'}",
+        hover_color="${component.props?.hoverColor || '#f0f0f0'}",
+        corner_radius=${component.props?.cornerRadius || 8},
+        border_color="${component.props?.borderColor || '#e2e8f0'}",
+        border_width=${component.props?.borderWidth || 1},
+        font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}, "${fontWeight} ${fontStyle}"))
 self.button_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
   } else {
     // For Eel, we just return a comment since components are handled via JSON
@@ -34,10 +42,9 @@ export function generateLabelCode(component: any, isTkinter: boolean): string {
     const fontWeight = component.props?.fontWeight === 'bold' ? 'bold' : 'normal';
     const fontStyle = component.props?.fontStyle === 'italic' ? 'italic' : 'roman';
     
-    return `self.label_${safeId} = tk.Label(self.root, 
+    return `self.label_${safeId} = ctk.CTkLabel(self.root, 
         text="${component.props?.text || 'Label'}",
-        fg="${component.props?.fgColor || '#000000'}",
-        bg="${component.props?.bgColor || '#ffffff'}",
+        text_color="${component.props?.fgColor || '#000000'}",
         font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}, "${fontWeight} ${fontStyle}"))
 self.label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
   } else {
@@ -53,9 +60,15 @@ export function generateEntryCode(component: any, isTkinter: boolean): string {
   const safeId = component.id.replace(/[^a-zA-Z0-9_]/g, '_');
   
   if (isTkinter) {
-    return `self.entry_${safeId} = tk.Entry(self.root,
-        bg="${component.props?.bgColor || '#ffffff'}",
-        fg="${component.props?.fgColor || '#000000'}",
+    // Add font related properties to the entry component
+    return `self.entry_${safeId} = ctk.CTkEntry(self.root,
+        placeholder_text="${component.props?.placeholder || 'Enter text...'}",
+        bg_color="${component.props?.bgColor || '#ffffff'}",
+        fg_color="${component.props?.bgColor || '#ffffff'}",
+        text_color="${component.props?.fgColor || '#000000'}",
+        corner_radius=${component.props?.cornerRadius || 8},
+        border_color="${component.props?.borderColor || '#e2e8f0'}",
+        border_width=${component.props?.borderWidth || 1},
         font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}))
 self.entry_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
   } else {
@@ -74,8 +87,9 @@ export function generateImageCode(component: any, isTkinter: boolean): string {
   
   if (isTkinter) {
     return `# Image setup for ${safeId}
-# Place the image file "${fileName}" in your project directory
-self.img_${safeId} = self.load_ctk_image("${fileName}", (${Math.round(component.size.width)}, ${Math.round(component.size.height)}))
+# Make sure to place the image file "${fileName}" in your project directory
+self.img_${safeId} = ctk.CTkImage(light_image=Image.open("${fileName}"), 
+                                 size=(${Math.round(component.size.width)}, ${Math.round(component.size.height)}))
 self.image_label_${safeId} = ctk.CTkLabel(self.root, image=self.img_${safeId}, text="")
 self.image_label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
 # Keep reference to prevent garbage collection
@@ -96,14 +110,17 @@ export function generateParagraphCode(component: any, isTkinter: boolean): strin
     const fontWeight = component.props?.fontWeight === 'bold' ? 'bold' : 'normal';
     const fontStyle = component.props?.fontStyle === 'italic' ? 'italic' : 'roman';
     
-    return `self.text_${safeId} = tk.Text(self.root, 
-        fg="${component.props?.fgColor || '#000000'}",
-        bg="${component.props?.bgColor || '#ffffff'}",
+    return `self.text_${safeId} = customtkinter.CTkTextbox(self.root, 
+        text_color="${component.props?.fgColor || '#000000'}",
+        fg_color="${component.props?.bgColor || '#ffffff'}",
+        corner_radius=${component.props?.cornerRadius || 8},
+        border_width=${component.props?.borderWidth || 1},
+        border_color="${component.props?.borderColor || '#e2e8f0'}",
         wrap="word",
         font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}, "${fontWeight} ${fontStyle}"))
 self.text_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
 self.text_${safeId}.insert("1.0", """${component.props?.text || 'Paragraph text'}""")
-self.text_${safeId}.config(state="disabled")  # Make read-only unless editing is needed`;
+self.text_${safeId}.configure(state="disabled")  # Make read-only unless editing is needed`;
   } else {
     // For Eel, we just return a comment since components are handled via JSON
     return `# Paragraph ${safeId} is managed in the JavaScript UI`;
@@ -183,21 +200,34 @@ export function generateOtherComponentCode(component: any, isTkinter: boolean): 
 function generateDatePickerCode(component: any, safeId: string): string {
   return `# Requires tkcalendar library: pip install tkcalendar
 # Add this import: from tkcalendar import DateEntry
-self.date_picker_${safeId} = DateEntry(self.root, width=12, background='darkblue', foreground='white', borderwidth=2)
+self.date_picker_${safeId} = DateEntry(self.root, 
+        width=12, 
+        background='darkblue', 
+        foreground='white',
+        date_pattern="${component.props?.format || 'yyyy-mm-dd'}",
+        font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}),
+        borderwidth=${component.props?.borderWidth || 1})
 self.date_picker_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
 }
 
 function generateProgressBarCode(component: any, safeId: string): string {
-  return `self.progress_${safeId} = ttk.Progressbar(self.root, orient='horizontal', length=${Math.round(component.size.width)}, mode='determinate')
+  return `self.progress_${safeId} = customtkinter.CTkProgressBar(self.root, 
+        orientation='horizontal',
+        width=${Math.round(component.size.width)},
+        height=${Math.round(component.size.height)},
+        corner_radius=${component.props?.cornerRadius || 4},
+        progress_color="${component.props?.progressColor || '#3b82f6'}",
+        fg_color="${component.props?.bgColor || '#e2e8f0'}")
 self.progress_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})
-self.progress_${safeId}['value'] = ${component.props?.value || 50}  # Set initial value`;
+self.progress_${safeId}.set(${(component.props?.value || 50) / 100})  # CTk uses 0-1 for progress`;
 }
 
 function generateFrameCode(component: any, safeId: string): string {
-  return `self.frame_${safeId} = tk.Frame(self.root, 
-      bg="${component.props?.bgColor || '#f0f0f0'}", 
-      highlightbackground="${component.props?.borderColor || '#cccccc'}", 
-      highlightthickness=${component.props?.borderWidth || 1})
+  return `self.frame_${safeId} = customtkinter.CTkFrame(self.root, 
+      corner_radius=${component.props?.cornerRadius || 4},
+      fg_color="${component.props?.bgColor || '#f0f0f0'}", 
+      border_color="${component.props?.borderColor || '#cccccc'}", 
+      border_width=${component.props?.borderWidth || 1})
 self.frame_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
 }
 

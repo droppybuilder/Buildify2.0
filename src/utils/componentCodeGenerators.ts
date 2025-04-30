@@ -61,7 +61,7 @@ self.entry_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round
 
 /**
  * Generates code for an image component
- * Modified to not export the actual image data, but instead references the file name
+ * Modified to use CTkImage for proper HighDPI support
  */
 export function generateImageCode(component: any, isTkinter: boolean): string {
   const safeId = component.id.replace(/[^a-zA-Z0-9_]/g, '_');
@@ -70,9 +70,8 @@ export function generateImageCode(component: any, isTkinter: boolean): string {
   if (isTkinter) {
     return `# Image setup for ${safeId}
 # Place the image file "${fileName}" in your project directory
-self.img_${safeId} = self.load_image("${fileName}", (${Math.round(component.size.width)}, ${Math.round(component.size.height)}))
+self.img_${safeId} = self.load_ctk_image("${fileName}", (${Math.round(component.size.width)}, ${Math.round(component.size.height)}))
 self.image_label_${safeId} = ctk.CTkLabel(self, image=self.img_${safeId}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)}, text="")
-# Note: CTkLabel with image doesn't support border properties
 self.image_label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})
 # Keep reference to prevent garbage collection
 self._image_references.append(self.img_${safeId})`;

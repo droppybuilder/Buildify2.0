@@ -68,6 +68,8 @@ export const Layers = ({
       onComponentsChange(updatedComponents);
       return newVisibility;
     });
+    
+    toast.info(`Component visibility ${visibilityStates[id] ? 'hidden' : 'shown'}`);
   };
   
   const toggleLock = (id: string, e: React.MouseEvent) => {
@@ -92,10 +94,11 @@ export const Layers = ({
       
       onComponentsChange(updatedComponents);
       
+      const componentName = components.find(c => c.id === id)?.type || 'Component';
       if (newLockState[id]) {
-        toast.info(`"${c => c.type || 'Component'}" locked`);
+        toast.info(`"${componentName}" locked`);
       } else {
-        toast.info(`"${c => c.type || 'Component'}" unlocked`);
+        toast.info(`"${componentName}" unlocked`);
       }
       
       return newLockState;
@@ -140,7 +143,7 @@ export const Layers = ({
     <div className="flex-1 overflow-auto bg-gray-50 border-r border-border flex flex-col">
       <div className="p-4 border-b">
         <h2 className="text-lg font-semibold">Layers</h2>
-        <p className="text-sm text-muted-foreground">Drag to reorder layers</p>
+        <p className="text-sm text-muted-foreground">Manage visibility and layer order</p>
       </div>
       
       <DragDropContext onDragEnd={handleDragEnd}>
@@ -188,6 +191,7 @@ export const Layers = ({
                               size="icon"
                               className="h-6 w-6"
                               onClick={(e) => toggleVisibility(component.id, e)}
+                              title={isVisible ? "Hide layer" : "Show layer"}
                             >
                               {isVisible ? (
                                 <Eye size={14} className="text-muted-foreground" />
@@ -201,6 +205,7 @@ export const Layers = ({
                               size="icon"
                               className="h-6 w-6 mr-2"
                               onClick={(e) => toggleLock(component.id, e)}
+                              title={isLocked ? "Unlock layer" : "Lock layer"}
                             >
                               {isLocked ? (
                                 <Lock size={14} className="text-muted-foreground" />
@@ -210,12 +215,22 @@ export const Layers = ({
                             </Button>
                             
                             <div 
-                              className={`flex-1 truncate text-sm ${!isVisible ? 'text-muted-foreground' : ''}`}
+                              className={`flex-1 truncate text-sm ${
+                                !isVisible ? 'text-muted-foreground italic' : 
+                                isLocked ? 'font-medium' : ''
+                              }`}
                             >
                               {component.type}{' '}
-                              <span className="text-xs text-muted-foreground">
-                                ({component.id.split('-')[1]})
-                              </span>
+                              {component.type === 'image' && component.props?.fileName && (
+                                <span className="text-xs text-blue-600">
+                                  ({component.props.fileName})
+                                </span>
+                              )}
+                              {component.type !== 'image' && (
+                                <span className="text-xs text-muted-foreground">
+                                  ({component.id.split('-')[0]})
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -236,7 +251,7 @@ export const Layers = ({
             {components.length} components
           </span>
           <span className="text-xs text-muted-foreground">
-            Figma-style layers
+            <span className="font-medium">Tip:</span> Lock layers to prevent editing
           </span>
         </div>
       </div>

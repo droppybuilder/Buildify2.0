@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import Canvas from '@/components/Canvas';
@@ -315,7 +316,6 @@ const Index = () => {
             <CodePreview 
               components={components} 
               visible={showCodePreview}
-              windowTitle={windowTitle}
             />
           ) : showLayers ? (
             <Layers 

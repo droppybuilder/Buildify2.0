@@ -61,6 +61,9 @@ export function generateEntryCode(component: any, isTkinter: boolean): string {
   
   if (isTkinter) {
     // Add font related properties to the entry component
+    const fontWeight = component.props?.fontWeight === 'bold' ? 'bold' : 'normal';
+    const fontStyle = component.props?.fontStyle === 'italic' ? 'italic' : 'roman';
+    
     return `self.entry_${safeId} = ctk.CTkEntry(self.root,
         placeholder_text="${component.props?.placeholder || 'Enter text...'}",
         bg_color="${component.props?.bgColor || '#ffffff'}",
@@ -69,7 +72,7 @@ export function generateEntryCode(component: any, isTkinter: boolean): string {
         corner_radius=${component.props?.cornerRadius || 8},
         border_color="${component.props?.borderColor || '#e2e8f0'}",
         border_width=${component.props?.borderWidth || 1},
-        font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}))
+        font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}, "${fontWeight} ${fontStyle}"))
 self.entry_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
   } else {
     // For Eel, we just return a comment since components are handled via JSON
@@ -152,11 +155,14 @@ export function generateCheckboxCode(component: any, isTkinter: boolean): string
   const safeId = component.id.replace(/[^a-zA-Z0-9_]/g, '_');
   
   if (isTkinter) {
+    const fontWeight = component.props?.fontWeight === 'bold' ? 'bold' : 'normal';
+    const fontStyle = component.props?.fontStyle === 'italic' ? 'italic' : 'roman';
+    
     return `self.var_${safeId} = tk.BooleanVar()
-self.checkbox_${safeId} = tk.Checkbutton(self.root, 
+self.checkbox_${safeId} = customtkinter.CTkCheckBox(self.root, 
         text="${component.props?.text || 'Checkbox'}", 
-        font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}),
-        fg="${component.props?.fgColor || '#000000'}",
+        font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}, "${fontWeight} ${fontStyle}"),
+        text_color="${component.props?.fgColor || '#000000'}",
         variable=self.var_${safeId})
 self.checkbox_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
   } else {
@@ -198,6 +204,9 @@ export function generateOtherComponentCode(component: any, isTkinter: boolean): 
 }
 
 function generateDatePickerCode(component: any, safeId: string): string {
+  const fontWeight = component.props?.fontWeight === 'bold' ? 'bold' : 'normal';
+  const fontStyle = component.props?.fontStyle === 'italic' ? 'italic' : 'roman';
+  
   return `# Requires tkcalendar library: pip install tkcalendar
 # Add this import: from tkcalendar import DateEntry
 self.date_picker_${safeId} = DateEntry(self.root, 
@@ -205,7 +214,7 @@ self.date_picker_${safeId} = DateEntry(self.root,
         background='darkblue', 
         foreground='white',
         date_pattern="${component.props?.format || 'yyyy-mm-dd'}",
-        font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}),
+        font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}, "${fontWeight} ${fontStyle}"),
         borderwidth=${component.props?.borderWidth || 1})
 self.date_picker_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
 }
@@ -232,6 +241,9 @@ self.frame_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round
 }
 
 function generateNotebookCode(component: any, safeId: string): string {
+  const fontWeight = component.props?.fontWeight === 'bold' ? 'bold' : 'normal';
+  const fontStyle = component.props?.fontStyle === 'italic' ? 'italic' : 'roman';
+  
   return `self.notebook_${safeId} = ttk.Notebook(self.root)
 self.notebook_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
 
@@ -245,9 +257,11 @@ self.notebook_${safeId}.add(self.tab2_${safeId}, text="Tab 2")`;
 function generateListboxCode(component: any, safeId: string): string {
   const items = component.props?.items || ["Item 1", "Item 2", "Item 3"];
   const itemArray = typeof items === 'string' ? items.split(',') : items;
+  const fontWeight = component.props?.fontWeight === 'bold' ? 'bold' : 'normal';
+  const fontStyle = component.props?.fontStyle === 'italic' ? 'italic' : 'roman';
   
   let code = `self.listbox_${safeId} = tk.Listbox(self.root, 
-      font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}))
+      font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}, "${fontWeight} ${fontStyle}"))
 self.listbox_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
 `;
   

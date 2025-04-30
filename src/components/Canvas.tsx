@@ -8,6 +8,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import ComponentPreview from './ComponentPreview';
 
 interface Component {
   id: string;
@@ -306,6 +307,7 @@ const Canvas = ({
             newX = Math.max(0, Math.min(newX, rect.width - comp.size.width));
             newY = Math.max(0, Math.min(newY, rect.height - comp.size.height));
             
+            // Create a new component object with updated position
             return {
               ...comp,
               position: {
@@ -316,7 +318,9 @@ const Canvas = ({
           }
           return comp;
         });
-        setComponents(newComponents);
+        
+        // Update components array - this prevents the "null widget" issue
+        setComponents([...newComponents]);
       } else if (isResizing && resizeDirection) {
         const rect = canvasRef.current?.getBoundingClientRect();
         if (!rect) return;
@@ -629,6 +633,12 @@ const Canvas = ({
     };
     
     const commonProps = commonLightProps;
+    const commonFontProps = {
+      font: 'Arial',
+      fontSize: 12,
+      fontWeight: 'normal',
+      fontStyle: 'normal'
+    };
     
     switch (type) {
       case 'button':
@@ -640,46 +650,35 @@ const Canvas = ({
           cornerRadius: 8,
           borderColor: '#e2e8f0',
           borderWidth: 1,
-          font: 'Arial',
-          fontSize: 12,
-          fontWeight: 'normal',
-          fontStyle: 'normal'
+          ...commonFontProps
         };
       case 'label':
         return { 
           text: 'Label', 
-          font: 'Arial', 
-          fontSize: 12, 
           fgColor: '#000000',
-          fontWeight: 'normal',
-          fontStyle: 'normal'
+          ...commonFontProps
         };
       case 'entry':
         return { 
           placeholder: 'Enter text...',
           bgColor: '#ffffff',
+          fgColor: '#000000',
           cornerRadius: 8,
           borderColor: '#e2e8f0',
           borderWidth: 1,
-          font: 'Arial',
-          fontSize: 12,
-          fontWeight: 'normal',
-          fontStyle: 'normal'
+          ...commonFontProps
         };
       case 'paragraph':
         return {
           text: 'Paragraph text goes here. Double-click to edit.',
           bgColor: '#ffffff',
           fgColor: '#000000',
-          font: 'Arial',
-          fontSize: 12,
-          fontWeight: 'normal',
-          fontStyle: 'normal',
           borderColor: '#e2e8f0',
           borderWidth: 1,
           cornerRadius: 8,
           padding: 10,
-          lineHeight: 1.5
+          lineHeight: 1.5,
+          ...commonFontProps
         };
       case 'image':
         return { 
@@ -716,10 +715,7 @@ const Canvas = ({
           fgColor: '#000000',
           borderColor: '#e2e8f0',
           checkedColor: '#3b82f6',
-          font: 'Arial',
-          fontSize: 12,
-          fontWeight: 'normal',
-          fontStyle: 'normal'
+          ...commonFontProps
         };
       case 'datepicker':
         return { 
@@ -729,8 +725,7 @@ const Canvas = ({
           cornerRadius: 8,
           borderColor: '#e2e8f0',
           borderWidth: 1,
-          font: 'Arial',
-          fontSize: 12
+          ...commonFontProps
         };
       case 'progressbar':
         return { 
@@ -936,9 +931,4 @@ const Canvas = ({
   );
 };
 
-interface ComponentPreviewProps {
-  component: Component;
-  isHovered: boolean;
-}
-
-const
+export default Canvas;

@@ -71,9 +71,15 @@ const Index = () => {
     }
   }, []);
   
-  // Update document title when window title changes
   useEffect(() => {
-    document.title = windowTitle;
+    try {
+      localStorage.setItem('guiBuilderComponents', JSON.stringify(components));
+    } catch (error) {
+      console.error('Failed to save components:', error);
+    }
+  }, [components]);
+  
+  useEffect(() => {
     try {
       localStorage.setItem('guiBuilderWindowTitle', windowTitle);
       localStorage.setItem('guiBuilderWindowSize', JSON.stringify(windowSize));
@@ -82,14 +88,6 @@ const Index = () => {
       console.error('Failed to save window properties:', error);
     }
   }, [windowTitle, windowSize, windowBgColor]);
-  
-  useEffect(() => {
-    try {
-      localStorage.setItem('guiBuilderComponents', JSON.stringify(components));
-    } catch (error) {
-      console.error('Failed to save components:', error);
-    }
-  }, [components]);
   
   const addToHistory = useCallback((newComponents: any[]) => {
     // Check if this is truly a new state to avoid unnecessary history entries

@@ -48,8 +48,6 @@ export const WindowProperties: React.FC<WindowPropertiesProps> = ({
     }
     
     setTitle(localTitle);
-    // Also update document title
-    document.title = localTitle;
     setSize({ width, height });
     setBgColor(localBgColor);
     toast.success("Window properties updated");

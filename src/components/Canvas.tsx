@@ -8,7 +8,6 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import ComponentPreview from './ComponentPreview';
 
 interface Component {
   id: string;
@@ -307,7 +306,6 @@ const Canvas = ({
             newX = Math.max(0, Math.min(newX, rect.width - comp.size.width));
             newY = Math.max(0, Math.min(newY, rect.height - comp.size.height));
             
-            // Create a new component object with updated position
             return {
               ...comp,
               position: {
@@ -318,9 +316,7 @@ const Canvas = ({
           }
           return comp;
         });
-        
-        // Update components array - this prevents the "null widget" issue
-        setComponents([...newComponents]);
+        setComponents(newComponents);
       } else if (isResizing && resizeDirection) {
         const rect = canvasRef.current?.getBoundingClientRect();
         if (!rect) return;
@@ -383,18 +379,13 @@ const Canvas = ({
     setHoveredComponent(null);
   };
 
-  // Specifically fixed to prevent null widgets during drag and drop
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
     
     try {
       const type = e.dataTransfer.getData('componentType');
-      if (!type) {
-        console.warn("Drop event missing component type");
-        return;
-      }
-      
       const rect = canvasRef.current?.getBoundingClientRect();
+      
       if (!rect) return;
 
       const x = e.clientX - rect.left;
@@ -416,7 +407,7 @@ const Canvas = ({
       };
 
       setComponents([...components, newComponent]);
-      toast.success(`${type} component added to canvas`);
+      toast.success("Component added to canvas");
     } catch (error) {
       console.error("Error in drop handler:", error);
       toast.error("Failed to add component");
@@ -425,7 +416,7 @@ const Canvas = ({
 
   // Handle image file uploads directly
   const handleImageDrop = (file: File, x: number, y: number) => {
-    if (!file || !file.type || !file.type.startsWith('image/')) {
+    if (!file.type.startsWith('image/')) {
       toast.error("Only image files are allowed");
       return;
     }
@@ -450,18 +441,12 @@ const Canvas = ({
           props: {
             ...getDefaultProps('image'),
             src: imageResult,
-            fileName: fileName,
-            alt: fileName
+            fileName: fileName
           },
         };
         
-        setImageCache(prev => ({
-          ...prev,
-          [imageResult]: imageResult
-        }));
-        
         setComponents([...components, newComponent]);
-        toast.success(`Image "${fileName}" added to canvas`);
+        toast.success("Image added to canvas");
       } catch (error) {
         console.error("Error processing image file:", error);
         toast.error("Failed to process image file");
@@ -575,8 +560,6 @@ const Canvas = ({
   const handleTitleSave = () => {
     if (setWindowTitle && titleInput.trim()) {
       setWindowTitle(titleInput.trim());
-      // Also update document title
-      document.title = titleInput.trim();
       toast.success("Window title updated");
     }
     setIsEditingTitle(false);
@@ -633,12 +616,6 @@ const Canvas = ({
     };
     
     const commonProps = commonLightProps;
-    const commonFontProps = {
-      font: 'Arial',
-      fontSize: 12,
-      fontWeight: 'normal',
-      fontStyle: 'normal'
-    };
     
     switch (type) {
       case 'button':
@@ -650,35 +627,46 @@ const Canvas = ({
           cornerRadius: 8,
           borderColor: '#e2e8f0',
           borderWidth: 1,
-          ...commonFontProps
+          font: 'Arial',
+          fontSize: 12,
+          fontWeight: 'normal',
+          fontStyle: 'normal'
         };
       case 'label':
         return { 
           text: 'Label', 
+          font: 'Arial', 
+          fontSize: 12, 
           fgColor: '#000000',
-          ...commonFontProps
+          fontWeight: 'normal',
+          fontStyle: 'normal'
         };
       case 'entry':
         return { 
           placeholder: 'Enter text...',
           bgColor: '#ffffff',
-          fgColor: '#000000',
           cornerRadius: 8,
           borderColor: '#e2e8f0',
           borderWidth: 1,
-          ...commonFontProps
+          font: 'Arial',
+          fontSize: 12,
+          fontWeight: 'normal',
+          fontStyle: 'normal'
         };
       case 'paragraph':
         return {
           text: 'Paragraph text goes here. Double-click to edit.',
           bgColor: '#ffffff',
           fgColor: '#000000',
+          font: 'Arial',
+          fontSize: 12,
+          fontWeight: 'normal',
+          fontStyle: 'normal',
           borderColor: '#e2e8f0',
           borderWidth: 1,
           cornerRadius: 8,
           padding: 10,
-          lineHeight: 1.5,
-          ...commonFontProps
+          lineHeight: 1.5
         };
       case 'image':
         return { 
@@ -715,7 +703,10 @@ const Canvas = ({
           fgColor: '#000000',
           borderColor: '#e2e8f0',
           checkedColor: '#3b82f6',
-          ...commonFontProps
+          font: 'Arial',
+          fontSize: 12,
+          fontWeight: 'normal',
+          fontStyle: 'normal'
         };
       case 'datepicker':
         return { 
@@ -725,7 +716,8 @@ const Canvas = ({
           cornerRadius: 8,
           borderColor: '#e2e8f0',
           borderWidth: 1,
-          ...commonFontProps
+          font: 'Arial',
+          fontSize: 12
         };
       case 'progressbar':
         return { 
@@ -929,6 +921,363 @@ const Canvas = ({
       </div>
     </div>
   );
+};
+
+interface ComponentPreviewProps {
+  component: Component;
+  isHovered: boolean;
+}
+
+const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
+  switch (component.type) {
+    case 'button':
+      return (
+        <button 
+          className="w-full h-full border transition-colors"
+          style={{
+            backgroundColor: isHovered && component.props.hoverColor 
+              ? component.props.hoverColor 
+              : component.props.bgColor || '#ffffff',
+            color: component.props.fgColor || '#000000',
+            borderRadius: `${component.props.cornerRadius || 8}px`,
+            borderColor: component.props.borderColor || '#e2e8f0',
+            borderWidth: `${component.props.borderWidth || 1}px`,
+            borderStyle: 'solid',
+            cursor: 'default',
+            fontFamily: component.props.font || 'Arial',
+            fontSize: `${component.props.fontSize || 12}px`,
+            fontWeight: component.props.fontWeight || 'normal',
+            fontStyle: component.props.fontStyle || 'normal',
+          }}
+        >
+          {component.props.text || 'Button'}
+        </button>
+      );
+    case 'label':
+      return (
+        <div 
+          className="w-full h-full flex items-center"
+          style={{
+            color: component.props.fgColor || '#000000',
+            fontSize: `${component.props.fontSize || 12}px`,
+            fontFamily: component.props.font || 'Arial',
+            fontWeight: component.props.fontWeight || 'normal',
+            fontStyle: component.props.fontStyle || 'normal',
+          }}
+        >
+          {component.props.text || 'Label'}
+        </div>
+      );
+    case 'entry':
+      return (
+        <input
+          type="text"
+          className="w-full h-full px-3"
+          placeholder={component.props.placeholder || 'Enter text...'}
+          style={{
+            backgroundColor: component.props.bgColor || '#ffffff',
+            borderRadius: `${component.props.cornerRadius || 8}px`,
+            borderColor: component.props.borderColor || '#e2e8f0',
+            borderWidth: `${component.props.borderWidth || 1}px`,
+            borderStyle: 'solid',
+            color: '#000000',
+            fontFamily: component.props.font || 'Arial',
+            fontSize: `${component.props.fontSize || 12}px`,
+            fontWeight: component.props.fontWeight || 'normal',
+            fontStyle: component.props.fontStyle || 'normal',
+          }}
+          readOnly
+        />
+      );
+    case 'paragraph':
+      return (
+        <div 
+          className="w-full h-full overflow-auto"
+          style={{
+            backgroundColor: component.props.bgColor || '#ffffff',
+            color: component.props.fgColor || '#000000',
+            borderRadius: `${component.props.cornerRadius || 8}px`,
+            borderColor: component.props.borderColor || '#e2e8f0',
+            borderWidth: `${component.props.borderWidth || 1}px`,
+            borderStyle: 'solid',
+            padding: `${component.props.padding || 10}px`,
+            fontFamily: component.props.font || 'Arial',
+            fontSize: `${component.props.fontSize || 12}px`,
+            fontWeight: component.props.fontWeight || 'normal',
+            fontStyle: component.props.fontStyle || 'normal',
+            lineHeight: component.props.lineHeight || 1.5,
+            whiteSpace: 'pre-wrap',
+          }}
+        >
+          {component.props.text || 'Paragraph text goes here. Double-click to edit.'}
+        </div>
+      );
+    case 'image':
+      // Improved image widget with filename display
+      return (
+        <div className="w-full h-full flex flex-col">
+          <div 
+            className="flex-1 overflow-hidden"
+            style={{
+              borderRadius: `${component.props.cornerRadius || 8}px`,
+              borderColor: component.props.borderColor || '#e2e8f0',
+              borderWidth: `${component.props.borderWidth || 1}px`,
+              borderStyle: 'solid',
+              backgroundColor: '#f0f0f0'
+            }}
+          >
+            {component.props.src ? (
+              <img 
+                src={component.props.src}
+                alt={component.props.alt || component.props.fileName || 'Image'}
+                className="w-full h-full"
+                style={{
+                  objectFit: component.props.fit || 'contain',
+                  imageRendering: 'auto'
+                }}
+                loading="eager"
+                decoding="async"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = '/placeholder.svg';
+                }}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
+                No Image Selected
+              </div>
+            )}
+          </div>
+          <div className="text-xs truncate text-center mt-1 text-gray-600">
+            {component.props.fileName || 'placeholder.png'}
+          </div>
+        </div>
+      );
+    case 'slider':
+      return (
+        <div 
+          className="w-full h-full flex items-center justify-center"
+          style={{
+            borderRadius: `${component.props.cornerRadius || 8}px`,
+          }}
+        >
+          <div 
+            className="relative"
+            style={{
+              width: component.props.orient === 'vertical' ? '8px' : '100%',
+              height: component.props.orient === 'vertical' ? '100%' : '8px',
+              backgroundColor: component.props.bgColor || '#e2e8f0',
+              borderRadius: '4px',
+              borderWidth: `${component.props.borderWidth || 0}px`,
+              borderStyle: 'solid',
+              borderColor: component.props.borderColor || 'transparent',
+            }}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                backgroundColor: component.props.progressColor || '#3b82f6',
+                borderRadius: '4px',
+                ...(component.props.orient === 'vertical' 
+                  ? {
+                      width: '100%',
+                      bottom: 0,
+                      height: `${((component.props.value - component.props.from) / (component.props.to - component.props.from)) * 100}%`
+                    }
+                  : {
+                      height: '100%',
+                      width: `${((component.props.value - component.props.from) / (component.props.to - component.props.from)) * 100}%`
+                    }
+                )
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                width: '16px',
+                height: '16px',
+                backgroundColor: 'white',
+                borderRadius: '50%',
+                border: `1px solid ${component.props.borderColor || '#d1d5db'}`,
+                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+                ...(component.props.orient === 'vertical'
+                  ? {
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      bottom: `calc(${((component.props.value - component.props.from) / (component.props.to - component.props.from)) * 100}% - 8px)`
+                    }
+                  : {
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      left: `calc(${((component.props.value - component.props.from) / (component.props.to - component.props.from)) * 100}% - 8px)`
+                    }
+                )
+              }}
+            />
+          </div>
+        </div>
+      );
+    case 'frame':
+      return (
+        <div 
+          className="w-full h-full"
+          style={{
+            backgroundColor: component.props.bgColor || '#ffffff',
+            borderWidth: `${component.props.borderWidth || 1}px`,
+            borderColor: component.props.borderColor || '#e2e8f0',
+            borderStyle: 
+              component.props.relief === 'flat' ? 'solid' :
+              component.props.relief === 'groove' ? 'groove' :
+              component.props.relief === 'ridge' ? 'ridge' : 'solid',
+            borderRadius: `${component.props.cornerRadius || 4}px`,
+          }}
+        />
+      );
+    case 'checkbox':
+      return (
+        <label className="flex items-center gap-2 h-full cursor-default">
+          <input 
+            type="checkbox" 
+            className="w-4 h-4 rounded"
+            defaultChecked={component.props.checked}
+            style={{
+              borderColor: component.props.borderColor || '#d1d5db',
+              accentColor: component.props.checkedColor || '#3b82f6',
+            }}
+            readOnly
+          />
+          <span style={{ 
+            color: component.props.fgColor || '#000000',
+            fontFamily: component.props.font || 'Arial',
+            fontSize: `${component.props.fontSize || 12}px`,
+            fontWeight: component.props.fontWeight || 'normal',
+            fontStyle: component.props.fontStyle || 'normal',
+          }}>
+            {component.props.text || 'Checkbox'}
+          </span>
+        </label>
+      );
+    case 'datepicker':
+      return (
+        <div 
+          className="w-full h-full flex items-center px-3"
+          style={{
+            backgroundColor: component.props.bgColor || '#ffffff',
+            borderRadius: `${component.props.cornerRadius || 8}px`,
+            borderColor: component.props.borderColor || '#e2e8f0',
+            borderWidth: `${component.props.borderWidth || 1}px`,
+            borderStyle: 'solid',
+            color: component.props.fgColor || '#000000',
+            fontFamily: component.props.font || 'Arial',
+            fontSize: `${component.props.fontSize || 12}px`,
+          }}
+        >
+          {component.props.format || 'yyyy-mm-dd'}
+        </div>
+      );
+    case 'progressbar':
+      return (
+        <div 
+          className="w-full h-full flex items-center"
+          style={{
+            borderRadius: `${component.props.cornerRadius || 4}px`,
+            overflow: 'hidden'
+          }}
+        >
+          <div 
+            className="h-full"
+            style={{
+              width: `${(component.props.value / component.props.maxValue) * 100}%`,
+              backgroundColor: component.props.progressColor || '#3b82f6'
+            }}
+          />
+          <div 
+            className="h-full flex-1"
+            style={{
+              backgroundColor: component.props.bgColor || '#e2e8f0'
+            }}
+          />
+        </div>
+      );
+    case 'notebook':
+      return (
+        <div 
+          className="w-full h-full flex flex-col"
+          style={{
+            backgroundColor: component.props.bgColor || '#ffffff',
+            borderRadius: `${component.props.cornerRadius || 4}px`,
+            borderColor: component.props.borderColor || '#e2e8f0',
+            borderWidth: `${component.props.borderWidth || 1}px`,
+            borderStyle: 'solid',
+            overflow: 'hidden'
+          }}
+        >
+          <div className="flex border-b border-gray-200">
+            {component.props.tabs && component.props.tabs.split(',').map((tab: string, index: number) => (
+              <div 
+                key={index}
+                className={`px-4 py-2 text-sm cursor-default ${
+                  component.props.selectedTab === tab.trim() 
+                    ? 'border-b-2 border-primary text-primary' 
+                    : 'text-gray-600'
+                }`}
+                style={{
+                  fontFamily: component.props.font || 'Arial',
+                  fontSize: `${component.props.fontSize || 12}px`,
+                }}
+              >
+                {tab.trim()}
+              </div>
+            ))}
+          </div>
+          <div className="flex-1" />
+        </div>
+      );
+    case 'listbox':
+      return (
+        <div 
+          className="w-full h-full overflow-auto"
+          style={{
+            backgroundColor: component.props.bgColor || '#ffffff',
+            borderRadius: `${component.props.cornerRadius || 4}px`,
+            borderColor: component.props.borderColor || '#e2e8f0',
+            borderWidth: `${component.props.borderWidth || 1}px`,
+            borderStyle: 'solid'
+          }}
+        >
+          <div className="py-1">
+            {component.props.items && component.props.items.split(',').map((item: string, index: number) => (
+              <div 
+                key={index} 
+                className="px-4 py-2 text-sm hover:bg-gray-100 cursor-default"
+                style={{
+                  color: component.props.fgColor || '#000000',
+                  fontFamily: component.props.font || 'Arial',
+                  fontSize: `${component.props.fontSize || 12}px`,
+                }}
+              >
+                {item.trim()}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    case 'canvas':
+      return (
+        <div 
+          className="w-full h-full"
+          style={{
+            backgroundColor: component.props.bgColor || '#ffffff',
+            borderRadius: `${component.props.cornerRadius || 4}px`,
+            borderColor: component.props.borderColor || '#e2e8f0',
+            borderWidth: `${component.props.borderWidth || 1}px`,
+            borderStyle: 'solid'
+          }}
+        />
+      );
+    default:
+      return null;
+  }
 };
 
 export default Canvas;

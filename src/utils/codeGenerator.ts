@@ -82,10 +82,29 @@ class App(ctk.CTk):
   components.forEach(component => {
     const props = component.props || {};
     
-    // Common font configuration
-    const fontConfig = props.font 
-      ? `font=("${props.font}", ${props.fontSize || 12}${props.fontWeight === 'bold' ? ', "bold"' : ''}${props.fontStyle === 'italic' ? ', "italic"' : ''})`
-      : 'font=("Arial", 12)';
+    // Enhanced font configuration with style and weight
+    let fontConfig = '';
+    if (props.font) {
+      // Build font tuple with support for weight and style
+      let fontOptions = [`"${props.font}"`, props.fontSize || 12];
+      let fontStyles = [];
+      
+      if (props.fontWeight === 'bold') {
+        fontStyles.push('"bold"');
+      }
+      
+      if (props.fontStyle === 'italic') {
+        fontStyles.push('"italic"');
+      }
+      
+      if (fontStyles.length > 0) {
+        fontConfig = `font=(${fontOptions.join(', ')}, ${fontStyles.join(' ')})`;
+      } else {
+        fontConfig = `font=(${fontOptions.join(', ')})`;
+      }
+    } else {
+      fontConfig = 'font=("Arial", 12)';
+    }
     
     // For consistency, ensure these properties always have default values
     const borderWidth = props.borderWidth !== undefined ? props.borderWidth : 1;
@@ -155,6 +174,13 @@ class App(ctk.CTk):
         self.${component.id}.place(x=${props.x}, y=${props.y})
         self.${component.id}.insert("1.0", """${props.text || 'Paragraph text'}""")
         self.${component.id}.configure(state="disabled")  # Make read-only
+`;
+        break;
+      case 'textbox':
+        code += `
+        self.${component.id} = ctk.CTkTextbox(self, width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, bg_color="${props.bg_color || '#ffffff'}", fg_color="${props.fg_color || '#ffffff'}", text_color="${props.text_color || '#000000'}", border_width=${borderWidth}, border_color="${borderColor}", ${fontConfig})
+        self.${component.id}.place(x=${props.x}, y=${props.y})
+        ${props.text ? `self.${component.id}.insert("1.0", """${props.text}""")` : ''}
 `;
         break;
       case 'frame':

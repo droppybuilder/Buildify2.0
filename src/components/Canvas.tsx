@@ -379,7 +379,7 @@ const Canvas = ({
     setHoveredComponent(null);
   };
 
-  // Specifically fixed to prevent null widgets during drag and drop
+  // Fixed to prevent null widgets during drag and drop
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
     
@@ -402,7 +402,7 @@ const Canvas = ({
         return;
       }
 
-      // Regular component creation
+      // Regular component creation with properly initialized props
       const newComponent: Component = {
         id: `${type}-${Date.now()}`,
         type,
@@ -411,7 +411,10 @@ const Canvas = ({
         props: getDefaultProps(type),
       };
 
-      setComponents([...components, newComponent]);
+      // Create a new array instead of modifying the existing one
+      const updatedComponents = [...components, newComponent];
+      setComponents(updatedComponents);
+      
       toast.success(`${type} component added to canvas`);
     } catch (error) {
       console.error("Error in drop handler:", error);
@@ -456,7 +459,10 @@ const Canvas = ({
           [imageResult]: imageResult
         }));
         
-        setComponents([...components, newComponent]);
+        // Create a new array instead of modifying the existing one
+        const updatedComponents = [...components, newComponent];
+        setComponents(updatedComponents);
+        
         toast.success(`Image "${fileName}" added to canvas`);
       } catch (error) {
         console.error("Error processing image file:", error);
@@ -624,84 +630,64 @@ const Canvas = ({
   };
 
   const getDefaultProps = (type: string) => {
-    const commonLightProps = {
-      bgColor: '#ffffff',
-      fgColor: '#000000',
-      borderColor: '#e2e8f0'
-    };
-    
-    const commonProps = {
-      ...commonLightProps,
+    // Base font properties to share across components
+    const fontProps = {
       font: 'Arial',
       fontSize: 12,
       fontWeight: 'normal',
       fontStyle: 'normal',
-      borderWidth: 1
+    };
+    
+    // Common border properties
+    const borderProps = {
+      borderColor: '#e2e8f0',
+      borderWidth: 1,
+      cornerRadius: 8,
+    };
+    
+    // Common color properties
+    const colorProps = {
+      bgColor: '#ffffff',
+      fgColor: '#000000',
     };
     
     switch (type) {
       case 'button':
         return { 
           text: 'Button', 
-          bgColor: '#ffffff',
-          fgColor: '#000000',
+          ...colorProps,
+          ...fontProps,
+          ...borderProps,
           hoverColor: '#f0f0f0',
-          cornerRadius: 8,
-          borderColor: '#e2e8f0',
-          borderWidth: 1,
-          font: 'Arial',
-          fontSize: 12,
-          fontWeight: 'normal',
-          fontStyle: 'normal'
         };
       case 'label':
         return { 
           text: 'Label', 
-          font: 'Arial', 
-          fontSize: 12, 
+          ...fontProps,
           fgColor: '#000000',
-          fontWeight: 'normal',
-          fontStyle: 'normal'
         };
       case 'entry':
         return { 
           placeholder: 'Enter text...',
-          bgColor: '#ffffff',
-          cornerRadius: 8,
-          borderColor: '#e2e8f0',
-          borderWidth: 1,
-          font: 'Arial',
-          fontSize: 12,
-          fontWeight: 'normal',
-          fontStyle: 'normal'
+          ...colorProps,
+          ...fontProps,
+          ...borderProps,
         };
       case 'paragraph':
         return {
           text: 'Paragraph text goes here. Double-click to edit.',
-          bgColor: '#ffffff',
-          fgColor: '#000000',
-          font: 'Arial',
-          fontSize: 12,
-          fontWeight: 'normal',
-          fontStyle: 'normal',
-          borderColor: '#e2e8f0',
-          borderWidth: 1,
-          cornerRadius: 8,
+          ...colorProps,
+          ...fontProps,
+          ...borderProps,
           padding: 10,
           lineHeight: 1.5
         };
       case 'textbox':
         return {
           text: '',
-          bgColor: '#ffffff',
-          fgColor: '#000000',
-          font: 'Arial',
-          fontSize: 12,
-          fontWeight: 'normal',
-          fontStyle: 'normal',
-          borderColor: '#e2e8f0',
-          borderWidth: 1,
-          cornerRadius: 8,
+          ...colorProps,
+          ...fontProps,
+          ...borderProps,
           padding: 8,
           multiline: true,
           placeholder: 'Enter text here...'
@@ -710,9 +696,7 @@ const Canvas = ({
         return { 
           src: '',
           fit: 'contain',
-          cornerRadius: 8,
-          borderColor: '#e2e8f0',
-          borderWidth: 1,
+          ...borderProps,
           fileName: 'placeholder.png',
           alt: 'Image'
         };
@@ -729,14 +713,9 @@ const Canvas = ({
       case 'frame':
         return { 
           relief: 'flat',
-          borderWidth: 1,
-          bgColor: '#ffffff',
-          borderColor: '#e2e8f0',
-          cornerRadius: 4,
-          font: 'Arial', 
-          fontSize: 12,
-          fontWeight: 'normal',
-          fontStyle: 'normal'
+          ...borderProps,
+          ...colorProps,
+          ...fontProps,
         };
       case 'checkbox':
         return { 
@@ -745,23 +724,14 @@ const Canvas = ({
           fgColor: '#000000',
           borderColor: '#e2e8f0',
           checkedColor: '#3b82f6',
-          font: 'Arial',
-          fontSize: 12,
-          fontWeight: 'normal',
-          fontStyle: 'normal'
+          ...fontProps,
         };
       case 'datepicker':
         return { 
           format: 'yyyy-mm-dd',
-          bgColor: '#ffffff',
-          fgColor: '#000000',
-          cornerRadius: 8,
-          borderColor: '#e2e8f0',
-          borderWidth: 1,
-          font: 'Arial',
-          fontSize: 12,
-          fontWeight: 'normal',
-          fontStyle: 'normal'
+          ...colorProps,
+          ...fontProps,
+          ...borderProps,
         };
       case 'progressbar':
         return { 
@@ -771,52 +741,38 @@ const Canvas = ({
           bgColor: '#e2e8f0',
           cornerRadius: 4,
           borderWidth: 0,
-          font: 'Arial', 
-          fontSize: 12,
-          fontWeight: 'normal',
-          fontStyle: 'normal'
+          ...fontProps,
         };
       case 'notebook':
         return { 
           tabs: 'Tab 1,Tab 2,Tab 3',
           selectedTab: 'Tab 1',
-          bgColor: '#ffffff',
-          fgColor: '#000000',
-          borderColor: '#e2e8f0',
-          borderWidth: 1,
-          font: 'Arial',
-          fontSize: 12,
-          fontWeight: 'normal',
-          fontStyle: 'normal'
+          ...colorProps,
+          ...fontProps,
+          ...borderProps,
         };
       case 'listbox':
         return { 
           items: 'Item 1,Item 2,Item 3,Item 4,Item 5',
-          bgColor: '#ffffff',
-          fgColor: '#000000',
-          borderColor: '#e2e8f0',
-          borderWidth: 1,
-          font: 'Arial',
-          fontSize: 12,
-          fontWeight: 'normal',
-          fontStyle: 'normal'
+          ...colorProps,
+          ...fontProps,
+          ...borderProps,
         };
       case 'canvas':
         return { 
           bgColor: '#ffffff',
-          borderWidth: 1,
-          borderColor: '#e2e8f0',
-          cornerRadius: 4,
-          font: 'Arial', 
-          fontSize: 12,
-          fontWeight: 'normal',
-          fontStyle: 'normal'
+          ...borderProps,
+          ...fontProps,
         };
       default:
-        return commonProps;
+        return {
+          ...colorProps,
+          ...fontProps,
+          ...borderProps,
+        };
     }
   };
-  
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (selectedComponent && isValidComponent(selectedComponent) || selectedComponents.length > 0) {
@@ -995,324 +951,4 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
             backgroundColor: component.props?.bgColor || '#ffffff',
             color: component.props?.fgColor || '#000000',
             border: `${component.props?.borderWidth || 1}px solid ${component.props?.borderColor || '#e2e8f0'}`,
-            borderRadius: `${component.props?.cornerRadius || 8}px`,
-            fontSize: `${component.props?.fontSize || 12}px`,
-            fontWeight: component.props?.fontWeight || 'normal',
-            fontStyle: component.props?.fontStyle || 'normal',
-            fontFamily: component.props?.font || 'Arial'
-          }}
-        >
-          {component.props?.text || 'Button'}
-        </div>
-      );
-      
-    case 'label':
-      return (
-        <div
-          className="h-full w-full flex items-center"
-          style={{ 
-            color: component.props?.fgColor || '#000000',
-            fontSize: `${component.props?.fontSize || 12}px`,
-            fontWeight: component.props?.fontWeight || 'normal',
-            fontStyle: component.props?.fontStyle || 'normal',
-            fontFamily: component.props?.font || 'Arial'
-          }}
-        >
-          {component.props?.text || 'Label'}
-        </div>
-      );
-      
-    case 'entry':
-      return (
-        <div
-          className="h-full w-full flex items-center px-2 rounded"
-          style={{
-            backgroundColor: component.props?.bgColor || '#ffffff',
-            color: component.props?.fgColor || '#000000',
-            border: `${component.props?.borderWidth || 1}px solid ${component.props?.borderColor || '#e2e8f0'}`,
-            borderRadius: `${component.props?.cornerRadius || 8}px`,
-            fontSize: `${component.props?.fontSize || 12}px`,
-            fontWeight: component.props?.fontWeight || 'normal',
-            fontStyle: component.props?.fontStyle || 'normal',
-            fontFamily: component.props?.font || 'Arial'
-          }}
-        >
-          {component.props?.placeholder || 'Enter text...'}
-        </div>
-      );
-      
-    case 'paragraph':
-      return (
-        <div
-          className="h-full w-full p-2 overflow-hidden rounded"
-          style={{
-            backgroundColor: component.props?.bgColor || '#ffffff',
-            color: component.props?.fgColor || '#000000',
-            border: `${component.props?.borderWidth || 1}px solid ${component.props?.borderColor || '#e2e8f0'}`,
-            borderRadius: `${component.props?.cornerRadius || 8}px`,
-            padding: `${component.props?.padding || 10}px`,
-            fontSize: `${component.props?.fontSize || 12}px`,
-            fontWeight: component.props?.fontWeight || 'normal',
-            fontStyle: component.props?.fontStyle || 'normal',
-            fontFamily: component.props?.font || 'Arial',
-            lineHeight: component.props?.lineHeight || 1.5
-          }}
-        >
-          {component.props?.text || 'Paragraph text goes here.'}
-        </div>
-      );
-
-    case 'textbox':
-      return (
-        <div
-          className="h-full w-full p-2 overflow-hidden rounded"
-          style={{
-            backgroundColor: component.props?.bgColor || '#ffffff',
-            color: component.props?.fgColor || '#000000',
-            border: `${component.props?.borderWidth || 1}px solid ${component.props?.borderColor || '#e2e8f0'}`,
-            borderRadius: `${component.props?.cornerRadius || 8}px`,
-            padding: `${component.props?.padding || 8}px`,
-            fontSize: `${component.props?.fontSize || 12}px`,
-            fontWeight: component.props?.fontWeight || 'normal',
-            fontStyle: component.props?.fontStyle || 'normal',
-            fontFamily: component.props?.font || 'Arial'
-          }}
-        >
-          <div className="text-gray-400">
-            {component.props?.placeholder || 'Enter text here...'}
-          </div>
-        </div>
-      );
-
-    case 'image':
-      if (component.props?.src) {
-        return (
-          <div 
-            className="h-full w-full overflow-hidden"
-            style={{
-              borderRadius: `${component.props?.cornerRadius || 0}px`,
-              border: `${component.props?.borderWidth || 0}px solid ${component.props?.borderColor || 'transparent'}`,
-            }}
-          >
-            <img 
-              src={component.props.src} 
-              alt={component.props?.alt || 'Image'} 
-              className="h-full w-full" 
-              style={{
-                objectFit: component.props?.fit || 'contain'
-              }}
-            />
-          </div>
-        );
-      } else {
-        return (
-          <div 
-            className="h-full w-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs overflow-hidden" 
-            style={{
-              borderRadius: `${component.props?.cornerRadius || 0}px`,
-              border: `${component.props?.borderWidth || 0}px solid ${component.props?.borderColor || 'transparent'}`,
-            }}
-          >
-            {component.props?.fileName || 'Image Placeholder'}
-          </div>
-        );
-      }
-      
-    case 'slider':
-      return (
-        <div className="h-full w-full flex items-center">
-          <div 
-            className="h-2 w-full bg-gray-200 rounded-full relative"
-            style={{
-              backgroundColor: component.props?.bgColor || '#e2e8f0'
-            }}
-          >
-            <div 
-              className="absolute h-full rounded-full" 
-              style={{
-                width: `${(component.props?.value / (component.props?.to || 100)) * 100}%`,
-                backgroundColor: component.props?.progressColor || '#3b82f6'
-              }}
-            />
-            <div 
-              className="absolute w-4 h-4 bg-white rounded-full shadow-md top-1/2 -translate-y-1/2" 
-              style={{
-                left: `calc(${(component.props?.value / (component.props?.to || 100)) * 100}% - 0.5rem)`
-              }}
-            />
-          </div>
-        </div>
-      );
-      
-    case 'checkbox':
-      return (
-        <div className="h-full w-full flex items-center gap-2">
-          <div 
-            className={`w-4 h-4 flex items-center justify-center rounded border ${component.props?.checked ? 'bg-blue-500' : 'bg-white'}`}
-            style={{
-              borderColor: component.props?.borderColor || '#e2e8f0',
-              backgroundColor: component.props?.checked ? (component.props?.checkedColor || '#3b82f6') : '#ffffff'
-            }}
-          >
-            {component.props?.checked && (
-              <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9 1L3.5 6.5L1 4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            )}
-          </div>
-          <span 
-            style={{ 
-              color: component.props?.fgColor || '#000000',
-              fontSize: `${component.props?.fontSize || 12}px`,
-              fontWeight: component.props?.fontWeight || 'normal',
-              fontStyle: component.props?.fontStyle || 'normal',
-              fontFamily: component.props?.font || 'Arial'
-            }}
-          >
-            {component.props?.text || 'Checkbox'}
-          </span>
-        </div>
-      );
-
-    case 'frame':
-      return (
-        <div
-          className="h-full w-full flex items-center justify-center"
-          style={{
-            backgroundColor: component.props?.bgColor || '#ffffff',
-            border: `${component.props?.borderWidth || 1}px solid ${component.props?.borderColor || '#e2e8f0'}`,
-            borderRadius: `${component.props?.cornerRadius || 4}px`,
-            fontSize: `${component.props?.fontSize || 12}px`,
-            fontWeight: component.props?.fontWeight || 'normal',
-            fontStyle: component.props?.fontStyle || 'normal',
-            fontFamily: component.props?.font || 'Arial'
-          }}
-        >
-          <div className="text-gray-400 text-xs">Frame Container</div>
-        </div>
-      );
-      
-    case 'progressbar':
-      return (
-        <div className="h-full w-full flex items-center">
-          <div 
-            className="h-full w-full bg-gray-200 overflow-hidden"
-            style={{
-              backgroundColor: component.props?.bgColor || '#e2e8f0',
-              borderRadius: `${component.props?.cornerRadius || 4}px`
-            }}
-          >
-            <div 
-              className="h-full" 
-              style={{
-                width: `${(component.props?.value / (component.props?.maxValue || 100)) * 100}%`,
-                backgroundColor: component.props?.progressColor || '#3b82f6'
-              }}
-            />
-          </div>
-        </div>
-      );
-      
-    case 'notebook':
-      return (
-        <div
-          className="h-full w-full flex flex-col border overflow-hidden"
-          style={{
-            backgroundColor: component.props?.bgColor || '#ffffff',
-            border: `${component.props?.borderWidth || 1}px solid ${component.props?.borderColor || '#e2e8f0'}`,
-            borderRadius: `${component.props?.cornerRadius || 4}px`
-          }}
-        >
-          <div className="flex border-b">
-            {(component.props?.tabs || "Tab 1,Tab 2,Tab 3").split(',').map((tab: string, index: number) => (
-              <div 
-                key={index} 
-                className={`px-3 py-1 border-r cursor-pointer ${component.props?.selectedTab === tab.trim() ? 'bg-white' : 'bg-gray-100'}`}
-                style={{
-                  fontSize: `${component.props?.fontSize || 12}px`,
-                  fontWeight: component.props?.fontWeight || 'normal',
-                  fontStyle: component.props?.fontStyle || 'normal',
-                  fontFamily: component.props?.font || 'Arial',
-                  color: component.props?.fgColor || '#000000',
-                  backgroundColor: component.props?.selectedTab === tab.trim() ? 
-                    component.props?.fgColor || '#ffffff' : 
-                    component.props?.bgColor || '#f0f0f0'
-                }}
-              >
-                {tab.trim()}
-              </div>
-            ))}
-          </div>
-          <div 
-            className="flex-1 p-2 flex items-center justify-center text-gray-400 text-xs"
-            style={{
-              backgroundColor: component.props?.fgColor || '#ffffff'
-            }}
-          >
-            Tab Content Area
-          </div>
-        </div>
-      );
-      
-    case 'listbox':
-      return (
-        <div 
-          className="h-full w-full overflow-y-auto border"
-          style={{
-            backgroundColor: component.props?.bgColor || '#ffffff',
-            border: `${component.props?.borderWidth || 1}px solid ${component.props?.borderColor || '#e2e8f0'}`,
-            borderRadius: `${component.props?.cornerRadius || 4}px`
-          }}
-        >
-          {(component.props?.items || "Item 1,Item 2,Item 3,Item 4,Item 5").split(',').map((item: string, index: number) => (
-            <div 
-              key={index} 
-              className="px-2 py-1 hover:bg-gray-100 cursor-pointer"
-              style={{
-                fontSize: `${component.props?.fontSize || 12}px`,
-                fontWeight: component.props?.fontWeight || 'normal',
-                fontStyle: component.props?.fontStyle || 'normal',
-                fontFamily: component.props?.font || 'Arial',
-                color: component.props?.fgColor || '#000000'
-              }}
-            >
-              {item.trim()}
-            </div>
-          ))}
-        </div>
-      );
-      
-    case 'canvas':
-      return (
-        <div
-          className="h-full w-full flex items-center justify-center"
-          style={{
-            backgroundColor: component.props?.bgColor || '#ffffff',
-            border: `${component.props?.borderWidth || 1}px solid ${component.props?.borderColor || '#e2e8f0'}`,
-            borderRadius: `${component.props?.cornerRadius || 4}px`
-          }}
-        >
-          <div 
-            className="text-gray-400 text-xs"
-            style={{
-              fontSize: `${component.props?.fontSize || 12}px`,
-              fontWeight: component.props?.fontWeight || 'normal',
-              fontStyle: component.props?.fontStyle || 'normal',
-              fontFamily: component.props?.font || 'Arial'
-            }}
-          >
-            Canvas Drawing Area
-          </div>
-        </div>
-      );
-
-    default:
-      return (
-        <div className="h-full w-full flex items-center justify-center bg-gray-50 border border-dashed border-gray-300 text-sm text-gray-500">
-          {component.type}
-        </div>
-      );
-  }
-};
-
-export default Canvas;
+            borderRadius: `${component.

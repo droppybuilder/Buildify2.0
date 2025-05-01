@@ -139,6 +139,34 @@ self.text_${safeId}.configure(state="disabled")  # Make read-only unless editing
 }
 
 /**
+ * Generates code for a textbox component
+ */
+export function generateTextboxCode(component: any, isTkinter: boolean): string {
+  const safeId = component.id.replace(/[^a-zA-Z0-9_]/g, '_');
+  
+  if (isTkinter) {
+    const fontWeight = component.props?.fontWeight === 'bold' ? 'bold' : 'normal';
+    const fontStyle = component.props?.fontStyle === 'italic' ? 'italic' : 'roman';
+    const borderWidth = component.props?.borderWidth !== undefined ? component.props?.borderWidth : 1;
+    const borderColor = component.props?.borderColor || '#e2e8f0';
+    
+    return `self.textbox_${safeId} = ctk.CTkTextbox(self.root, 
+        fg_color="${component.props?.bgColor || '#ffffff'}", 
+        text_color="${component.props?.fgColor || '#000000'}",
+        corner_radius=${component.props?.cornerRadius || 8},
+        border_width=${borderWidth},
+        border_color="${borderColor}",
+        wrap="word",
+        font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}, "${fontWeight} ${fontStyle}"))
+self.textbox_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+${component.props?.text ? `self.textbox_${safeId}.insert("1.0", """${component.props.text}""")` : ''}`;
+  } else {
+    // For Eel, we just return a comment since components are handled via JSON
+    return `# Textbox ${safeId} is managed in the JavaScript UI`;
+  }
+}
+
+/**
  * Generates code for a slider component
  */
 export function generateSliderCode(component: any, isTkinter: boolean): string {
@@ -195,6 +223,8 @@ export function generateOtherComponentCode(component: any, isTkinter: boolean): 
     switch (component.type) {
       case 'paragraph':
         return generateParagraphCode(component, isTkinter);
+      case 'textbox':
+        return generateTextboxCode(component, isTkinter);
       case 'datepicker':
         return generateDatePickerCode(component, safeId);
       case 'progressbar':
@@ -237,8 +267,6 @@ self.date_picker_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math
 function generateProgressBarCode(component: any, safeId: string): string {
   const borderWidth = component.props?.borderWidth !== undefined ? component.props?.borderWidth : 0;
   const borderColor = component.props?.borderColor || '#e2e8f0';
-  const fontWeight = component.props?.fontWeight === 'bold' ? 'bold' : 'normal';
-  const fontStyle = component.props?.fontStyle === 'italic' ? 'italic' : 'roman';
   
   return `self.progress_${safeId} = ctk.CTkProgressBar(self.root, 
         orientation='horizontal',

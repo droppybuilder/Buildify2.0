@@ -616,6 +616,8 @@ const Canvas = ({
         return { width: 300, height: 200 };
       case 'paragraph':
         return { width: 300, height: 150 };
+      case 'textbox':
+        return { width: 300, height: 150 };
       default:
         return { width: 120, height: 40 };
     }
@@ -687,6 +689,22 @@ const Canvas = ({
           cornerRadius: 8,
           padding: 10,
           lineHeight: 1.5
+        };
+      case 'textbox':
+        return {
+          text: '',
+          bgColor: '#ffffff',
+          fgColor: '#000000',
+          font: 'Arial',
+          fontSize: 12,
+          fontWeight: 'normal',
+          fontStyle: 'normal',
+          borderColor: '#e2e8f0',
+          borderWidth: 1,
+          cornerRadius: 8,
+          padding: 8,
+          multiline: true,
+          placeholder: 'Enter text here...'
         };
       case 'image':
         return { 
@@ -1044,6 +1062,28 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
         </div>
       );
 
+    case 'textbox':
+      return (
+        <div
+          className="h-full w-full p-2 overflow-hidden rounded"
+          style={{
+            backgroundColor: component.props?.bgColor || '#ffffff',
+            color: component.props?.fgColor || '#000000',
+            border: `${component.props?.borderWidth || 1}px solid ${component.props?.borderColor || '#e2e8f0'}`,
+            borderRadius: `${component.props?.cornerRadius || 8}px`,
+            padding: `${component.props?.padding || 8}px`,
+            fontSize: `${component.props?.fontSize || 12}px`,
+            fontWeight: component.props?.fontWeight || 'normal',
+            fontStyle: component.props?.fontStyle || 'normal',
+            fontFamily: component.props?.font || 'Arial'
+          }}
+        >
+          <div className="text-gray-400">
+            {component.props?.placeholder || 'Enter text here...'}
+          </div>
+        </div>
+      );
+
     case 'image':
       if (component.props?.src) {
         return (
@@ -1187,19 +1227,28 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
             {(component.props?.tabs || "Tab 1,Tab 2,Tab 3").split(',').map((tab: string, index: number) => (
               <div 
                 key={index} 
-                className={`px-3 py-1 border-r cursor-pointer ${component.props?.selectedTab === tab.trim() ? 'bg-gray-100' : ''}`}
+                className={`px-3 py-1 border-r cursor-pointer ${component.props?.selectedTab === tab.trim() ? 'bg-white' : 'bg-gray-100'}`}
                 style={{
                   fontSize: `${component.props?.fontSize || 12}px`,
                   fontWeight: component.props?.fontWeight || 'normal',
                   fontStyle: component.props?.fontStyle || 'normal',
-                  fontFamily: component.props?.font || 'Arial'
+                  fontFamily: component.props?.font || 'Arial',
+                  color: component.props?.fgColor || '#000000',
+                  backgroundColor: component.props?.selectedTab === tab.trim() ? 
+                    component.props?.fgColor || '#ffffff' : 
+                    component.props?.bgColor || '#f0f0f0'
                 }}
               >
                 {tab.trim()}
               </div>
             ))}
           </div>
-          <div className="flex-1 p-2 flex items-center justify-center text-gray-400 text-xs">
+          <div 
+            className="flex-1 p-2 flex items-center justify-center text-gray-400 text-xs"
+            style={{
+              backgroundColor: component.props?.fgColor || '#ffffff'
+            }}
+          >
             Tab Content Area
           </div>
         </div>

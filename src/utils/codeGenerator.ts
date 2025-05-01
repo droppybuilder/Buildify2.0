@@ -103,44 +103,49 @@ class App(ctk.CTk):
 `;
         } else {
           code += `
-        self.${component.id} = ctk.CTkLabel(self, text="${props.text || ''}", width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, bg_color="${props.bg_color}", fg_color="${props.fg_color}", text_color="${props.text_color}", ${fontConfig})
+        self.${component.id} = ctk.CTkLabel(self, text="${props.text || ''}", width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, bg_color="${props.bg_color || '#ffffff'}", fg_color="${props.fg_color || '#ffffff'}", text_color="${props.text_color || '#000000'}", ${fontConfig})
         self.${component.id}.place(x=${props.x}, y=${props.y})
 `;
         }
         break;
       case 'CTkButton':
         code += `
-        self.${component.id} = ctk.CTkButton(self, text="${props.text}", width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, bg_color="${props.bg_color}", fg_color="${props.fg_color}", text_color="${props.text_color}", border_width=${borderWidth}, border_color="${borderColor}", ${fontConfig})
+        self.${component.id} = ctk.CTkButton(self, text="${props.text || 'Button'}", width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, bg_color="${props.bg_color || '#ffffff'}", fg_color="${props.fg_color || '#3b82f6'}", text_color="${props.text_color || '#ffffff'}", border_width=${borderWidth}, border_color="${borderColor}", ${fontConfig})
         self.${component.id}.place(x=${props.x}, y=${props.y})
 `;
         break;
       case 'CTkEntry':
         code += `
-        self.${component.id} = ctk.CTkEntry(self, width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, bg_color="${props.bg_color}", fg_color="${props.fg_color}", text_color="${props.text_color}", border_width=${borderWidth}, border_color="${borderColor}", ${fontConfig})
+        self.${component.id} = ctk.CTkEntry(self, width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, bg_color="${props.bg_color || '#ffffff'}", fg_color="${props.fg_color || '#ffffff'}", text_color="${props.text_color || '#000000'}", border_width=${borderWidth}, border_color="${borderColor}", ${fontConfig})
         self.${component.id}.place(x=${props.x}, y=${props.y})
 `;
         break;
       case 'CTkTextbox':
         code += `
-        self.${component.id} = ctk.CTkTextbox(self, width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, bg_color="${props.bg_color}", fg_color="${props.fg_color}", text_color="${props.text_color}", border_width=${borderWidth}, border_color="${borderColor}", ${fontConfig})
+        self.${component.id} = ctk.CTkTextbox(self, width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, bg_color="${props.bg_color || '#ffffff'}", fg_color="${props.fg_color || '#ffffff'}", text_color="${props.text_color || '#000000'}", border_width=${borderWidth}, border_color="${borderColor}", ${fontConfig})
         self.${component.id}.place(x=${props.x}, y=${props.y})
 `;
+        if (props.text) {
+          code += `        self.${component.id}.insert("1.0", """${props.text}""")
+`;
+        }
         break;
       case 'CTkSlider':
         code += `
-        self.${component.id} = ctk.CTkSlider(self, width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, border_width=${borderWidth})
+        self.${component.id} = ctk.CTkSlider(self, width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, border_width=${borderWidth}, bg_color="${props.bg_color || '#e2e8f0'}", fg_color="${props.fg_color || '#ffffff'}", progress_color="${props.progressColor || '#3b82f6'}")
         self.${component.id}.place(x=${props.x}, y=${props.y})
 `;
         break;
       case 'CTkSwitch':
         code += `
-        self.${component.id} = ctk.CTkSwitch(self, text="${props.text}", ${fontConfig})
+        self.${component.id} = ctk.CTkSwitch(self, text="${props.text || 'Switch'}", ${fontConfig}, bg_color="${props.bg_color || '#ffffff'}", fg_color="${props.fg_color || '#3b82f6'}", progress_color="${props.progressColor || '#3b82f6'}", text_color="${props.text_color || '#000000'}")
         self.${component.id}.place(x=${props.x}, y=${props.y})
 `;
         break;
       case 'CTkProgressBar':
         code += `
-        self.${component.id} = ctk.CTkProgressBar(self, width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, border_width=${borderWidth})
+        self.${component.id} = ctk.CTkProgressBar(self, width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, border_width=${borderWidth}, bg_color="${props.bg_color || '#e2e8f0'}", fg_color="${props.fg_color || '#ffffff'}", progress_color="${props.progressColor || '#3b82f6'}")
+        self.${component.id}.set(${(props.value || 50) / 100})
         self.${component.id}.place(x=${props.x}, y=${props.y})
 `;
         break;
@@ -170,7 +175,7 @@ class App(ctk.CTk):
         tab_width = ${props.width} / len(tab_titles)
         
         for i, tab_title in enumerate(tab_titles):
-            tab_btn = ctk.CTkButton(self.${component.id}_frame, text=tab_title.strip(), corner_radius=0, height=30, width=tab_width, ${fontConfig})
+            tab_btn = ctk.CTkButton(self.${component.id}_frame, text=tab_title.strip(), corner_radius=0, height=30, width=tab_width, ${fontConfig}, fg_color="${props.fg_color || '#ffffff'}" if i == 0 else "${props.bg_color || '#f0f0f0'}", text_color="${props.text_color || '#000000'}")
             tab_btn.place(x=i*tab_width, y=0)
             self.${component.id}_tabs.append(tab_btn)
             
@@ -190,7 +195,7 @@ class App(ctk.CTk):
         self.${component.id}_items = []
         
         for i, item in enumerate(items):
-            item_label = ctk.CTkLabel(self.${component.id}_frame, text=item.strip(), anchor="w", ${fontConfig})
+            item_label = ctk.CTkLabel(self.${component.id}_frame, text=item.strip(), anchor="w", ${fontConfig}, text_color="${props.text_color || '#000000'}")
             item_label.pack(fill="x", padx=5, pady=2)
             self.${component.id}_items.append(item_label)
 `;

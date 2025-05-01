@@ -8,12 +8,14 @@ interface ColorInputProps {
   value: string;
   onChange: (color: string) => void;
   label?: string;
+  id?: string;  // Added id as an optional prop
 }
 
 export const ColorInput: React.FC<ColorInputProps> = ({
   value,
   onChange,
-  label
+  label,
+  id
 }) => {
   const [inputValue, setInputValue] = useState(value || '#ffffff');
   const [isOpen, setIsOpen] = useState(false);
@@ -119,6 +121,7 @@ export const ColorInput: React.FC<ColorInputProps> = ({
         onKeyDown={handleKeyDown}
         className="font-mono"
         placeholder="#ffffff"
+        id={id}  // Pass the id to the input element
       />
     </div>
   );

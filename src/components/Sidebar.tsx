@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import CustomTkinterGuide from '@/components/CustomTkinterGuide';
+import { CustomTkinterGuide } from '@/components/CustomTkinterGuide';
 
 export function Sidebar() {
   const [showHelp, setShowHelp] = useState(false);

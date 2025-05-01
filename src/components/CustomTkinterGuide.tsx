@@ -9,7 +9,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 
-export const CustomTkinterGuide = () => {
+export const CustomTkinterGuide = ({ onClose }: { onClose?: () => void }) => {
   return (
     <div className="p-4 bg-white rounded-lg border">
       <h2 className="text-lg font-semibold mb-3">CustomTkinter Troubleshooting Guide</h2>
@@ -68,6 +68,17 @@ export const CustomTkinterGuide = () => {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+      
+      {onClose && (
+        <div className="mt-4 flex justify-end">
+          <button 
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      )}
     </div>
   );
 };

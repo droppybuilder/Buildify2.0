@@ -628,7 +628,14 @@ const Canvas = ({
       borderColor: '#e2e8f0'
     };
     
-    const commonProps = commonLightProps;
+    const commonProps = {
+      ...commonLightProps,
+      font: 'Arial',
+      fontSize: 12,
+      fontWeight: 'normal',
+      fontStyle: 'normal',
+      borderWidth: 1
+    };
     
     switch (type) {
       case 'button':
@@ -707,7 +714,11 @@ const Canvas = ({
           borderWidth: 1,
           bgColor: '#ffffff',
           borderColor: '#e2e8f0',
-          cornerRadius: 4
+          cornerRadius: 4,
+          font: 'Arial', 
+          fontSize: 12,
+          fontWeight: 'normal',
+          fontStyle: 'normal'
         };
       case 'checkbox':
         return { 
@@ -730,7 +741,9 @@ const Canvas = ({
           borderColor: '#e2e8f0',
           borderWidth: 1,
           font: 'Arial',
-          fontSize: 12
+          fontSize: 12,
+          fontWeight: 'normal',
+          fontStyle: 'normal'
         };
       case 'progressbar':
         return { 
@@ -739,7 +752,11 @@ const Canvas = ({
           progressColor: '#3b82f6',
           bgColor: '#e2e8f0',
           cornerRadius: 4,
-          borderWidth: 0
+          borderWidth: 0,
+          font: 'Arial', 
+          fontSize: 12,
+          fontWeight: 'normal',
+          fontStyle: 'normal'
         };
       case 'notebook':
         return { 
@@ -750,7 +767,9 @@ const Canvas = ({
           borderColor: '#e2e8f0',
           borderWidth: 1,
           font: 'Arial',
-          fontSize: 12
+          fontSize: 12,
+          fontWeight: 'normal',
+          fontStyle: 'normal'
         };
       case 'listbox':
         return { 
@@ -760,14 +779,20 @@ const Canvas = ({
           borderColor: '#e2e8f0',
           borderWidth: 1,
           font: 'Arial',
-          fontSize: 12
+          fontSize: 12,
+          fontWeight: 'normal',
+          fontStyle: 'normal'
         };
       case 'canvas':
         return { 
           bgColor: '#ffffff',
           borderWidth: 1,
           borderColor: '#e2e8f0',
-          cornerRadius: 4
+          cornerRadius: 4,
+          font: 'Arial', 
+          fontSize: 12,
+          fontWeight: 'normal',
+          fontStyle: 'normal'
         };
       default:
         return commonProps;
@@ -1112,13 +1137,19 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
     case 'frame':
       return (
         <div
-          className="h-full w-full"
+          className="h-full w-full flex items-center justify-center"
           style={{
             backgroundColor: component.props?.bgColor || '#ffffff',
             border: `${component.props?.borderWidth || 1}px solid ${component.props?.borderColor || '#e2e8f0'}`,
-            borderRadius: `${component.props?.cornerRadius || 4}px`
+            borderRadius: `${component.props?.cornerRadius || 4}px`,
+            fontSize: `${component.props?.fontSize || 12}px`,
+            fontWeight: component.props?.fontWeight || 'normal',
+            fontStyle: component.props?.fontStyle || 'normal',
+            fontFamily: component.props?.font || 'Arial'
           }}
-        />
+        >
+          <div className="text-gray-400 text-xs">Frame Container</div>
+        </div>
       );
       
     case 'progressbar':
@@ -1142,6 +1173,90 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
         </div>
       );
       
+    case 'notebook':
+      return (
+        <div
+          className="h-full w-full flex flex-col border overflow-hidden"
+          style={{
+            backgroundColor: component.props?.bgColor || '#ffffff',
+            border: `${component.props?.borderWidth || 1}px solid ${component.props?.borderColor || '#e2e8f0'}`,
+            borderRadius: `${component.props?.cornerRadius || 4}px`
+          }}
+        >
+          <div className="flex border-b">
+            {(component.props?.tabs || "Tab 1,Tab 2,Tab 3").split(',').map((tab: string, index: number) => (
+              <div 
+                key={index} 
+                className={`px-3 py-1 border-r cursor-pointer ${component.props?.selectedTab === tab.trim() ? 'bg-gray-100' : ''}`}
+                style={{
+                  fontSize: `${component.props?.fontSize || 12}px`,
+                  fontWeight: component.props?.fontWeight || 'normal',
+                  fontStyle: component.props?.fontStyle || 'normal',
+                  fontFamily: component.props?.font || 'Arial'
+                }}
+              >
+                {tab.trim()}
+              </div>
+            ))}
+          </div>
+          <div className="flex-1 p-2 flex items-center justify-center text-gray-400 text-xs">
+            Tab Content Area
+          </div>
+        </div>
+      );
+      
+    case 'listbox':
+      return (
+        <div 
+          className="h-full w-full overflow-y-auto border"
+          style={{
+            backgroundColor: component.props?.bgColor || '#ffffff',
+            border: `${component.props?.borderWidth || 1}px solid ${component.props?.borderColor || '#e2e8f0'}`,
+            borderRadius: `${component.props?.cornerRadius || 4}px`
+          }}
+        >
+          {(component.props?.items || "Item 1,Item 2,Item 3,Item 4,Item 5").split(',').map((item: string, index: number) => (
+            <div 
+              key={index} 
+              className="px-2 py-1 hover:bg-gray-100 cursor-pointer"
+              style={{
+                fontSize: `${component.props?.fontSize || 12}px`,
+                fontWeight: component.props?.fontWeight || 'normal',
+                fontStyle: component.props?.fontStyle || 'normal',
+                fontFamily: component.props?.font || 'Arial',
+                color: component.props?.fgColor || '#000000'
+              }}
+            >
+              {item.trim()}
+            </div>
+          ))}
+        </div>
+      );
+      
+    case 'canvas':
+      return (
+        <div
+          className="h-full w-full flex items-center justify-center"
+          style={{
+            backgroundColor: component.props?.bgColor || '#ffffff',
+            border: `${component.props?.borderWidth || 1}px solid ${component.props?.borderColor || '#e2e8f0'}`,
+            borderRadius: `${component.props?.cornerRadius || 4}px`
+          }}
+        >
+          <div 
+            className="text-gray-400 text-xs"
+            style={{
+              fontSize: `${component.props?.fontSize || 12}px`,
+              fontWeight: component.props?.fontWeight || 'normal',
+              fontStyle: component.props?.fontStyle || 'normal',
+              fontFamily: component.props?.font || 'Arial'
+            }}
+          >
+            Canvas Drawing Area
+          </div>
+        </div>
+      );
+
     default:
       return (
         <div className="h-full w-full flex items-center justify-center bg-gray-50 border border-dashed border-gray-300 text-sm text-gray-500">

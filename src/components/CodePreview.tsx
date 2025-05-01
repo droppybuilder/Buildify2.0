@@ -10,9 +10,10 @@ import { CustomTkinterGuide } from './CustomTkinterGuide';
 interface CodePreviewProps {
   components: any[];
   visible: boolean;
+  windowTitle?: string;
 }
 
-export const CodePreview: React.FC<CodePreviewProps> = ({ components, visible }) => {
+export const CodePreview: React.FC<CodePreviewProps> = ({ components, visible, windowTitle = "My CustomTkinter Application" }) => {
   const [code, setCode] = useState('');
   const [isExporting, setIsExporting] = useState(false);
   const [codeTab, setCodeTab] = useState<'preview' | 'requirements' | 'readme'>('preview');
@@ -25,10 +26,10 @@ export const CodePreview: React.FC<CodePreviewProps> = ({ components, visible })
         props: component.props || {}
       }));
       
-      const pythonCode = generatePythonCode(preparedComponents);
+      const pythonCode = generatePythonCode(preparedComponents, windowTitle);
       setCode(pythonCode);
     }
-  }, [components, visible]);
+  }, [components, visible, windowTitle]);
 
   useEffect(() => {
     if (visible) {
@@ -50,7 +51,7 @@ export const CodePreview: React.FC<CodePreviewProps> = ({ components, visible })
         props: component.props || {}
       }));
       
-      await exportProject(preparedComponents);
+      await exportProject(preparedComponents, windowTitle);
       toast.success("Project exported successfully!");
     } catch (error) {
       console.error("Export error:", error);

@@ -941,4 +941,214 @@ interface ComponentPreviewProps {
   isHovered: boolean;
 }
 
-const
+const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
+  // Render different component types
+  switch (component.type) {
+    case 'button':
+      return (
+        <div
+          className="h-full w-full flex items-center justify-center rounded"
+          style={{
+            backgroundColor: component.props?.bgColor || '#ffffff',
+            color: component.props?.fgColor || '#000000',
+            border: `${component.props?.borderWidth || 1}px solid ${component.props?.borderColor || '#e2e8f0'}`,
+            borderRadius: `${component.props?.cornerRadius || 8}px`,
+            fontSize: `${component.props?.fontSize || 12}px`,
+            fontWeight: component.props?.fontWeight || 'normal',
+            fontStyle: component.props?.fontStyle || 'normal',
+            fontFamily: component.props?.font || 'Arial'
+          }}
+        >
+          {component.props?.text || 'Button'}
+        </div>
+      );
+      
+    case 'label':
+      return (
+        <div
+          className="h-full w-full flex items-center"
+          style={{ 
+            color: component.props?.fgColor || '#000000',
+            fontSize: `${component.props?.fontSize || 12}px`,
+            fontWeight: component.props?.fontWeight || 'normal',
+            fontStyle: component.props?.fontStyle || 'normal',
+            fontFamily: component.props?.font || 'Arial'
+          }}
+        >
+          {component.props?.text || 'Label'}
+        </div>
+      );
+      
+    case 'entry':
+      return (
+        <div
+          className="h-full w-full flex items-center px-2 rounded"
+          style={{
+            backgroundColor: component.props?.bgColor || '#ffffff',
+            color: component.props?.fgColor || '#000000',
+            border: `${component.props?.borderWidth || 1}px solid ${component.props?.borderColor || '#e2e8f0'}`,
+            borderRadius: `${component.props?.cornerRadius || 8}px`,
+            fontSize: `${component.props?.fontSize || 12}px`,
+            fontWeight: component.props?.fontWeight || 'normal',
+            fontStyle: component.props?.fontStyle || 'normal',
+            fontFamily: component.props?.font || 'Arial'
+          }}
+        >
+          {component.props?.placeholder || 'Enter text...'}
+        </div>
+      );
+      
+    case 'paragraph':
+      return (
+        <div
+          className="h-full w-full p-2 overflow-hidden rounded"
+          style={{
+            backgroundColor: component.props?.bgColor || '#ffffff',
+            color: component.props?.fgColor || '#000000',
+            border: `${component.props?.borderWidth || 1}px solid ${component.props?.borderColor || '#e2e8f0'}`,
+            borderRadius: `${component.props?.cornerRadius || 8}px`,
+            padding: `${component.props?.padding || 10}px`,
+            fontSize: `${component.props?.fontSize || 12}px`,
+            fontWeight: component.props?.fontWeight || 'normal',
+            fontStyle: component.props?.fontStyle || 'normal',
+            fontFamily: component.props?.font || 'Arial',
+            lineHeight: component.props?.lineHeight || 1.5
+          }}
+        >
+          {component.props?.text || 'Paragraph text goes here.'}
+        </div>
+      );
+
+    case 'image':
+      if (component.props?.src) {
+        return (
+          <div 
+            className="h-full w-full overflow-hidden"
+            style={{
+              borderRadius: `${component.props?.cornerRadius || 0}px`,
+              border: `${component.props?.borderWidth || 0}px solid ${component.props?.borderColor || 'transparent'}`,
+            }}
+          >
+            <img 
+              src={component.props.src} 
+              alt={component.props?.alt || 'Image'} 
+              className="h-full w-full" 
+              style={{
+                objectFit: component.props?.fit || 'contain'
+              }}
+            />
+          </div>
+        );
+      } else {
+        return (
+          <div 
+            className="h-full w-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs overflow-hidden" 
+            style={{
+              borderRadius: `${component.props?.cornerRadius || 0}px`,
+              border: `${component.props?.borderWidth || 0}px solid ${component.props?.borderColor || 'transparent'}`,
+            }}
+          >
+            {component.props?.fileName || 'Image Placeholder'}
+          </div>
+        );
+      }
+      
+    case 'slider':
+      return (
+        <div className="h-full w-full flex items-center">
+          <div 
+            className="h-2 w-full bg-gray-200 rounded-full relative"
+            style={{
+              backgroundColor: component.props?.bgColor || '#e2e8f0'
+            }}
+          >
+            <div 
+              className="absolute h-full rounded-full" 
+              style={{
+                width: `${(component.props?.value / (component.props?.to || 100)) * 100}%`,
+                backgroundColor: component.props?.progressColor || '#3b82f6'
+              }}
+            />
+            <div 
+              className="absolute w-4 h-4 bg-white rounded-full shadow-md top-1/2 -translate-y-1/2" 
+              style={{
+                left: `calc(${(component.props?.value / (component.props?.to || 100)) * 100}% - 0.5rem)`
+              }}
+            />
+          </div>
+        </div>
+      );
+      
+    case 'checkbox':
+      return (
+        <div className="h-full w-full flex items-center gap-2">
+          <div 
+            className={`w-4 h-4 flex items-center justify-center rounded border ${component.props?.checked ? 'bg-blue-500' : 'bg-white'}`}
+            style={{
+              borderColor: component.props?.borderColor || '#e2e8f0',
+              backgroundColor: component.props?.checked ? (component.props?.checkedColor || '#3b82f6') : '#ffffff'
+            }}
+          >
+            {component.props?.checked && (
+              <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 1L3.5 6.5L1 4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            )}
+          </div>
+          <span 
+            style={{ 
+              color: component.props?.fgColor || '#000000',
+              fontSize: `${component.props?.fontSize || 12}px`,
+              fontWeight: component.props?.fontWeight || 'normal',
+              fontStyle: component.props?.fontStyle || 'normal',
+              fontFamily: component.props?.font || 'Arial'
+            }}
+          >
+            {component.props?.text || 'Checkbox'}
+          </span>
+        </div>
+      );
+
+    case 'frame':
+      return (
+        <div
+          className="h-full w-full"
+          style={{
+            backgroundColor: component.props?.bgColor || '#ffffff',
+            border: `${component.props?.borderWidth || 1}px solid ${component.props?.borderColor || '#e2e8f0'}`,
+            borderRadius: `${component.props?.cornerRadius || 4}px`
+          }}
+        />
+      );
+      
+    case 'progressbar':
+      return (
+        <div className="h-full w-full flex items-center">
+          <div 
+            className="h-full w-full bg-gray-200 overflow-hidden"
+            style={{
+              backgroundColor: component.props?.bgColor || '#e2e8f0',
+              borderRadius: `${component.props?.cornerRadius || 4}px`
+            }}
+          >
+            <div 
+              className="h-full" 
+              style={{
+                width: `${(component.props?.value / (component.props?.maxValue || 100)) * 100}%`,
+                backgroundColor: component.props?.progressColor || '#3b82f6'
+              }}
+            />
+          </div>
+        </div>
+      );
+      
+    default:
+      return (
+        <div className="h-full w-full flex items-center justify-center bg-gray-50 border border-dashed border-gray-300 text-sm text-gray-500">
+          {component.type}
+        </div>
+      );
+  }
+};
+
+export default Canvas;

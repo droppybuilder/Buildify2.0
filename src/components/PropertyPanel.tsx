@@ -187,7 +187,6 @@ export function PropertyPanel({
             <ColorInput
               value={selectedComponent.props.fgColor}
               onChange={(value) => handleChange('fgColor', value)}
-              id="fgColor"
             />
           </div>
         )}
@@ -412,7 +411,6 @@ export function PropertyPanel({
                   <ColorInput
                     value={selectedComponent.props.bgColor}
                     onChange={(value) => handleChange('bgColor', value)}
-                    id="bgColor"
                   />
                 </div>
               )}
@@ -424,7 +422,6 @@ export function PropertyPanel({
                   <ColorInput
                     value={selectedComponent.props.borderColor}
                     onChange={(value) => handleChange('borderColor', value)}
-                    id="borderColor"
                   />
                 </div>
               )}
@@ -473,7 +470,6 @@ export function PropertyPanel({
                   <ColorInput
                     value={selectedComponent.props.hoverColor || '#f0f0f0'}
                     onChange={(value) => handleChange('hoverColor', value)}
-                    id="hoverColor"
                   />
                 </div>
               )}

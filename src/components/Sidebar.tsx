@@ -40,192 +40,138 @@ export function Sidebar() {
           <div className="space-y-1">
             <TooltipProvider>
               <div className="flex flex-col items-center gap-3">
-                {/* Typography Components */}
-                <div className="space-y-3">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div
-                        className="h-10 w-10 flex items-center justify-center rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-grab"
-                        draggable
-                        onDragStart={(e) => handleComponentDragStart(e, 'label')}
-                      >
-                        <Text size={16} />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">Label</TooltipContent>
-                  </Tooltip>
-                  
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div
-                        className="h-10 w-10 flex items-center justify-center rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-grab"
-                        draggable
-                        onDragStart={(e) => handleComponentDragStart(e, 'paragraph')}
-                      >
-                        <PenLine size={16} />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">Paragraph</TooltipContent>
-                  </Tooltip>
-                </div>
+                {/* Main component categories */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className="h-10 w-10 flex items-center justify-center rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-grab"
+                      draggable
+                      onDragStart={(e) => handleComponentDragStart(e, 'button')}
+                    >
+                      <Square size={16} />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">Button</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className="h-10 w-10 flex items-center justify-center rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-grab"
+                      draggable
+                      onDragStart={(e) => handleComponentDragStart(e, 'label')}
+                    >
+                      <Text size={16} />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">Label</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className="h-10 w-10 flex items-center justify-center rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-grab"
+                      draggable
+                      onDragStart={(e) => handleComponentDragStart(e, 'entry')}
+                    >
+                      <SquareTerminal size={16} />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">Entry (Textbox)</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className="h-10 w-10 flex items-center justify-center rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-grab"
+                      draggable
+                      onDragStart={(e) => handleComponentDragStart(e, 'checkbox')}
+                    >
+                      <CheckSquare size={16} />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">Checkbox</TooltipContent>
+                </Tooltip>
+                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className="h-10 w-10 flex items-center justify-center rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-grab"
+                      draggable
+                      onDragStart={(e) => handleComponentDragStart(e, 'frame')}
+                    >
+                      <LayoutGrid size={16} />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">Frame</TooltipContent>
+                </Tooltip>
+                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className="h-10 w-10 flex items-center justify-center rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-grab"
+                      draggable
+                      onDragStart={(e) => handleComponentDragStart(e, 'paragraph')}
+                    >
+                      <PenLine size={16} />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">Paragraph</TooltipContent>
+                </Tooltip>
 
                 <Separator className="w-10" />
                 
-                {/* Interactive Components */}
-                <div className="space-y-3">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div
-                        className="h-10 w-10 flex items-center justify-center rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-grab"
-                        draggable
-                        onDragStart={(e) => handleComponentDragStart(e, 'button')}
-                      >
-                        <Square size={16} />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">Button</TooltipContent>
-                  </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className="h-10 w-10 flex items-center justify-center rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-grab"
+                      draggable
+                      onDragStart={(e) => handleComponentDragStart(e, 'slider')}
+                    >
+                      <BarChart3 size={16} />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">Slider</TooltipContent>
+                </Tooltip>
+                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className="h-10 w-10 flex items-center justify-center rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-grab"
+                      draggable
+                      onDragStart={(e) => handleComponentDragStart(e, 'image')}
+                    >
+                      <Image size={16} />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">Image</TooltipContent>
+                </Tooltip>
 
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div
-                        className="h-10 w-10 flex items-center justify-center rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-grab"
-                        draggable
-                        onDragStart={(e) => handleComponentDragStart(e, 'entry')}
-                      >
-                        <SquareTerminal size={16} />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">Entry (Textbox)</TooltipContent>
-                  </Tooltip>
-                  
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div
-                        className="h-10 w-10 flex items-center justify-center rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-grab"
-                        draggable
-                        onDragStart={(e) => handleComponentDragStart(e, 'checkbox')}
-                      >
-                        <CheckSquare size={16} />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">Checkbox</TooltipContent>
-                  </Tooltip>
-                  
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div
-                        className="h-10 w-10 flex items-center justify-center rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-grab"
-                        draggable
-                        onDragStart={(e) => handleComponentDragStart(e, 'slider')}
-                      >
-                        <BarChart3 size={16} />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">Slider</TooltipContent>
-                  </Tooltip>
-                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className="h-10 w-10 flex items-center justify-center rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-grab"
+                      draggable
+                      onDragStart={(e) => handleComponentDragStart(e, 'progressbar')}
+                    >
+                      <SquareStack size={16} />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">Progressbar</TooltipContent>
+                </Tooltip>
 
-                <Separator className="w-10" />
-
-                {/* Container Components */}
-                <div className="space-y-3">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div
-                        className="h-10 w-10 flex items-center justify-center rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-grab"
-                        draggable
-                        onDragStart={(e) => handleComponentDragStart(e, 'frame')}
-                      >
-                        <LayoutGrid size={16} />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">Frame</TooltipContent>
-                  </Tooltip>
-                  
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div
-                        className="h-10 w-10 flex items-center justify-center rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-grab"
-                        draggable
-                        onDragStart={(e) => handleComponentDragStart(e, 'notebook')}
-                      >
-                        <Book size={16} />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">Notebook (Tabs)</TooltipContent>
-                  </Tooltip>
-                  
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div
-                        className="h-10 w-10 flex items-center justify-center rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-grab"
-                        draggable
-                        onDragStart={(e) => handleComponentDragStart(e, 'listbox')}
-                      >
-                        <List size={16} />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">Listbox</TooltipContent>
-                  </Tooltip>
-                </div>
-
-                <Separator className="w-10" />
-
-                {/* Media Components */}
-                <div className="space-y-3">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div
-                        className="h-10 w-10 flex items-center justify-center rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-grab"
-                        draggable
-                        onDragStart={(e) => handleComponentDragStart(e, 'image')}
-                      >
-                        <Image size={16} />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">Image</TooltipContent>
-                  </Tooltip>
-                  
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div
-                        className="h-10 w-10 flex items-center justify-center rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-grab"
-                        draggable
-                        onDragStart={(e) => handleComponentDragStart(e, 'canvas')}
-                      >
-                        <MousePointer size={16} />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">Canvas</TooltipContent>
-                  </Tooltip>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div
-                        className="h-10 w-10 flex items-center justify-center rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-grab"
-                        draggable
-                        onDragStart={(e) => handleComponentDragStart(e, 'progressbar')}
-                      >
-                        <SquareStack size={16} />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">Progressbar</TooltipContent>
-                  </Tooltip>
-                  
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div
-                        className="h-10 w-10 flex items-center justify-center rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-grab"
-                        draggable
-                        onDragStart={(e) => handleComponentDragStart(e, 'datepicker')}
-                      >
-                        <Cpu size={16} />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">DatePicker</TooltipContent>
-                  </Tooltip>
-                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className="h-10 w-10 flex items-center justify-center rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-grab"
+                      draggable
+                      onDragStart={(e) => handleComponentDragStart(e, 'canvas')}
+                    >
+                      <MousePointer size={16} />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">Canvas</TooltipContent>
+                </Tooltip>
                 
                 <Separator className="w-10" />
                 

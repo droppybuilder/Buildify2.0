@@ -379,6 +379,7 @@ const Canvas = ({
     setHoveredComponent(null);
   };
 
+  // Specifically fixed to prevent null widgets during drag and drop
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
     
@@ -410,7 +411,6 @@ const Canvas = ({
         props: getDefaultProps(type),
       };
 
-      // Fixed: Always create a new array to ensure proper state update
       setComponents([...components, newComponent]);
       toast.success(`${type} component added to canvas`);
     } catch (error) {
@@ -456,7 +456,6 @@ const Canvas = ({
           [imageResult]: imageResult
         }));
         
-        // Fixed: Always create a new array to ensure proper state update
         setComponents([...components, newComponent]);
         toast.success(`Image "${fileName}" added to canvas`);
       } catch (error) {
@@ -572,6 +571,8 @@ const Canvas = ({
   const handleTitleSave = () => {
     if (setWindowTitle && titleInput.trim()) {
       setWindowTitle(titleInput.trim());
+      // Also update document title
+      document.title = titleInput.trim();
       toast.success("Window title updated");
     }
     setIsEditingTitle(false);
@@ -940,158 +941,4 @@ interface ComponentPreviewProps {
   isHovered: boolean;
 }
 
-const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
-  switch (component.type) {
-    case 'button':
-      return (
-        <button 
-          className="w-full h-full border transition-colors"
-          style={{
-            backgroundColor: isHovered && component.props.hoverColor 
-              ? component.props.hoverColor 
-              : component.props.bgColor || '#ffffff',
-            color: component.props.fgColor || '#000000',
-            borderRadius: `${component.props.cornerRadius || 8}px`,
-            borderColor: component.props.borderColor || '#e2e8f0',
-            borderWidth: `${component.props.borderWidth || 1}px`,
-            borderStyle: 'solid',
-            cursor: 'default',
-            fontFamily: component.props.font || 'Arial',
-            fontSize: `${component.props.fontSize || 12}px`,
-            fontWeight: component.props.fontWeight || 'normal',
-            fontStyle: component.props.fontStyle || 'normal',
-          }}
-        >
-          {component.props.text || 'Button'}
-        </button>
-      );
-    case 'label':
-      return (
-        <div 
-          className="w-full h-full flex items-center"
-          style={{
-            color: component.props.fgColor || '#000000',
-            fontSize: `${component.props.fontSize || 12}px`,
-            fontFamily: component.props.font || 'Arial',
-            fontWeight: component.props.fontWeight || 'normal',
-            fontStyle: component.props.fontStyle || 'normal',
-          }}
-        >
-          {component.props.text || 'Label'}
-        </div>
-      );
-    case 'entry':
-      return (
-        <input
-          type="text"
-          className="w-full h-full px-3"
-          placeholder={component.props.placeholder || 'Enter text...'}
-          style={{
-            backgroundColor: component.props.bgColor || '#ffffff',
-            borderRadius: `${component.props.cornerRadius || 8}px`,
-            borderColor: component.props.borderColor || '#e2e8f0',
-            borderWidth: `${component.props.borderWidth || 1}px`,
-            borderStyle: 'solid',
-            color: '#000000',
-            fontFamily: component.props.font || 'Arial',
-            fontSize: `${component.props.fontSize || 12}px`,
-            fontWeight: component.props.fontWeight || 'normal',
-            fontStyle: component.props.fontStyle || 'normal',
-          }}
-          readOnly
-        />
-      );
-    case 'paragraph':
-      return (
-        <div 
-          className="w-full h-full overflow-auto"
-          style={{
-            backgroundColor: component.props.bgColor || '#ffffff',
-            color: component.props.fgColor || '#000000',
-            borderRadius: `${component.props.cornerRadius || 8}px`,
-            borderColor: component.props.borderColor || '#e2e8f0',
-            borderWidth: `${component.props.borderWidth || 1}px`,
-            borderStyle: 'solid',
-            padding: `${component.props.padding || 10}px`,
-            fontFamily: component.props.font || 'Arial',
-            fontSize: `${component.props.fontSize || 12}px`,
-            fontWeight: component.props.fontWeight || 'normal',
-            fontStyle: component.props.fontStyle || 'normal',
-            lineHeight: component.props.lineHeight || 1.5,
-            whiteSpace: 'pre-wrap',
-          }}
-        >
-          {component.props.text || 'Paragraph text goes here. Double-click to edit.'}
-        </div>
-      );
-    case 'image':
-      // Improved image widget with filename display
-      return (
-        <div className="w-full h-full flex flex-col">
-          <div 
-            className="flex-1 overflow-hidden"
-            style={{
-              borderRadius: `${component.props.cornerRadius || 8}px`,
-              borderColor: component.props.borderColor || '#e2e8f0',
-              borderWidth: `${component.props.borderWidth || 1}px`,
-              borderStyle: 'solid',
-              backgroundColor: '#f0f0f0'
-            }}
-          >
-            {component.props.src ? (
-              <img 
-                src={component.props.src}
-                alt={component.props.alt || component.props.fileName || 'Image'}
-                className="w-full h-full"
-                style={{
-                  objectFit: component.props.fit || 'contain',
-                  imageRendering: 'auto'
-                }}
-                loading="eager"
-                decoding="async"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = '/placeholder.svg';
-                }}
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
-                No Image Selected
-              </div>
-            )}
-          </div>
-          <div className="text-xs truncate text-center mt-1 text-gray-600">
-            {component.props.fileName || 'placeholder.png'}
-          </div>
-        </div>
-      );
-    case 'checkbox':
-      return (
-        <label className="flex items-center gap-2 h-full cursor-default">
-          <input 
-            type="checkbox" 
-            className="w-4 h-4 rounded"
-            defaultChecked={component.props.checked}
-            style={{
-              borderColor: component.props.borderColor || '#d1d5db',
-              accentColor: component.props.checkedColor || '#3b82f6',
-            }}
-            readOnly
-          />
-          <span style={{ 
-            color: component.props.fgColor || '#000000',
-            fontFamily: component.props.font || 'Arial',
-            fontSize: `${component.props.fontSize || 12}px`,
-            fontWeight: component.props.fontWeight || 'normal',
-            fontStyle: component.props.fontStyle || 'normal',
-          }}>
-            {component.props.text || 'Checkbox'}
-          </span>
-        </label>
-      );
-    default:
-      return null;
-  }
-};
-
-export default Canvas;
+const

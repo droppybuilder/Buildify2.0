@@ -11,11 +11,14 @@ export function generateButtonCode(component: any, isTkinter: boolean): string {
   const safeId = component.id.replace(/[^a-zA-Z0-9_]/g, '_');
   
   if (isTkinter) {
+    const fontWeight = component.props?.fontWeight === 'bold' ? 'bold' : 'normal';
+    const fontStyle = component.props?.fontStyle === 'italic' ? 'italic' : 'roman';
+    
     return `self.button_${safeId} = tk.Button(self.root, 
         text="${component.props?.text || 'Button'}",
         bg="${component.props?.bgColor || '#e0e0e0'}",
         fg="${component.props?.fgColor || '#000000'}",
-        font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}),
+        font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}, "${fontWeight} ${fontStyle}"),
         activebackground="${component.props?.hoverColor || '#f0f0f0'}")
 self.button_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
   } else {
@@ -53,10 +56,13 @@ export function generateEntryCode(component: any, isTkinter: boolean): string {
   const safeId = component.id.replace(/[^a-zA-Z0-9_]/g, '_');
   
   if (isTkinter) {
+    const fontWeight = component.props?.fontWeight === 'bold' ? 'bold' : 'normal';
+    const fontStyle = component.props?.fontStyle === 'italic' ? 'italic' : 'roman';
+    
     return `self.entry_${safeId} = tk.Entry(self.root,
         bg="${component.props?.bgColor || '#ffffff'}",
         fg="${component.props?.fgColor || '#000000'}",
-        font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}))
+        font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}, "${fontWeight} ${fontStyle}"))
 self.entry_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
   } else {
     // For Eel, we just return a comment since components are handled via JSON
@@ -135,10 +141,13 @@ export function generateCheckboxCode(component: any, isTkinter: boolean): string
   const safeId = component.id.replace(/[^a-zA-Z0-9_]/g, '_');
   
   if (isTkinter) {
+    const fontWeight = component.props?.fontWeight === 'bold' ? 'bold' : 'normal';
+    const fontStyle = component.props?.fontStyle === 'italic' ? 'italic' : 'roman';
+    
     return `self.var_${safeId} = tk.BooleanVar()
 self.checkbox_${safeId} = tk.Checkbutton(self.root, 
         text="${component.props?.text || 'Checkbox'}", 
-        font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}),
+        font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}, "${fontWeight} ${fontStyle}"),
         fg="${component.props?.fgColor || '#000000'}",
         variable=self.var_${safeId})
 self.checkbox_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;

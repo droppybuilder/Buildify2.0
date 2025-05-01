@@ -384,8 +384,12 @@ const Canvas = ({
     
     try {
       const type = e.dataTransfer.getData('componentType');
-      const rect = canvasRef.current?.getBoundingClientRect();
+      if (!type) {
+        console.warn("Drop event missing component type");
+        return;
+      }
       
+      const rect = canvasRef.current?.getBoundingClientRect();
       if (!rect) return;
 
       const x = e.clientX - rect.left;
@@ -406,8 +410,9 @@ const Canvas = ({
         props: getDefaultProps(type),
       };
 
+      // Fixed: Always create a new array to ensure proper state update
       setComponents([...components, newComponent]);
-      toast.success("Component added to canvas");
+      toast.success(`${type} component added to canvas`);
     } catch (error) {
       console.error("Error in drop handler:", error);
       toast.error("Failed to add component");
@@ -416,7 +421,7 @@ const Canvas = ({
 
   // Handle image file uploads directly
   const handleImageDrop = (file: File, x: number, y: number) => {
-    if (!file.type.startsWith('image/')) {
+    if (!file || !file.type || !file.type.startsWith('image/')) {
       toast.error("Only image files are allowed");
       return;
     }
@@ -441,12 +446,19 @@ const Canvas = ({
           props: {
             ...getDefaultProps('image'),
             src: imageResult,
-            fileName: fileName
+            fileName: fileName,
+            alt: fileName
           },
         };
         
+        setImageCache(prev => ({
+          ...prev,
+          [imageResult]: imageResult
+        }));
+        
+        // Fixed: Always create a new array to ensure proper state update
         setComponents([...components, newComponent]);
-        toast.success("Image added to canvas");
+        toast.success(`Image "${fileName}" added to canvas`);
       } catch (error) {
         console.error("Error processing image file:", error);
         toast.error("Failed to process image file");
@@ -1053,86 +1065,6 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
           </div>
         </div>
       );
-    case 'slider':
-      return (
-        <div 
-          className="w-full h-full flex items-center justify-center"
-          style={{
-            borderRadius: `${component.props.cornerRadius || 8}px`,
-          }}
-        >
-          <div 
-            className="relative"
-            style={{
-              width: component.props.orient === 'vertical' ? '8px' : '100%',
-              height: component.props.orient === 'vertical' ? '100%' : '8px',
-              backgroundColor: component.props.bgColor || '#e2e8f0',
-              borderRadius: '4px',
-              borderWidth: `${component.props.borderWidth || 0}px`,
-              borderStyle: 'solid',
-              borderColor: component.props.borderColor || 'transparent',
-            }}
-          >
-            <div
-              style={{
-                position: 'absolute',
-                backgroundColor: component.props.progressColor || '#3b82f6',
-                borderRadius: '4px',
-                ...(component.props.orient === 'vertical' 
-                  ? {
-                      width: '100%',
-                      bottom: 0,
-                      height: `${((component.props.value - component.props.from) / (component.props.to - component.props.from)) * 100}%`
-                    }
-                  : {
-                      height: '100%',
-                      width: `${((component.props.value - component.props.from) / (component.props.to - component.props.from)) * 100}%`
-                    }
-                )
-              }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                width: '16px',
-                height: '16px',
-                backgroundColor: 'white',
-                borderRadius: '50%',
-                border: `1px solid ${component.props.borderColor || '#d1d5db'}`,
-                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-                ...(component.props.orient === 'vertical'
-                  ? {
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      bottom: `calc(${((component.props.value - component.props.from) / (component.props.to - component.props.from)) * 100}% - 8px)`
-                    }
-                  : {
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      left: `calc(${((component.props.value - component.props.from) / (component.props.to - component.props.from)) * 100}% - 8px)`
-                    }
-                )
-              }}
-            />
-          </div>
-        </div>
-      );
-    case 'frame':
-      return (
-        <div 
-          className="w-full h-full"
-          style={{
-            backgroundColor: component.props.bgColor || '#ffffff',
-            borderWidth: `${component.props.borderWidth || 1}px`,
-            borderColor: component.props.borderColor || '#e2e8f0',
-            borderStyle: 
-              component.props.relief === 'flat' ? 'solid' :
-              component.props.relief === 'groove' ? 'groove' :
-              component.props.relief === 'ridge' ? 'ridge' : 'solid',
-            borderRadius: `${component.props.cornerRadius || 4}px`,
-          }}
-        />
-      );
     case 'checkbox':
       return (
         <label className="flex items-center gap-2 h-full cursor-default">
@@ -1156,124 +1088,6 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
             {component.props.text || 'Checkbox'}
           </span>
         </label>
-      );
-    case 'datepicker':
-      return (
-        <div 
-          className="w-full h-full flex items-center px-3"
-          style={{
-            backgroundColor: component.props.bgColor || '#ffffff',
-            borderRadius: `${component.props.cornerRadius || 8}px`,
-            borderColor: component.props.borderColor || '#e2e8f0',
-            borderWidth: `${component.props.borderWidth || 1}px`,
-            borderStyle: 'solid',
-            color: component.props.fgColor || '#000000',
-            fontFamily: component.props.font || 'Arial',
-            fontSize: `${component.props.fontSize || 12}px`,
-          }}
-        >
-          {component.props.format || 'yyyy-mm-dd'}
-        </div>
-      );
-    case 'progressbar':
-      return (
-        <div 
-          className="w-full h-full flex items-center"
-          style={{
-            borderRadius: `${component.props.cornerRadius || 4}px`,
-            overflow: 'hidden'
-          }}
-        >
-          <div 
-            className="h-full"
-            style={{
-              width: `${(component.props.value / component.props.maxValue) * 100}%`,
-              backgroundColor: component.props.progressColor || '#3b82f6'
-            }}
-          />
-          <div 
-            className="h-full flex-1"
-            style={{
-              backgroundColor: component.props.bgColor || '#e2e8f0'
-            }}
-          />
-        </div>
-      );
-    case 'notebook':
-      return (
-        <div 
-          className="w-full h-full flex flex-col"
-          style={{
-            backgroundColor: component.props.bgColor || '#ffffff',
-            borderRadius: `${component.props.cornerRadius || 4}px`,
-            borderColor: component.props.borderColor || '#e2e8f0',
-            borderWidth: `${component.props.borderWidth || 1}px`,
-            borderStyle: 'solid',
-            overflow: 'hidden'
-          }}
-        >
-          <div className="flex border-b border-gray-200">
-            {component.props.tabs && component.props.tabs.split(',').map((tab: string, index: number) => (
-              <div 
-                key={index}
-                className={`px-4 py-2 text-sm cursor-default ${
-                  component.props.selectedTab === tab.trim() 
-                    ? 'border-b-2 border-primary text-primary' 
-                    : 'text-gray-600'
-                }`}
-                style={{
-                  fontFamily: component.props.font || 'Arial',
-                  fontSize: `${component.props.fontSize || 12}px`,
-                }}
-              >
-                {tab.trim()}
-              </div>
-            ))}
-          </div>
-          <div className="flex-1" />
-        </div>
-      );
-    case 'listbox':
-      return (
-        <div 
-          className="w-full h-full overflow-auto"
-          style={{
-            backgroundColor: component.props.bgColor || '#ffffff',
-            borderRadius: `${component.props.cornerRadius || 4}px`,
-            borderColor: component.props.borderColor || '#e2e8f0',
-            borderWidth: `${component.props.borderWidth || 1}px`,
-            borderStyle: 'solid'
-          }}
-        >
-          <div className="py-1">
-            {component.props.items && component.props.items.split(',').map((item: string, index: number) => (
-              <div 
-                key={index} 
-                className="px-4 py-2 text-sm hover:bg-gray-100 cursor-default"
-                style={{
-                  color: component.props.fgColor || '#000000',
-                  fontFamily: component.props.font || 'Arial',
-                  fontSize: `${component.props.fontSize || 12}px`,
-                }}
-              >
-                {item.trim()}
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    case 'canvas':
-      return (
-        <div 
-          className="w-full h-full"
-          style={{
-            backgroundColor: component.props.bgColor || '#ffffff',
-            borderRadius: `${component.props.cornerRadius || 4}px`,
-            borderColor: component.props.borderColor || '#e2e8f0',
-            borderWidth: `${component.props.borderWidth || 1}px`,
-            borderStyle: 'solid'
-          }}
-        />
       );
     default:
       return null;

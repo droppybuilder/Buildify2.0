@@ -11,7 +11,7 @@ import { ColorInput } from "@/components/ColorInput";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Bold, Italic } from "lucide-react";
 
 interface PropertyPanelProps {
   selectedComponent: any;
@@ -27,6 +27,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
   inputFocused
 }) => {
   const [dimensionsOpen, setDimensionsOpen] = useState(true);
+  const [fontSettingsOpen, setFontSettingsOpen] = useState(true);
   
   // Local state for input values to ensure controlled components work properly
   const [localInputValues, setLocalInputValues] = useState<Record<string, any>>({});
@@ -162,10 +163,27 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
     
     reader.readAsDataURL(file);
   };
+
+  // Toggle font weight between normal and bold
+  const toggleFontWeight = () => {
+    const currentWeight = selectedComponent.props?.fontWeight;
+    updateProperty('fontWeight', currentWeight === 'bold' ? 'normal' : 'bold');
+  };
+  
+  // Toggle font style between normal and italic
+  const toggleFontStyle = () => {
+    const currentStyle = selectedComponent.props?.fontStyle;
+    updateProperty('fontStyle', currentStyle === 'italic' ? 'normal' : 'italic');
+  };
   
   // Helper function to get local value with fallback to component value
   const getValue = (field: string, defaultValue: any = '') => {
     return localInputValues[field] !== undefined ? localInputValues[field] : defaultValue;
+  };
+
+  // Gets whether a button should appear active based on the property value
+  const isActive = (property: string, value: string) => {
+    return selectedComponent.props?.[property] === value;
   };
   
   // Return empty panel if no component is selected
@@ -189,6 +207,17 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
   
   // Initialize props if needed
   const props = selectedComponent.props || {};
+  
+  // Determine if the component type should show font settings
+  const showFontSettings = [
+    'button', 
+    'label', 
+    'entry', 
+    'textbox', 
+    'checkbox', 
+    'paragraph',
+    'listbox'
+  ].includes(selectedComponent.type);
   
   return (
     <ScrollArea className="h-full px-4">
@@ -265,6 +294,83 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
             </div>
           </CollapsibleContent>
         </Collapsible>
+
+        {/* Font settings section */}
+        {showFontSettings && (
+          <Collapsible 
+            open={fontSettingsOpen} 
+            onOpenChange={setFontSettingsOpen}
+            className="border rounded-md overflow-hidden"
+          >
+            <CollapsibleTrigger className="flex items-center justify-between w-full bg-muted px-3 py-2">
+              <h3 className="text-sm font-medium">Font Settings</h3>
+              {fontSettingsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </CollapsibleTrigger>
+            <CollapsibleContent className="p-3">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="font">Font Family</Label>
+                  <Select
+                    value={getValue('font', props.font || 'Arial')}
+                    onValueChange={(value) => updateProperty('font', value)}
+                  >
+                    <SelectTrigger id="font" className="w-full">
+                      <SelectValue placeholder="Select font" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Arial">Arial</SelectItem>
+                      <SelectItem value="Helvetica">Helvetica</SelectItem>
+                      <SelectItem value="Times New Roman">Times New Roman</SelectItem>
+                      <SelectItem value="Courier New">Courier New</SelectItem>
+                      <SelectItem value="Georgia">Georgia</SelectItem>
+                      <SelectItem value="Verdana">Verdana</SelectItem>
+                      <SelectItem value="Tahoma">Tahoma</SelectItem>
+                      <SelectItem value="Trebuchet MS">Trebuchet MS</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="fontSize">Font Size</Label>
+                  <Input
+                    id="fontSize"
+                    type="number"
+                    value={getValue('fontSize', props.fontSize || 12)}
+                    onChange={(e) => handleNumberChange(e, 'fontSize')}
+                    onFocus={() => setInputFocused(true)}
+                    onBlur={() => setInputFocused(false)}
+                  />
+                </div>
+                
+                <div>
+                  <Label>Font Style</Label>
+                  <div className="flex space-x-2 mt-1">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={isActive('fontWeight', 'bold') ? "default" : "outline"}
+                      onClick={toggleFontWeight}
+                      className="flex items-center gap-1"
+                    >
+                      <Bold size={16} />
+                      <span>Bold</span>
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={isActive('fontStyle', 'italic') ? "default" : "outline"}
+                      onClick={toggleFontStyle}
+                      className="flex items-center gap-1"
+                    >
+                      <Italic size={16} />
+                      <span>Italic</span>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
 
         {/* Component type specific properties - Only render relevant section */}
         {selectedComponent.type === 'button' && (
@@ -781,6 +887,65 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 id="cornerRadius"
                 type="number"
                 value={getValue('cornerRadius', props.cornerRadius || 3)}
+                onChange={(e) => handleNumberChange(e, 'cornerRadius')}
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => setInputFocused(false)}
+              />
+            </div>
+          </div>
+        )}
+
+        {selectedComponent.type === 'paragraph' && (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="paragraphText">Paragraph Text</Label>
+              <Textarea
+                id="paragraphText"
+                value={getValue('text', props.text || 'Paragraph text')}
+                onChange={(e) => handleTextChange(e, 'text')}
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => setInputFocused(false)}
+                className="min-h-[100px]"
+              />
+            </div>
+            <div>
+              <Label>Text Color</Label>
+              <ColorInput
+                value={props.fgColor || '#000000'}
+                onChange={(value) => updateProperty('fgColor', value)}
+              />
+            </div>
+            <div>
+              <Label>Background Color</Label>
+              <ColorInput
+                value={props.bgColor || 'transparent'}
+                onChange={(value) => updateProperty('bgColor', value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="borderWidth">Border Width</Label>
+              <Input
+                id="borderWidth"
+                type="number"
+                value={getValue('borderWidth', props.borderWidth || 0)}
+                onChange={(e) => handleNumberChange(e, 'borderWidth')}
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => setInputFocused(false)}
+              />
+            </div>
+            <div>
+              <Label>Border Color</Label>
+              <ColorInput
+                value={props.borderColor || '#d1d5db'}
+                onChange={(value) => updateProperty('borderColor', value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="cornerRadius">Corner Radius</Label>
+              <Input
+                id="cornerRadius"
+                type="number"
+                value={getValue('cornerRadius', props.cornerRadius || 0)}
                 onChange={(e) => handleNumberChange(e, 'cornerRadius')}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}

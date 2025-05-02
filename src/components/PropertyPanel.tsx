@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -168,9 +169,6 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
     return localInputValues[field] !== undefined ? localInputValues[field] : defaultValue;
   };
   
-  // Helper function to check if component is text-based and should have font options
-  const hasTextOptions = ['button', 'label', 'entry', 'textbox', 'paragraph', 'checkbox', 'dropdown'].includes(selectedComponent.type);
-  
   // Return empty panel if no component is selected
   if (!selectedComponent) {
     return (
@@ -189,6 +187,9 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
       </div>
     );
   }
+  
+  // Helper function to check if component is text-based and should have font options
+  const hasTextOptions = ['button', 'label', 'entry', 'textbox', 'paragraph', 'checkbox', 'dropdown'].includes(selectedComponent.type);
   
   // Initialize props if needed
   const props = selectedComponent.props || {};

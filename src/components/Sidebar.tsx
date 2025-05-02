@@ -13,7 +13,8 @@ import {
   LayoutGrid, 
   Gauge, 
   Layout, 
-  List 
+  List,
+  Text
 } from "lucide-react";
 
 export const Sidebar = () => {
@@ -63,6 +64,14 @@ export const Sidebar = () => {
               >
                 <ImageIcon size={16} />
                 <span>Image</span>
+              </div>
+              <div
+                draggable
+                onDragStart={(e) => handleDragStart(e, 'paragraph')}
+                className="aspect-[4/1] rounded-lg border p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors border-gray-200 bg-white"
+              >
+                <Text size={16} />
+                <span>Paragraph</span>
               </div>
             </div>
           </div>

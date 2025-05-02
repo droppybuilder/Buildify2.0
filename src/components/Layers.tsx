@@ -69,7 +69,7 @@ export const Layers = ({
       return newVisibility;
     });
     
-    toast.info(`Component visibility ${visibilityStates[id] ? 'hidden' : 'shown'}`);
+    toast.info(`Component ${visibilityStates[id] ? 'hidden' : 'shown'}`);
   };
   
   const toggleLock = (id: string, e: React.MouseEvent) => {
@@ -178,7 +178,7 @@ export const Layers = ({
                             selectedComponent?.id === component.id 
                               ? 'bg-primary/10 border border-primary/30' 
                               : 'hover:bg-gray-100 border border-transparent'
-                          }`}
+                          } ${!isVisible ? 'opacity-50' : ''}`}
                           onClick={() => handleLayerClick(component)}
                         >
                           <div className="flex items-center">

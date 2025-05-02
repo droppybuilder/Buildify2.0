@@ -82,6 +82,10 @@ class App(ctk.CTk):
   components.forEach(component => {
     const props = component.props || {};
     
+    // Ensure x and y coordinates are defined or use defaults
+    const xPos = props.x !== undefined ? props.x : 10;
+    const yPos = props.y !== undefined ? props.y : 10;
+    
     // Enhanced font configuration with style and weight
     let fontConfig = '';
     if (props.font) {
@@ -118,31 +122,31 @@ class App(ctk.CTk):
           const imageSize = props.image_size || { width: 50, height: 50 };
           code += `
         self.${component.id} = ctk.CTkLabel(self, text="${props.text || ''}", image=self.load_image("${imagePath}", (${imageSize.width}, ${imageSize.height})), compound="${props.compound || 'left'}", ${fontConfig})
-        self.${component.id}.place(x=${props.x}, y=${props.y}, width=${props.width}, height=${props.height})
+        self.${component.id}.place(x=${xPos}, y=${yPos}, width=${props.width || 100}, height=${props.height || 30})
 `;
         } else {
           code += `
-        self.${component.id} = ctk.CTkLabel(self, text="${props.text || ''}", width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, bg_color="${props.bg_color || '#ffffff'}", fg_color="${props.fg_color || '#ffffff'}", text_color="${props.text_color || '#000000'}", ${fontConfig})
-        self.${component.id}.place(x=${props.x}, y=${props.y})
+        self.${component.id} = ctk.CTkLabel(self, text="${props.text || ''}", width=${props.width || 100}, height=${props.height || 30}, corner_radius=${cornerRadius}, bg_color="${props.bg_color || '#ffffff'}", fg_color="${props.fg_color || '#ffffff'}", text_color="${props.text_color || '#000000'}", ${fontConfig})
+        self.${component.id}.place(x=${xPos}, y=${yPos})
 `;
         }
         break;
       case 'CTkButton':
         code += `
-        self.${component.id} = ctk.CTkButton(self, text="${props.text || 'Button'}", width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, bg_color="${props.bg_color || '#ffffff'}", fg_color="${props.fg_color || '#3b82f6'}", text_color="${props.text_color || '#ffffff'}", border_width=${borderWidth}, border_color="${borderColor}", ${fontConfig})
-        self.${component.id}.place(x=${props.x}, y=${props.y})
+        self.${component.id} = ctk.CTkButton(self, text="${props.text || 'Button'}", width=${props.width || 100}, height=${props.height || 30}, corner_radius=${cornerRadius}, bg_color="${props.bg_color || '#ffffff'}", fg_color="${props.fg_color || '#3b82f6'}", text_color="${props.text_color || '#ffffff'}", border_width=${borderWidth}, border_color="${borderColor}", ${fontConfig})
+        self.${component.id}.place(x=${xPos}, y=${yPos})
 `;
         break;
       case 'CTkEntry':
         code += `
-        self.${component.id} = ctk.CTkEntry(self, width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, bg_color="${props.bg_color || '#ffffff'}", fg_color="${props.fg_color || '#ffffff'}", text_color="${props.text_color || '#000000'}", border_width=${borderWidth}, border_color="${borderColor}", ${fontConfig})
-        self.${component.id}.place(x=${props.x}, y=${props.y})
+        self.${component.id} = ctk.CTkEntry(self, width=${props.width || 100}, height=${props.height || 30}, corner_radius=${cornerRadius}, bg_color="${props.bg_color || '#ffffff'}", fg_color="${props.fg_color || '#ffffff'}", text_color="${props.text_color || '#000000'}", border_width=${borderWidth}, border_color="${borderColor}", ${fontConfig})
+        self.${component.id}.place(x=${xPos}, y=${yPos})
 `;
         break;
       case 'CTkTextbox':
         code += `
-        self.${component.id} = ctk.CTkTextbox(self, width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, bg_color="${props.bg_color || '#ffffff'}", fg_color="${props.fg_color || '#ffffff'}", text_color="${props.text_color || '#000000'}", border_width=${borderWidth}, border_color="${borderColor}", ${fontConfig})
-        self.${component.id}.place(x=${props.x}, y=${props.y})
+        self.${component.id} = ctk.CTkTextbox(self, width=${props.width || 100}, height=${props.height || 80}, corner_radius=${cornerRadius}, bg_color="${props.bg_color || '#ffffff'}", fg_color="${props.fg_color || '#ffffff'}", text_color="${props.text_color || '#000000'}", border_width=${borderWidth}, border_color="${borderColor}", ${fontConfig})
+        self.${component.id}.place(x=${xPos}, y=${yPos})
 `;
         if (props.text) {
           code += `        self.${component.id}.insert("1.0", """${props.text}""")
@@ -151,54 +155,54 @@ class App(ctk.CTk):
         break;
       case 'CTkSlider':
         code += `
-        self.${component.id} = ctk.CTkSlider(self, width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, border_width=${borderWidth}, bg_color="${props.bg_color || '#e2e8f0'}", fg_color="${props.fg_color || '#ffffff'}", progress_color="${props.progressColor || '#3b82f6'}")
-        self.${component.id}.place(x=${props.x}, y=${props.y})
+        self.${component.id} = ctk.CTkSlider(self, width=${props.width || 160}, height=${props.height || 16}, corner_radius=${cornerRadius}, border_width=${borderWidth}, bg_color="${props.bg_color || '#e2e8f0'}", fg_color="${props.fg_color || '#ffffff'}", progress_color="${props.progressColor || '#3b82f6'}")
+        self.${component.id}.place(x=${xPos}, y=${yPos})
 `;
         break;
       case 'CTkSwitch':
         code += `
         self.${component.id} = ctk.CTkSwitch(self, text="${props.text || 'Switch'}", ${fontConfig}, bg_color="${props.bg_color || '#ffffff'}", fg_color="${props.fg_color || '#3b82f6'}", progress_color="${props.progressColor || '#3b82f6'}", text_color="${props.text_color || '#000000'}")
-        self.${component.id}.place(x=${props.x}, y=${props.y})
+        self.${component.id}.place(x=${xPos}, y=${yPos})
 `;
         break;
       case 'CTkProgressBar':
         code += `
-        self.${component.id} = ctk.CTkProgressBar(self, width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, border_width=${borderWidth}, bg_color="${props.bg_color || '#e2e8f0'}", fg_color="${props.fg_color || '#ffffff'}", progress_color="${props.progressColor || '#3b82f6'}")
+        self.${component.id} = ctk.CTkProgressBar(self, width=${props.width || 160}, height=${props.height || 16}, corner_radius=${cornerRadius}, border_width=${borderWidth}, bg_color="${props.bg_color || '#e2e8f0'}", fg_color="${props.fg_color || '#ffffff'}", progress_color="${props.progressColor || '#3b82f6'}")
         self.${component.id}.set(${(props.value || 50) / 100})
-        self.${component.id}.place(x=${props.x}, y=${props.y})
+        self.${component.id}.place(x=${xPos}, y=${yPos})
 `;
         break;
       case 'paragraph':
         code += `
-        self.${component.id} = ctk.CTkTextbox(self, width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, bg_color="${props.bg_color || '#ffffff'}", fg_color="${props.fg_color || '#ffffff'}", text_color="${props.text_color || '#000000'}", border_width=${borderWidth}, border_color="${borderColor}", ${fontConfig})
-        self.${component.id}.place(x=${props.x}, y=${props.y})
+        self.${component.id} = ctk.CTkTextbox(self, width=${props.width || 200}, height=${props.height || 100}, corner_radius=${cornerRadius}, bg_color="${props.bg_color || '#ffffff'}", fg_color="${props.fg_color || '#ffffff'}", text_color="${props.text_color || '#000000'}", border_width=${borderWidth}, border_color="${borderColor}", ${fontConfig})
+        self.${component.id}.place(x=${xPos}, y=${yPos})
         self.${component.id}.insert("1.0", """${props.text || 'Paragraph text'}""")
         self.${component.id}.configure(state="disabled")  # Make read-only
 `;
         break;
       case 'textbox':
         code += `
-        self.${component.id} = ctk.CTkTextbox(self, width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, bg_color="${props.bg_color || '#ffffff'}", fg_color="${props.fg_color || '#ffffff'}", text_color="${props.text_color || '#000000'}", border_width=${borderWidth}, border_color="${borderColor}", ${fontConfig})
-        self.${component.id}.place(x=${props.x}, y=${props.y})
+        self.${component.id} = ctk.CTkTextbox(self, width=${props.width || 200}, height=${props.height || 100}, corner_radius=${cornerRadius}, bg_color="${props.bg_color || '#ffffff'}", fg_color="${props.fg_color || '#ffffff'}", text_color="${props.text_color || '#000000'}", border_width=${borderWidth}, border_color="${borderColor}", ${fontConfig})
+        self.${component.id}.place(x=${xPos}, y=${yPos})
         ${props.text ? `self.${component.id}.insert("1.0", """${props.text}""")` : ''}
 `;
         break;
       case 'frame':
         code += `
-        self.${component.id} = ctk.CTkFrame(self, width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, bg_color="${props.bg_color || '#f0f0f0'}", fg_color="${props.fg_color || '#ffffff'}", border_width=${borderWidth}, border_color="${borderColor}")
-        self.${component.id}.place(x=${props.x}, y=${props.y})
+        self.${component.id} = ctk.CTkFrame(self, width=${props.width || 200}, height=${props.height || 150}, corner_radius=${cornerRadius}, bg_color="${props.bg_color || '#f0f0f0'}", fg_color="${props.fg_color || '#ffffff'}", border_width=${borderWidth}, border_color="${borderColor}")
+        self.${component.id}.place(x=${xPos}, y=${yPos})
 `;
         break;
       case 'notebook':
         code += `
         # For a CTk notebook equivalent, we need to create a tabbed view
-        self.${component.id}_frame = ctk.CTkFrame(self, width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, bg_color="${props.bg_color || '#f0f0f0'}", fg_color="${props.fg_color || '#ffffff'}", border_width=${borderWidth}, border_color="${borderColor}")
-        self.${component.id}_frame.place(x=${props.x}, y=${props.y})
+        self.${component.id}_frame = ctk.CTkFrame(self, width=${props.width || 300}, height=${props.height || 200}, corner_radius=${cornerRadius}, bg_color="${props.bg_color || '#f0f0f0'}", fg_color="${props.fg_color || '#ffffff'}", border_width=${borderWidth}, border_color="${borderColor}")
+        self.${component.id}_frame.place(x=${xPos}, y=${yPos})
         
         # Create tab buttons on top
         self.${component.id}_tabs = []
         tab_titles = "${props.tabs || 'Tab 1,Tab 2,Tab 3'}".split(',')
-        tab_width = ${props.width} / len(tab_titles)
+        tab_width = ${props.width || 300} / len(tab_titles)
         
         for i, tab_title in enumerate(tab_titles):
             tab_btn = ctk.CTkButton(self.${component.id}_frame, text=tab_title.strip(), corner_radius=0, height=30, width=tab_width, ${fontConfig}, fg_color="${props.fg_color || '#ffffff'}" if i == 0 else "${props.bg_color || '#f0f0f0'}", text_color="${props.text_color || '#000000'}")
@@ -206,15 +210,15 @@ class App(ctk.CTk):
             self.${component.id}_tabs.append(tab_btn)
             
         # Create content frame below tabs
-        self.${component.id}_content = ctk.CTkFrame(self.${component.id}_frame, width=${props.width}, height=${props.height-30}, corner_radius=0, fg_color="${props.fg_color || '#ffffff'}")
+        self.${component.id}_content = ctk.CTkFrame(self.${component.id}_frame, width=${props.width || 300}, height=${(props.height || 200)-30}, corner_radius=0, fg_color="${props.fg_color || '#ffffff'}")
         self.${component.id}_content.place(x=0, y=30)
 `;
         break;
       case 'listbox':
         code += `
         # Since CustomTkinter doesn't have a native listbox, we'll use a CTkScrollableFrame with labels
-        self.${component.id}_frame = ctk.CTkScrollableFrame(self, width=${props.width}, height=${props.height}, corner_radius=${cornerRadius}, fg_color="${props.fg_color || '#ffffff'}", border_width=${borderWidth}, border_color="${borderColor}")
-        self.${component.id}_frame.place(x=${props.x}, y=${props.y})
+        self.${component.id}_frame = ctk.CTkScrollableFrame(self, width=${props.width || 200}, height=${props.height || 150}, corner_radius=${cornerRadius}, fg_color="${props.fg_color || '#ffffff'}", border_width=${borderWidth}, border_color="${borderColor}")
+        self.${component.id}_frame.place(x=${xPos}, y=${yPos})
         
         # Add items to the listbox
         items = "${props.items || 'Item 1,Item 2,Item 3,Item 4,Item 5'}".split(',')
@@ -228,8 +232,8 @@ class App(ctk.CTk):
         break;
       case 'canvas':
         code += `
-        self.${component.id} = tk.Canvas(self, width=${props.width}, height=${props.height}, bg="${props.bg_color || '#ffffff'}", highlightthickness=${borderWidth}, highlightbackground="${borderColor}")
-        self.${component.id}.place(x=${props.x}, y=${props.y})
+        self.${component.id} = tk.Canvas(self, width=${props.width || 200}, height=${props.height || 150}, bg="${props.bg_color || '#ffffff'}", highlightthickness=${borderWidth}, highlightbackground="${borderColor}")
+        self.${component.id}.place(x=${xPos}, y=${yPos})
         
         # Example drawing
         self.${component.id}.create_rectangle(20, 20, 50, 50, fill="#3b82f6")

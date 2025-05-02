@@ -34,13 +34,11 @@ export const Layers = ({
     const initialLockStates: Record<string, boolean> = {};
     
     components.forEach(component => {
-      if (component && component.id) {
-        // Use existing visibility from component props if available
-        initialVisibility[component.id] = component.visible !== false; // Default to true
-        
-        // Use existing lock state from component props if available
-        initialLockStates[component.id] = component.locked === true; // Default to false
-      }
+      // Use existing visibility from component props if available
+      initialVisibility[component.id] = component.visible !== false; // Default to true
+      
+      // Use existing lock state from component props if available
+      initialLockStates[component.id] = component.locked === true; // Default to false
     });
     
     setVisibilityStates(initialVisibility);
@@ -58,7 +56,7 @@ export const Layers = ({
       
       // Update the components with visibility information
       const updatedComponents = components.map(c => {
-        if (c && c.id === id) {
+        if (c.id === id) {
           return {
             ...c,
             visible: newVisibility[id]
@@ -71,7 +69,7 @@ export const Layers = ({
       return newVisibility;
     });
     
-    toast.info(`Component ${visibilityStates[id] ? 'hidden' : 'shown'}`);
+    toast.info(`Component visibility ${visibilityStates[id] ? 'hidden' : 'shown'}`);
   };
   
   const toggleLock = (id: string, e: React.MouseEvent) => {
@@ -85,7 +83,7 @@ export const Layers = ({
       
       // Update the components with lock information
       const updatedComponents = components.map(c => {
-        if (c && c.id === id) {
+        if (c.id === id) {
           return {
             ...c,
             locked: newLockState[id]
@@ -96,8 +94,7 @@ export const Layers = ({
       
       onComponentsChange(updatedComponents);
       
-      const componentItem = components.find(c => c && c.id === id);
-      const componentName = componentItem?.type || 'Component';
+      const componentName = components.find(c => c.id === id)?.type || 'Component';
       if (newLockState[id]) {
         toast.info(`"${componentName}" locked`);
       } else {
@@ -129,8 +126,6 @@ export const Layers = ({
   };
   
   const handleLayerClick = (component: any) => {
-    if (!component || !component.id) return;
-    
     // If the component is not locked, allow selection
     if (!lockStates[component.id]) {
       setSelectedComponent(component);
@@ -140,7 +135,7 @@ export const Layers = ({
   };
   
   // Reverse the components array for display so that the top-most layer appears at the top
-  const displayComponents = [...components].filter(Boolean).reverse();
+  const displayComponents = [...components].reverse();
 
   if (!visible) return null;
 
@@ -165,8 +160,6 @@ export const Layers = ({
                 </div>
               ) : (
                 displayComponents.map((component, index) => {
-                  if (!component || !component.id) return null;
-                  
                   const isVisible = visibilityStates[component.id] !== false;
                   const isLocked = lockStates[component.id] === true;
                   
@@ -182,10 +175,10 @@ export const Layers = ({
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           className={`mb-1 p-2 rounded transition-colors ${
-                            selectedComponent && selectedComponent.id === component.id 
+                            selectedComponent?.id === component.id 
                               ? 'bg-primary/10 border border-primary/30' 
                               : 'hover:bg-gray-100 border border-transparent'
-                          } ${!isVisible ? 'opacity-50' : ''}`}
+                          }`}
                           onClick={() => handleLayerClick(component)}
                         >
                           <div className="flex items-center">
@@ -255,7 +248,7 @@ export const Layers = ({
       <div className="p-3 border-t">
         <div className="flex justify-between">
           <span className="text-xs text-muted-foreground">
-            {components.filter(Boolean).length} components
+            {components.length} components
           </span>
           <span className="text-xs text-muted-foreground">
             <span className="font-medium">Tip:</span> Lock layers to prevent editing

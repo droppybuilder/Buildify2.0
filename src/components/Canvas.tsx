@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { toast } from "sonner";
 import { Maximize2, Minimize2, X, Copy, Scissors, Trash } from "lucide-react";
@@ -15,8 +16,6 @@ interface Component {
   position: { x: number; y: number };
   size: { width: number; height: number };
   props: Record<string, any>;
-  visible?: boolean;
-  locked?: boolean;
 }
 
 interface CanvasProps {
@@ -411,8 +410,6 @@ const Canvas = ({
         position: { x, y },
         size: getDefaultSize(type),
         props: getDefaultProps(type),
-        visible: true,
-        locked: false,
       };
 
       // Create a new array instead of modifying the existing one
@@ -456,8 +453,6 @@ const Canvas = ({
             fileName: fileName,
             alt: fileName
           },
-          visible: true,
-          locked: false,
         };
         
         setImageCache(prev => ({
@@ -812,18 +807,13 @@ const Canvas = ({
   return (
     <div className="w-full h-full p-8 flex items-center justify-center">
       <div 
-        className="macos-window light flex flex-col relative"
+        className="macos-window light flex flex-col"
         style={{ 
           width: windowSize.width, 
           height: windowSize.height,
           backgroundColor: windowBgColor || '#f0f0f0',
         }}
       >
-        {/* Watermark */}
-        <div className="absolute bottom-2 right-4 opacity-40 text-gray-600 text-sm pointer-events-none">
-          CustomTkinter GUI Builder - Free Version
-        </div>
-        
         <div className="window-titlebar">
           <div className="window-buttons">
             <div className="window-button window-close">
@@ -888,70 +878,58 @@ const Canvas = ({
             />
           )}
           
-          {components.map((component) => {
-            // Skip rendering hidden components
-            if (component?.visible === false) {
-              return null;
-            }
-            
-            return (
-              <ContextMenu key={component.id}>
-                <ContextMenuTrigger>
-                  <div
-                    className={`absolute component-preview ${component.locked ? 'cursor-not-allowed' : 'cursor-move'} ${
-                      selectedComponent?.id === component.id ? 'ring-2 ring-primary ring-offset-2' : 
-                      selectedComponents.includes(component.id) ? 'ring-2 ring-blue-400 ring-offset-2' : ''
-                    }`}
-                    style={{
-                      left: `${component.position.x}px`,
-                      top: `${component.position.y}px`,
-                      width: `${component.size.width}px`,
-                      height: `${component.size.height}px`,
-                      transform: 'translate(0, 0)',
-                      transition: isDragging || isResizing ? 'none' : 'all 0.2s ease',
-                      willChange: 'transform, left, top, width, height',
-                      opacity: component.visible === false ? 0 : 1,
-                    }}
-                    onMouseDown={(e) => {
-                      if (component.locked !== true) {
-                        handleMouseDown(e, component);
-                      }
-                    }}
-                    onContextMenu={(e) => handleContextMenu(e, component)}
-                    onMouseEnter={() => handleComponentMouseEnter(component.id)}
-                    onMouseLeave={handleComponentMouseLeave}
-                  >
-                    <ComponentPreview 
-                      component={component} 
-                      isHovered={hoveredComponent === component.id}
-                    />
-                    {selectedComponent?.id === component.id && component.locked !== true && (
-                      <>
-                        <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full top-0 left-0 -translate-x-1/2 -translate-y-1/2 cursor-nw-resize" data-direction="nw" />
-                        <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full top-0 right-0 translate-x-1/2 -translate-y-1/2 cursor-ne-resize" data-direction="ne" />
-                        <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full bottom-0 left-0 -translate-x-1/2 translate-y-1/2 cursor-sw-resize" data-direction="sw" />
-                        <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full bottom-0 right-0 translate-x-1/2 translate-y-1/2 cursor-se-resize" data-direction="se" />
-                      </>
-                    )}
-                  </div>
-                </ContextMenuTrigger>
-                <ContextMenuContent>
-                  <ContextMenuItem onClick={handleCopyComponent}>
-                    <Copy className="mr-2 h-4 w-4" />
-                    <span>Copy</span>
-                  </ContextMenuItem>
-                  <ContextMenuItem onClick={handleCutComponent}>
-                    <Scissors className="mr-2 h-4 w-4" />
-                    <span>Cut</span>
-                  </ContextMenuItem>
-                  <ContextMenuItem onClick={handleDeleteComponent}>
-                    <Trash className="mr-2 h-4 w-4" />
-                    <span>Delete</span>
-                  </ContextMenuItem>
-                </ContextMenuContent>
-              </ContextMenu>
-            );
-          })}
+          {components.map((component) => (
+            <ContextMenu key={component.id}>
+              <ContextMenuTrigger>
+                <div
+                  className={`absolute component-preview cursor-move ${
+                    selectedComponent?.id === component.id ? 'ring-2 ring-primary ring-offset-2' : 
+                    selectedComponents.includes(component.id) ? 'ring-2 ring-blue-400 ring-offset-2' : ''
+                  }`}
+                  style={{
+                    left: `${component.position.x}px`,
+                    top: `${component.position.y}px`,
+                    width: `${component.size.width}px`,
+                    height: `${component.size.height}px`,
+                    transform: 'translate(0, 0)',
+                    transition: isDragging || isResizing ? 'none' : 'all 0.2s ease',
+                    willChange: 'transform, left, top, width, height',
+                  }}
+                  onMouseDown={(e) => handleMouseDown(e, component)}
+                  onContextMenu={(e) => handleContextMenu(e, component)}
+                  onMouseEnter={() => handleComponentMouseEnter(component.id)}
+                  onMouseLeave={handleComponentMouseLeave}
+                >
+                  <ComponentPreview 
+                    component={component} 
+                    isHovered={hoveredComponent === component.id}
+                  />
+                  {selectedComponent?.id === component.id && (
+                    <>
+                      <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full top-0 left-0 -translate-x-1/2 -translate-y-1/2 cursor-nw-resize" data-direction="nw" />
+                      <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full top-0 right-0 translate-x-1/2 -translate-y-1/2 cursor-ne-resize" data-direction="ne" />
+                      <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full bottom-0 left-0 -translate-x-1/2 translate-y-1/2 cursor-sw-resize" data-direction="sw" />
+                      <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full bottom-0 right-0 translate-x-1/2 translate-y-1/2 cursor-se-resize" data-direction="se" />
+                    </>
+                  )}
+                </div>
+              </ContextMenuTrigger>
+              <ContextMenuContent>
+                <ContextMenuItem onClick={handleCopyComponent}>
+                  <Copy className="mr-2 h-4 w-4" />
+                  <span>Copy</span>
+                </ContextMenuItem>
+                <ContextMenuItem onClick={handleCutComponent}>
+                  <Scissors className="mr-2 h-4 w-4" />
+                  <span>Cut</span>
+                </ContextMenuItem>
+                <ContextMenuItem onClick={handleDeleteComponent}>
+                  <Trash className="mr-2 h-4 w-4" />
+                  <span>Delete</span>
+                </ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
+          ))}
         </div>
       </div>
     </div>

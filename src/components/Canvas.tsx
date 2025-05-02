@@ -913,7 +913,6 @@ const Canvas = ({
                       opacity: component.visible === false ? 0 : 1,
                     }}
                     onMouseDown={(e) => {
-                      // Fixed comparison: component.locked could be undefined or boolean
                       if (component.locked !== true) {
                         handleMouseDown(e, component);
                       }

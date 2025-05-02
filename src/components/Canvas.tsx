@@ -890,7 +890,7 @@ const Canvas = ({
           
           {components.map((component) => {
             // Skip rendering hidden components
-            if (component.visible === false) {
+            if (component?.visible === false) {
               return null;
             }
             

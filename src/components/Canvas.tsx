@@ -912,7 +912,12 @@ const Canvas = ({
                       willChange: 'transform, left, top, width, height',
                       opacity: component.visible === false ? 0 : 1,
                     }}
-                    onMouseDown={(e) => !component.locked && handleMouseDown(e, component)}
+                    onMouseDown={(e) => {
+                      // Fixed comparison: component.locked could be undefined or boolean
+                      if (component.locked !== true) {
+                        handleMouseDown(e, component);
+                      }
+                    }}
                     onContextMenu={(e) => handleContextMenu(e, component)}
                     onMouseEnter={() => handleComponentMouseEnter(component.id)}
                     onMouseLeave={handleComponentMouseLeave}
@@ -921,7 +926,7 @@ const Canvas = ({
                       component={component} 
                       isHovered={hoveredComponent === component.id}
                     />
-                    {selectedComponent?.id === component.id && !component.locked && (
+                    {selectedComponent?.id === component.id && component.locked !== true && (
                       <>
                         <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full top-0 left-0 -translate-x-1/2 -translate-y-1/2 cursor-nw-resize" data-direction="nw" />
                         <div className="resize-handle absolute w-2 h-2 bg-primary rounded-full top-0 right-0 translate-x-1/2 -translate-y-1/2 cursor-ne-resize" data-direction="ne" />

@@ -34,12 +34,24 @@ export function getComponentProps(component: any): any {
   props.borderWidth = component.props?.borderWidth !== undefined ? component.props?.borderWidth : 1;
   props.borderColor = component.props?.borderColor || '#e2e8f0';
   
-  // Font properties
+  // Font properties - FIX: Properly format the font style
   const fontFamily = component.props?.fontFamily || 'Arial';
   const fontSize = component.props?.fontSize || 12;
-  const fontWeight = component.props?.fontWeight === 'bold' ? 'bold' : 'normal';
-  const fontStyle = component.props?.fontStyle === 'italic' ? 'italic' : 'roman';
-  props.fontConfig = `font=("${fontFamily}", ${fontSize}, "${fontWeight} ${fontStyle}")`;
+  
+  // Fix: Only include font weight and style if they're set to something other than normal
+  let fontConfig = `font=("${fontFamily}", ${fontSize}`;
+  
+  if (component.props?.fontWeight === 'bold') {
+    fontConfig += ', "bold"';
+  }
+  
+  if (component.props?.fontStyle === 'italic') {
+    fontConfig += ', "italic"';
+  }
+  
+  fontConfig += ')';
+  
+  props.fontConfig = fontConfig;
   
   // Image properties if applicable
   if (component.props?.image) {
@@ -53,3 +65,4 @@ export function getComponentProps(component: any): any {
   
   return props;
 }
+

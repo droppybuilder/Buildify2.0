@@ -79,6 +79,7 @@ class App(ctk.CTk):
             return None
 `;
 
+  // Add widgets creation INSIDE the __init__ method
   components.forEach(component => {
     const props = component.props || {};
     
@@ -118,8 +119,8 @@ class App(ctk.CTk):
     const borderColor = props.borderColor || "#e2e8f0";
     const cornerRadius = props.cornerRadius !== undefined ? props.cornerRadius : 8;
     
-    // Sanitize ID for Python by removing dashes which would cause syntax errors
-    const safeId = component.id.replace(/-/g, '_');
+    // Sanitize ID for Python by removing dashes and other invalid characters which would cause syntax errors
+    const safeId = component.id.replace(/[^a-zA-Z0-9_]/g, '_');
     
     switch (component.type) {
       case 'CTkLabel':

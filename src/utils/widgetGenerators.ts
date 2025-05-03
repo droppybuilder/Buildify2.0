@@ -7,7 +7,11 @@
  * @param indent The indentation string to use
  */
 export function generateWidgetCode(type: string, safeId: string, props: any, indent: string): string {
-  switch (type.toLowerCase()) {
+  // Normalize the type to lowercase for case-insensitive matching
+  const normalizedType = type.toLowerCase();
+  
+  // Map component types to their generator functions
+  switch (normalizedType) {
     case 'ctklabel':
     case 'label':
       return generateLabelCode(safeId, props, indent);
@@ -16,9 +20,11 @@ export function generateWidgetCode(type: string, safeId: string, props: any, ind
       return generateButtonCode(safeId, props, indent);
     case 'ctkentry':
     case 'entry':
+    case 'textfield':
       return generateEntryCode(safeId, props, indent);
     case 'ctktextbox':
     case 'textbox':
+    case 'textarea':
       return generateTextboxCode(safeId, props, indent);
     case 'ctkslider':
     case 'slider':
@@ -30,25 +36,39 @@ export function generateWidgetCode(type: string, safeId: string, props: any, ind
     case 'progressbar':
       return generateProgressBarCode(safeId, props, indent);
     case 'paragraph':
+    case 'text':
       return generateParagraphCode(safeId, props, indent);
     case 'frame':
+    case 'container':
       return generateFrameCode(safeId, props, indent);
     case 'checkbox':
     case 'ctkcheckbox':
       return generateCheckboxCode(safeId, props, indent);
     case 'image':
+    case 'picture':
       return generateImageCode(safeId, props, indent);
     case 'notebook':
+    case 'tabs':
+    case 'tabview':
       return generateNotebookCode(safeId, props, indent);
     case 'listbox':
+    case 'list':
       return generateListboxCode(safeId, props, indent);
     case 'canvas':
+    case 'drawing':
       return generateCanvasCode(safeId, props, indent);
     case 'datepicker':
-    case 'datepicker':
+    case 'calendar':
       return generateDatePickerCode(safeId, props, indent);
+    case 'combobox':
+    case 'dropdown':
+      return generateComboboxCode(safeId, props, indent);
+    case 'radiobutton':
+    case 'radio':
+      return generateRadioButtonCode(safeId, props, indent);
     default:
-      return `${indent}# Unsupported component type: ${type}\n`;
+      // Return a descriptive comment for unsupported types
+      return `${indent}# Unsupported component type: ${type}\n${indent}# Creating a label as a placeholder\n${indent}self.${safeId} = ctk.CTkLabel(self, text="Unsupported: ${type}", bg_color="#ffcccc")\n${indent}self.${safeId}.place(x=${props.x}, y=${props.y}, width=${props.width}, height=${props.height})\n`;
   }
 }
 
@@ -71,7 +91,7 @@ function generateLabelCode(safeId: string, props: any, indent: string): string {
 function generateButtonCode(safeId: string, props: any, indent: string): string {
   let code = '';
   
-  code += `${indent}self.${safeId} = ctk.CTkButton(self, text="${props.text || 'Button'}", width=${props.width}, height=${props.height}, corner_radius=${props.cornerRadius}, bg_color="${props.bg_color || '#ffffff'}", fg_color="${props.fg_color || '#3b82f6'}", text_color="${props.text_color || '#ffffff'}", border_width=${props.borderWidth}, border_color="${props.borderColor}", ${props.fontConfig})\n`;
+  code += `${indent}self.${safeId} = ctk.CTkButton(self, text="${props.text || 'Button'}", width=${props.width}, height=${props.height}, corner_radius=${props.cornerRadius}, bg_color="${props.bg_color || '#ffffff'}", fg_color="${props.bg_color || '#3b82f6'}", text_color="${props.text_color || '#ffffff'}", border_width=${props.borderWidth}, border_color="${props.borderColor}", ${props.fontConfig})\n`;
   code += `${indent}self.${safeId}.place(x=${props.x}, y=${props.y})\n`;
   
   return code;
@@ -164,11 +184,9 @@ function generateImageCode(safeId: string, props: any, indent: string): string {
   
   code += `${indent}# Image setup for ${safeId}\n`;
   code += `${indent}# Make sure to place the image file "${imagePath}" in your project directory\n`;
-  code += `${indent}self.img_${safeId} = ctk.CTkImage(light_image=Image.open("${imagePath}"), size=(${imageWidth}, ${imageHeight}))\n`;
+  code += `${indent}self.img_${safeId} = self.load_image("${imagePath}", (${imageWidth}, ${imageHeight}))\n`;
   code += `${indent}self.image_label_${safeId} = ctk.CTkLabel(self, image=self.img_${safeId}, text="")\n`;
   code += `${indent}self.image_label_${safeId}.place(x=${props.x}, y=${props.y}, width=${imageWidth}, height=${imageHeight})\n`;
-  code += `${indent}# Keep reference to prevent garbage collection\n`;
-  code += `${indent}self._image_references.append(self.img_${safeId})\n`;
   
   return code;
 }
@@ -233,7 +251,6 @@ function generateDatePickerCode(safeId: string, props: any, indent: string): str
   let code = '';
   
   code += `${indent}# Requires tkcalendar library: pip install tkcalendar\n`;
-  code += `${indent}# Add this import at the top: from tkcalendar import DateEntry\n`;
   code += `${indent}try:\n`;
   code += `${indent}    from tkcalendar import DateEntry\n`;
   code += `${indent}    self.${safeId} = DateEntry(self, width=12, background='darkblue', foreground='white', ${props.fontConfig}, borderwidth=${props.borderWidth})\n`;
@@ -243,6 +260,27 @@ function generateDatePickerCode(safeId: string, props: any, indent: string): str
   code += `${indent}    # Fallback to a label\n`;
   code += `${indent}    self.${safeId} = ctk.CTkLabel(self, text="DatePicker (requires tkcalendar)", ${props.fontConfig})\n`;
   code += `${indent}    self.${safeId}.place(x=${props.x}, y=${props.y})\n`;
+  
+  return code;
+}
+
+function generateComboboxCode(safeId: string, props: any, indent: string): string {
+  let code = '';
+  
+  code += `${indent}# Create a combobox/dropdown\n`;
+  code += `${indent}values = "${props.items || 'Option 1,Option 2,Option 3'}".split(',')\n`;
+  code += `${indent}self.${safeId} = ctk.CTkComboBox(self, values=[item.strip() for item in values], width=${props.width}, height=${props.height}, corner_radius=${props.cornerRadius}, border_width=${props.borderWidth}, fg_color="${props.fg_color || '#ffffff'}", border_color="${props.borderColor}", text_color="${props.text_color || '#000000'}", ${props.fontConfig})\n`;
+  code += `${indent}self.${safeId}.place(x=${props.x}, y=${props.y})\n`;
+  
+  return code;
+}
+
+function generateRadioButtonCode(safeId: string, props: any, indent: string): string {
+  let code = '';
+  
+  code += `${indent}# Create a radio button\n`;
+  code += `${indent}self.${safeId} = ctk.CTkRadioButton(self, text="${props.text || 'Radio Button'}", bg_color="${props.bg_color || '#ffffff'}", fg_color="${props.fg_color || '#3b82f6'}", text_color="${props.text_color || '#000000'}", ${props.fontConfig})\n`;
+  code += `${indent}self.${safeId}.place(x=${props.x}, y=${props.y})\n`;
   
   return code;
 }

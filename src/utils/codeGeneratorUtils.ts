@@ -1,73 +1,55 @@
 
 /**
- * Sanitizes a component ID for use in Python code
+ * Utility functions for code generation
+ */
+
+/**
+ * Sanitizes component IDs to be valid Python variable names
  * @param id The component ID to sanitize
  */
-export function sanitizeId(id?: string): string {
-  return id ? id.replace(/[^a-zA-Z0-9_]/g, '_') : `widget_${Math.floor(Math.random() * 1000000)}`;
+export function sanitizeId(id: string): string {
+  // Replace non-alphanumeric characters with underscores
+  return id.replace(/[^a-zA-Z0-9_]/g, '_');
 }
 
 /**
- * Gets the properties of a component with default values
- * @param component The component to get properties for
+ * Extracts and formats properties for code generation
+ * @param component The component to extract properties from
  */
 export function getComponentProps(component: any): any {
-  const props = component.props || {};
+  const props: any = {};
   
-  // Ensure x and y coordinates are defined or use defaults
-  const xPos = props.x !== undefined ? props.x : 10;
-  const yPos = props.y !== undefined ? props.y : 10;
+  // Extract basic properties
+  props.x = Math.round(component.position?.x || 0);
+  props.y = Math.round(component.position?.y || 0);
+  props.width = Math.round(component.size?.width || 100);
+  props.height = Math.round(component.size?.height || 30);
   
-  // For consistency, ensure these properties always have default values
-  const borderWidth = props.borderWidth !== undefined ? props.borderWidth : 1;
-  const borderColor = props.borderColor || "#e2e8f0";
-  const cornerRadius = props.cornerRadius !== undefined ? props.cornerRadius : 8;
-  const width = props.width !== undefined ? props.width : 100;
-  const height = props.height !== undefined ? props.height : 30;
+  // Extract style properties
+  props.text = component.props?.text || '';
+  props.bg_color = component.props?.bgColor || '#ffffff';
+  props.fg_color = component.props?.fgColor || '#ffffff';
+  props.text_color = component.props?.textColor || '#000000';
+  props.cornerRadius = component.props?.cornerRadius || 8;
+  props.borderWidth = component.props?.borderWidth !== undefined ? component.props?.borderWidth : 1;
+  props.borderColor = component.props?.borderColor || '#e2e8f0';
   
-  // Build proper font configuration
-  let fontConfig = buildFontConfig(props);
+  // Font properties
+  const fontFamily = component.props?.fontFamily || 'Arial';
+  const fontSize = component.props?.fontSize || 12;
+  const fontWeight = component.props?.fontWeight === 'bold' ? 'bold' : 'normal';
+  const fontStyle = component.props?.fontStyle === 'italic' ? 'italic' : 'roman';
+  props.fontConfig = `font=("${fontFamily}", ${fontSize}, "${fontWeight} ${fontStyle}")`;
   
-  return {
-    ...props,
-    x: xPos,
-    y: yPos,
-    borderWidth,
-    borderColor,
-    cornerRadius,
-    width,
-    height,
-    fontConfig
-  };
-}
-
-/**
- * Builds the font configuration string for a component
- * @param props The component properties
- */
-export function buildFontConfig(props: any): string {
-  if (props.font || props.fontSize || props.fontWeight || props.fontStyle) {
-    const fontFamily = props.font || "Arial";
-    const fontSize = props.fontSize || 12;
-    
-    // Build font options list
-    let fontStyles = [];
-    
-    if (props.fontWeight === 'bold') {
-      fontStyles.push('bold');
-    }
-    
-    if (props.fontStyle === 'italic') {
-      fontStyles.push('italic');
-    }
-    
-    // Generate the font tuple with proper format
-    if (fontStyles.length > 0) {
-      return `font=("${fontFamily}", ${fontSize}, "${fontStyles.join(' ')}")`;
-    } else {
-      return `font=("${fontFamily}", ${fontSize})`;
-    }
+  // Image properties if applicable
+  if (component.props?.image) {
+    props.image = component.props.image;
+    props.image_size = {
+      width: component.props.imageWidth || props.width,
+      height: component.props.imageHeight || props.height
+    };
+    props.compound = component.props.compound || 'left';
   }
   
-  return 'font=("Arial", 12)';
+  return props;
 }

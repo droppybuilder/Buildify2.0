@@ -29,16 +29,16 @@ class App(ctk.CTk):
 
   // Add the load_image method
   code += `
-    def load_image(self, path, size):
-        try:
-            img = Image.open(path)
-            img = img.resize(size, Image.LANCZOS)
-            image = ctk.CTkImage(light_image=img, dark_image=img, size=size)
-            self._image_references.append(image)
-            return image
-        except Exception as e:
-            print(f"Error loading image: {e}")
-            return None
+        def load_image(self, path, size):
+            try:
+                img = Image.open(path)
+                img = img.resize(size, Image.LANCZOS)
+                image = ctk.CTkImage(light_image=img, dark_image=img, size=size)
+                self._image_references.append(image)
+                return image
+            except Exception as e:
+                print(f"Error loading image: {e}")
+                return None
 `;
 
   // Process components and add widget creation code within the __init__ method

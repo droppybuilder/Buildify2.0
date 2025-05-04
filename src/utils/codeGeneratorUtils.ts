@@ -69,7 +69,13 @@ export function getComponentProps(component: any): any {
   
   // Image properties if applicable
   if (component.props?.src || component.props?.image) {
-    props.image = component.props?.src || component.props?.image;
+    // Ensure proper path for images - assets folder
+    let imagePath = component.props?.src || component.props?.image;
+    // If it's not a placeholder and doesn't already have assets/ prefix
+    if (imagePath && !imagePath.startsWith('assets/') && !imagePath.startsWith('placeholder')) {
+      imagePath = `assets/${imagePath.split('/').pop()}`;
+    }
+    props.image = imagePath;
     props.image_size = {
       width: component.props?.imageWidth || props.width,
       height: component.props?.imageHeight || props.height
@@ -146,7 +152,9 @@ export function collectComponentImages(components: any[]): Record<string, string
   
   components.forEach(component => {
     if (component.props?.src && component.props.src.startsWith('data:')) {
-      const fileName = component.props.fileName || `image-${component.id}.png`;
+      // Generate a unique filename if not provided
+      const fileName = component.props.fileName || 
+        `image-${component.id}-${Date.now()}.png`;
       images[component.props.src] = fileName;
     }
   });

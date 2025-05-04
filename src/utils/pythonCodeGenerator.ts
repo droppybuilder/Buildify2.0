@@ -36,11 +36,11 @@ class App(ctk.CTk):
         # Store references to images to prevent garbage collection
         self._image_references = []
         
+        # Define load_image method before we attempt to use it
+        # This ensures the method is defined before any component tries to access it
+        self._load_image = self.load_image_implementation
+        
         # Create all widgets and components
-`;
-
-  // Define the load_image method separately - this is a critical fix to prevent the blank window
-  code += `        # Initialize all widgets
         self.create_widgets()
         
     def create_widgets(self):
@@ -61,7 +61,7 @@ class App(ctk.CTk):
 
   // Add the load_image method as a separate method in the class
   code += `
-    def _load_image(self, path, size):
+    def load_image_implementation(self, path, size):
         """Load an image, resize it and return as CTkImage"""
         try:
             if os.path.exists(path):
@@ -85,7 +85,7 @@ class App(ctk.CTk):
             self._image_references.append(ctk_img)
             return ctk_img
             
-    # Property to access the load_image method
+    # This is the property to access load_image
     @property
     def load_image(self):
         return self._load_image

@@ -55,20 +55,27 @@ python app.py
 \`\`\`
 
 ## Features
-- Modern UI with dark mode
-- Responsive layout
+- Modern UI with system theme detection (adapts to your OS settings)
+- Responsive layout with grid system
 - Customizable components
 - Cross-platform compatibility (Windows, macOS, Linux)
 
-## Note on appearance
-This application uses CustomTkinter's dark mode by default to match the web preview. If you prefer light mode, you can change:
+## Theme settings
+This application uses CustomTkinter's system mode by default to match your operating system theme:
 \`\`\`python
-ctk.set_appearance_mode("dark")
+ctk.set_appearance_mode("system")
 \`\`\`
-to
-\`\`\`python
-ctk.set_appearance_mode("light")
-\`\`\`
+
+You can also manually set it to "light" or "dark" by changing the above line.
+
+## Layout configuration
+The app uses both place geometry manager for absolute positioning and grid layout for responsive design.
+To make a widget use the grid layout instead of place, set these properties in the component:
+- row: grid row position
+- column: grid column position
+- rowspan: number of rows to span
+- columnspan: number of columns to span
+- sticky: directions to stick to cell edges (n, s, e, w)
 
 ## Troubleshooting
 If your UI doesn't match the preview:

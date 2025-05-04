@@ -17,16 +17,16 @@ class App(ctk.CTk):
         super().__init__()
 
         # Set appearance mode and default color theme
-        ctk.set_appearance_mode("dark")  # Options: "light", "dark", "system"
+        ctk.set_appearance_mode("system")  # Options: "light", "dark", "system"
         ctk.set_default_color_theme("blue")  # Options: "blue", "green", "dark-blue"
 
         self.title("${windowTitle}")
         self.geometry("800x600")
         self.configure(fg_color="#1A1A1A")  # Dark background to match web preview
 
-        # Configure grid layout (1x1)
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(0, weight=1)
+        # Configure grid layout (4x4) for better responsiveness
+        self.grid_columnconfigure((0, 1, 2, 3), weight=1)
+        self.grid_rowconfigure((0, 1, 2, 3), weight=1)
 
         self._image_references = []
 `;

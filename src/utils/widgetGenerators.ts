@@ -1,4 +1,3 @@
-
 /**
  * Generates code for a specific widget type
  * @param type The widget type
@@ -31,6 +30,7 @@ export function generateWidgetCode(type: string, safeId: string, props: any, ind
       return generateSliderCode(safeId, props, indent);
     case 'ctkswitch':
     case 'switch':
+    case 'toggle':
       return generateSwitchCode(safeId, props, indent);
     case 'ctkprogressbar':
     case 'progressbar':
@@ -133,8 +133,16 @@ function generateSliderCode(safeId: string, props: any, indent: string): string 
 function generateSwitchCode(safeId: string, props: any, indent: string): string {
   let code = '';
   
-  code += `${indent}self.${safeId} = ctk.CTkSwitch(self, text="${props.text || 'Switch'}", ${props.fontConfig}, button_color="${props.fg_color || '#3b82f6'}", button_hover_color="${adjustColorBrightness(props.fg_color || '#3b82f6', -20)}", progress_color="${props.progressColor || '#3b82f6'}", text_color="${props.text_color || '#ffffff'}")\n`;
+  // Improved switch widget with proper styling
+  code += `${indent}self.${safeId} = ctk.CTkSwitch(self, text="${props.text || 'Toggle'}", width=${props.width || 100}, ${props.fontConfig}, button_color="${props.fg_color || '#3b82f6'}", button_hover_color="${adjustColorBrightness(props.fg_color || '#3b82f6', -20)}", progress_color="${props.fg_color || '#3b82f6'}", text_color="${props.text_color || '#ffffff'}")\n`;
   code += `${indent}self.${safeId}.place(x=${props.x}, y=${props.y})\n`;
+  
+  // Set default value if specified
+  if (props.value === true || props.checked === true) {
+    code += `${indent}self.${safeId}.select()\n`;
+  } else if (props.value === false || props.checked === false) {
+    code += `${indent}self.${safeId}.deselect()\n`;
+  }
   
   return code;
 }

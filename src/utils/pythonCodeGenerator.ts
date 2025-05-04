@@ -10,7 +10,8 @@ export function generatePythonCode(components: any[], windowTitle = "My CustomTk
   // Initialize code with imports and class definition
   let code = `import customtkinter as ctk
 import tkinter as tk
-from PIL import Image
+from PIL import Image, ImageTk
+import os
 
 class App(ctk.CTk):
     def __init__(self):
@@ -28,30 +29,49 @@ class App(ctk.CTk):
         self.grid_columnconfigure((0, 1, 2, 3), weight=1)
         self.grid_rowconfigure((0, 1, 2, 3), weight=1)
 
-        self._image_references = []
+        self._image_references = []  # Keep references to prevent garbage collection
+        
+        # Create all widgets and components
 `;
 
-  // Add the load_image method
-  code += `
-        def load_image(self, path, size):
-            try:
+  // Add the load_image method as part of the class
+  code += `        # Method to load and resize images
+        self.load_image = self._load_image
+        
+    def _load_image(self, path, size):
+        """Load an image, resize it and return as CTkImage"""
+        try:
+            if os.path.exists(path):
                 img = Image.open(path)
-                img = img.resize(size, Image.LANCZOS)
-                image = ctk.CTkImage(light_image=img, dark_image=img, size=size)
-                self._image_references.append(image)
-                return image
-            except Exception as e:
-                print(f"Error loading image: {e}")
-                return None
+                img = img.resize(size, Image.Resampling.LANCZOS)
+                ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=size)
+                self._image_references.append(ctk_img)  # Keep reference
+                return ctk_img
+            else:
+                print(f"Image file not found: {path}")
+                # Create a placeholder colored rectangle
+                img = Image.new('RGB', size, color='#3B82F6')  # Blue color as placeholder
+                ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=size)
+                self._image_references.append(ctk_img)
+                return ctk_img
+        except Exception as e:
+            print(f"Error loading image '{path}': {e}")
+            # Create a placeholder colored rectangle with error indication
+            img = Image.new('RGB', size, color='#FF5555')  # Red color for error
+            ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=size)
+            self._image_references.append(ctk_img)
+            return ctk_img
 `;
 
-  // Process components and add widget creation code within the __init__ method
+  // Process components and add widget creation code within the class
   if (components && components.length > 0) {
-    const indent = '        ';
     components.forEach(component => {
-      // Generate code for this component and add it to the main code
-      const componentCode = generateComponentCode(component, indent);
-      code += componentCode;
+      // Only include visible components
+      if (component.visible !== false) {
+        // Generate code for this component and add it to the main code
+        const componentCode = generateComponentCode(component, '        ');
+        code += componentCode;
+      }
     });
   }
 

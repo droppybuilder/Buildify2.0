@@ -19,8 +19,17 @@ export async function exportProject(components: any[], windowTitle?: string) {
     // Add files to the zip
     zip.file("app.py", pythonCode);
     zip.file("requirements.txt", "customtkinter>=5.2.0\nPillow>=9.0.0\ntkcalendar>=1.6.1\n");
-    zip.file("README.md", generateReadmeContent());
-    zip.file("assets/placeholder.png", ""); // Create assets folder
+    zip.file("README.md", generateReadmeContent(windowTitle));
+    
+    // Create the assets directory
+    const assets = zip.folder("assets");
+    if (assets) {
+      assets.file("placeholder.png", "");  // Empty file to ensure the folder is created
+    }
+    
+    // Generate a simple placeholder image
+    const placeholderImageData = generatePlaceholderImage();
+    zip.file("placeholder.png", placeholderImageData, {base64: true});
     
     // Generate the zip file
     const content = await zip.generateAsync({ type: "blob" });
@@ -35,9 +44,10 @@ export async function exportProject(components: any[], windowTitle?: string) {
 
 /**
  * Generates the content for the README.md file
+ * @param windowTitle The window title for the app
  */
-function generateReadmeContent(): string {
-  return `# CustomTkinter GUI Application
+function generateReadmeContent(windowTitle?: string): string {
+  return `# ${windowTitle || "CustomTkinter GUI Application"}
 
 This is a modern CustomTkinter GUI application generated with GUI Builder.
 
@@ -47,7 +57,10 @@ This is a modern CustomTkinter GUI application generated with GUI Builder.
 
 ## Installation
 1. Install Python from https://www.python.org/downloads/
-2. Install dependencies: \`pip install -r requirements.txt\`
+2. Install dependencies: 
+   \`\`\`
+   pip install -r requirements.txt
+   \`\`\`
 
 ## Running the application
 \`\`\`
@@ -82,5 +95,28 @@ If your UI doesn't match the preview:
 - Make sure you have the latest version of CustomTkinter installed
 - Check that the appearance mode and color theme are set correctly
 - For DatePicker, ensure you have tkcalendar installed
+- If images don't load, check that they are in the correct folder
+
+### Common Issues
+- **Image loading errors**: Make sure all images are in the project folder or in the assets subfolder
+- **Unknown font style errors**: Font styles should be either "normal", "bold", "italic", or "bold italic"
+- **Layout issues**: If widgets overlap, consider using grid layout with appropriate row/column settings
+- **Dark mode appearance**: If dark mode looks incorrect, make sure your system theme is set to dark
+
+## Customization
+You can customize the appearance of the application by modifying the following settings:
+- Change the appearance mode: "light", "dark", or "system" (uses OS setting)
+- Change the color theme: "blue", "green", or "dark-blue"
+- Adjust the window size and title
+- Customize each widget's properties (colors, fonts, sizes, etc.)
 `;
+}
+
+/**
+ * Generates a simple placeholder PNG image
+ * Returns a base64-encoded PNG image
+ */
+function generatePlaceholderImage(): string {
+  // A minimal base64-encoded PNG image (a blue square)
+  return 'iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsIAAA7CARUoSoAAAAF3SURBVHhe7dAxAQAwDASh+je9+WsYD0LACQScgIATEHACAk5AwAkIOAEBJyDgBASc+7N3lY0dwGF4AkvQOLO8AY0rhcc4zPLs2TU77d21+xPIA8QD+fkB4oFkyzHngXggOSACyRLZcsx5IB5IDogvWVkiW445D8QDyQERSJbIlmPOA/FAckAEkiWy5ZjzQDyQHBCBZIlsOeY8EA8kB0QgWSJbjjkPxAPJARFIlsiWY84D8UByQASSJbLlmPNAPJAcEIFkiWw55jwQDyQHRCBZIluOOQ/EA8kBEUiWyJZjzgPxQHJABJIlsuWY80A8kBwQgWSJbDnmPBAPJAdEIFkiW445D8QDyQERSJbIlmPOA/FAckAEkiWy5ZjzQDyQHBCBZIlsOeY8EA8kB0QgWSJbjjkPxAPJARFIlsiWY84D8UByQASSJbLlmPNAPJAcEIFkiWw55jwQDyQHRCBZIluOOQ/EA8kBEUiWyJZjzgPxQArtpXaW3e+UawAAAABJRU5ErkJggg==';
 }

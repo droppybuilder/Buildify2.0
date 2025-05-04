@@ -27,9 +27,9 @@ export function getComponentProps(component: any): any {
   
   // Extract style properties
   props.text = component.props?.text || '';
-  props.bg_color = component.props?.bgColor || '#ffffff';
-  props.fg_color = component.props?.fgColor || '#ffffff';
-  props.text_color = component.props?.textColor || '#000000';
+  props.bg_color = component.props?.bgColor || '#1A1A1A';  // Dark background to match web preview
+  props.fg_color = component.props?.fgColor || component.props?.bgColor || '#3b82f6';
+  props.text_color = component.props?.textColor || '#ffffff';  // Default to white text for dark mode
   props.cornerRadius = component.props?.cornerRadius || 8;
   props.borderWidth = component.props?.borderWidth !== undefined ? component.props?.borderWidth : 1;
   props.borderColor = component.props?.borderColor || '#e2e8f0';
@@ -65,4 +65,3 @@ export function getComponentProps(component: any): any {
   
   return props;
 }
-

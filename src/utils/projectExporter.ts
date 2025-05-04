@@ -18,8 +18,9 @@ export async function exportProject(components: any[], windowTitle?: string) {
     
     // Add files to the zip
     zip.file("app.py", pythonCode);
-    zip.file("requirements.txt", "customtkinter>=5.2.0\nPillow>=9.0.0\n");
+    zip.file("requirements.txt", "customtkinter>=5.2.0\nPillow>=9.0.0\ntkcalendar>=1.6.1\n");
     zip.file("README.md", generateReadmeContent());
+    zip.file("assets/placeholder.png", ""); // Create assets folder
     
     // Generate the zip file
     const content = await zip.generateAsync({ type: "blob" });
@@ -54,9 +55,25 @@ python app.py
 \`\`\`
 
 ## Features
-- Modern UI with CustomTkinter
+- Modern UI with dark mode
 - Responsive layout
 - Customizable components
 - Cross-platform compatibility (Windows, macOS, Linux)
+
+## Note on appearance
+This application uses CustomTkinter's dark mode by default to match the web preview. If you prefer light mode, you can change:
+\`\`\`python
+ctk.set_appearance_mode("dark")
+\`\`\`
+to
+\`\`\`python
+ctk.set_appearance_mode("light")
+\`\`\`
+
+## Troubleshooting
+If your UI doesn't match the preview:
+- Make sure you have the latest version of CustomTkinter installed
+- Check that the appearance mode and color theme are set correctly
+- For DatePicker, ensure you have tkcalendar installed
 `;
 }

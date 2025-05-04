@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import Canvas from '@/components/Canvas';
@@ -8,20 +9,33 @@ import { Layers } from '@/components/Layers';
 import { WindowProperties } from '@/components/WindowProperties';
 import { toast } from 'sonner';
 
+// Define what constitutes a major state change for undo/redo
+const ACTION_TYPES = {
+  ADD_COMPONENT: 'add_component',
+  DELETE_COMPONENT: 'delete_component',
+  UPDATE_COMPONENT: 'update_component',
+  REORDER_COMPONENTS: 'reorder_components',
+  WINDOW_SETTINGS: 'window_settings',
+  MULTI_DELETE: 'multi_delete',
+};
+
 const Index = () => {
   const [selectedComponent, setSelectedComponent] = useState(null);
   const [components, setComponents] = useState([]);
   const [history, setHistory] = useState<any[][]>([[]]);
   const [historyIndex, setHistoryIndex] = useState(0);
+  const [actionHistory, setActionHistory] = useState<string[]>(['initial']);
   const [inputFocused, setInputFocused] = useState(false);
   const [selectedComponents, setSelectedComponents] = useState<string[]>([]);
   const [showCodePreview, setShowCodePreview] = useState(false);
   const [showLayers, setShowLayers] = useState(false);
   const [showWindowProperties, setShowWindowProperties] = useState(false);
+  const [isUndoRedoAction, setIsUndoRedoAction] = useState(false);
+  const [lastActionTimestamp, setLastActionTimestamp] = useState(0);
   
   const [windowTitle, setWindowTitle] = useState("My CustomTkinter Application");
   const [windowSize, setWindowSize] = useState({ width: 800, height: 600 });
-  const [windowBgColor, setWindowBgColor] = useState("#f0f0f0");
+  const [windowBgColor, setWindowBgColor] = useState("#1A1A1A"); // Set dark background as default
   
   // Safe setter for selected component that includes validation
   const safeSetSelectedComponent = useCallback((component: any) => {
@@ -55,7 +69,7 @@ const Index = () => {
       if (savedComponents) {
         const parsedComponents = JSON.parse(savedComponents);
         setComponents(parsedComponents);
-        addToHistory(parsedComponents);
+        addToHistory(parsedComponents, ACTION_TYPES.ADD_COMPONENT);
       }
       
       const savedWindowTitle = localStorage.getItem('guiBuilderWindowTitle');
@@ -90,25 +104,47 @@ const Index = () => {
     }
   }, [components]);
   
-  const addToHistory = useCallback((newComponents: any[]) => {
-    // Check if this is truly a new state to avoid unnecessary history entries
-    if (JSON.stringify(newComponents) !== JSON.stringify(history[historyIndex])) {
-      const newHistory = history.slice(0, historyIndex + 1);
-      newHistory.push([...newComponents]);
-      setHistory(newHistory);
-      setHistoryIndex(newHistory.length - 1);
+  // Optimized addToHistory that only adds significant changes
+  const addToHistory = useCallback((newComponents: any[], actionType: string) => {
+    const now = Date.now();
+    
+    // Don't record history for continuous small movements within 500ms
+    if (
+      actionType === ACTION_TYPES.UPDATE_COMPONENT && 
+      now - lastActionTimestamp < 500 && 
+      !isUndoRedoAction
+    ) {
+      return;
     }
-  }, [history, historyIndex]);
+    
+    // Only add to history if it's a significant action or enough time has passed
+    if (isUndoRedoAction || actionType !== ACTION_TYPES.UPDATE_COMPONENT || now - lastActionTimestamp > 500) {
+      setLastActionTimestamp(now);
+      
+      // Make sure we're only storing different states
+      if (JSON.stringify(newComponents) !== JSON.stringify(history[historyIndex])) {
+        const newHistory = history.slice(0, historyIndex + 1);
+        newHistory.push([...newComponents]);
+        
+        const newActionHistory = actionHistory.slice(0, historyIndex + 1);
+        newActionHistory.push(actionType);
+        
+        setHistory(newHistory);
+        setActionHistory(newActionHistory);
+        setHistoryIndex(newHistory.length - 1);
+      }
+    }
+  }, [history, historyIndex, actionHistory, lastActionTimestamp, isUndoRedoAction]);
 
-  const handleComponentsChange = useCallback((newComponents: any[]) => {
-    console.log("Index - Components changed, count:", newComponents.length);
+  const handleComponentsChange = useCallback((newComponents: any[], actionType = ACTION_TYPES.UPDATE_COMPONENT) => {
     setComponents([...newComponents]);
-    addToHistory([...newComponents]);
+    addToHistory([...newComponents], actionType);
   }, [addToHistory]);
 
   const handleUndo = useCallback(() => {
     if (historyIndex > 0) {
       const newIndex = historyIndex - 1;
+      setIsUndoRedoAction(true);
       setHistoryIndex(newIndex);
       setComponents([...history[newIndex]]);
       
@@ -116,13 +152,19 @@ const Index = () => {
       setSelectedComponent(null);
       setSelectedComponents([]);
       
-      toast.info("Undo successful");
+      toast.info(`Undo: ${actionHistory[newIndex+1].replace('_', ' ')}`);
+      
+      // Reset the flag after a short delay
+      setTimeout(() => {
+        setIsUndoRedoAction(false);
+      }, 100);
     }
-  }, [history, historyIndex]);
+  }, [history, historyIndex, actionHistory]);
 
   const handleRedo = useCallback(() => {
     if (historyIndex < history.length - 1) {
       const newIndex = historyIndex + 1;
+      setIsUndoRedoAction(true);
       setHistoryIndex(newIndex);
       setComponents([...history[newIndex]]);
       
@@ -130,9 +172,21 @@ const Index = () => {
       setSelectedComponent(null);
       setSelectedComponents([]);
       
-      toast.info("Redo successful");
+      toast.info(`Redo: ${actionHistory[newIndex].replace('_', ' ')}`);
+      
+      // Reset the flag after a short delay
+      setTimeout(() => {
+        setIsUndoRedoAction(false);
+      }, 100);
     }
-  }, [history, historyIndex]);
+  }, [history, historyIndex, actionHistory]);
+
+  // Add a component to the canvas
+  const handleAddComponent = useCallback((component: any) => {
+    const newComponents = [...components, component];
+    handleComponentsChange(newComponents, ACTION_TYPES.ADD_COMPONENT);
+    return component;
+  }, [components, handleComponentsChange]);
 
   const handleComponentUpdate = useCallback((updatedComponent: any) => {
     try {
@@ -159,7 +213,7 @@ const Index = () => {
         c.id === updatedComponent.id ? { ...updatedComponent } : c
       );
       
-      handleComponentsChange(newComponents);
+      handleComponentsChange(newComponents, ACTION_TYPES.UPDATE_COMPONENT);
     } catch (error) {
       console.error("Error updating component:", error);
       toast.error("Failed to update component");
@@ -191,7 +245,7 @@ const Index = () => {
         }
         
         const newComponents = components.filter(c => !validComponentIds.includes(c.id));
-        handleComponentsChange(newComponents);
+        handleComponentsChange(newComponents, ACTION_TYPES.MULTI_DELETE);
         setSelectedComponents([]);
         setSelectedComponent(null);
         toast.info("Multiple components deleted");
@@ -204,7 +258,7 @@ const Index = () => {
         }
         
         const newComponents = components.filter(c => c.id !== component.id);
-        handleComponentsChange(newComponents);
+        handleComponentsChange(newComponents, ACTION_TYPES.DELETE_COMPONENT);
         setSelectedComponent(null);
         toast.info("Component deleted");
       }
@@ -240,8 +294,17 @@ const Index = () => {
     const [removed] = result.splice(fromIndex, 1);
     result.splice(toIndex, 0, removed);
     
-    handleComponentsChange(result);
+    handleComponentsChange(result, ACTION_TYPES.REORDER_COMPONENTS);
   }, [components, handleComponentsChange]);
+  
+  const handleWindowPropertiesChange = useCallback((title: string, size: any, bgColor: string) => {
+    setWindowTitle(title);
+    setWindowSize(size);
+    setWindowBgColor(bgColor);
+    
+    // Add this to history as a window settings change
+    addToHistory([...components], ACTION_TYPES.WINDOW_SETTINGS);
+  }, [components, addToHistory]);
   
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -259,7 +322,7 @@ const Index = () => {
           );
           
           const newComponents = components.filter(c => !validComponentIds.includes(c.id));
-          handleComponentsChange(newComponents);
+          handleComponentsChange(newComponents, ACTION_TYPES.MULTI_DELETE);
           setSelectedComponents([]);
           setSelectedComponent(null);
           toast.info("Multiple components deleted");
@@ -289,7 +352,7 @@ const Index = () => {
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedComponent, selectedComponents, handleDeleteComponent, handleUndo, handleRedo, inputFocused, components, handleComponentsChange]);
+  }, [selectedComponent, selectedComponents, handleDeleteComponent, handleUndo, handleRedo, inputFocused, components]);
   
   return (
     <div className="h-screen flex overflow-hidden bg-white">
@@ -330,17 +393,17 @@ const Index = () => {
             <WindowProperties
               visible={showWindowProperties}
               title={windowTitle}
-              setTitle={setWindowTitle}
+              setTitle={(title) => handleWindowPropertiesChange(title, windowSize, windowBgColor)}
               size={windowSize}
-              setSize={setWindowSize}
+              setSize={(size) => handleWindowPropertiesChange(windowTitle, size, windowBgColor)}
               bgColor={windowBgColor}
-              setBgColor={setWindowBgColor}
+              setBgColor={(color) => handleWindowPropertiesChange(windowTitle, windowSize, color)}
             />
           ) : (
             <div className="flex-1 overflow-auto bg-background p-6">
               <Canvas
                 components={components}
-                setComponents={handleComponentsChange}
+                setComponents={(newComponents) => handleComponentsChange(newComponents, ACTION_TYPES.UPDATE_COMPONENT)}
                 selectedComponent={selectedComponent}
                 setSelectedComponent={handleComponentSelect}
                 onDeleteComponent={handleDeleteComponent}
@@ -349,7 +412,8 @@ const Index = () => {
                 windowTitle={windowTitle}
                 windowSize={windowSize}
                 windowBgColor={windowBgColor}
-                setWindowTitle={setWindowTitle}
+                setWindowTitle={(title) => handleWindowPropertiesChange(title, windowSize, windowBgColor)}
+                onAddComponent={handleAddComponent}
               />
             </div>
           )}

@@ -12,6 +12,8 @@ export function generatePythonCode(components: any[], windowTitle = "My CustomTk
 import tkinter as tk
 from PIL import Image, ImageTk
 import os
+from datetime import datetime
+import sys
 
 class App(ctk.CTk):
     def __init__(self):
@@ -23,21 +25,42 @@ class App(ctk.CTk):
 
         self.title("${windowTitle}")
         self.geometry("800x600")
+        
+        # Set background color
         self.configure(fg_color="#1A1A1A")  # Dark background to match web preview
 
         # Configure grid layout (4x4) for better responsiveness
         self.grid_columnconfigure((0, 1, 2, 3), weight=1)
         self.grid_rowconfigure((0, 1, 2, 3), weight=1)
 
-        self._image_references = []  # Keep references to prevent garbage collection
+        # Store references to images to prevent garbage collection
+        self._image_references = []
         
         # Create all widgets and components
 `;
 
-  // Add the load_image method as part of the class
-  code += `        # Method to load and resize images
-        self.load_image = self._load_image
+  // Define the load_image method separately - this is a critical fix to prevent the blank window
+  code += `        # Initialize all widgets
+        self.create_widgets()
         
+    def create_widgets(self):
+        """Create and place all widgets"""
+`;
+
+  // Process components and add widget creation code within the create_widgets method
+  if (components && components.length > 0) {
+    components.forEach(component => {
+      // Only include visible components
+      if (component.visible !== false) {
+        // Generate code for this component and add it to the main code
+        const componentCode = generateComponentCode(component, '        ');
+        code += componentCode;
+      }
+    });
+  }
+
+  // Add the load_image method as a separate method in the class
+  code += `
     def _load_image(self, path, size):
         """Load an image, resize it and return as CTkImage"""
         try:
@@ -61,19 +84,12 @@ class App(ctk.CTk):
             ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=size)
             self._image_references.append(ctk_img)
             return ctk_img
+            
+    # Property to access the load_image method
+    @property
+    def load_image(self):
+        return self._load_image
 `;
-
-  // Process components and add widget creation code within the class
-  if (components && components.length > 0) {
-    components.forEach(component => {
-      // Only include visible components
-      if (component.visible !== false) {
-        // Generate code for this component and add it to the main code
-        const componentCode = generateComponentCode(component, '        ');
-        code += componentCode;
-      }
-    });
-  }
 
   // Add main method
   code += `

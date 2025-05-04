@@ -2,6 +2,7 @@
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { generatePythonCode } from './pythonCodeGenerator';
+import { collectComponentImages } from './codeGeneratorUtils';
 
 /**
  * Exports the project as a ZIP file containing Python code and required files
@@ -23,11 +24,24 @@ export async function exportProject(components: any[], windowTitle?: string) {
     
     // Create the assets directory
     const assets = zip.folder("assets");
-    if (assets) {
-      assets.file("placeholder.png", "");  // Empty file to ensure the folder is created
+    
+    // Collect images from components
+    const componentImages = collectComponentImages(components);
+    
+    // Process and add images to the zip
+    for (const [src, fileName] of Object.entries(componentImages)) {
+      try {
+        // Convert data URL to binary
+        const base64Data = src.substring(src.indexOf(',') + 1);
+        if (assets) {
+          assets.file(fileName, base64Data, { base64: true });
+        }
+      } catch (err) {
+        console.error(`Error processing image ${fileName}:`, err);
+      }
     }
     
-    // Generate a simple placeholder image
+    // Always include a placeholder image for fallback
     const placeholderImageData = generatePlaceholderImage();
     zip.file("placeholder.png", placeholderImageData, {base64: true});
     
@@ -95,7 +109,7 @@ If your UI doesn't match the preview:
 - Make sure you have the latest version of CustomTkinter installed
 - Check that the appearance mode and color theme are set correctly
 - For DatePicker, ensure you have tkcalendar installed
-- If images don't load, check that they are in the correct folder
+- If images don't load, check that they are in the correct folder (root or assets subfolder)
 
 ### Common Issues
 - **Image loading errors**: Make sure all images are in the project folder or in the assets subfolder
@@ -118,5 +132,5 @@ You can customize the appearance of the application by modifying the following s
  */
 function generatePlaceholderImage(): string {
   // A minimal base64-encoded PNG image (a blue square)
-  return 'iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsIAAA7CARUoSoAAAAF3SURBVHhe7dAxAQAwDASh+je9+WsYD0LACQScgIATEHACAk5AwAkIOAEBJyDgBASc+7N3lY0dwGF4AkvQOLO8AY0rhcc4zPLs2TU77d21+xPIA8QD+fkB4oFkyzHngXggOSACyRLZcsx5IB5IDogvWVkiW445D8QDyQERSJbIlmPOA/FAckAEkiWy5ZjzQDyQHBCBZIlsOeY8EA8kB0QgWSJbjjkPxAPJARFIlsiWY84D8UByQASSJbLlmPNAPJAcEIFkiWw55jwQDyQHRCBZIluOOQ/EA8kBEUiWyJZjzgPxQHJABJIlsuWY80A8kBwQgWSJbDnmPBAPJAdEIFkiW445D8QDyQERSJbIlmPOA/FAckAEkiWy5ZjzQDyQHBCBZIlsOeY8EA8kB0QgWSJbjjkPxAPJARFIlsiWY84D8UByQASSJbLlmPNAPJAcEIFkiWw55jwQDyQHRCBZIluOOQ/EA8kBEUiWyJZjzgPxQArtpXaW3e+UawAAAABJRU5ErkJggg==';
+  return 'iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsIAAA7CARUoSoAAAAF3SURBVHhe7dAxAQAwDASh+je9+WsYD0LACQScgIATEHACAk5AwAkIOAEBJyDgBASc+7N3lY0dwGF4AkvQOLO8AY0rhcc4zPLs2TU77d21+xPIA8QD+fkB4oFkyzHngXggOSACyRLZcsx5IB5IDogvWVkiW445D8QDyQERSJbIlmPOA/FAckAEkiWy5ZjzQDyQHBCBZIlsOeY8EA8kB0QgWSJbjjkPxAPJARFIlsiWY84D8UByQASSJbLlmPNAPJAcEIFkiWw55jwQDyQHRCBZIluOOQ/EA8kBEUiWyJZjzgPxQHJABJIlsuWY80A8kBwQgWSJbDnmPBAPJAdEIFkiW445D8QDyQERSJbIlmPOA/FAckAEkiWy5ZjzQDyQHBCBZIlsOeY8EA8kB0QgWSJbDyQHRCBZIlsOeY8EA8kB0QgWSJbDnmPBAPJAcEIFkiWy5ZjzQDyQHRCBZIlsOeY8EA8kBEUiWyJZjzgPxQArtpXaW3e+UawAAAABJRU5ErkJggg==';
 }

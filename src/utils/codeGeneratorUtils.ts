@@ -34,24 +34,27 @@ export function getComponentProps(component: any): any {
   props.borderWidth = component.props?.borderWidth !== undefined ? component.props?.borderWidth : 1;
   props.borderColor = component.props?.borderColor || '#e2e8f0';
   
-  // Fix the font configuration to avoid "unknown font style" error
-  let fontConfig = 'font=("' + (component.props?.fontFamily || 'Arial') + '", ' + (component.props?.fontSize || 12);
+  // Properly format the font configuration
+  const fontFamily = component.props?.fontFamily || "Arial";
+  const fontSize = component.props?.fontSize || 12;
+  const fontWeight = component.props?.fontWeight || "normal";
+  const fontStyle = component.props?.fontStyle || "normal";
   
-  // Add font weight if specified
-  const fontWeightPart = component.props?.fontWeight === 'bold' ? ', "bold"' : '';
+  // Build the font tuple string safely
+  let fontConfig = `("${fontFamily}", ${fontSize}`;
   
-  // Add font style if specified
-  const fontStylePart = component.props?.fontStyle === 'italic' ? ', "italic"' : '';
-  
-  // Combine weight and style correctly - avoid combinations that cause errors
-  if (fontWeightPart && fontStylePart) {
+  // Handle font style and weight combinations properly for CTk
+  if (fontWeight === 'bold' && fontStyle === 'italic') {
     fontConfig += ', "bold italic"';
+  } else if (fontWeight === 'bold') {
+    fontConfig += ', "bold"';
+  } else if (fontStyle === 'italic') {
+    fontConfig += ', "italic"';
   } else {
-    fontConfig += fontWeightPart + fontStylePart;
+    fontConfig += ', "normal"';
   }
   
   fontConfig += ')';
-  
   props.fontConfig = fontConfig;
   
   // Toggle/checkbox state
@@ -65,13 +68,13 @@ export function getComponentProps(component: any): any {
   props.isOn = component.props?.isOn === true;
   
   // Image properties if applicable
-  if (component.props?.image) {
-    props.image = component.props.image;
+  if (component.props?.src || component.props?.image) {
+    props.image = component.props?.src || component.props?.image;
     props.image_size = {
-      width: component.props.imageWidth || props.width,
-      height: component.props.imageHeight || props.height
+      width: component.props?.imageWidth || props.width,
+      height: component.props?.imageHeight || props.height
     };
-    props.compound = component.props.compound || 'left';
+    props.compound = component.props?.compound || 'left';
   }
   
   // Layout properties for grid and pack layouts
@@ -129,4 +132,24 @@ export function adjustColorBrightness(hexColor: string, percent: number): string
   
   // Convert back to hex
   return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+}
+
+/**
+ * Ensures all component images are included in the assets
+ * @param components The list of components
+ * @returns Object mapping src URLs to filenames
+ */
+export function collectComponentImages(components: any[]): Record<string, string> {
+  const images: Record<string, string> = {};
+  
+  if (!components || !components.length) return images;
+  
+  components.forEach(component => {
+    if (component.props?.src && component.props.src.startsWith('data:')) {
+      const fileName = component.props.fileName || `image-${component.id}.png`;
+      images[component.props.src] = fileName;
+    }
+  });
+  
+  return images;
 }

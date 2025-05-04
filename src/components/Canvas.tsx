@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { toast } from "sonner";
 import { Maximize2, Minimize2, X, Copy, Scissors, Trash } from "lucide-react";
@@ -30,6 +29,7 @@ interface CanvasProps {
   windowSize?: { width: number; height: number };
   windowBgColor?: string;
   setWindowTitle?: (title: string) => void;
+  onAddComponent?: (component: Component) => Component; // Added this missing prop type
 }
 
 const Canvas = ({
@@ -43,7 +43,8 @@ const Canvas = ({
   windowTitle = "My CustomTkinter Application",
   windowSize = { width: 800, height: 600 },
   windowBgColor = "#f0f0f0",
-  setWindowTitle
+  setWindowTitle,
+  onAddComponent
 }: CanvasProps) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);

@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for code generation
  */
@@ -71,10 +70,16 @@ export function getComponentProps(component: any): any {
   if (component.props?.src || component.props?.image) {
     // Ensure proper path for images - assets folder
     let imagePath = component.props?.src || component.props?.image;
+    
+    // If it's a data URL, use the fileName property (which should be set in CodePreview.tsx)
+    if (imagePath && imagePath.startsWith('data:') && component.props?.fileName) {
+      imagePath = `assets/${component.props.fileName}`;
+    }
     // If it's not a placeholder and doesn't already have assets/ prefix
-    if (imagePath && !imagePath.startsWith('assets/') && !imagePath.startsWith('placeholder')) {
+    else if (imagePath && !imagePath.startsWith('assets/') && !imagePath.startsWith('placeholder')) {
       imagePath = `assets/${imagePath.split('/').pop()}`;
     }
+    
     props.image = imagePath;
     props.image_size = {
       width: component.props?.imageWidth || props.width,
@@ -151,11 +156,21 @@ export function collectComponentImages(components: any[]): Record<string, string
   if (!components || !components.length) return images;
   
   components.forEach(component => {
-    if (component.props?.src && component.props.src.startsWith('data:')) {
-      // Generate a unique filename if not provided
-      const fileName = component.props.fileName || 
-        `image-${component.id}-${Date.now()}.png`;
-      images[component.props.src] = fileName;
+    // Handle both direct src property and nested props.src
+    const src = component.src || component.props?.src;
+    const fileName = component.fileName || component.props?.fileName;
+    
+    if (src && src.startsWith('data:')) {
+      // Use provided fileName or generate a unique one
+      const imageFileName = fileName || `image-${component.id}-${Date.now()}.png`;
+      images[src] = imageFileName;
+    }
+    
+    // Also check for image property which might be used in some components
+    const image = component.image || component.props?.image;
+    if (image && image.startsWith('data:')) {
+      const imageFileName = fileName || `image-${component.id}-${Date.now()}.png`;
+      images[image] = imageFileName;
     }
   });
   

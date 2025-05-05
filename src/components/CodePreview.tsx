@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { generatePythonCode, exportProject } from '@/utils/codeGenerator';
 import Prism from 'prismjs';
@@ -50,10 +51,17 @@ export const CodePreview: React.FC<CodePreviewProps> = ({ components, visible, w
   const handleExport = async () => {
     try {
       setIsExporting(true);
-      // Ensure props always exists for components
+      
+      // Properly prepare components for export with fileName for images
       const preparedComponents = components.map(component => ({
         ...component,
-        props: component.props || {}
+        props: {
+          ...(component.props || {}),
+          // Ensure fileName property exists for images with data URLs
+          fileName: component.props?.fileName || 
+            (component.props?.src && component.props.src.startsWith('data:') ? 
+              `image-${component.id}-${Date.now()}.png` : undefined)
+        }
       }));
       
       await exportProject(preparedComponents, windowTitle);

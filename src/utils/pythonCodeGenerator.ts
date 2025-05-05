@@ -36,10 +36,6 @@ class App(ctk.CTk):
         # Store references to images to prevent garbage collection
         self._image_references = []
         
-        # Define load_image method before we attempt to use it
-        # This ensures the method is defined before any component tries to access it
-        self._load_image = self.load_image_implementation
-        
         # Create all widgets and components
         self.create_widgets()
         
@@ -61,7 +57,7 @@ class App(ctk.CTk):
 
   // Add the load_image method as a separate method in the class
   code += `
-    def load_image_implementation(self, path, size):
+    def load_image(self, path, size):
         """Load an image, resize it and return as CTkImage"""
         try:
             if os.path.exists(path):
@@ -73,22 +69,34 @@ class App(ctk.CTk):
             else:
                 print(f"Image file not found: {path}")
                 # Create a placeholder colored rectangle
-                img = Image.new('RGB', size, color='#3B82F6')  # Blue color as placeholder
+                placeholder_path = "assets/placeholder.png"
+                if os.path.exists(placeholder_path):
+                    img = Image.open(placeholder_path)
+                    img = img.resize(size, Image.Resampling.LANCZOS)
+                else:
+                    img = Image.new('RGB', size, color='#3B82F6')  # Blue color as placeholder
                 ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=size)
                 self._image_references.append(ctk_img)
                 return ctk_img
         except Exception as e:
             print(f"Error loading image '{path}': {e}")
             # Create a placeholder colored rectangle with error indication
-            img = Image.new('RGB', size, color='#FF5555')  # Red color for error
-            ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=size)
-            self._image_references.append(ctk_img)
-            return ctk_img
-            
-    # This is the property to access load_image
-    @property
-    def load_image(self):
-        return self._load_image
+            try:
+                placeholder_path = "assets/placeholder.png"
+                if os.path.exists(placeholder_path):
+                    img = Image.open(placeholder_path)
+                    img = img.resize(size, Image.Resampling.LANCZOS)
+                else:
+                    img = Image.new('RGB', size, color='#FF5555')  # Red color for error
+                ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=size)
+                self._image_references.append(ctk_img)
+                return ctk_img
+            except:
+                # Last resort fallback
+                img = Image.new('RGB', size, color='#FF5555')  # Red color for error
+                ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=size)
+                self._image_references.append(ctk_img)
+                return ctk_img
 `;
 
   // Add main method

@@ -24,41 +24,44 @@ export async function exportProject(components: any[], windowTitle?: string) {
     
     // Create the assets directory
     const assets = zip.folder("assets");
+    if (!assets) {
+      throw new Error("Failed to create assets directory");
+    }
     
     // Collect images from components
     const componentImages = collectComponentImages(components);
     
     // Process and add images to the zip
     if (Object.keys(componentImages).length > 0) {
+      console.log(`Processing ${Object.keys(componentImages).length} images`);
       for (const [src, fileName] of Object.entries(componentImages)) {
         try {
           // Convert data URL to binary
           if (src.includes('base64')) {
+            console.log(`Adding image: ${fileName}`);
             const base64Data = src.substring(src.indexOf(',') + 1);
-            if (assets) {
-              assets.file(fileName, base64Data, { base64: true });
-            }
+            assets.file(fileName, base64Data, { base64: true });
+          } else {
+            console.log(`Skipping non-data URL: ${fileName}`);
           }
         } catch (err) {
           console.error(`Error processing image ${fileName}:`, err);
         }
       }
+    } else {
+      console.log("No images found to include in export");
     }
     
     // Always include a placeholder image for fallback
     const placeholderImageData = generatePlaceholderImage();
-    if (assets) {
-      assets.file("placeholder.png", placeholderImageData, {base64: true});
-    } else {
-      // If assets folder creation failed, add to root
-      zip.file("placeholder.png", placeholderImageData, {base64: true});
-    }
+    assets.file("placeholder.png", placeholderImageData, {base64: true});
     
     // Generate the zip file
     const content = await zip.generateAsync({ type: "blob" });
     
     // Save the zip file
     saveAs(content, "customtkinter-project.zip");
+    console.log("Project export completed successfully");
   } catch (error) {
     console.error("Error exporting project:", error);
     throw error;

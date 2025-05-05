@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { generatePythonCode, exportProject } from '@/utils/codeGenerator';
 import Prism from 'prismjs';
@@ -23,10 +22,9 @@ export const CodePreview: React.FC<CodePreviewProps> = ({ components, visible, w
       // Generate code for components, ensuring they have properly initialized props
       const preparedComponents = components.map(component => ({
         ...component,
-        props: component.props || {},
-        // Ensure fileName property exists for images with data URLs
         props: {
           ...(component.props || {}),
+          // Ensure fileName property exists for images with data URLs
           fileName: component.props?.fileName || 
             (component.props?.src && component.props.src.startsWith('data:') ? 
               `image-${component.id}-${Date.now()}.png` : undefined)

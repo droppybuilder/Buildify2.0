@@ -40,8 +40,9 @@ export function getComponentProps(component: any): any {
   const fontWeight = component.props?.fontWeight || "normal";
   const fontStyle = component.props?.fontStyle || "normal";
   
-  // Build the font tuple string safely
-  let fontConfig = `("${fontFamily}", ${fontSize}`;
+  // Build the font tuple string safely - DO NOT include in keyword arguments
+  // Remove the trailing comma and parenthesis to fix the positional/keyword argument issue
+  let fontConfig = `font=("${fontFamily}", ${fontSize}`;
   
   // Handle font style and weight combinations properly for CTk
   if (fontWeight === 'bold' && fontStyle === 'italic') {

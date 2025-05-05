@@ -1,4 +1,3 @@
-
 import { adjustColorBrightness, generateGridCode } from './codeGeneratorUtils';
 
 /**
@@ -86,7 +85,7 @@ function generateLabelCode(safeId: string, props: any, indent: string): string {
   if (props.image) {
     const imagePath = props.image;
     const imageSize = props.image_size || { width: 50, height: 50 };
-    code += `${indent}self.${safeId} = ctk.CTkLabel(self, text="${props.text || ''}", image=self.load_image("${imagePath}", (${imageSize.width}, ${imageSize.height})), compound="${props.compound || 'left'}", ${props.fontConfig}, fg_color="${props.fg_color || 'transparent'}", text_color="${props.text_color}")\n`;
+    code += `${indent}self.${safeId} = ctk.CTkLabel(self, text="${props.text || ''}", ${props.fontConfig.replace("font=", "")}, image=self.load_image("${imagePath}", (${imageSize.width}, ${imageSize.height})), compound="${props.compound || 'left'}", fg_color="${props.fg_color || 'transparent'}", text_color="${props.text_color}")\n`;
   } else {
     code += `${indent}self.${safeId} = ctk.CTkLabel(self, text="${props.text || ''}", width=${props.width}, height=${props.height}, corner_radius=${props.cornerRadius}, fg_color="${props.fg_color || 'transparent'}", text_color="${props.text_color || '#ffffff'}", ${props.fontConfig})\n`;
   }
@@ -178,7 +177,7 @@ function generateSwitchCode(safeId: string, props: any, indent: string): string 
   let code = '';
   
   // Improved switch widget with proper styling
-  code += `${indent}self.${safeId} = ctk.CTkSwitch(self, text="${props.text || 'Toggle'}", width=${props.width || 100}, ${props.fontConfig}, button_color="${props.fg_color || '#3b82f6'}", button_hover_color="${adjustColorBrightness(props.fg_color || '#3b82f6', -20)}", progress_color="${props.fg_color || '#3b82f6'}", text_color="${props.text_color || '#ffffff'}")\n`;
+  code += `${indent}self.${safeId} = ctk.CTkSwitch(self, text="${props.text || 'Toggle'}", width=${props.width || 100}, button_color="${props.fg_color || '#3b82f6'}", button_hover_color="${adjustColorBrightness(props.fg_color || '#3b82f6', -20)}", progress_color="${props.fg_color || '#3b82f6'}", text_color="${props.text_color || '#ffffff'}", ${props.fontConfig})\n`;
   
   // Use grid layout if grid properties are specified, otherwise use place
   const gridCode = generateGridCode(safeId, props, indent);
@@ -253,7 +252,7 @@ function generateFrameCode(safeId: string, props: any, indent: string): string {
 function generateCheckboxCode(safeId: string, props: any, indent: string): string {
   let code = '';
   
-  code += `${indent}self.${safeId} = ctk.CTkCheckBox(self, text="${props.text || 'Checkbox'}", ${props.fontConfig}, fg_color="${props.fg_color || '#3b82f6'}", hover_color="${adjustColorBrightness(props.fg_color || '#3b82f6', -20)}", text_color="${props.text_color || '#ffffff'}", border_color="${props.borderColor}")\n`;
+  code += `${indent}self.${safeId} = ctk.CTkCheckBox(self, text="${props.text || 'Checkbox'}", fg_color="${props.fg_color || '#3b82f6'}", hover_color="${adjustColorBrightness(props.fg_color || '#3b82f6', -20)}", text_color="${props.text_color || '#ffffff'}", border_color="${props.borderColor}", ${props.fontConfig})\n`;
   
   // Use grid layout if grid properties are specified, otherwise use place
   const gridCode = generateGridCode(safeId, props, indent);

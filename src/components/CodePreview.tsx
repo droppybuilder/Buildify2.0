@@ -21,16 +21,24 @@ export const CodePreview: React.FC<CodePreviewProps> = ({ components, visible, w
   useEffect(() => {
     if (visible) {
       // Generate code for components, ensuring they have properly initialized props
-      const preparedComponents = components.map(component => ({
-        ...component,
-        props: {
-          ...(component.props || {}),
-          // Ensure fileName property exists for images with data URLs
-          fileName: component.props?.fileName || 
-            (component.props?.src && component.props.src.startsWith('data:') ? 
-              `image-${component.id}-${Date.now()}.png` : undefined)
+      const preparedComponents = components.map(component => {
+        // Make a deep copy to avoid modifying the original component
+        const componentCopy = JSON.parse(JSON.stringify(component));
+        
+        // Ensure props exists
+        if (!componentCopy.props) {
+          componentCopy.props = {};
         }
-      }));
+        
+        // Ensure fileName property exists for images with data URLs
+        if (componentCopy.props.src && componentCopy.props.src.startsWith('data:')) {
+          if (!componentCopy.props.fileName) {
+            componentCopy.props.fileName = `image-${componentCopy.id}-${Date.now()}.png`;
+          }
+        }
+        
+        return componentCopy;
+      });
       
       const pythonCode = generatePythonCode(preparedComponents, windowTitle);
       setCode(pythonCode);
@@ -51,24 +59,34 @@ export const CodePreview: React.FC<CodePreviewProps> = ({ components, visible, w
   const handleExport = async () => {
     try {
       setIsExporting(true);
+      toast.info("Preparing project for export...");
       
       // Properly prepare components for export with fileName for images
-      const preparedComponents = components.map(component => ({
-        ...component,
-        props: {
-          ...(component.props || {}),
-          // Ensure fileName property exists for images with data URLs
-          fileName: component.props?.fileName || 
-            (component.props?.src && component.props.src.startsWith('data:') ? 
-              `image-${component.id}-${Date.now()}.png` : undefined)
+      const preparedComponents = components.map(component => {
+        // Make a deep copy to avoid modifying the original
+        const componentCopy = JSON.parse(JSON.stringify(component));
+        
+        // Ensure props exists
+        if (!componentCopy.props) {
+          componentCopy.props = {};
         }
-      }));
+        
+        // Set fileName property for images with data URLs
+        if (componentCopy.props.src && componentCopy.props.src.startsWith('data:')) {
+          if (!componentCopy.props.fileName) {
+            componentCopy.props.fileName = `image-${componentCopy.id}-${Date.now()}.png`;
+          }
+        }
+        
+        return componentCopy;
+      });
       
+      console.log("Starting project export with prepared components:", preparedComponents.length);
       await exportProject(preparedComponents, windowTitle);
       toast.success("Project exported successfully!");
     } catch (error) {
       console.error("Export error:", error);
-      toast.error("Failed to export project. Check console for details.");
+      toast.error(`Failed to export project: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsExporting(false);
     }
@@ -76,6 +94,7 @@ export const CodePreview: React.FC<CodePreviewProps> = ({ components, visible, w
 
   const requirementsCode = `customtkinter>=5.2.0
 Pillow>=9.0.0
+tkcalendar>=1.6.1
 `;
 
   const readmeCode = `# CustomTkinter GUI Application

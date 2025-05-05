@@ -1,3 +1,4 @@
+
 /**
  * Utility functions for code generation
  */
@@ -155,23 +156,33 @@ export function collectComponentImages(components: any[]): Record<string, string
   
   if (!components || !components.length) return images;
   
+  // Process components recursively to find all images
+  const processComponent = (component: any) => {
+    // Handle image in props
+    if (component.props) {
+      // Check for image source in props
+      const src = component.props.src;
+      const fileName = component.props.fileName;
+      
+      // Process data URLs for images
+      if (src && src.startsWith('data:')) {
+        // Use provided fileName or generate a unique one
+        const imageFileName = fileName || `image-${component.id}-${Date.now()}.png`;
+        images[src] = imageFileName;
+      }
+      
+      // Also check for image property which might be used in some components
+      const image = component.props.image;
+      if (image && image.startsWith('data:')) {
+        const imageFileName = fileName || `image-${component.id}-${Date.now()}.png`;
+        images[image] = imageFileName;
+      }
+    }
+  };
+  
+  // Process each component
   components.forEach(component => {
-    // Handle both direct src property and nested props.src
-    const src = component.src || component.props?.src;
-    const fileName = component.fileName || component.props?.fileName;
-    
-    if (src && src.startsWith('data:')) {
-      // Use provided fileName or generate a unique one
-      const imageFileName = fileName || `image-${component.id}-${Date.now()}.png`;
-      images[src] = imageFileName;
-    }
-    
-    // Also check for image property which might be used in some components
-    const image = component.image || component.props?.image;
-    if (image && image.startsWith('data:')) {
-      const imageFileName = fileName || `image-${component.id}-${Date.now()}.png`;
-      images[image] = imageFileName;
-    }
+    processComponent(component);
   });
   
   return images;

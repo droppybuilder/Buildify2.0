@@ -12,8 +12,8 @@ export function generatePythonCode(components: any[], windowTitle = "My CustomTk
 import tkinter as tk
 from PIL import Image, ImageTk
 import os
-from datetime import datetime
 import sys
+from pathlib import Path
 
 class App(ctk.CTk):
     def __init__(self):
@@ -32,6 +32,10 @@ class App(ctk.CTk):
         # Configure grid layout (4x4) for better responsiveness
         self.grid_columnconfigure((0, 1, 2, 3), weight=1)
         self.grid_rowconfigure((0, 1, 2, 3), weight=1)
+
+        # Create assets directory if it doesn't exist
+        assets_dir = Path("assets")
+        assets_dir.mkdir(exist_ok=True)
 
         # Store references to images to prevent garbage collection
         self._image_references = []
@@ -55,56 +59,62 @@ class App(ctk.CTk):
     });
   }
 
-  // Add the load_image method as a separate method in the class
+  // Add the load_image method as a separate method in the class with improved error handling
   code += `
     def load_image(self, path, size):
         """Load an image, resize it and return as CTkImage"""
         try:
-            if os.path.exists(path):
-                img = Image.open(path)
-                img = img.resize(size, Image.Resampling.LANCZOS)
+            # Handle path as string or Path object
+            path_str = str(path)
+            
+            # Check if image file exists
+            if os.path.exists(path_str):
+                img = Image.open(path_str)
+                img = img.resize(size, Image.LANCZOS if hasattr(Image, 'LANCZOS') else Image.ANTIALIAS)
                 ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=size)
                 self._image_references.append(ctk_img)  # Keep reference
                 return ctk_img
             else:
-                print(f"Image file not found: {path}")
-                # Create a placeholder colored rectangle
+                print(f"Image file not found: {path_str}")
+                # Use placeholder image
                 placeholder_path = "assets/placeholder.png"
                 if os.path.exists(placeholder_path):
                     img = Image.open(placeholder_path)
-                    img = img.resize(size, Image.Resampling.LANCZOS)
+                    img = img.resize(size, Image.LANCZOS if hasattr(Image, 'LANCZOS') else Image.ANTIALIAS)
+                    ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=size)
+                    self._image_references.append(ctk_img)
+                    return ctk_img
                 else:
+                    # Create a fallback colored rectangle
                     img = Image.new('RGB', size, color='#3B82F6')  # Blue color as placeholder
-                ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=size)
-                self._image_references.append(ctk_img)
-                return ctk_img
+                    ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=size)
+                    self._image_references.append(ctk_img)
+                    return ctk_img
         except Exception as e:
             print(f"Error loading image '{path}': {e}")
-            # Create a placeholder colored rectangle with error indication
+            # Create a colored rectangle with error indication
             try:
-                placeholder_path = "assets/placeholder.png"
-                if os.path.exists(placeholder_path):
-                    img = Image.open(placeholder_path)
-                    img = img.resize(size, Image.Resampling.LANCZOS)
-                else:
-                    img = Image.new('RGB', size, color='#FF5555')  # Red color for error
-                ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=size)
-                self._image_references.append(ctk_img)
-                return ctk_img
-            except:
-                # Last resort fallback
                 img = Image.new('RGB', size, color='#FF5555')  # Red color for error
                 ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=size)
                 self._image_references.append(ctk_img)
                 return ctk_img
+            except Exception as e2:
+                print(f"Failed to create error placeholder: {e2}")
+                # Last resort - return None and let CustomTkinter handle it
+                return None
 `;
 
-  // Add main method
+  // Add main method with error handling
   code += `
 
 if __name__ == "__main__":
-    app = App()
-    app.mainloop()
+    try:
+        app = App()
+        app.mainloop()
+    except Exception as e:
+        print(f"Error running application: {e}")
+        import traceback
+        traceback.print_exc()
 `;
 
   return code;

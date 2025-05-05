@@ -28,21 +28,31 @@ export async function exportProject(components: any[], windowTitle?: string) {
       throw new Error("Failed to create assets directory");
     }
     
+    // Create a placeholder image and add it to assets
+    const placeholderImageData = generatePlaceholderImage();
+    assets.file("placeholder.png", placeholderImageData, {base64: true});
+    
     // Collect images from components
     const componentImages = collectComponentImages(components);
     
     // Process and add images to the zip
     if (Object.keys(componentImages).length > 0) {
       console.log(`Processing ${Object.keys(componentImages).length} images`);
+      
       for (const [src, fileName] of Object.entries(componentImages)) {
         try {
-          // Convert data URL to binary
-          if (src.includes('base64')) {
+          // Make sure we're working with a valid data URL
+          if (src && src.includes('base64')) {
             console.log(`Adding image: ${fileName}`);
-            const base64Data = src.substring(src.indexOf(',') + 1);
-            assets.file(fileName, base64Data, { base64: true });
+            // Extract the base64 content after the comma
+            const base64Data = src.split(',')[1];
+            if (base64Data) {
+              assets.file(fileName, base64Data, { base64: true });
+            } else {
+              console.error(`Invalid base64 data for ${fileName}`);
+            }
           } else {
-            console.log(`Skipping non-data URL: ${fileName}`);
+            console.log(`Skipping non-data URL: ${src}`);
           }
         } catch (err) {
           console.error(`Error processing image ${fileName}:`, err);
@@ -51,10 +61,6 @@ export async function exportProject(components: any[], windowTitle?: string) {
     } else {
       console.log("No images found to include in export");
     }
-    
-    // Always include a placeholder image for fallback
-    const placeholderImageData = generatePlaceholderImage();
-    assets.file("placeholder.png", placeholderImageData, {base64: true});
     
     // Generate the zip file
     const content = await zip.generateAsync({ type: "blob" });

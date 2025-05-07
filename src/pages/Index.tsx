@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import Canvas from '@/components/Canvas';
@@ -8,6 +7,9 @@ import { Toolbar } from '@/components/Toolbar';
 import { Layers } from '@/components/Layers';
 import { WindowProperties } from '@/components/WindowProperties';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import WatermarkedCanvas from '@/components/WatermarkedCanvas';
+import { FEATURES, hasFeature } from '@/utils/subscriptionUtils';
 
 // Define what constitutes a major state change for undo/redo
 const ACTION_TYPES = {
@@ -20,6 +22,8 @@ const ACTION_TYPES = {
 };
 
 const Index = () => {
+  const { subscription } = useAuth();
+
   const [selectedComponent, setSelectedComponent] = useState(null);
   const [components, setComponents] = useState([]);
   const [history, setHistory] = useState<any[][]>([[]]);
@@ -272,10 +276,21 @@ const Index = () => {
   }, [components, handleComponentsChange, selectedComponents]);
   
   const toggleCodePreview = useCallback(() => {
+    // Check if user has permission to view code
+    if (!hasFeature(subscription, FEATURES.EXPORT_CODE) && !showCodePreview) {
+      toast.error("Upgrade to Standard or Pro plan to export code", {
+        action: {
+          label: "Upgrade",
+          onClick: () => navigate('/pricing')
+        }
+      });
+      return;
+    }
+    
     setShowCodePreview(prev => !prev);
     setShowLayers(false);
     setShowWindowProperties(false);
-  }, []);
+  }, [subscription, showCodePreview]);
   
   const toggleLayers = useCallback(() => {
     setShowLayers(prev => !prev);
@@ -379,6 +394,7 @@ const Index = () => {
               components={components} 
               visible={showCodePreview}
               windowTitle={windowTitle}
+              subscription={subscription}
             />
           ) : showLayers ? (
             <Layers 
@@ -401,20 +417,22 @@ const Index = () => {
             />
           ) : (
             <div className="flex-1 overflow-auto bg-background p-6">
-              <Canvas
-                components={components}
-                setComponents={(newComponents) => handleComponentsChange(newComponents, ACTION_TYPES.UPDATE_COMPONENT)}
-                selectedComponent={selectedComponent}
-                setSelectedComponent={handleComponentSelect}
-                onDeleteComponent={handleDeleteComponent}
-                selectedComponents={selectedComponents}
-                setSelectedComponents={setSelectedComponents}
-                windowTitle={windowTitle}
-                windowSize={windowSize}
-                windowBgColor={windowBgColor}
-                setWindowTitle={(title) => handleWindowPropertiesChange(title, windowSize, windowBgColor)}
-                onAddComponent={handleAddComponent}
-              />
+              <WatermarkedCanvas>
+                <Canvas
+                  components={components}
+                  setComponents={(newComponents) => handleComponentsChange(newComponents, ACTION_TYPES.UPDATE_COMPONENT)}
+                  selectedComponent={selectedComponent}
+                  setSelectedComponent={handleComponentSelect}
+                  onDeleteComponent={handleDeleteComponent}
+                  selectedComponents={selectedComponents}
+                  setSelectedComponents={setSelectedComponents}
+                  windowTitle={windowTitle}
+                  windowSize={windowSize}
+                  windowBgColor={windowBgColor}
+                  setWindowTitle={(title) => handleWindowPropertiesChange(title, windowSize, windowBgColor)}
+                  onAddComponent={handleAddComponent}
+                />
+              </WatermarkedCanvas>
             </div>
           )}
           
@@ -424,6 +442,7 @@ const Index = () => {
               onUpdate={handleComponentUpdate}
               setInputFocused={setInputFocused}
               inputFocused={inputFocused}
+              subscription={subscription}
             />
           </div>
         </div>

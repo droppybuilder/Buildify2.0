@@ -45,7 +45,7 @@ export default function AuthPage() {
       email,
       password,
       options: {
-        // Using the current URL so redirects work in all environments
+        // Using the full URL structure for consistent behavior
         emailRedirectTo: `${window.location.origin}/auth`
       }
     });
@@ -53,7 +53,8 @@ export default function AuthPage() {
     setLoading(false);
     
     if (error) {
-      toast.error(error.message);
+      console.error('Signup error:', error);
+      toast.error(`Signup error: ${error.message}`);
     } else {
       toast.success('Sign up successful! Please check your email for verification.');
     }
@@ -71,14 +72,18 @@ export default function AuthPage() {
     setLoading(false);
     
     if (error) {
-      toast.error(error.message);
+      console.error('Login error:', error);
+      toast.error(`Login error: ${error.message}`);
+    } else {
+      toast.success('Login successful!');
     }
   };
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
+    console.log('Starting Google auth...');
     
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { error, data } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/auth`,
@@ -94,6 +99,8 @@ export default function AuthPage() {
     if (error) {
       console.error('Google auth error:', error);
       toast.error(`Google auth error: ${error.message}`);
+    } else {
+      console.log('Google auth started successfully', data);
     }
   };
 

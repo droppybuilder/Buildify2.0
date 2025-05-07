@@ -45,7 +45,8 @@ export default function AuthPage() {
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin
+        // Using the current URL so redirects work in all environments
+        emailRedirectTo: `${window.location.origin}/auth`
       }
     });
     
@@ -80,7 +81,7 @@ export default function AuthPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}`,
+        redirectTo: `${window.location.origin}/auth`,
         queryParams: {
           access_type: 'offline',
           prompt: 'consent'
@@ -92,7 +93,7 @@ export default function AuthPage() {
     
     if (error) {
       console.error('Google auth error:', error);
-      toast.error(error.message);
+      toast.error(`Google auth error: ${error.message}`);
     }
   };
 

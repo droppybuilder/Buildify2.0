@@ -58,6 +58,8 @@ serve(async (req) => {
       expiresAt.setFullYear(expiresAt.getFullYear() + 1);
     }
 
+    console.log(`Updating subscription for user ${userId} to tier ${tier} with expiry ${expiresAt}`);
+
     // Update user subscription
     const { data, error } = await supabase
       .from("user_subscriptions")
@@ -65,7 +67,7 @@ serve(async (req) => {
         user_id: userId,
         tier: tier,
         starts_at: new Date().toISOString(),
-        expires_at: expiresAt.toISOString(),
+        expires_at: expiresAt?.toISOString(),
         gumroad_product_id: productId,
         gumroad_purchase_id: purchaseId,
         updated_at: new Date().toISOString()
@@ -80,6 +82,8 @@ serve(async (req) => {
       );
     }
 
+    console.log("Subscription updated successfully:", data);
+
     return new Response(
       JSON.stringify({ 
         message: "Subscription updated successfully",
@@ -90,7 +94,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error processing request:", error);
     return new Response(
-      JSON.stringify({ error: "Internal server error" }),
+      JSON.stringify({ error: "Internal server error", details: error.message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

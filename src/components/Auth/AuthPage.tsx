@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { FcGoogle } from 'react-icons/fc';
-import { Direction, DirectionProvider } from '@radix-ui/react-direction';
+import { DirectionProvider } from '@radix-ui/react-direction';
 
 export default function AuthPage() {
   const [email, setEmail] = useState('');
@@ -44,6 +44,9 @@ export default function AuthPage() {
     const { error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: window.location.origin
+      }
     });
     
     setLoading(false);
@@ -77,13 +80,18 @@ export default function AuthPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin,
+        redirectTo: `${window.location.origin}`,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent'
+        }
       }
     });
     
     setLoading(false);
     
     if (error) {
+      console.error('Google auth error:', error);
       toast.error(error.message);
     }
   };

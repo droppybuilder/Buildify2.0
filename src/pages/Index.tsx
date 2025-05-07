@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '@/components/Sidebar';
 import Canvas from '@/components/Canvas';
 import { PropertyPanel } from '@/components/PropertyPanel';
@@ -23,6 +24,7 @@ const ACTION_TYPES = {
 
 const Index = () => {
   const { subscription } = useAuth();
+  const navigate = useNavigate();
 
   const [selectedComponent, setSelectedComponent] = useState(null);
   const [components, setComponents] = useState([]);
@@ -290,7 +292,7 @@ const Index = () => {
     setShowCodePreview(prev => !prev);
     setShowLayers(false);
     setShowWindowProperties(false);
-  }, [subscription, showCodePreview]);
+  }, [subscription, showCodePreview, navigate]);
   
   const toggleLayers = useCallback(() => {
     setShowLayers(prev => !prev);
@@ -394,7 +396,6 @@ const Index = () => {
               components={components} 
               visible={showCodePreview}
               windowTitle={windowTitle}
-              subscription={subscription}
             />
           ) : showLayers ? (
             <Layers 
@@ -442,7 +443,6 @@ const Index = () => {
               onUpdate={handleComponentUpdate}
               setInputFocused={setInputFocused}
               inputFocused={inputFocused}
-              subscription={subscription}
             />
           </div>
         </div>

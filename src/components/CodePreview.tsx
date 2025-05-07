@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { generatePythonCode, exportProject } from '@/utils/codeGenerator';
 import Prism from 'prismjs';
@@ -6,14 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Copy, Download, Code, File } from 'lucide-react';
 import { toast } from 'sonner';
 import { CustomTkinterGuide } from './CustomTkinterGuide';
+import { Subscription } from '@/hooks/useSubscription';
 
 interface CodePreviewProps {
   components: any[];
   visible: boolean;
   windowTitle?: string;
+  subscription?: Subscription | null;
 }
 
-export const CodePreview: React.FC<CodePreviewProps> = ({ components, visible, windowTitle = "My CustomTkinter Application" }) => {
+export const CodePreview: React.FC<CodePreviewProps> = ({ components, visible, windowTitle = "My CustomTkinter Application", subscription }) => {
   const [code, setCode] = useState('');
   const [isExporting, setIsExporting] = useState(false);
   const [codeTab, setCodeTab] = useState<'preview' | 'requirements' | 'readme'>('preview');

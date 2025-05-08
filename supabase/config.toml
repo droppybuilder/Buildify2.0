@@ -4,7 +4,3 @@ project_id = "mmcmimmzgvovmvnbsznv"
 [functions.verify-gumroad-purchase]
 verify_jwt = true
 
-[auth.external.google]
-enabled = true
-client_id = "env(GOOGLE_CLIENT_ID)"
-secret = "env(GOOGLE_CLIENT_SECRET)"

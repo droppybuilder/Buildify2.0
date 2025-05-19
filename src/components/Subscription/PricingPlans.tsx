@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,6 @@ import { Check, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { useSubscription } from '@/hooks/useSubscription';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface PlanFeature {
@@ -23,7 +21,6 @@ interface PricingPlan {
   billingPeriod: string;
   features: PlanFeature[];
   tier: 'free' | 'standard' | 'pro';
-  productId?: string;
 }
 
 const plans: PricingPlan[] = [
@@ -52,7 +49,6 @@ const plans: PricingPlan[] = [
     price: '$8',
     billingPeriod: 'monthly',
     tier: 'standard',
-    productId: '7CX2FTDAsPXnb5Z-9bRKRA==',
     features: [
       { name: 'Basic widgets', included: true },
       { name: 'Unlimited canvas size', included: true },
@@ -71,7 +67,6 @@ const plans: PricingPlan[] = [
     price: '$95',
     billingPeriod: 'yearly',
     tier: 'pro',
-    productId: '7CX2FTDAsPXnb5Z-9bRKRA==',
     features: [
       { name: 'Basic widgets', included: true },
       { name: 'Unlimited canvas size', included: true },
@@ -87,10 +82,10 @@ const plans: PricingPlan[] = [
 
 export default function PricingPlans() {
   const [processing, setProcessing] = useState<string | null>(null);
-  const { subscription, loading, refetch } = useSubscription();
+  const { subscription, loading } = useSubscription();
   const { user } = useAuth();
   const navigate = useNavigate();
-  
+
   const handleUpgrade = async (plan: PricingPlan) => {
     try {
       // Check if user is logged in
@@ -99,52 +94,15 @@ export default function PricingPlans() {
         navigate('/auth');
         return;
       }
-      
+
       setProcessing(plan.id);
-      console.log(`Processing upgrade to ${plan.name} plan for user ${user.id}`);
-      
-      // This is a simplified version just for demo
-      // In a real app, you would redirect to Gumroad checkout
-      if (plan.tier === 'free') {
-        // For downgrading to free plan
-        const { data, error } = await supabase.functions.invoke('verify-gumroad-purchase', {
-          body: {
-            productId: null,
-            purchaseId: null,
-            userId: user.id,
-            tier: 'free'
-          }
-        });
-        
-        if (error) {
-          throw new Error(error.message);
-        }
-        
-        toast.success('Downgraded to Free plan successfully');
-        refetch();
-      } else {
-        // Mock a purchase ID for demo purposes
-        const mockPurchaseId = `purchase_${Math.random().toString(36).substring(2, 10)}`;
-        
-        const { data, error } = await supabase.functions.invoke('verify-gumroad-purchase', {
-          body: {
-            productId: plan.productId,
-            purchaseId: mockPurchaseId,
-            userId: user.id,
-            tier: plan.tier
-          }
-        });
-        
-        if (error) {
-          throw new Error(error.message);
-        }
-        
-        toast.success(`Upgraded to ${plan.name} plan successfully`);
-        refetch();
-      }
+      console.log(`Processing upgrade to ${plan.name} plan for user ${user.uid}`);
+
+      // Mock success message for demo purposes
+      toast.success(`Upgraded to ${plan.name} plan successfully`);
     } catch (error) {
       console.error('Error upgrading plan:', error);
-      toast.error(`Failed to process payment: ${error.message}`);
+      toast.error('Failed to process upgrade. Please try again.');
     } finally {
       setProcessing(null);
     }

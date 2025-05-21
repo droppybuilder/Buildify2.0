@@ -8,6 +8,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Badge } from '@/components/ui/badge'
 import { signOut } from 'firebase/auth'
 import { auth } from '@/integrations/firebase/firebase.config'
+import { useState } from 'react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 interface ToolbarProps {
    components: any[]
@@ -38,10 +42,28 @@ export const Toolbar = ({
 }: ToolbarProps) => {
    const navigate = useNavigate()
    const { user } = useAuth()
+   const [modalOpen, setModalOpen] = useState(false)
+   const [featureRequest, setFeatureRequest] = useState('')
+   const [featureName, setFeatureName] = useState('')
+   const [submitting, setSubmitting] = useState(false)
 
    const handleSignOut = async () => {
       await signOut(auth)
       navigate('/auth')
+   }
+
+   const handleFeatureSubmit = async (e: React.FormEvent) => {
+      e.preventDefault()
+      setSubmitting(true)
+      // For demo, just close modal and reset
+      setTimeout(() => {
+         setSubmitting(false)
+         setModalOpen(false)
+         setFeatureRequest('')
+         setFeatureName('')
+         // You can add a toast here for success
+         // toast('Feature request submitted!')
+      }, 1000)
    }
 
    return (
@@ -160,6 +182,60 @@ export const Toolbar = ({
                <CreditCard size={16} />
                Plans
             </Button>
+            <Button
+               variant='outline'
+               size='sm'
+               className='gap-1 text-xs border-primary text-primary font-semibold'
+               style={{ borderWidth: 2 }}
+               onClick={() => setModalOpen(true)}
+            >
+               + Request Next Feature
+            </Button>
+            <Dialog
+               open={modalOpen}
+               onOpenChange={setModalOpen}
+            >
+               <DialogContent className='max-w-md mx-auto'>
+                  <DialogHeader>
+                     <DialogTitle>Request a Feature</DialogTitle>
+                  </DialogHeader>
+                  <form
+                     onSubmit={handleFeatureSubmit}
+                     className='space-y-4'
+                  >
+                     <div className='space-y-2'>
+                        <Label htmlFor='feature-name'>Feature Name</Label>
+                        <Input
+                           id='feature-name'
+                           value={featureName}
+                           onChange={(e) => setFeatureName(e.target.value)}
+                           placeholder='Short title for your feature...'
+                           required
+                        />
+                     </div>
+                     <div className='space-y-2'>
+                        <Label htmlFor='feature-request'>Feature Description</Label>
+                        <textarea
+                           id='feature-request'
+                           value={featureRequest}
+                           onChange={(e) => setFeatureRequest(e.target.value)}
+                           placeholder='Describe your feature idea...'
+                           required
+                           className='w-full min-h-[80px] max-h-60 resize-y rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
+                           style={{ resize: 'vertical' }}
+                        />
+                     </div>
+                     <DialogFooter>
+                        <Button
+                           type='submit'
+                           disabled={submitting || !featureRequest || !featureName}
+                        >
+                           {submitting ? 'Submitting...' : 'Submit'}
+                        </Button>
+                     </DialogFooter>
+                  </form>
+               </DialogContent>
+            </Dialog>
 
             <DropdownMenu>
                <DropdownMenuTrigger asChild>

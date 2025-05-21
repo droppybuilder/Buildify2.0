@@ -110,15 +110,27 @@ const LandingPage: React.FC = () => {
       <div className='min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 flex flex-col overflow-auto'>
          {/* Banner */}
          <div className='w-full bg-gradient-to-r from-primary to-indigo-500 text-white text-center py-3 font-semibold tracking-wide shadow-md z-50 text-lg flex items-center justify-center gap-2'>
-            <svg className='w-6 h-6 text-white animate-bounce' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'>
-               <path strokeLinecap='round' strokeLinejoin='round' d='M5 13l4 4L19 7' />
+            <svg
+               className='w-6 h-6 text-white animate-bounce'
+               fill='none'
+               stroke='currentColor'
+               strokeWidth='2'
+               viewBox='0 0 24 24'
+            >
+               <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  d='M5 13l4 4L19 7'
+               />
             </svg>
-            <span className='drop-shadow-sm'>AI Integration <span className='font-bold'>coming soon</span>!</span>
+            <span className='drop-shadow-sm'>
+               AI Integration <span className='font-bold'>coming soon</span>!
+            </span>
          </div>
          {/* Hero Section */}
          <header className='w-full py-16 flex flex-col items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-200 border-b border-indigo-200'>
             <h1 className='text-6xl font-extrabold text-primary mb-4 text-center tracking-tight drop-shadow-lg'>
-               Buildfy
+               Buildfy 2.0
             </h1>
             <p className='text-2xl text-muted-foreground mb-8 text-center max-w-2xl font-medium'>
                Effortlessly design, preview, and export beautiful Python Tkinter GUIs.
@@ -211,13 +223,7 @@ const LandingPage: React.FC = () => {
                            </li>
                         ))}
                      </ul>
-                     <Button
-                        className='w-full mt-auto'
-                        variant={plan.tier === 'free' ? 'default' : 'outline'}
-                        onClick={() => navigate('/auth')}
-                     >
-                        {plan.tier === 'free' ? 'Start Free' : `Go ${plan.name}`}
-                     </Button>
+                     {/* No button here, just viewable cards */}
                   </div>
                ))}
             </div>

@@ -12,6 +12,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import ProtectedRoute from './components/Auth/ProtectedRoute'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
+import LandingPage from './pages/LandingPage'
 import './App.css'
 
 const queryClient = new QueryClient()
@@ -26,6 +27,10 @@ const App = () => {
                <Toaster />
                <Sonner />
                <Routes>
+                  <Route
+                     path='/landing'
+                     element={<LandingPage />}
+                  />
                   <Route
                      path='/auth'
                      element={<AuthPage />}

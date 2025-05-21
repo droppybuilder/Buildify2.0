@@ -26,8 +26,11 @@ interface AuthContextProps {
 const AuthContext = createContext<AuthContextProps | undefined>(undefined)
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-   const [user, setUser] = useState<User | null>(null)
-   // const [session, setSession] = useState<Session | null>(null);
+   // Initialize user from localStorage if available
+   const [user, setUser] = useState<User | null>(() => {
+      const stored = localStorage.getItem('user')
+      return stored ? JSON.parse(stored) : null
+   })
    const [loading, setLoading] = useState<boolean>(true)
    // const { subscription, loading: subscriptionLoading } = useSubscription();
 
@@ -61,9 +64,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
    useEffect(() => {
       const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
          setUser(currentUser)
+         setLoading(false)
       })
       return () => unsubscribe()
    }, [])
+
+   // Persist user to localStorage whenever it changes
+   useEffect(() => {
+      if (user) {
+         // Firebase User object is not fully serializable, so store only needed fields
+         localStorage.setItem(
+            'user',
+            JSON.stringify({
+               uid: user.uid,
+               email: user.email,
+               displayName: user.displayName,
+               photoURL: user.photoURL,
+            })
+         )
+      } else {
+         localStorage.removeItem('user')
+      }
+   }, [user])
 
    //  const signOut = async () => {
    //     await supabase.auth.signOut()
@@ -88,6 +110,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                subscription_type: 'Free',
             })
          }
+         // Persist user to localStorage after login
+         localStorage.setItem(
+            'user',
+            JSON.stringify({
+               uid: user.uid,
+               email: user.email,
+               displayName: user.displayName,
+               photoURL: user.photoURL,
+            })
+         )
+         setUser(user)
       } catch (error) {
          console.error('Google login failed:', (error as Error).message)
       }
@@ -95,6 +128,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
    const logout = async (): Promise<void> => {
       await firebaseSignOut(auth)
+      setUser(null)
+      localStorage.removeItem('user')
    }
 
    //    return (

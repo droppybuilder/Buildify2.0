@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { auth } from '../../integrations/firebase/firebase.config'
 import { signOut } from 'firebase/auth'
+import { X } from 'lucide-react'
 
 interface Profile {
    id: string
@@ -117,10 +118,18 @@ const ProfilePage: React.FC = () => {
    }
 
    return (
-      <div className='container mx-auto p-6'>
-         <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+      <div className='container mx-auto p-6 relative flex flex-col items-center min-h-[80vh]'>
+         {/* Close Icon */}
+         <button
+            className='absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors'
+            onClick={() => navigate('/')}
+            aria-label='Close'
+         >
+            <X className='w-6 h-6 text-gray-500 hover:text-primary' />
+         </button>
+         <div className='w-full max-w-2xl flex flex-col gap-8 justify-center items-stretch'>
             {/* Profile Information */}
-            <Card className='md:col-span-2'>
+            <Card className='flex-1 flex flex-col justify-between'>
                <CardHeader>
                   <CardTitle>Profile Information</CardTitle>
                   <CardDescription>Update your account details and preferences</CardDescription>
@@ -146,7 +155,6 @@ const ProfilePage: React.FC = () => {
                         <p className='text-sm text-gray-500'>{profile?.email}</p>
                      </div>
                   </div>
-
                   <div className='space-y-2'>
                      <Label htmlFor='display-name'>Display Name</Label>
                      <Input
@@ -156,7 +164,6 @@ const ProfilePage: React.FC = () => {
                         placeholder='Enter your display name'
                      />
                   </div>
-
                   <div className='flex justify-between'>
                      <Button onClick={updateProfile}>Save Changes</Button>
                      <Button
@@ -168,21 +175,20 @@ const ProfilePage: React.FC = () => {
                   </div>
                </CardContent>
             </Card>
-
             {/* Subscription Info */}
-            <Card>
+            <Card className='flex-1 flex flex-col justify-between'>
                <CardHeader>
                   <CardTitle>Subscription</CardTitle>
                   <CardDescription>Your current plan and subscription information</CardDescription>
                </CardHeader>
-               <CardContent className='space-y-4'>
+               <CardContent className='space-y-4 flex flex-col flex-1'>
                   <div>
                      <h3 className='font-medium'>Current Plan</h3>
                      <p className='text-2xl font-bold capitalize'>Free</p>
                   </div>
-
+                  <div className='flex-1'></div>
                   <Button
-                     className='w-full'
+                     className='w-full mt-auto'
                      onClick={() => navigate('/pricing')}
                   >
                      Upgrade Plan

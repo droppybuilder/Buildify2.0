@@ -1,6 +1,7 @@
 import React from 'react'
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
+import logo from '/logoi.png'
 
 const features = [
    {
@@ -98,6 +99,7 @@ const plans = [
          { name: 'Email support', included: true },
          { name: 'Priority support', included: true },
          { name: 'Custom integrations', included: true },
+         { name: 'AI Integration', included: true },
       ],
    },
 ]
@@ -129,9 +131,17 @@ const LandingPage: React.FC = () => {
          </div>
          {/* Hero Section */}
          <header className='w-full py-16 flex flex-col items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-200 border-b border-indigo-200'>
-            <h1 className='text-6xl font-extrabold text-primary mb-4 text-center tracking-tight drop-shadow-lg'>
-               Buildfy 2.0
-            </h1>
+            <div className='flex items-center justify-center gap-0 mb-4'>
+               <img
+                  src={logo}
+                  alt='Buildfy2.0 Logo'
+                  className='size-24 mt-0.5'
+                  draggable={false}
+               />
+               <h1 className='text-6xl font-extrabold text-primary  text-center tracking-tight drop-shadow-lg'>
+                  Buildfy 2.0
+               </h1>
+            </div>
             <p className='text-2xl text-muted-foreground mb-8 text-center max-w-2xl font-medium'>
                Effortlessly design, preview, and export beautiful Python Tkinter GUIs.
                <br />
@@ -194,36 +204,87 @@ const LandingPage: React.FC = () => {
          </section>
 
          {/* Pricing Section */}
-         <section className='py-20 px-4 max-w-6xl mx-auto w-full'>
+         <section className='py-20 px-4 max-w-7xl mx-auto w-full'>
             <h2 className='text-4xl font-bold text-center mb-12 text-primary'>Pricing</h2>
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-10'>
-               {plans.map((plan) => (
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8'>
+               {/* Updated pricing plans layout */}
+               {/* Add Lifetime plan for visual parity with the reference image */}
+               {[
+                  ...plans.map((plan) => ({ ...plan, aiIntegration: plan.id === 'pro' || plan.id === 'lifetime' })),
+                  {
+                     id: 'lifetime',
+                     name: 'Lifetime',
+                     description: 'Pay once - Use Forever',
+                     price: '$200',
+                     billingPeriod: 'forever',
+                     tier: 'lifetime',
+                     features: [
+                        { name: 'Basic widgets', included: true },
+                        { name: 'Unlimited canvas size', included: true },
+                        { name: 'Export code without watermark', included: true },
+                        { name: 'Community support', included: true },
+                        { name: 'Advanced widgets', included: true },
+                        { name: 'Email support', included: true },
+                        { name: 'Priority support', included: true },
+                        { name: 'Custom integrations', included: true },
+                        { name: 'Lifetime updates', included: true },
+                        { name: 'AI Integration', included: true },
+                     ],
+                  },
+               ].map((plan) => (
                   <div
                      key={plan.id}
-                     className='bg-white rounded-xl shadow-md border border-gray-100 p-10 flex flex-col items-center hover:shadow-xl transition-shadow'
+                     className={`rounded-3xl border-2 border-indigo-200 bg-white shadow-lg flex flex-col items-center px-6 py-10 relative hover:shadow-2xl transition-shadow`}
+                     style={{ minHeight: 520 }}
                   >
-                     <h3 className='text-2xl font-semibold mb-2 text-indigo-700'>{plan.name}</h3>
-                     <p className='text-gray-500 mb-4'>{plan.description}</p>
-                     <div className='mb-6'>
-                        <span className='text-3xl font-bold'>{plan.price}</span>
-                        <span className='text-muted-foreground'>/{plan.billingPeriod}</span>
+                     {/* Subtitle/Banner */}
+                     <div
+                        className='absolute -top-6 left-1/2 -translate-x-1/2 bg-indigo-100 text-indigo-700 px-5 py-1 rounded-full font-semibold shadow text-sm border border-indigo-200 
+                     w-44 text-center'
+                     >
+                        {plan.id === 'free' && 'Forever Free'}
+                        {plan.id === 'standard' && 'Pay As You Go'}
+                        {plan.id === 'pro' && 'Pay As You Go'}
+                        {plan.id === 'lifetime' && 'One-Time Payment'}
                      </div>
-                     <ul className='mb-6 text-gray-600 text-left w-full max-w-xs mx-auto'>
+                     <h3 className='text-2xl font-bold mt-0 mb-1 text-indigo-700'>{plan.name}</h3>
+                     {/* <div className='mb-2 text-sm text-gray-500'>
+                        {plan.id.charAt(0).toUpperCase() + plan.id.slice(1)}
+                     </div> */}
+                     <div className='mb-4'>
+                        <span className='text-3xl font-bold'>{plan.price}</span>
+                        <span className='text-muted-foreground ml-1 text-base'>/{plan.billingPeriod}</span>
+                     </div>
+                     <ul className='mb-0 text-gray-700 text-left w-full max-w-xs mx-auto space-y-2'>
                         {plan.features.map((feature, i) => (
                            <li
                               key={i}
                               className='flex items-center gap-2'
                            >
                               {feature.included ? (
-                                 <span className='text-green-500'>✔</span>
+                                 <span
+                                    className='text-green-500 font-bold text-lg'
+                                    aria-label='Included'
+                                 >
+                                    ✔
+                                 </span>
                               ) : (
-                                 <span className='text-red-400'>✖</span>
+                                 <span
+                                    className='text-red-400 font-bold text-lg'
+                                    aria-label='Not included'
+                                 >
+                                    ✖
+                                 </span>
                               )}
                               <span>{feature.name}</span>
                            </li>
                         ))}
                      </ul>
-                     {/* No button here, just viewable cards */}
+                     {/* {plan.aiIntegration && (
+                        <div className='mt-auto text-center text-indigo-600 font-medium text-base pt-2'>
+                           AI Integration
+                        </div>
+                     )} */}
                   </div>
                ))}
             </div>

@@ -20,7 +20,8 @@ interface PricingPlan {
    price: string
    billingPeriod: string
    features: PlanFeature[]
-   tier: 'free' | 'standard' | 'pro'
+   tier: 'free' | 'standard' | 'pro' | 'lifetime'
+   subtitle?: string
 }
 
 const plans: PricingPlan[] = [
@@ -28,8 +29,9 @@ const plans: PricingPlan[] = [
       id: 'free',
       name: 'Free',
       description: 'Basic features for hobbyists',
+      subtitle: 'Forever Free',
       price: '$0',
-      billingPeriod: 'forever',
+      billingPeriod: 'Forever',
       tier: 'free',
       features: [
          { name: 'Basic widgets', included: true },
@@ -46,8 +48,9 @@ const plans: PricingPlan[] = [
       id: 'standard',
       name: 'Standard',
       description: 'For serious developers',
+      subtitle: 'Pay As You Go',
       price: '$8',
-      billingPeriod: 'monthly',
+      billingPeriod: 'Monthly',
       tier: 'standard',
       features: [
          { name: 'Basic widgets', included: true },
@@ -64,8 +67,9 @@ const plans: PricingPlan[] = [
       id: 'pro',
       name: 'Pro',
       description: 'For professional developers',
+      subtitle: 'Pay As You Go',
       price: '$95',
-      billingPeriod: 'yearly',
+      billingPeriod: 'Yearly',
       tier: 'pro',
       features: [
          { name: 'Basic widgets', included: true },
@@ -76,6 +80,28 @@ const plans: PricingPlan[] = [
          { name: 'Email support', included: true },
          { name: 'Priority support', included: true },
          { name: 'Custom integrations', included: true },
+         { name: 'AI Integration', included: true },
+      ],
+   },
+   {
+      id: 'lifetime',
+      name: 'Lifetime',
+      description: 'Pay once - Use Forever',
+      subtitle: 'One-Time Payment',
+      price: '$200',
+      billingPeriod: 'Forever',
+      tier: 'lifetime',
+      features: [
+         { name: 'Basic widgets', included: true },
+         { name: 'Unlimited canvas size', included: true },
+         { name: 'Export code without watermark', included: true },
+         { name: 'Community support', included: true },
+         { name: 'Advanced widgets', included: true },
+         { name: 'Email support', included: true },
+         { name: 'Priority support', included: true },
+         { name: 'Custom integrations', included: true },
+         { name: 'Lifetime updates', included: true },
+         { name: 'AI Integration', included: true },
       ],
    },
 ]
@@ -132,41 +158,37 @@ export default function PricingPlans() {
             <p className='text-muted-foreground mt-2'>Select the plan that best fits your needs</p>
          </div>
 
-         <div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
+         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8'>
             {plans.map((plan) => (
                <Card
                   key={plan.id}
-                  className={`flex flex-col ${isCurrentPlan(plan.tier) ? 'border-primary' : ''}`}
+                  className={`rounded-3xl border-2 border-indigo-200 bg-white shadow-lg flex flex-col items-center px-6 py-10 relative hover:shadow-2xl transition-shadow`}
+                  style={{ minHeight: 520 }}
                >
-                  <CardHeader>
-                     <div className='flex justify-between items-center'>
-                        <CardTitle>{plan.name}</CardTitle>
-                        {isCurrentPlan(plan.tier) && <Badge variant='secondary'>Current Plan</Badge>}
-                     </div>
-                     <CardDescription>{plan.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className='flex-1'>
-                     <div className='mb-6'>
-                        <span className='text-3xl font-bold'>{plan.price}</span>
-                        <span className='text-muted-foreground'>/{plan.billingPeriod}</span>
-                     </div>
-                     <ul className='space-y-2'>
-                        {plan.features.map((feature, i) => (
-                           <li
-                              key={i}
-                              className='flex items-start'
-                           >
-                              {feature.included ? (
-                                 <Check className='h-5 w-5 text-green-500 mr-2 mt-0.5' />
-                              ) : (
-                                 <X className='h-5 w-5 text-red-500 mr-2 mt-0.5' />
-                              )}
-                              <span>{feature.name}</span>
-                           </li>
-                        ))}
-                     </ul>
-                  </CardContent>
-                  <CardFooter>
+                  {/* Subtitle/Banner */}
+                  <div
+                     className='absolute -top-6 left-1/2 -translate-x-1/2 bg-indigo-100 text-indigo-700 px-5 py-1 rounded-full font-semibold shadow text-sm border border-indigo-200 w-44 text-center'
+                  >
+                     {plan.subtitle}
+                  </div>
+                  <h3 className='text-2xl font-bold mt-6 mb-1 text-indigo-700'>{plan.name}</h3>
+                  <div className='mb-4'>
+                     <span className='text-3xl font-bold'>{plan.price}</span>
+                     <span className='text-muted-foreground ml-1 text-base'>/{plan.billingPeriod}</span>
+                  </div>
+                  <ul className='mb-6 text-gray-700 text-left w-full max-w-xs mx-auto space-y-2'>
+                     {plan.features.map((feature, i) => (
+                        <li key={i} className='flex items-center gap-2'>
+                           {feature.included ? (
+                              <span className='text-green-500 font-bold text-lg' aria-label='Included'>✔</span>
+                           ) : (
+                              <span className='text-red-400 font-bold text-lg' aria-label='Not included'>✖</span>
+                           )}
+                           <span>{feature.name}</span>
+                        </li>
+                     ))}
+                  </ul>
+                  <CardFooter className='w-full flex flex-col items-center mt-auto'>
                      <Button
                         className='w-full'
                         variant={isCurrentPlan(plan.tier) ? 'secondary' : 'default'}

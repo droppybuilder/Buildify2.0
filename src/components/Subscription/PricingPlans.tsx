@@ -113,25 +113,37 @@ export default function PricingPlans() {
    const navigate = useNavigate()
 
    const handleUpgrade = async (plan: PricingPlan) => {
-      try {
-         // Check if user is logged in
-         if (!user) {
-            toast.error('Please login to upgrade your plan')
-            navigate('/auth')
-            return
-         }
-
-         setProcessing(plan.id)
-         console.log(`Processing upgrade to ${plan.name} plan for user ${user.uid}`)
-
-         // Mock success message for demo purposes
-         toast.success(`Upgraded to ${plan.name} plan successfully`)
-      } catch (error) {
-         console.error('Error upgrading plan:', error)
-         toast.error('Failed to process upgrade. Please try again.')
-      } finally {
-         setProcessing(null)
+      if (!user) {
+         toast.error('Please login to upgrade your plan')
+         navigate('/auth')
+         return
       }
+      if (plan.tier === 'free') {
+         toast.info('You are already on the Free plan.')
+         return
+      }
+      setProcessing(plan.id)
+      // Call backend to get PayU payment form
+      const res = await fetch('/api/create-payu-payment', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({
+            planId: plan.tier,
+            userId: user.uid,
+            userEmail: user.email,
+            userName: user.displayName || user.email,
+         }),
+      })
+      const html = await res.text()
+      // Open payment form in a new window
+      const payuWin = window.open('', '_blank')
+      if (payuWin) {
+         payuWin.document.write(html)
+         payuWin.document.close()
+      } else {
+         toast.error('Popup blocked! Please allow popups for this site.')
+      }
+      setProcessing(null)
    }
 
    const getCurrentPlan = () => {
@@ -166,9 +178,7 @@ export default function PricingPlans() {
                   style={{ minHeight: 520 }}
                >
                   {/* Subtitle/Banner */}
-                  <div
-                     className='absolute -top-6 left-1/2 -translate-x-1/2 bg-indigo-100 text-indigo-700 px-5 py-1 rounded-full font-semibold shadow text-sm border border-indigo-200 w-44 text-center'
-                  >
+                  <div className='absolute -top-6 left-1/2 -translate-x-1/2 bg-indigo-100 text-indigo-700 px-5 py-1 rounded-full font-semibold shadow text-sm border border-indigo-200 w-44 text-center'>
                      {plan.subtitle}
                   </div>
                   <h3 className='text-2xl font-bold mt-6 mb-1 text-indigo-700'>{plan.name}</h3>
@@ -178,11 +188,24 @@ export default function PricingPlans() {
                   </div>
                   <ul className='mb-6 text-gray-700 text-left w-full max-w-xs mx-auto space-y-2'>
                      {plan.features.map((feature, i) => (
-                        <li key={i} className='flex items-center gap-2'>
+                        <li
+                           key={i}
+                           className='flex items-center gap-2'
+                        >
                            {feature.included ? (
-                              <span className='text-green-500 font-bold text-lg' aria-label='Included'>✔</span>
+                              <span
+                                 className='text-green-500 font-bold text-lg'
+                                 aria-label='Included'
+                              >
+                                 ✔
+                              </span>
                            ) : (
-                              <span className='text-red-400 font-bold text-lg' aria-label='Not included'>✖</span>
+                              <span
+                                 className='text-red-400 font-bold text-lg'
+                                 aria-label='Not included'
+                              >
+                                 ✖
+                              </span>
                            )}
                            <span>{feature.name}</span>
                         </li>

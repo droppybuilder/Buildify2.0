@@ -1,4 +1,4 @@
-const { createHash } = require('crypto');
+import { createHash } from 'crypto';
 
 // Environment variables (set these in Vercel dashboard)
 const MERCHANT_KEY = process.env.PAYU_MERCHANT_KEY;
@@ -12,7 +12,7 @@ const PLAN_DETAILS = {
    lifetime: { amount: '200.00', productinfo: 'Lifetime Plan' },
 };
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
    if (req.method !== 'POST') {
       return res.status(405).json({ error: 'Method not allowed' });
    }
@@ -56,4 +56,4 @@ module.exports = async function handler(req, res) {
 
    res.setHeader('Content-Type', 'text/html');
    res.status(200).send(formHtml);
-};
+}

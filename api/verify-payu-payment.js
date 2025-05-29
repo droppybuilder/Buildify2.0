@@ -1,6 +1,6 @@
-const { createHash } = require('crypto');
-const { initializeApp, cert, getApps } = require('firebase-admin/app');
-const { getFirestore } = require('firebase-admin/firestore');
+import { createHash } from 'crypto';
+import { initializeApp, cert, getApps } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
 
 // Initialize Firebase Admin SDK (set GOOGLE_APPLICATION_CREDENTIALS in Vercel)
 if (!getApps().length) {
@@ -13,7 +13,7 @@ const db = getFirestore();
 const MERCHANT_KEY = process.env.PAYU_MERCHANT_KEY;
 const MERCHANT_SALT = process.env.PAYU_MERCHANT_SALT;
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
    if (req.method !== 'POST') {
       return res.status(405).json({ error: 'Method not allowed' });
    }
@@ -59,4 +59,4 @@ module.exports = async function handler(req, res) {
    } else {
       return res.status(200).json({ success: false, message: 'Payment not successful.' });
    }
-};
+}

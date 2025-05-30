@@ -8,7 +8,7 @@ import { Toolbar } from '@/components/Toolbar'
 import { Layers } from '@/components/Layers'
 import { WindowProperties } from '@/components/WindowProperties'
 import { toast } from 'sonner'
-import { useAuth } from '@/contexts/AuthContext'
+import { useSubscription } from '@/hooks/useSubscription'
 import WatermarkedCanvas from '@/components/WatermarkedCanvas'
 import { FEATURES, hasFeature } from '@/utils/subscriptionUtils'
 
@@ -23,8 +23,8 @@ const ACTION_TYPES = {
 }
 
 const Index = () => {
-   const { subscription } = useAuth()
    const navigate = useNavigate()
+   const { subscription, loading: subscriptionLoading } = useSubscription()
 
    const [selectedComponent, setSelectedComponent] = useState(null)
    const [components, setComponents] = useState([])
@@ -343,6 +343,11 @@ const Index = () => {
       [components, addToHistory]
    )
 
+   // Add debug log for subscription
+   useEffect(() => {
+      console.log('Index.tsx subscription:', subscription)
+   }, [subscription])
+
    useEffect(() => {
       const handleKeyDown = (e: KeyboardEvent) => {
          if (inputFocused || ['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
@@ -392,7 +397,6 @@ const Index = () => {
    return (
       <div className='h-screen flex overflow-hidden bg-white'>
          <Sidebar />
-
          <main className='flex-1 flex flex-col overflow-hidden'>
             <Toolbar
                components={components}
@@ -407,13 +411,13 @@ const Index = () => {
                showLayers={showLayers}
                showWindowProperties={showWindowProperties}
             />
-
             <div className='flex-1 flex overflow-hidden'>
                {showCodePreview ? (
                   <CodePreview
                      components={components}
                      visible={showCodePreview}
                      windowTitle={windowTitle}
+                     subscription={subscription} // Pass subscription prop
                   />
                ) : showLayers ? (
                   <Layers
@@ -456,7 +460,6 @@ const Index = () => {
                      </WatermarkedCanvas>
                   </div>
                )}
-
                <div className='w-80 border-l flex flex-col overflow-hidden border-border bg-gray-50'>
                   <PropertyPanel
                      selectedComponent={selectedComponent}

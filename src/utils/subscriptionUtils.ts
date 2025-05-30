@@ -87,25 +87,36 @@ export const TIER_FEATURES = {
 }
 
 /**
+ * Normalize the tier string to a standard set of values
+ * Treat 'lifetime' as 'pro' for feature checks
+ */
+function normalizeTier(tier: string): 'free' | 'standard' | 'pro' {
+   if (tier === 'lifetime') return 'pro'
+   if (tier === 'standard') return 'standard'
+   if (tier === 'pro') return 'pro'
+   return 'free'
+}
+
+/**
  * Check if a subscription has a specific feature
  */
 export function hasFeature(subscription: Subscription | null, feature: string): boolean {
-   const tier = subscription?.tier || 'free'
+   const tier = normalizeTier(subscription?.tier || 'free')
    return TIER_FEATURES[tier].includes(feature)
 }
 
 /**
  * Get features available for a specific tier
  */
-export function getFeatures(tier: 'free' | 'standard' | 'pro') {
-   return TIER_FEATURES[tier]
+export function getFeatures(tier: 'free' | 'standard' | 'pro' | 'lifetime') {
+   return TIER_FEATURES[normalizeTier(tier)]
 }
 
 /**
  * Check if a widget is available for a subscription tier
  */
 export function isWidgetAvailable(widget: string, subscription: Subscription | null): boolean {
-   const tier = subscription?.tier || 'free'
+   const tier = normalizeTier(subscription?.tier || 'free')
    const advancedWidgets = ['DatePicker', 'ColorPicker', 'Slider', 'ProgressBar', 'TabView']
 
    // All users have access to basic widgets
@@ -122,13 +133,20 @@ export function isWidgetAvailable(widget: string, subscription: Subscription | n
  */
 export async function getSubscription(userId: string): Promise<Subscription | null> {
    try {
-      const docRef = doc(db, 'subscriptions', userId)
+      // Read from users collection instead of subscriptions
+      const docRef = doc(db, 'users', userId)
       const docSnap = await getDoc(docRef)
 
       if (docSnap.exists()) {
-         return docSnap.data() as Subscription
+         const data = docSnap.data()
+         // Map Firestore user fields to Subscription shape
+         return {
+            user_id: userId,
+            tier: (data.subscription_type || 'free').toLowerCase(),
+            // Optionally add more fields if you store them
+         }
       } else {
-         console.warn('No subscription found for user:', userId)
+         console.warn('No user found for user:', userId)
          return null
       }
    } catch (error) {

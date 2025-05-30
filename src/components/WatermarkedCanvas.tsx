@@ -1,20 +1,25 @@
-
 import { ReactNode } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription } from '@/hooks/useSubscription';
+import { Subscription } from '@/hooks/useSubscription';
 
 interface WatermarkedCanvasProps {
   children: ReactNode;
 }
 
+function isWatermarkRequired(subscription: Subscription | null): boolean {
+  if (!subscription) return true;
+  // Treat 'lifetime' as 'pro' for watermark logic
+  return subscription.tier === 'free' || subscription.tier === 'standard';
+}
+
 export default function WatermarkedCanvas({ children }: WatermarkedCanvasProps) {
-  const { subscription } = useAuth();
-  const isFreeUser = !subscription || subscription.tier === 'free';
+  const { subscription } = useSubscription();
+  const showWatermark = isWatermarkRequired(subscription);
 
   return (
     <div className="relative">
       {children}
-      
-      {isFreeUser && (
+      {showWatermark && (
         <div className="absolute inset-0 pointer-events-none select-none">
           <div className="absolute inset-0 flex items-center justify-center opacity-20">
             <div className="transform rotate-45 text-gray-600 font-bold text-4xl">

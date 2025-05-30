@@ -106,6 +106,15 @@ const plans: PricingPlan[] = [
    },
 ]
 
+// Add helper to normalize tier
+type Tier = 'free' | 'standard' | 'pro' | 'lifetime';
+function normalizeTier(tier: Tier): 'free' | 'standard' | 'pro' {
+  if (tier === 'lifetime') return 'pro';
+  if (tier === 'pro') return 'pro';
+  if (tier === 'standard') return 'standard';
+  return 'free';
+}
+
 export default function PricingPlans() {
    const [processing, setProcessing] = useState<string | null>(null)
    const { subscription, loading } = useSubscription()
@@ -148,11 +157,11 @@ export default function PricingPlans() {
 
    const getCurrentPlan = () => {
       if (!subscription) return 'free'
-      return subscription.tier
+      return normalizeTier(subscription.tier)
    }
 
    const isCurrentPlan = (planTier: string) => {
-      return getCurrentPlan() === planTier
+      return getCurrentPlan() === normalizeTier(planTier as Tier)
    }
 
    return (

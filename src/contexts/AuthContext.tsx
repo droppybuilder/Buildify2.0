@@ -1,20 +1,8 @@
 import { createContext, useState, useEffect, useContext, ReactNode } from 'react'
-// import { Session, User } from '@supabase/supabase-js'
-// import { supabase } from '@/integrations/supabase/client'
-// import { useSubscription, Subscription } from '@/hooks/useSubscription'
 import { User, onAuthStateChanged, signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth'
 import { auth, googleProvider } from '../integrations/firebase/firebase.config'
 import { db } from '../integrations/firebase/firebase.config'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
-
-// interface AuthContextProps {
-//    session: Session | null
-//    user: User | null
-//    subscription: Subscription | null
-//    loading: boolean
-//    signOut: () => Promise<void>
-//    hasPaidPlan: boolean
-// }
 
 interface AuthContextProps {
    user: User | null
@@ -32,34 +20,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return stored ? JSON.parse(stored) : null
    })
    const [loading, setLoading] = useState<boolean>(true)
-   // const { subscription, loading: subscriptionLoading } = useSubscription();
-
-   // useEffect(() => {
-   //   const setup = async () => {
-   //     setLoading(true);
-
-   //     // Set up auth state listener first
-   //     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
-   //       (event, currentSession) => {
-   //         setSession(currentSession);
-   //         setUser(currentSession?.user ?? null);
-   //       }
-   //     );
-
-   //     // Then get current session
-   //     const { data: { session: currentSession } } = await supabase.auth.getSession();
-   //     setSession(currentSession);
-   //     setUser(currentSession?.user ?? null);
-
-   //     setLoading(false);
-
-   //     return () => {
-   //       authSubscription.unsubscribe();
-   //     };
-   //   };
-
-   //   setup();
-   // }, []);
 
    useEffect(() => {
       const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -86,12 +46,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
          localStorage.removeItem('user')
       }
    }, [user])
-
-   //  const signOut = async () => {
-   //     await supabase.auth.signOut()
-   //  }
-
-   //  const hasPaidPlan = subscription?.tier === 'standard' || subscription?.tier === 'pro'
 
    const loginWithGoogle = async (): Promise<void> => {
       try {
@@ -131,22 +85,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(null)
       localStorage.removeItem('user')
    }
-
-   //    return (
-   //       <AuthContext.Provider
-   //          value={{
-   //             session,
-   //             user,
-   //             subscription,
-   //             loading: loading || subscriptionLoading,
-   //             signOut,
-   //             hasPaidPlan,
-   //          }}
-   //       >
-   //          {children}
-   //       </AuthContext.Provider>
-   //    )
-   // }
 
    return <AuthContext.Provider value={{ user, loading, loginWithGoogle, logout }}>{children}</AuthContext.Provider>
 }

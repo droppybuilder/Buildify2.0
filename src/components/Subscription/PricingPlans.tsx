@@ -121,6 +121,25 @@ export default function PricingPlans() {
    const { user } = useAuth()
    const navigate = useNavigate()
 
+   // Helper to get the user's normalized tier
+   const getCurrentTier = () => {
+      if (!subscription) return 'free'
+      return normalizeTier(subscription.tier)
+   }
+
+   // Filter plans based on current tier
+   const currentTier = getCurrentTier()
+   let filteredPlans: PricingPlan[] = []
+   if (currentTier === 'free') {
+      filteredPlans = plans
+   } else if (currentTier === 'standard') {
+      filteredPlans = plans.filter(p => ['standard', 'pro', 'lifetime'].includes(p.tier))
+   } else if (currentTier === 'pro') {
+      filteredPlans = plans.filter(p => ['pro', 'lifetime'].includes(p.tier))
+   } else if (currentTier === 'lifetime') {
+      filteredPlans = plans.filter(p => p.tier === 'lifetime')
+   }
+
    const handleUpgrade = async (plan: PricingPlan) => {
       if (!user) {
          toast.error('Please login to upgrade your plan')
@@ -179,8 +198,8 @@ export default function PricingPlans() {
             <p className='text-muted-foreground mt-2'>Select the plan that best fits your needs</p>
          </div>
 
-         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8'>
-            {plans.map((plan) => (
+         <div className='flex flex-wrap justify-center gap-8'>
+            {filteredPlans.map((plan) => (
                <Card
                   key={plan.id}
                   className={`rounded-3xl border-2 border-indigo-200 bg-white shadow-lg flex flex-col items-center px-6 py-10 relative hover:shadow-2xl transition-shadow`}

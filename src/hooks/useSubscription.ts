@@ -11,6 +11,7 @@ export interface Subscription {
    payu_txnid?: string | null
    payu_amount?: string | null
    updated_at?: string | null
+   subscriptionExpiry?: string | null
 }
 
 export const useSubscription = () => {

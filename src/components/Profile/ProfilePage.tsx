@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom'
 import { auth } from '../../integrations/firebase/firebase.config'
 import { signOut } from 'firebase/auth'
 import { X } from 'lucide-react'
+import { useSubscription } from '@/hooks/useSubscription'
 
 interface Profile {
    id: string
@@ -21,6 +22,7 @@ interface Profile {
 
 const ProfilePage: React.FC = () => {
    const { user } = useAuth()
+   const { subscription } = useSubscription()
    const [profile, setProfile] = useState<Profile | null>(null)
    const [displayName, setDisplayName] = useState('')
    const [loading, setLoading] = useState(true)
@@ -107,6 +109,15 @@ const ProfilePage: React.FC = () => {
          .toUpperCase()
    }
 
+   // Helper to format expiry date
+   const getExpiryText = () => {
+      if (!subscription || !subscription.subscriptionExpiry) return null;
+      if (subscription.subscriptionExpiry === 'lifetime') return 'Never (Lifetime)';
+      const date = new Date(subscription.subscriptionExpiry);
+      if (isNaN(date.getTime())) return null;
+      return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+   };
+
    if (loading) {
       return (
          <div className='container mx-auto p-6'>
@@ -184,8 +195,15 @@ const ProfilePage: React.FC = () => {
                <CardContent className='space-y-4 flex flex-col flex-1'>
                   <div>
                      <h3 className='font-medium'>Current Plan</h3>
-                     <p className='text-2xl font-bold capitalize'>Free</p>
+                     <p className='text-2xl font-bold capitalize'>{subscription ? subscription.tier : 'Free'}</p>
                   </div>
+                  {subscription && subscription.tier !== 'free' && (
+                     <div>
+                        <span className='text-sm text-muted-foreground'>
+                           Subscription expires: <b>{getExpiryText() || 'Unknown'}</b>
+                        </span>
+                     </div>
+                  )}
                   <div className='flex-1'></div>
                   <Button
                      className='w-full mt-auto'

@@ -35,6 +35,19 @@ export default async function handler(req, res) {
    }
 
    if (status === 'success') {
+      // Calculate expiry date
+      let expiry = null;
+      if (productinfo.toLowerCase().includes('lifetime')) {
+         expiry = 'lifetime';
+      } else if (productinfo.toLowerCase().includes('pro')) {
+         const d = new Date();
+         d.setFullYear(d.getFullYear() + 1);
+         expiry = d.toISOString();
+      } else if (productinfo.toLowerCase().includes('standard')) {
+         const d = new Date();
+         d.setMonth(d.getMonth() + 1);
+         expiry = d.toISOString();
+      }
       // Update Firestore user subscription
       const userRef = db.collection('users').doc(userId);
       await userRef.set(
@@ -51,6 +64,7 @@ export default async function handler(req, res) {
                payu_txnid: txnid,
                payu_amount: amount,
                updated_at: new Date().toISOString(),
+               subscriptionExpiry: expiry,
             },
          },
          { merge: true }

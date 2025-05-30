@@ -8,8 +8,8 @@ interface WatermarkedCanvasProps {
 
 function isWatermarkRequired(subscription: Subscription | null): boolean {
   if (!subscription) return true;
-  // Treat 'lifetime' as 'pro' for watermark logic
-  return subscription.tier === 'free' || subscription.tier === 'standard';
+  // Only show watermark for free users
+  return subscription.tier === 'free';
 }
 
 export default function WatermarkedCanvas({ children }: WatermarkedCanvasProps) {

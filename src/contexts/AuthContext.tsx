@@ -62,6 +62,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                display_name: user.displayName || '',
                avatar_url: user.photoURL || '',
                subscription_type: 'Free',
+               subscriptionExpiry: null,
             })
          }
          // Persist user to localStorage after login

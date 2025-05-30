@@ -183,6 +183,15 @@ export default function PricingPlans() {
       return getCurrentPlan() === normalizeTier(planTier as Tier)
    }
 
+   // Helper to format expiry date
+   const getExpiryText = () => {
+      if (!subscription || !subscription.subscriptionExpiry) return null;
+      if (subscription.subscriptionExpiry === 'lifetime') return 'Never (Lifetime)';
+      const date = new Date(subscription.subscriptionExpiry);
+      if (isNaN(date.getTime())) return null;
+      return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+   };
+
    return (
       <div className='container mx-auto py-10 relative'>
          {/* Close Icon */}
@@ -256,6 +265,14 @@ export default function PricingPlans() {
                </Card>
             ))}
          </div>
+         {/* Show expiry for upgraded users */}
+         {subscription && subscription.tier !== 'free' && (
+            <div className='mt-6 text-center'>
+               <span className='text-sm text-muted-foreground'>
+                  Subscription expires: <b>{getExpiryText() || 'Unknown'}</b>
+               </span>
+            </div>
+         )}
       </div>
    )
 }

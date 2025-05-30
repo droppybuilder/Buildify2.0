@@ -143,6 +143,7 @@ export async function getSubscription(userId: string): Promise<Subscription | nu
          return {
             user_id: userId,
             tier: (data.subscription_type || 'free').toLowerCase(),
+            subscriptionExpiry: data.subscription?.subscriptionExpiry || data.subscriptionExpiry || null,
             // Optionally add more fields if you store them
          }
       } else {

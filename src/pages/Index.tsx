@@ -7,8 +7,10 @@ import { CodePreview } from '@/components/CodePreview'
 import { Toolbar } from '@/components/Toolbar'
 import { Layers } from '@/components/Layers'
 import { WindowProperties } from '@/components/WindowProperties'
+import { ProjectToolbar } from '@/components/ProjectToolbar'
 import { toast } from 'sonner'
 import { useSubscription } from '@/hooks/useSubscription'
+import { useProjectManager } from '@/hooks/useProjectManager'
 import WatermarkedCanvas from '@/components/WatermarkedCanvas'
 import { FEATURES, hasFeature } from '@/utils/subscriptionUtils'
 
@@ -394,10 +396,41 @@ const Index = () => {
       return () => window.removeEventListener('keydown', handleKeyDown)
    }, [selectedComponent, selectedComponents, handleDeleteComponent, handleUndo, handleRedo, inputFocused, components])
 
+   // Project Management Hook
+   const projectManager = useProjectManager({
+      components,
+      setComponents,
+      windowTitle,
+      setWindowTitle,      windowSize,
+      setWindowSize,
+      windowBgColor,
+      setWindowBgColor,
+      addToHistory,
+      ACTION_TYPES
+   })
+
    return (
       <div className='h-screen flex overflow-hidden bg-white'>
          <Sidebar />
-         <main className='flex-1 flex flex-col overflow-hidden'>
+         <main className='flex-1 flex flex-col overflow-hidden'>            <ProjectToolbar
+               currentProject={projectManager.currentProject}
+               setCurrentProject={projectManager.setCurrentProject}
+               hasUnsavedChanges={projectManager.hasUnsavedChanges}
+               setHasUnsavedChanges={projectManager.setHasUnsavedChanges}
+               hasUnsavedCloudChanges={projectManager.hasUnsavedCloudChanges}
+               setHasUnsavedCloudChanges={projectManager.setHasUnsavedCloudChanges}
+               autoSaveEnabled={projectManager.autoSaveEnabled}
+               setAutoSaveEnabled={projectManager.setAutoSaveEnabled}
+               onNewProject={projectManager.handleNewProject}
+               onSaveProject={projectManager.handleSaveProject}
+               onLoadProject={projectManager.handleLoadProject}
+               components={components}
+               windowSettings={{
+                  title: windowTitle,
+                  size: windowSize,
+                  bgColor: windowBgColor
+               }}
+            />
             <Toolbar
                components={components}
                onUndo={handleUndo}

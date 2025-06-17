@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
 import { toast } from 'sonner'
-import { Maximize2, Minimize2, X, Copy, Scissors, Trash } from 'lucide-react'
+import { Maximize2, Minimize2, X, Copy, Scissors, Trash, Eye, EyeOff, Lock, Unlock } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu'
+import { useSubscription } from '@/hooks/useSubscription'
+import { isWidgetAvailable } from '@/utils/subscriptionUtils'
 
 interface Component {
    id: string
@@ -10,6 +12,8 @@ interface Component {
    position: { x: number; y: number }
    size: { width: number; height: number }
    props: Record<string, any>
+   visible?: boolean
+   locked?: boolean
 }
 
 interface CanvasProps {
@@ -37,7 +41,7 @@ const Canvas = ({
    setSelectedComponents,
    windowTitle = 'My CustomTkinter Application',
    windowSize = { width: 800, height: 600 },
-   windowBgColor = '#f0f0f0',
+   windowBgColor,
    setWindowTitle,
    onAddComponent,
 }: CanvasProps) => {
@@ -50,7 +54,6 @@ const Canvas = ({
    const [titleInput, setTitleInput] = useState(windowTitle || '')
    const [imageCache, setImageCache] = useState<Record<string, string>>({})
    const [clipboard, setClipboard] = useState<Component | null>(null)
-   const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(null)
    const [hoveredComponent, setHoveredComponent] = useState<string | null>(null)
 
    const [selectionBox, setSelectionBox] = useState<{
@@ -59,6 +62,25 @@ const Canvas = ({
    } | null>(null)
    const [isSelecting, setIsSelecting] = useState(false)
    const [isMultiSelectKeyDown, setIsMultiSelectKeyDown] = useState(false)
+
+   const { subscription } = useSubscription()
+   // Normalize tier for feature checks
+   const normalizedTier = subscription?.tier === 'lifetime' ? 'pro' : subscription?.tier
+   const isUnlimitedCanvas = normalizedTier === 'standard' || normalizedTier === 'pro'
+   const maxCanvasSize = isUnlimitedCanvas ? { width: 3000, height: 2000 } : { width: 800, height: 600 }
+   // Enforce canvas size limit for free users
+   const enforcedWindowSize = {
+      width: Math.min(windowSize.width, maxCanvasSize.width),
+      height: Math.min(windowSize.height, maxCanvasSize.height),
+   }
+   // Warn if user tries to resize canvas beyond allowed size
+   useEffect(() => {
+      if (windowSize.width > maxCanvasSize.width || windowSize.height > maxCanvasSize.height) {
+         if (!isUnlimitedCanvas) {
+            toast.warning('Upgrade to Standard or Pro for unlimited canvas size!')
+         }
+      }
+   }, [windowSize, maxCanvasSize, isUnlimitedCanvas])
 
    // Update titleInput when windowTitle changes
    useEffect(() => {
@@ -207,37 +229,23 @@ const Canvas = ({
                   setSelectedComponent(selected[0])
                } else if (selected.length > 1) {
                   setSelectedComponent(null)
-               }
-            }
+               }            }
          }
       }
-
+      
       setIsSelecting(false)
       setSelectionBox(null)
-      handleMouseUp()
-   }
-
-   const handleContextMenu = (e: React.MouseEvent, component: Component) => {
-      e.preventDefault()
-      e.stopPropagation()
-
-      try {
-         // Validate component exists before setting it as selected
-         if (!isValidComponent(component)) {
-            console.warn('Invalid component in context menu:', component?.id || 'unknown')
-            return
-         }
-
-         setSelectedComponent(component)
-         setContextMenuPosition({ x: e.clientX, y: e.clientY })
-      } catch (error) {
-         console.error('Error in context menu:', error)
-      }
-   }
+      handleMouseUp()   }
 
    const handleMouseDown = (e: React.MouseEvent, component: Component) => {
       try {
          e.stopPropagation()
+
+         // Check if component is locked
+         if (component.locked === true) {
+            toast.error('This component is locked. Unlock it in the Layers panel to edit.')
+            return
+         }
 
          // First, validate the component exists in our components array
          if (!isValidComponent(component)) {
@@ -294,6 +302,9 @@ const Canvas = ({
 
    const handleMouseMove = (e: React.MouseEvent) => {
       if (!selectedComponent || !isValidComponent(selectedComponent)) return
+
+      // Don't allow dragging/resizing if component is locked
+      if (selectedComponent.locked === true) return
 
       try {
          if (isDragging) {
@@ -382,7 +393,7 @@ const Canvas = ({
    }
 
    // Fixed to prevent null widgets during drag and drop
-   const onDrop = (e: React.DragEvent) => {
+   const originalOnDrop = (e: React.DragEvent) => {
       e.preventDefault()
 
       try {
@@ -402,6 +413,14 @@ const Canvas = ({
          if (type === 'image' && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             handleImageDrop(e.dataTransfer.files[0], x, y)
             return
+         }
+
+         // Feature check for advanced widgets
+         if (['DatePicker', 'ColorPicker', 'Slider', 'ProgressBar', 'TabView'].includes(type)) {
+            if (!isWidgetAvailable(type, subscription)) {
+               toast.error('Upgrade to Standard or Pro to use advanced widgets!')
+               return
+            }
          }
 
          // Regular component creation with properly initialized props
@@ -557,6 +576,51 @@ const Canvas = ({
          // In case of error, reset selections to be safe
          setSelectedComponent(null)
          setSelectedComponents([])
+      }
+   }
+
+   const handleToggleVisibility = () => {
+      try {
+         if (selectedComponent && isValidComponent(selectedComponent)) {
+            const newComponents = components.map((comp) => {
+               if (comp.id === selectedComponent.id) {
+                  return {
+                     ...comp,
+                     visible: comp.visible === false ? true : false,
+                  }
+               }
+               return comp
+            })
+            setComponents(newComponents)
+            toast.success(`Component ${selectedComponent.visible === false ? 'shown' : 'hidden'}`)
+         }
+      } catch (error) {
+         console.error('Error toggling visibility:', error)
+      }
+   }
+
+   const handleToggleLock = () => {
+      try {
+         if (selectedComponent && isValidComponent(selectedComponent)) {
+            const newComponents = components.map((comp) => {
+               if (comp.id === selectedComponent.id) {
+                  return {
+                     ...comp,
+                     locked: comp.locked === true ? false : true,
+                  }
+               }
+               return comp
+            })
+            setComponents(newComponents)
+            toast.success(`Component ${selectedComponent.locked === true ? 'unlocked' : 'locked'}`)
+
+            // If locking, deselect the component
+            if (selectedComponent.locked !== true) {
+               setSelectedComponent(null)
+            }
+         }
+      } catch (error) {
+         console.error('Error toggling lock:', error)
       }
    }
 
@@ -802,16 +866,15 @@ const Canvas = ({
       }
 
       window.addEventListener('keydown', handleKeyDown)
-      return () => window.removeEventListener('keydown', handleKeyDown)
-   }, [selectedComponent, selectedComponents, clipboard, components])
+      return () => window.removeEventListener('keydown', handleKeyDown)   }, [selectedComponent, selectedComponents, clipboard, components])
 
    return (
       <div className='w-full h-full p-8 flex items-center justify-center'>
          <div
             className='macos-window light flex flex-col'
             style={{
-               width: windowSize.width,
-               height: windowSize.height,
+               width: enforcedWindowSize.width,
+               height: enforcedWindowSize.height,
                backgroundColor: windowBgColor || '#f0f0f0',
             }}
          >
@@ -861,7 +924,7 @@ const Canvas = ({
                className={`flex-1 canvas-grid relative overflow-auto`}
                style={{ backgroundColor: windowBgColor || '#f0f0f0' }}
                onDragOver={onDragOver}
-               onDrop={onDrop}
+               onDrop={originalOnDrop}
                onMouseDown={handleCanvasMouseDown}
                onMouseMove={handleCanvasMouseMove}
                onMouseUp={handleCanvasMouseUp}
@@ -887,75 +950,121 @@ const Canvas = ({
                         height: Math.abs(selectionBox.end.y - selectionBox.start.y),
                      }}
                   />
-               )}
+               )}{' '}
+               {components.map((component) => {
+                  // Skip rendering if component is hidden
+                  if (component.visible === false) {
+                     return null
+                  }
 
-               {components.map((component) => (
-                  <ContextMenu key={component.id}>
-                     <ContextMenuTrigger>
-                        <div
-                           className={`absolute component-preview cursor-move ${
-                              selectedComponent?.id === component.id
-                                 ? 'ring-2 ring-primary ring-offset-2'
-                                 : selectedComponents.includes(component.id)
-                                 ? 'ring-2 ring-blue-400 ring-offset-2'
-                                 : ''
-                           }`}
-                           style={{
-                              left: `${component.position.x}px`,
-                              top: `${component.position.y}px`,
-                              width: `${component.size.width}px`,
-                              height: `${component.size.height}px`,
-                              transform: 'translate(0, 0)',
-                              transition: isDragging || isResizing ? 'none' : 'all 0.2s ease',
-                              willChange: 'transform, left, top, width, height',
-                           }}
-                           onMouseDown={(e) => handleMouseDown(e, component)}
-                           onContextMenu={(e) => handleContextMenu(e, component)}
-                           onMouseEnter={() => handleComponentMouseEnter(component.id)}
-                           onMouseLeave={handleComponentMouseLeave}
-                        >
-                           <ComponentPreview
-                              component={component}
-                              isHovered={hoveredComponent === component.id}
-                           />
-                           {selectedComponent?.id === component.id && (
-                              <>
-                                 <div
-                                    className='resize-handle absolute w-2 h-2 bg-primary rounded-full top-0 left-0 -translate-x-1/2 -translate-y-1/2 cursor-nw-resize'
-                                    data-direction='nw'
-                                 />
-                                 <div
-                                    className='resize-handle absolute w-2 h-2 bg-primary rounded-full top-0 right-0 translate-x-1/2 -translate-y-1/2 cursor-ne-resize'
-                                    data-direction='ne'
-                                 />
-                                 <div
-                                    className='resize-handle absolute w-2 h-2 bg-primary rounded-full bottom-0 left-0 -translate-x-1/2 translate-y-1/2 cursor-sw-resize'
-                                    data-direction='sw'
-                                 />
-                                 <div
-                                    className='resize-handle absolute w-2 h-2 bg-primary rounded-full bottom-0 right-0 translate-x-1/2 translate-y-1/2 cursor-se-resize'
-                                    data-direction='se'
-                                 />
-                              </>
-                           )}
-                        </div>
-                     </ContextMenuTrigger>
-                     <ContextMenuContent>
-                        <ContextMenuItem onClick={handleCopyComponent}>
-                           <Copy className='mr-2 h-4 w-4' />
-                           <span>Copy</span>
-                        </ContextMenuItem>
-                        <ContextMenuItem onClick={handleCutComponent}>
-                           <Scissors className='mr-2 h-4 w-4' />
-                           <span>Cut</span>
-                        </ContextMenuItem>
-                        <ContextMenuItem onClick={handleDeleteComponent}>
-                           <Trash className='mr-2 h-4 w-4' />
-                           <span>Delete</span>
-                        </ContextMenuItem>
-                     </ContextMenuContent>
-                  </ContextMenu>
-               ))}
+                  // Check if component is locked
+                  const isLocked = component.locked === true
+
+                  return (
+                     <ContextMenu key={component.id}>
+                        <ContextMenuTrigger>
+                           <div
+                              className={`absolute component-preview ${
+                                 isLocked ? 'cursor-not-allowed' : 'cursor-move'
+                              } ${
+                                 selectedComponent?.id === component.id
+                                    ? 'ring-2 ring-primary ring-offset-2'
+                                    : selectedComponents.includes(component.id)
+                                    ? 'ring-2 ring-blue-400 ring-offset-2'
+                                    : ''
+                              } ${isLocked ? 'opacity-75' : ''}`}
+                              style={{
+                                 left: `${component.position.x}px`,
+                                 top: `${component.position.y}px`,
+                                 width: `${component.size.width}px`,
+                                 height: `${component.size.height}px`,
+                                 transform: 'translate(0, 0)',
+                                 transition: isDragging || isResizing ? 'none' : 'all 0.2s ease',
+                                 willChange: 'transform, left, top, width, height',
+                              }}
+                              onMouseDown={(e) => {
+                                 // Prevent interaction if component is locked
+                                 if (isLocked) {
+                                    e.stopPropagation()
+                                    toast.error('This component is locked. Unlock it in the Layers panel to edit.')
+                                    return
+                                 }
+                                 handleMouseDown(e, component)
+                              }}                              onContextMenu={(e) => {
+                                 // Just set the selected component for context menu actions
+                                 setSelectedComponent(component);
+                              }}
+                              onMouseEnter={() => handleComponentMouseEnter(component.id)}
+                              onMouseLeave={handleComponentMouseLeave}
+                           >
+                              <ComponentPreview
+                                 component={component}
+                                 isHovered={hoveredComponent === component.id}
+                              />
+                              {selectedComponent?.id === component.id && !isLocked && (
+                                 <>
+                                    <div
+                                       className='resize-handle absolute w-2 h-2 bg-primary rounded-full top-0 left-0 -translate-x-1/2 -translate-y-1/2 cursor-nw-resize'
+                                       data-direction='nw'
+                                    />
+                                    <div
+                                       className='resize-handle absolute w-2 h-2 bg-primary rounded-full top-0 right-0 translate-x-1/2 -translate-y-1/2 cursor-ne-resize'
+                                       data-direction='ne'
+                                    />
+                                    <div
+                                       className='resize-handle absolute w-2 h-2 bg-primary rounded-full bottom-0 left-0 -translate-x-1/2 translate-y-1/2 cursor-sw-resize'
+                                       data-direction='sw'
+                                    />
+                                    <div
+                                       className='resize-handle absolute w-2 h-2 bg-primary rounded-full bottom-0 right-0 translate-x-1/2 translate-y-1/2 cursor-se-resize'
+                                       data-direction='se'
+                                    />
+                                 </>
+                              )}{' '}
+                           </div>
+                        </ContextMenuTrigger>                        <ContextMenuContent>
+                           <ContextMenuItem onClick={handleCopyComponent}>
+                              <Copy className='mr-2 h-4 w-4' />
+                              <span>Copy</span>
+                           </ContextMenuItem>
+                           <ContextMenuItem onClick={handleCutComponent}>
+                              <Scissors className='mr-2 h-4 w-4' />
+                              <span>Cut</span>
+                           </ContextMenuItem>
+                           <ContextMenuItem onClick={handleToggleVisibility}>
+                              {selectedComponent?.visible === false ? (
+                                 <>
+                                    <Eye className='mr-2 h-4 w-4' />
+                                    <span>Show</span>
+                                 </>
+                              ) : (
+                                 <>
+                                    <EyeOff className='mr-2 h-4 w-4' />
+                                    <span>Hide</span>
+                                 </>
+                              )}
+                           </ContextMenuItem>
+                           <ContextMenuItem onClick={handleToggleLock}>
+                              {selectedComponent?.locked === true ? (
+                                 <>
+                                    <Unlock className='mr-2 h-4 w-4' />
+                                    <span>Unlock</span>
+                                 </>
+                              ) : (
+                                 <>
+                                    <Lock className='mr-2 h-4 w-4' />
+                                    <span>Lock</span>
+                                 </>
+                              )}
+                           </ContextMenuItem>
+                           <ContextMenuItem onClick={handleDeleteComponent}>
+                              <Trash className='mr-2 h-4 w-4' />
+                              <span>Delete</span>
+                           </ContextMenuItem>
+                        </ContextMenuContent>
+                     </ContextMenu>
+                  )
+               })}
             </div>
          </div>
       </div>

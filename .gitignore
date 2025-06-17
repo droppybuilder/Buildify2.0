@@ -23,3 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 .env
+CLOUD_STATUS_FIX.md
+PROJECT_MANAGEMENT_GUIDE.md
+TOOLBAR_IMPROVEMENTS.md

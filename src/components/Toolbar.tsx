@@ -12,6 +12,8 @@ import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { featureRequestService } from '@/services/featureRequestService'
+import { toast } from 'sonner'
 
 interface ToolbarProps {
    components: any[]
@@ -54,16 +56,38 @@ export const Toolbar = ({
 
    const handleFeatureSubmit = async (e: React.FormEvent) => {
       e.preventDefault()
+      
+      if (!user) {
+         toast.error('You must be logged in to submit a feature request')
+         return
+      }
+
+      if (!featureName.trim() || !featureRequest.trim()) {
+         toast.error('Please fill in both feature name and description')
+         return
+      }
+
       setSubmitting(true)
-      // For demo, just close modal and reset
-      setTimeout(() => {
-         setSubmitting(false)
+      
+      try {
+         await featureRequestService.submitFeatureRequest(
+            featureName.trim(),
+            featureRequest.trim(),
+            user
+         )
+         
+         // Success - reset form and close modal
          setModalOpen(false)
          setFeatureRequest('')
          setFeatureName('')
-         // You can add a toast here for success
-         // toast('Feature request submitted!')
-      }, 1000)
+         toast.success('Feature request submitted successfully! Thank you for your feedback.')
+         
+      } catch (error) {
+         console.error('Error submitting feature request:', error)
+         toast.error('Failed to submit feature request. Please try again.')
+      } finally {
+         setSubmitting(false)
+      }
    }
 
    return (

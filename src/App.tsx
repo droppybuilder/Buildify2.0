@@ -46,8 +46,7 @@ const App = () => {
                            <ProfilePage />
                         </ProtectedRoute>
                      }
-                  />
-                  <Route
+                  />                  <Route
                      path='/'
                      element={
                         <ProtectedRoute>

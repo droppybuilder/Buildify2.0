@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { Undo2, Redo2, Code, Layers as LayersIcon, Settings, User, CreditCard, LogOut } from 'lucide-react'
+import { Undo2, Redo2, Code, Layers as LayersIcon, Settings, User, CreditCard, LogOut, MessageSquare } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useNavigate } from 'react-router-dom'
@@ -12,7 +12,7 @@ import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { featureRequestService } from '@/services/featureRequestService'
+import { feedbackService } from '@/services/feedbackService'
 import { toast } from 'sonner'
 
 interface ToolbarProps {
@@ -41,12 +41,12 @@ export const Toolbar = ({
    showCodePreview,
    showLayers = false,
    showWindowProperties = false,
-}: ToolbarProps) => {
-   const navigate = useNavigate()
+}: ToolbarProps) => {   const navigate = useNavigate()
    const { user } = useAuth()
    const [modalOpen, setModalOpen] = useState(false)
-   const [featureRequest, setFeatureRequest] = useState('')
-   const [featureName, setFeatureName] = useState('')
+   const [title, setTitle] = useState('')
+   const [description, setDescription] = useState('')
+   const [submissionType, setSubmissionType] = useState<'feedback' | 'feature-request'>('feedback')
    const [submitting, setSubmitting] = useState(false)
 
    const handleSignOut = async () => {
@@ -58,33 +58,35 @@ export const Toolbar = ({
       e.preventDefault()
       
       if (!user) {
-         toast.error('You must be logged in to submit a feature request')
+         toast.error('You must be logged in to submit feedback')
          return
       }
 
-      if (!featureName.trim() || !featureRequest.trim()) {
-         toast.error('Please fill in both feature name and description')
+      if (!title.trim() || !description.trim()) {
+         toast.error('Please fill in both title and description')
          return
       }
 
       setSubmitting(true)
       
       try {
-         await featureRequestService.submitFeatureRequest(
-            featureName.trim(),
-            featureRequest.trim(),
+         await feedbackService.submitFeedback(
+            title.trim(),
+            description.trim(),
+            submissionType,
             user
          )
          
          // Success - reset form and close modal
          setModalOpen(false)
-         setFeatureRequest('')
-         setFeatureName('')
-         toast.success('Feature request submitted successfully! Thank you for your feedback.')
+         setDescription('')
+         setTitle('')
+         const typeText = submissionType === 'feedback' ? 'Feedback' : 'Feature request'
+         toast.success(`${typeText} submitted successfully! Thank you for your input.`)
          
       } catch (error) {
-         console.error('Error submitting feature request:', error)
-         toast.error('Failed to submit feature request. Please try again.')
+         console.error('Error submitting feedback:', error)
+         toast.error('Failed to submit. Please try again.')
       } finally {
          setSubmitting(false)
       }
@@ -205,45 +207,71 @@ export const Toolbar = ({
             >
                <CreditCard size={16} />
                Plans
-            </Button>
-            <Button
+            </Button>            <Button
                variant='outline'
                size='sm'
                className='gap-1 text-xs border-primary text-primary font-semibold'
                style={{ borderWidth: 2 }}
                onClick={() => setModalOpen(true)}
             >
-               + Request Next Feature
+               <MessageSquare size={14} />
+               Feedback & Ideas
             </Button>
             <Dialog
                open={modalOpen}
                onOpenChange={setModalOpen}
-            >
-               <DialogContent className='max-w-md mx-auto'>
+            >               <DialogContent className='max-w-md mx-auto'>
                   <DialogHeader>
-                     <DialogTitle>Request a Feature</DialogTitle>
+                     <DialogTitle>Share Your Feedback & Ideas</DialogTitle>
                   </DialogHeader>
                   <form
                      onSubmit={handleFeatureSubmit}
                      className='space-y-4'
                   >
                      <div className='space-y-2'>
-                        <Label htmlFor='feature-name'>Feature Name</Label>
+                        <Label>Type</Label>
+                        <div className='flex gap-4'>
+                           <label className='flex items-center space-x-2 cursor-pointer'>
+                              <input
+                                 type='radio'
+                                 name='submissionType'
+                                 value='feedback'
+                                 checked={submissionType === 'feedback'}
+                                 onChange={(e) => setSubmissionType(e.target.value as 'feedback')}
+                                 className='text-primary'
+                              />
+                              <span className='text-sm'>General Feedback</span>
+                           </label>
+                           <label className='flex items-center space-x-2 cursor-pointer'>
+                              <input
+                                 type='radio'
+                                 name='submissionType'
+                                 value='feature-request'
+                                 checked={submissionType === 'feature-request'}
+                                 onChange={(e) => setSubmissionType(e.target.value as 'feature-request')}
+                                 className='text-primary'
+                              />
+                              <span className='text-sm'>Feature Request</span>
+                           </label>
+                        </div>
+                     </div>
+                     <div className='space-y-2'>
+                        <Label htmlFor='title'>Title</Label>
                         <Input
-                           id='feature-name'
-                           value={featureName}
-                           onChange={(e) => setFeatureName(e.target.value)}
-                           placeholder='Short title for your feature...'
+                           id='title'
+                           value={title}
+                           onChange={(e) => setTitle(e.target.value)}
+                           placeholder={submissionType === 'feedback' ? 'Brief summary of your feedback...' : 'Short title for your feature idea...'}
                            required
                         />
                      </div>
                      <div className='space-y-2'>
-                        <Label htmlFor='feature-request'>Feature Description</Label>
+                        <Label htmlFor='description'>Description</Label>
                         <textarea
-                           id='feature-request'
-                           value={featureRequest}
-                           onChange={(e) => setFeatureRequest(e.target.value)}
-                           placeholder='Describe your feature idea...'
+                           id='description'
+                           value={description}
+                           onChange={(e) => setDescription(e.target.value)}
+                           placeholder={submissionType === 'feedback' ? 'Tell us about your experience, what you liked, what could be improved...' : 'Describe your feature idea in detail...'}
                            required
                            className='w-full min-h-[80px] max-h-60 resize-y rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
                            style={{ resize: 'vertical' }}
@@ -252,7 +280,7 @@ export const Toolbar = ({
                      <DialogFooter>
                         <Button
                            type='submit'
-                           disabled={submitting || !featureRequest || !featureName}
+                           disabled={submitting || !description || !title}
                         >
                            {submitting ? 'Submitting...' : 'Submit'}
                         </Button>
@@ -269,10 +297,13 @@ export const Toolbar = ({
                   >
                      <User size={16} />
                   </Button>
-               </DropdownMenuTrigger>
-               <DropdownMenuContent align='end'>
+               </DropdownMenuTrigger>               <DropdownMenuContent align='end'>
                   <DropdownMenuItem onClick={() => navigate('/profile')}>Profile</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/pricing')}>Subscription</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setModalOpen(true)}>
+                     <MessageSquare className='mr-2 h-4 w-4' />
+                     Send Feedback
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleSignOut}>
                      <LogOut className='mr-2 h-4 w-4' />
                      Sign Out

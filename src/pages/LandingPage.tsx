@@ -1,38 +1,93 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
-import logo from '/logo1.png'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import logo from '/logo6.png'
 
 const features = [
    {
       title: 'Visual Tkinter Builder',
       desc: 'Drag, drop, and visually design Python Tkinter GUIs with instant code preview.',
       icon: '🖱️',
+      gradient: 'from-purple-500 to-pink-500',
    },
    {
       title: 'Export Instantly',
       desc: 'Export clean, production-ready Python code for your desktop apps in one click.',
       icon: '🚀',
+      gradient: 'from-blue-500 to-cyan-500',
    },
    {
       title: 'Modern UI Components',
       desc: 'Access a library of beautiful, customizable widgets and layouts.',
       icon: '🎨',
+      gradient: 'from-green-500 to-emerald-500',
    },
    {
       title: 'No Coding Required',
       desc: 'Build complex interfaces without writing a single line of code.',
       icon: '🤖',
+      gradient: 'from-orange-500 to-red-500',
    },
    {
       title: 'Cloud Profiles',
       desc: 'Save your projects and access them from anywhere, anytime.',
       icon: '☁️',
+      gradient: 'from-indigo-500 to-purple-500',
    },
    {
       title: 'Flexible Pricing',
       desc: 'Start for free, upgrade for more power and features.',
       icon: '💸',
+      gradient: 'from-yellow-500 to-orange-500',
+   },
+]
+
+const reviews = [
+   {
+      name: 'Alex Chen',
+      role: 'Python Developer',
+      rating: 5,
+      text: 'Buildfy revolutionized my workflow! Building Tkinter GUIs has never been this easy.',
+      avatar: '👨‍💻',
+   },
+   {
+      name: 'Sarah Johnson',
+      role: 'Software Engineer',
+      rating: 5,
+      text: 'The drag-and-drop interface is intuitive. Saved me hours of coding!',
+      avatar: '👩‍💻',
+   },
+   {
+      name: 'Michael Torres',
+      role: 'Data Scientist',
+      rating: 5,
+      text: 'Perfect for creating quick GUI prototypes. The code export is clean and professional.',
+      avatar: '🧑‍🔬',
+   },
+   {
+      name: 'Emily Davis',
+      role: 'Freelancer',
+      rating: 5,
+      text: 'Client presentations are now 10x better with beautiful UIs created in minutes.',
+      avatar: '👩‍🎨',
+   },
+   {
+      name: 'David Kim',
+      role: 'Startup Founder',
+      rating: 5,
+      text: 'Buildfy helped us launch our MVP faster. No more struggling with Tkinter layouts!',
+      avatar: '🚀',
+   },
+   {
+      name: 'Lisa Wang',
+      role: 'CS Student',
+      rating: 5,
+      text: 'Learning GUI development became fun! The visual approach makes everything clear.',
+      avatar: '🎓',
    },
 ]
 
@@ -109,8 +164,6 @@ const plans = [
    },
 ]
 
-const glass = 'bg-white/10 backdrop-blur-md border border-white/20 shadow-xl rounded-3xl'
-
 const lifetimePlan = {
    id: 'lifetime',
    name: 'Lifetime',
@@ -135,222 +188,682 @@ const lifetimePlan = {
 const LandingPage: React.FC = () => {
    const navigate = useNavigate()
    const userExists = Boolean(localStorage.getItem('user'))
-   // Combine plans and lifetimePlan for display
    const displayPlans = [...plans, lifetimePlan]
+   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' })
+
+   useEffect(() => {
+      const handleMouseMove = (e: MouseEvent) => {
+         setMousePosition({ x: e.clientX, y: e.clientY })
+      }
+      window.addEventListener('mousemove', handleMouseMove)
+      return () => window.removeEventListener('mousemove', handleMouseMove)
+   }, [])
+
+   const handleContactSubmit = (e: React.FormEvent) => {
+      e.preventDefault()
+      // Handle contact form submission
+      console.log('Contact form submitted:', contactForm)
+      // Reset form
+      setContactForm({ name: '', email: '', message: '' })
+   }
+
    return (
-      <div className='min-h-screen w-full relative overflow-x-hidden bg-gradient-to-br from-[#181c2b] via-[#23243a] to-[#1a1d2b] text-white'>
-         {/* Animated background blobs */}
+      <div className='min-h-screen w-full relative overflow-x-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white'>
+         {/* Animated Cursor Effect */}
+         <div
+            className='fixed w-6 h-6 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full pointer-events-none z-50 opacity-50 transition-all duration-300 ease-out'
+            style={{
+               left: mousePosition.x - 12,
+               top: mousePosition.y - 12,
+               background: `radial-gradient(circle, rgba(168, 85, 247, 0.4) 0%, rgba(236, 72, 153, 0.4) 100%)`,
+            }}
+         />
+         {/* Dynamic Background */}
          <div className='pointer-events-none fixed inset-0 -z-10'>
-            <div className='absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-indigo-600 opacity-30 rounded-full blur-3xl animate-blob1' />
-            <div className='absolute bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] bg-purple-600 opacity-30 rounded-full blur-3xl animate-blob2' />
-            <div className='absolute top-1/2 left-1/2 w-[30vw] h-[30vw] bg-pink-500 opacity-20 rounded-full blur-3xl animate-blob3' />
+            <div className='absolute top-[-20%] left-[-20%] w-[60vw] h-[60vw] bg-gradient-to-r from-purple-600/30 to-pink-600/30 rounded-full blur-3xl animate-float-1' />
+            <div className='absolute bottom-[-20%] right-[-20%] w-[60vw] h-[60vw] bg-gradient-to-r from-blue-600/30 to-cyan-600/30 rounded-full blur-3xl animate-float-2' />
+            <div className='absolute top-1/2 left-1/2 w-[40vw] h-[40vw] bg-gradient-to-r from-emerald-600/20 to-teal-600/20 rounded-full blur-3xl animate-float-3' />
          </div>
-
-         {/* Banner */}
-         <div className='w-full flex justify-center z-50 relative animate-fadein'>
-            <div className='relative flex items-center justify-center px-6 py-3 mt-4 rounded-2xl shadow-lg bg-gradient-to-r from-[#7f5af0] via-[#6246ea] to-[#ff6ac1] border border-[#a78bfa]/40 backdrop-blur-md'>
-               <svg
-                  className='w-6 h-6 text-white animate-bounce mr-2 drop-shadow-lg'
-                  fill='none'
-                  stroke='currentColor'
-                  strokeWidth='2'
-                  viewBox='0 0 24 24'
-               >
-                  <path
-                     strokeLinecap='round'
-                     strokeLinejoin='round'
-                     d='M5 13l4 4L19 7'
-                  />
-               </svg>
-               <span className='drop-shadow font-semibold text-lg bg-gradient-to-r from-white via-[#e0c3fc] to-[#ffb6b9] bg-clip-text text-transparent'>
-                  AI Integration <span className='font-bold text-pink-200'>coming soon!</span>
-               </span>
-            </div>
-         </div>
-
-         {/* Hero Section */}
-         <header className='w-full py-24 flex flex-col items-center justify-center relative z-10'>
-            <div className='flex items-center justify-center gap-4 mb-6'>
-               <div className='p-2 rounded-3xl bg-gradient-to-br from-[#23243a] via-[#181c2b] to-[#1a1d2b] shadow-2xl border border-[#7f5af0]/30'>
-                  <img
-                     src={logo}
-                     alt='Buildfy2.0 Logo'
-                     className='size-28 drop-shadow-xl animate-float'
-                     draggable={false}
-                  />
-               </div>
-               <h1 className='text-6xl md:text-7xl font-extrabold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent text-center tracking-tight drop-shadow-lg animate-glow'>
-                  Buildfy Web
-               </h1>
-            </div>
-            <p className='text-2xl md:text-3xl text-gray-200 mb-10 text-center max-w-2xl font-medium animate-fadein-slow'>
-               Effortlessly design, preview, and export beautiful Python Tkinter GUIs.
-               <br />
-               Drag, drop, and build your next desktop app visually—no code required!
-            </p>
-            <div className='flex gap-6 mb-4 flex-wrap justify-center'>
-               <Button
-                  size='lg'
-                  className='px-10 py-4 text-lg font-semibold shadow-lg bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-pink-500 transition-all duration-300 animate-pop rounded-2xl'
-                  onClick={() => navigate(userExists ? '/' : '/auth')}
-               >
-                  {userExists ? 'DesignLab' : 'Login'}
-               </Button>
-            </div>
-         </header>
-
-         {/* Features Section */}
-         <section className='py-20 px-4 max-w-6xl mx-auto w-full'>
-            <h2 className='text-4xl font-bold text-center mb-12 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-glow'>
-               Features
-            </h2>
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10'>
-               {features.map((f, i) => (
-                  <div
-                     key={i}
-                     className={`${glass} p-8 flex flex-col items-center hover:scale-[1.04] hover:shadow-2xl transition-all duration-300 group animate-fadein-up`}
-                     style={{ animationDelay: `${i * 80}ms` }}
-                  >
-                     <div className='text-4xl mb-3 animate-pop'>{f.icon}</div>
-                     <h3 className='text-2xl font-semibold mb-2 text-indigo-200 group-hover:text-pink-300 transition-colors'>
-                        {f.title}
-                     </h3>
-                     <p className='text-gray-200 text-center'>{f.desc}</p>
-                  </div>
-               ))}
-            </div>
-         </section>
-
-         {/* Team Section */}
-         <section className='py-20 px-4 max-w-5xl mx-auto w-full'>
-            <h2 className='text-4xl font-bold text-center mb-12 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-glow'>
-               Meet the Team
-            </h2>
-            <div className='flex flex-wrap justify-center gap-10'>
-               {team.map((member, i) => (
-                  <div
-                     key={i}
-                     className={`${glass} p-8 flex flex-col items-center w-72 hover:scale-105 hover:shadow-2xl transition-all duration-300 animate-fadein-up`}
-                     style={{ animationDelay: `${i * 120}ms` }}
-                  >
+         {/* Navbar */}
+         <nav className='fixed top-0 w-full bg-black/10 backdrop-blur-xl border-b border-white/10 z-40'>
+            <div className='max-w-7xl mx-auto px-6 sm:px-8'>
+               <div className='flex items-center justify-between h-16'>
+                  <div className='flex items-center space-x-4'>
+                     {' '}
                      <img
-                        src={member.img}
-                        alt={member.name}
-                        className='w-24 h-24 rounded-full mb-4 object-cover border-4 border-indigo-400 shadow-lg animate-pop'
+                        src={logo}
+                        alt='Buildfy Web'
+                        className='h-10 w-10 rounded-lg'
                      />
-                     <h3 className='text-xl font-semibold mb-1 text-indigo-100'>{member.name}</h3>
-                     <p className='text-gray-300 mb-2'>{member.role}</p>
+                     <span className='text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+                        Buildfy Web
+                     </span>
+                  </div>
+                  <div className='hidden md:flex items-center space-x-8'>
                      <a
-                        href={member.peerlist}
-                        target='_blank'
-                        rel='noopener noreferrer'
-                        className='text-indigo-300 hover:text-pink-300 hover:underline transition-colors'
+                        href='#features'
+                        className='hover:text-purple-400 transition-colors'
                      >
-                        Visit
+                        Features
+                     </a>
+                     <a
+                        href='#pricing'
+                        className='hover:text-purple-400 transition-colors'
+                     >
+                        Pricing
+                     </a>
+                     <a
+                        href='#contact'
+                        className='hover:text-purple-400 transition-colors'
+                     >
+                        Contact
                      </a>
                   </div>
-               ))}
+                  <div className='flex items-center space-x-4'>
+                     {userExists ? (
+                        <Button
+                           onClick={() => navigate('/app')}
+                           className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-6 py-2 rounded-xl'
+                        >
+                           Open App
+                        </Button>
+                     ) : (
+                        <>
+                           <Button
+                              variant='ghost'
+                              onClick={() => navigate('/auth')}
+                              className='hover:bg-white/10'
+                           >
+                              Sign In
+                           </Button>
+                           <Button
+                              onClick={() => navigate('/auth')}
+                              className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-6 py-2 rounded-xl'
+                           >
+                              Get Started
+                           </Button>
+                        </>
+                     )}
+                  </div>
+               </div>
+            </div>
+         </nav>
+         {/* Hero Section */}
+         <section className='relative pt-32 pb-20 px-6 sm:px-8'>
+            <div className='max-w-6xl mx-auto text-center'>
+               <Badge className='mb-6 bg-gradient-to-r from-purple-600/20 to-pink-600/20 text-purple-300 border-purple-500/30 px-4 py-2'>
+                  🚀 Web version of the popular Buildfy Tool
+               </Badge>
+
+               <h1 className='text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent leading-tight'>
+                  Build Python GUIs
+                  <br />
+                  <span className='bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+                     Visually & Effortlessly
+                  </span>
+               </h1>
+
+               <p className='text-xl md:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed'>
+                  Create stunning Tkinter desktop applications with our intuitive drag-and-drop interface. No coding
+                  required - just design, customize, and export production-ready Python code.
+               </p>
+
+               <div className='flex flex-col sm:flex-row gap-4 justify-center items-center mb-16'>
+                  {' '}
+                  <Button
+                     size='lg'
+                     onClick={() => navigate(userExists ? '/app' : '/auth')}
+                     className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-8 py-3 text-lg rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300'
+                  >
+                     🚀 Start Building Now
+                  </Button>
+                  <Button
+                     size='lg'
+                     variant='outline'
+                     onClick={() => document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' })}
+                     className='border-purple-500/50 text-purple-300 hover:bg-purple-500/10 px-8 py-4 text-lg rounded-xl'
+                  >
+                     ▶️ Watch Demo
+                  </Button>
+               </div>
+
+               {/* Stats */}
+               <div className='grid grid-cols-2 md:grid-cols-4 gap-8 mb-20'>
+                  {[
+                     { number: '10,000+', label: 'GUIs Created' },
+                     { number: '5,000+', label: 'Happy Developers' },
+                     { number: '50+', label: 'UI Components' },
+                     { number: '99%', label: 'Code Quality' },
+                  ].map((stat, index) => (
+                     <div
+                        key={index}
+                        className='text-center'
+                     >
+                        <div className='text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+                           {stat.number}
+                        </div>
+                        <div className='text-gray-400 text-sm md:text-base'>{stat.label}</div>
+                     </div>
+                  ))}
+               </div>
             </div>
          </section>
+         {/* Reviews Marquee */}
+         <section className='py-16 overflow-hidden'>
+            <div className='max-w-7xl mx-auto px-6 sm:px-8'>
+               <h2 className='text-4xl font-bold text-center mb-12 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+                  What Developers Say
+               </h2>
+               <div className='relative'>
+                  <div className='flex animate-marquee space-x-8'>
+                     {[...reviews, ...reviews].map((review, index) => (
+                        <Card
+                           key={index}
+                           className='flex-shrink-0 w-80 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6'
+                        >
+                           <CardContent className='p-0'>
+                              <div className='flex items-center mb-4'>
+                                 <span className='text-3xl mr-3'>{review.avatar}</span>
+                                 <div>
+                                    <h4 className='font-semibold text-white'>{review.name}</h4>
+                                    <p className='text-gray-400 text-sm'>{review.role}</p>
+                                 </div>
+                                 <div className='ml-auto flex text-yellow-400'>
+                                    {Array.from({ length: review.rating }).map((_, i) => (
+                                       <span key={i}>⭐</span>
+                                    ))}
+                                 </div>
+                              </div>
+                              <p className='text-gray-300 italic'>"{review.text}"</p>
+                           </CardContent>
+                        </Card>
+                     ))}
+                  </div>
+               </div>
+            </div>
+         </section>
+         {/* Features Section */}
+         <section
+            id='features'
+            className='py-20 px-6 sm:px-8'
+         >
+            <div className='max-w-7xl mx-auto'>
+               <div className='text-center mb-16'>
+                  <h2 className='text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+                     Powerful Features
+                  </h2>
+                  <p className='text-xl text-gray-300 max-w-3xl mx-auto'>
+                     Everything you need to build professional Python GUIs without writing a single line of code
+                  </p>
+               </div>
 
-         {/* Pricing Section */}
-         <section className='py-20 px-4 max-w-7xl mx-auto w-full'>
-            <h2 className='text-4xl font-bold text-center mb-12 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-glow'>
-               Pricing
-            </h2>
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8'>
-               {displayPlans.map((plan, idx) => (
-                  <div
-                     key={plan.id}
-                     className={`${glass} flex flex-col items-center px-6 py-10 relative hover:scale-105 hover:shadow-2xl transition-all duration-300 animate-fadein-up`}
-                     style={{ minHeight: 520, animationDelay: `${idx * 100}ms` }}
-                  >
-                     {/* Subtitle/Banner */}
-                     <div className='absolute -top-6 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-700/80 to-purple-700/80 text-indigo-100 px-5 py-1 rounded-full font-semibold shadow text-sm border border-indigo-300 w-44 text-center animate-pop'>
-                        {plan.id === 'free' && 'Forever Free'}
-                        {plan.id === 'standard' && 'Pay As You Go'}
-                        {plan.id === 'pro' && 'Pay As You Go'}
-                        {plan.id === 'lifetime' && 'One-Time Payment'}
-                     </div>
-                     <h3 className='text-2xl font-bold mt-0 mb-1 text-indigo-100'>{plan.name}</h3>
-                     <div className='mb-4'>
-                        <span className='text-3xl font-bold text-pink-300'>{plan.price}</span>
-                        <span className='text-gray-400 ml-1 text-base'>/{plan.billingPeriod}</span>
-                     </div>
-                     <ul className='mb-0 text-gray-200 text-left w-full max-w-xs mx-auto space-y-2'>
-                        {plan.features.map((feature, i) => (
-                           <li
-                              key={i}
-                              className='flex items-center gap-2'
+               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
+                  {features.map((feature, index) => (
+                     <Card
+                        key={index}
+                        className='group bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300 transform hover:scale-105'
+                     >
+                        <CardContent className='p-0'>
+                           <div
+                              className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${feature.gradient} flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform duration-300`}
                            >
-                              {feature.included ? (
-                                 <span
-                                    className='text-green-400 font-bold text-lg'
-                                    aria-label='Included'
-                                 >
-                                    ✔
+                              {feature.icon}
+                           </div>
+                           <h3 className='text-xl font-semibold mb-4 text-white'>{feature.title}</h3>
+                           <p className='text-gray-300 leading-relaxed'>{feature.desc}</p>
+                        </CardContent>
+                     </Card>
+                  ))}
+               </div>
+            </div>
+         </section>
+         {/* Demo Section */}
+         <section
+            id='demo'
+            className='py-20 px-6 sm:px-8 bg-gradient-to-r from-purple-900/20 to-pink-900/20'
+         >
+            <div className='max-w-6xl mx-auto text-center'>
+               <h2 className='text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+                  See Buildfy in Action
+               </h2>
+               <p className='text-xl text-gray-300 mb-12 max-w-3xl mx-auto'>
+                  Watch how easy it is to create professional Python GUIs with our visual builder
+               </p>
+
+               <div className='relative rounded-3xl overflow-hidden bg-gradient-to-r from-purple-600/20 to-pink-600/20 p-8 backdrop-blur-md border border-white/10'>
+                  <div className='aspect-video bg-gray-800 rounded-2xl flex items-center justify-center text-6xl'>
+                     ▶️
+                  </div>
+                  <div className='absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-3xl' />
+                  <Button
+                     size='lg'
+                     className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-8 py-4 text-lg rounded-xl shadow-2xl'
+                  >
+                     ▶️ Play Demo
+                  </Button>
+               </div>
+            </div>
+         </section>
+         {/* Pricing Section */}
+         <section
+            id='pricing'
+            className='py-20 px-6 sm:px-8'
+         >
+            <div className='max-w-7xl mx-auto'>
+               <div className='text-center mb-16'>
+                  <h2 className='text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+                     Choose Your Plan
+                  </h2>
+                  <p className='text-xl text-gray-300 max-w-3xl mx-auto'>
+                     Start free and scale as you grow. All plans include our core features.
+                  </p>
+               </div>
+
+               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8'>
+                  {displayPlans.map((plan) => (
+                     <Card
+                        key={plan.id}
+                        className={`relative bg-white/5 backdrop-blur-md border rounded-2xl p-8 hover:bg-white/10 transition-all duration-300 transform hover:scale-105 ${
+                           plan.tier === 'pro' ? 'border-purple-500 ring-2 ring-purple-500/20' : 'border-white/10'
+                        }`}
+                     >
+                        {plan.tier === 'pro' && (
+                           <Badge className='absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1'>
+                              Most Popular
+                           </Badge>
+                        )}
+                        <CardContent className='p-0'>
+                           <div className='text-center mb-8'>
+                              <h3 className='text-2xl font-bold mb-2 text-white'>{plan.name}</h3>
+                              <p className='text-gray-400 mb-4'>{plan.description}</p>
+                              <div className='flex items-baseline justify-center'>
+                                 <span className='text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+                                    {plan.price}
                                  </span>
-                              ) : (
-                                 <span
-                                    className='text-red-400 font-bold text-lg'
-                                    aria-label='Not included'
+                                 <span className='text-gray-400 ml-2'>/{plan.billingPeriod}</span>
+                              </div>
+                           </div>
+
+                           <ul className='space-y-3 mb-8'>
+                              {plan.features.map((feature, index) => (
+                                 <li
+                                    key={index}
+                                    className={`flex items-center ${
+                                       feature.included ? 'text-green-400' : 'text-gray-500'
+                                    }`}
                                  >
-                                    ✖
-                                 </span>
-                              )}
-                              <span>{feature.name}</span>
-                           </li>
-                        ))}
+                                    <span className='mr-3'>{feature.included ? '✅' : '❌'}</span>
+                                    {feature.name}
+                                 </li>
+                              ))}
+                           </ul>
+
+                           <Button
+                              className={`w-full py-3 rounded-xl ${
+                                 plan.tier === 'pro'
+                                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
+                                    : 'bg-white/10 hover:bg-white/20 border border-white/20'
+                              }`}
+                              onClick={() => navigate('/auth')}
+                           >
+                              Get Started
+                           </Button>
+                        </CardContent>
+                     </Card>
+                  ))}
+               </div>
+            </div>
+         </section>
+         {/* Team Section */}
+         <section className='py-20 px-6 sm:px-8 bg-gradient-to-r from-purple-900/20 to-pink-900/20'>
+            <div className='max-w-5xl mx-auto'>
+               <div className='text-center mb-16'>
+                  <h2 className='text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+                     Meet Our Team
+                  </h2>
+                  <p className='text-xl text-gray-300 max-w-3xl mx-auto'>
+                     The passionate developers behind Buildfy, making GUI development accessible to everyone
+                  </p>
+               </div>
+
+               <div className='flex flex-col md:flex-row gap-8 justify-center items-center'>
+                  {team.map((member, index) => (
+                     <Card
+                        key={index}
+                        className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300 transform hover:scale-105 max-w-sm'
+                     >
+                        <CardContent className='p-0 text-center'>
+                           <img
+                              src={member.img}
+                              alt={member.name}
+                              className='w-24 h-24 rounded-full mx-auto mb-6 ring-4 ring-purple-500/20'
+                           />
+                           <h3 className='text-xl font-semibold mb-2 text-white'>{member.name}</h3>
+                           <p className='text-purple-400 mb-4'>{member.role}</p>
+                           <Button
+                              variant='outline'
+                              size='sm'
+                              onClick={() => window.open(member.peerlist, '_blank')}
+                              className='border-purple-500/50 text-purple-300 hover:bg-purple-500/10'
+                           >
+                              View Profile
+                           </Button>
+                        </CardContent>
+                     </Card>
+                  ))}
+               </div>
+            </div>
+         </section>
+         {/* Contact Section */}
+         <section
+            id='contact'
+            className='py-20 px-6 sm:px-8'
+         >
+            <div className='max-w-5xl mx-auto'>
+               <div className='text-center mb-16'>
+                  <h2 className='text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+                     Get in Touch
+                  </h2>
+                  <p className='text-xl text-gray-300 max-w-3xl mx-auto'>
+                     Have questions? Need support? Want to collaborate? We'd love to hear from you!
+                  </p>
+               </div>{' '}
+               <div className='grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch'>
+                  {/* Contact Form */}
+                  <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-8 h-full'>
+                     <CardContent className='p-0 h-full flex flex-col'>
+                        <h3 className='text-2xl font-semibold mb-6 text-white'>Send us a message</h3>
+                        <form
+                           onSubmit={handleContactSubmit}
+                           className='space-y-6'
+                        >
+                           <div>
+                              <label className='block text-sm font-medium text-gray-300 mb-2'>Name</label>
+                              <Input
+                                 value={contactForm.name}
+                                 onChange={(e) => setContactForm((prev) => ({ ...prev, name: e.target.value }))}
+                                 className='bg-white/10 border-white/20 text-white placeholder-gray-400 rounded-xl'
+                                 placeholder='Your name'
+                                 required
+                              />
+                           </div>
+                           <div>
+                              <label className='block text-sm font-medium text-gray-300 mb-2'>Email</label>
+                              <Input
+                                 type='email'
+                                 value={contactForm.email}
+                                 onChange={(e) => setContactForm((prev) => ({ ...prev, email: e.target.value }))}
+                                 className='bg-white/10 border-white/20 text-white placeholder-gray-400 rounded-xl'
+                                 placeholder='your@email.com'
+                                 required
+                              />
+                           </div>
+                           <div>
+                              <label className='block text-sm font-medium text-gray-300 mb-2'>Message</label>
+                              <Textarea
+                                 value={contactForm.message}
+                                 onChange={(e) => setContactForm((prev) => ({ ...prev, message: e.target.value }))}
+                                 className='bg-white/10 border-white/20 text-white placeholder-gray-400 rounded-xl min-h-[120px]'
+                                 placeholder='Tell us how we can help...'
+                                 required
+                              />
+                           </div>
+                           <Button
+                              type='submit'
+                              className='w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 py-3 rounded-xl'
+                           >
+                              Send Message 📧
+                           </Button>
+                        </form>
+                     </CardContent>
+                  </Card>{' '}
+                  {/* Contact Info */}
+                  <div className='space-y-8 h-full flex flex-col justify-center'>
+                     <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6'>
+                        <CardContent className='p-0'>
+                           <div className='flex items-center space-x-4'>
+                              <div className='w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-xl'>
+                                 📧
+                              </div>
+                              <div>
+                                 <h4 className='font-semibold text-white'>Email Support</h4>
+                                 <p className='text-gray-400'>support@buildfy.com</p>
+                              </div>
+                           </div>
+                        </CardContent>
+                     </Card>
+
+                     <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6'>
+                        <CardContent className='p-0'>
+                           <div className='flex items-center space-x-4'>
+                              <div className='w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center text-xl'>
+                                 💬
+                              </div>
+                              <div>
+                                 <h4 className='font-semibold text-white'>Live Chat</h4>
+                                 <p className='text-gray-400'>Available 24/7</p>
+                              </div>
+                           </div>
+                        </CardContent>
+                     </Card>
+
+                     <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6'>
+                        <CardContent className='p-0'>
+                           <div className='flex items-center space-x-4'>
+                              <div className='w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center text-xl'>
+                                 📚
+                              </div>
+                              <div>
+                                 <h4 className='font-semibold text-white'>Documentation</h4>
+                                 <p className='text-gray-400'>docs.buildfy.com</p>
+                              </div>
+                           </div>
+                        </CardContent>
+                     </Card>
+
+                     <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6'>
+                        <CardContent className='p-0'>
+                           <div className='flex items-center space-x-4'>
+                              <div className='w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center text-xl'>
+                                 🐛
+                              </div>
+                              <div>
+                                 <h4 className='font-semibold text-white'>Bug Reports</h4>
+                                 <p className='text-gray-400'>bugs@buildfy.com</p>
+                              </div>
+                           </div>
+                        </CardContent>
+                     </Card>
+                  </div>
+               </div>
+            </div>
+         </section>
+         {/* Footer */}
+         <footer className='bg-black/20 backdrop-blur-md border-t border-white/10 py-12 px-6 sm:px-8'>
+            <div className='max-w-7xl mx-auto'>
+               <div className='grid grid-cols-1 md:grid-cols-4 gap-8 mb-8'>
+                  <div>
+                     <div className='flex items-center space-x-3 mb-4'>
+                        {' '}
+                        <img
+                           src={logo}
+                           alt='Buildfy Web'
+                           className='h-8 w-8 rounded-lg'
+                        />
+                        <span className='text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+                           Buildfy Web
+                        </span>
+                     </div>
+                     <p className='text-gray-400 mb-4'>
+                        Making Python GUI development accessible to everyone through visual design.
+                     </p>
+                  </div>
+
+                  <div>
+                     <h4 className='font-semibold text-white mb-4'>Product</h4>
+                     <ul className='space-y-2 text-gray-400'>
+                        <li>
+                           <a
+                              href='#features'
+                              className='hover:text-purple-400 transition-colors'
+                           >
+                              Features
+                           </a>
+                        </li>
+                        <li>
+                           <a
+                              href='#pricing'
+                              className='hover:text-purple-400 transition-colors'
+                           >
+                              Pricing
+                           </a>
+                        </li>
+                        <li>
+                           <a
+                              href='#demo'
+                              className='hover:text-purple-400 transition-colors'
+                           >
+                              Demo
+                           </a>
+                        </li>
+                        <li>
+                           <a
+                              href='/docs'
+                              className='hover:text-purple-400 transition-colors'
+                           >
+                              Documentation
+                           </a>
+                        </li>
                      </ul>
                   </div>
-               ))}
+
+                  <div>
+                     <h4 className='font-semibold text-white mb-4'>Support</h4>
+                     <ul className='space-y-2 text-gray-400'>
+                        <li>
+                           <a
+                              href='#contact'
+                              className='hover:text-purple-400 transition-colors'
+                           >
+                              Contact
+                           </a>
+                        </li>
+                        <li>
+                           <a
+                              href='/help'
+                              className='hover:text-purple-400 transition-colors'
+                           >
+                              Help Center
+                           </a>
+                        </li>
+                        <li>
+                           <a
+                              href='/community'
+                              className='hover:text-purple-400 transition-colors'
+                           >
+                              Community
+                           </a>
+                        </li>
+                        <li>
+                           <a
+                              href='/status'
+                              className='hover:text-purple-400 transition-colors'
+                           >
+                              Status
+                           </a>
+                        </li>
+                     </ul>
+                  </div>
+
+                  <div>
+                     <h4 className='font-semibold text-white mb-4'>Connect</h4>
+                     <ul className='space-y-2 text-gray-400'>
+                        <li>
+                           <a
+                              href='https://twitter.com/buildfy'
+                              className='hover:text-purple-400 transition-colors'
+                           >
+                              Twitter
+                           </a>
+                        </li>
+                        <li>
+                           <a
+                              href='https://github.com/buildfy'
+                              className='hover:text-purple-400 transition-colors'
+                           >
+                              GitHub
+                           </a>
+                        </li>
+                        <li>
+                           <a
+                              href='https://discord.gg/buildfy'
+                              className='hover:text-purple-400 transition-colors'
+                           >
+                              Discord
+                           </a>
+                        </li>
+                        <li>
+                           <a
+                              href='https://linkedin.com/company/buildfy'
+                              className='hover:text-purple-400 transition-colors'
+                           >
+                              LinkedIn
+                           </a>
+                        </li>
+                     </ul>
+                  </div>
+               </div>
+
+               <div className='border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center'>
+                  <p className='text-gray-400 text-sm'>© 2025 Buildfy Web. All rights reserved.</p>
+                  <div className='flex space-x-6 text-sm text-gray-400 mt-4 md:mt-0'>
+                     <a
+                        href='/privacy'
+                        className='hover:text-purple-400 transition-colors'
+                     >
+                        Privacy Policy
+                     </a>
+                     <a
+                        href='/terms'
+                        className='hover:text-purple-400 transition-colors'
+                     >
+                        Terms of Service
+                     </a>
+                     <a
+                        href='/cookies'
+                        className='hover:text-purple-400 transition-colors'
+                     >
+                        Cookie Policy
+                     </a>
+                  </div>
+               </div>
             </div>
-         </section>
-
-         <footer className='mt-10 mb-4 text-gray-400 text-sm text-center'>
-            &copy; {new Date().getFullYear()} Buildfy. All rights reserved.
-         </footer>
-
-         {/* Animations */}
+         </footer>{' '}
+         {/* Custom Styles */}
          <style>{`
-            @keyframes float {
-               0%, 100% { transform: translateY(0); }
-               50% { transform: translateY(-16px); }
+            @keyframes float-1 {
+               0%, 100% { transform: translate(0, 0) rotate(0deg); }
+               33% { transform: translate(30px, -30px) rotate(120deg); }
+               66% { transform: translate(-20px, 20px) rotate(240deg); }
             }
-            .animate-float { animation: float 3.5s ease-in-out infinite; }
-            @keyframes glow {
-               0%, 100% { filter: drop-shadow(0 0 12px #a78bfa); }
-               50% { filter: drop-shadow(0 0 32px #f472b6); }
+            @keyframes float-2 {
+               0%, 100% { transform: translate(0, 0) rotate(0deg); }
+               33% { transform: translate(-30px, -30px) rotate(-120deg); }
+               66% { transform: translate(20px, 20px) rotate(-240deg); }
             }
-            .animate-glow { animation: glow 2.5s ease-in-out infinite; }
-            @keyframes fadein {
-               from { opacity: 0; transform: translateY(16px); }
-               to { opacity: 1; transform: none; }
+            @keyframes float-3 {
+               0%, 100% { transform: translate(0, 0) scale(1); }
+               50% { transform: translate(20px, -20px) scale(1.1); }
             }
-            .animate-fadein { animation: fadein 1.2s cubic-bezier(.4,0,.2,1) both; }
-            .animate-fadein-slow { animation: fadein 2s cubic-bezier(.4,0,.2,1) both; }
-            .animate-fadein-up { animation: fadein 1.2s cubic-bezier(.4,0,.2,1) both; }
-            @keyframes pop {
-               0% { transform: scale(0.9); }
-               60% { transform: scale(1.05); }
-               100% { transform: scale(1); }
+            @keyframes marquee {
+               0% { transform: translateX(0); }
+               100% { transform: translateX(-50%); }
             }
-            .animate-pop { animation: pop 0.7s cubic-bezier(.4,0,.2,1) both; }
-            @keyframes blob1 {
-               0%, 100% { transform: scale(1) translate(0,0); }
-               50% { transform: scale(1.15) translate(40px, 40px); }
-            }
-            .animate-blob1 { animation: blob1 12s ease-in-out infinite; }
-            @keyframes blob2 {
-               0%, 100% { transform: scale(1) translate(0,0); }
-               50% { transform: scale(1.1) translate(-40px, -40px); }
-            }
-            .animate-blob2 { animation: blob2 14s ease-in-out infinite; }
-            @keyframes blob3 {
-               0%, 100% { transform: scale(1) translate(0,0); }
-               50% { transform: scale(1.08) translate(-30px, 30px); }
-            }
-            .animate-blob3 { animation: blob3 16s ease-in-out infinite; }
+            .animate-float-1 { animation: float-1 20s ease-in-out infinite; }
+            .animate-float-2 { animation: float-2 25s ease-in-out infinite; }
+            .animate-float-3 { animation: float-3 15s ease-in-out infinite; }
+            .animate-marquee { animation: marquee 30s linear infinite; }
          `}</style>
       </div>
    )

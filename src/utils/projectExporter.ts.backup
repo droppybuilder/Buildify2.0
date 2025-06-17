@@ -29,8 +29,7 @@ export async function exportProject(components: any[], windowTitle?: string) {
     if (!assets) {
       throw new Error("Failed to create assets directory in ZIP");
     }
-    
-    // Create a placeholder image and add it to assets
+      // Create a placeholder image and add it to assets
     console.log('Adding placeholder image...');
     try {
       const placeholderImageData = generatePlaceholderImage();
@@ -38,45 +37,98 @@ export async function exportProject(components: any[], windowTitle?: string) {
       console.log('✓ Placeholder image added successfully');
     } catch (placeholderError) {
       console.error('Failed to add placeholder image:', placeholderError);
-      // Continue without placeholder if it fails
+      // Continue without placeholder if it fails    }
+    
+    // Collect images from components (completely safe - never fail export)
+    console.log('Collecting component images...');
+    let componentImages: Record<string, string> = {};
+    
+    try {
+      componentImages = collectComponentImages(components);
+    } catch (collectionError) {
+      console.warn('Error collecting component images:', collectionError);
+      componentImages = {}; // Continue with no images
     }
     
-    // Image processing - completely safe, never fails the export
-    console.log('Processing component images...');
-    try {
-      const componentImages = collectComponentImages(components);
+    // Process and add images to the zip (non-blocking - don't fail export if images fail)
+    if (Object.keys(componentImages).length > 0) {
+      console.log(`Processing ${Object.keys(componentImages).length} images`);
       
-      if (Object.keys(componentImages).length > 0) {
-        console.log(`Found ${Object.keys(componentImages).length} images to process`);
-        
-        for (const [src, fileName] of Object.entries(componentImages)) {
-          try {
-            if (src && typeof src === 'string' && src.startsWith('data:') && src.includes(',')) {
-              const commaIndex = src.indexOf(',');
-              const base64Data = src.substring(commaIndex + 1);
-              
-              const validBase64 = validateAndCleanBase64(base64Data);
-              if (validBase64) {
+      let successfulImages = 0;
+      let failedImages = 0;
+      
+      for (const [src, fileName] of Object.entries(componentImages)) {
+        try {
+          // Make sure we're working with a valid data URL
+          if (src && typeof src === 'string' && src.startsWith('data:')) {
+            console.log(`Processing image: ${fileName} (data URL length: ${src.length})`);
+            
+            // Check if it's a proper data URL format
+            const commaIndex = src.indexOf(',');
+            if (commaIndex === -1) {
+              console.warn(`Invalid data URL format for ${fileName}: missing comma separator - skipping`);
+              failedImages++;
+              continue;
+            }
+            
+            // Extract the media type and base64 content
+            const mediaType = src.substring(0, commaIndex);
+            const base64Data = src.substring(commaIndex + 1);
+            
+            console.log(`Media type: ${mediaType}, Base64 length: ${base64Data.length}`);
+              // Validate base64 data (non-throwing version)
+            const validBase64 = validateAndCleanBase64(base64Data);
+            if (validBase64) {
+              console.log(`Successfully validated base64 for ${fileName}, adding to zip`);
+              try {
                 assets.file(fileName, validBase64, { base64: true });
-                console.log(`✓ Added image: ${fileName}`);
-              } else {
-                // Use placeholder for invalid images
+                console.log(`✓ Successfully added ${fileName} to zip`);
+                successfulImages++;
+              } catch (zipError) {
+                console.error(`Failed to add ${fileName} to zip:`, zipError);
+                // Try adding a placeholder instead
+                try {
+                  assets.file(fileName, generatePlaceholderImage(), { base64: true });
+                  console.log(`✓ Added placeholder for ${fileName} after zip error`);
+                  failedImages++;
+                } catch (placeholderError) {
+                  console.error(`Failed to add placeholder for ${fileName}:`, placeholderError);
+                  failedImages++;
+                }
+              }
+            } else {
+              console.warn(`Failed to validate base64 data for ${fileName} - using placeholder`);
+              // Add a placeholder image instead of failing completely
+              try {
                 assets.file(fileName, generatePlaceholderImage(), { base64: true });
-                console.log(`✓ Added placeholder for invalid image: ${fileName}`);
+                console.log(`✓ Added placeholder for ${fileName} after validation failure`);
+                failedImages++;
+              } catch (placeholderError) {
+                console.error(`Failed to add placeholder for ${fileName}:`, placeholderError);
+                failedImages++;
               }
             }
-          } catch (imageError) {
-            console.warn(`Failed to process image ${fileName}:`, imageError);
-            // Skip this image and continue
+          } else {
+            console.warn(`Skipping invalid image source for ${fileName}: ${typeof src} ${src ? src.substring(0, 50) + '...' : 'null'}`);
+            failedImages++;
+          }        } catch (err) {
+          console.warn(`Error processing image ${fileName}:`, err);
+          // Add a placeholder image for failed images to prevent export failure
+          try {
+            console.log(`Adding placeholder image for failed ${fileName}`);
+            assets.file(fileName, generatePlaceholderImage(), { base64: true });
+            console.log(`✓ Added placeholder for failed ${fileName}`);
+            failedImages++;
+          } catch (placeholderErr) {
+            console.warn(`Failed to add placeholder for ${fileName}:`, placeholderErr);
+            failedImages++;
           }
         }
-      } else {
-        console.log('No images found in components');
       }
-    } catch (imageProcessingError) {
-      console.warn('Error during image processing:', imageProcessingError);
-      // Continue without images
-    }
+      
+      console.log(`Image processing complete: ${successfulImages} successful, ${failedImages} failed (using placeholders)`);
+    } else {
+      console.log("No images found to include in export - proceeding with text-only export");    }
     
     // Generate the zip file
     console.log('Generating ZIP file...');
@@ -87,8 +139,7 @@ export async function exportProject(components: any[], windowTitle?: string) {
         level: 6
       }
     });
-    
-    // Save the zip file
+      // Save the zip file
     console.log('Saving ZIP file...');
     saveAs(content, "customtkinter-project.zip");
     console.log("Project export completed successfully");
@@ -179,8 +230,7 @@ If you still encounter issues, please check the console output for detailed erro
  * Generates a simple placeholder PNG image
  * Returns a base64-encoded PNG image
  */
-function generatePlaceholderImage(): string {
-  // A minimal, guaranteed valid base64-encoded PNG image (1x1 transparent pixel)
+function generatePlaceholderImage(): string {  // A minimal, guaranteed valid base64-encoded PNG image (1x1 transparent pixel)
   // This is the smallest possible valid PNG and is guaranteed to work with JSZip
   return 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChAGKuXNDCwAAAABJRU5ErkJggg==';
 }

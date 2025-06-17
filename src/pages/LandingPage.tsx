@@ -45,7 +45,7 @@ const team = [
    },
    {
       name: 'Nakul Srivastava',
-      role: 'Frontend Developer',
+      role: 'Developer',
       img: '/prof2.png',
       peerlist: 'https://devnakul.me',
    },

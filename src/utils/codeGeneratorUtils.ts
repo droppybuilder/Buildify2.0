@@ -154,37 +154,72 @@ export function adjustColorBrightness(hexColor: string, percent: number): string
  */
 export function collectComponentImages(components: any[]): Record<string, string> {
   const images: Record<string, string> = {};
+    if (!components || !components.length) {
+    console.log('No components provided for image collection');
+    return images;
+  }
   
-  if (!components || !components.length) return images;
-  
-  // Process components recursively to find all images
+  // Process components to find all images
   const processComponent = (component: any) => {
-    // Handle image in props
-    if (component.props) {
-      // Check for image source in props
-      const src = component.props.src;
-      const fileName = component.props.fileName;
+    // Safety check for component structure
+    if (!component || typeof component !== 'object' || !component.props) {
+      return;
+    }
+    
+    // Check for image source in props
+    const src = component.props.src;
+    const fileName = component.props.fileName;
+    
+    // Process data URLs for images - be very strict about validation
+    if (src && typeof src === 'string' && src.startsWith('data:') && src.includes(',')) {
+      // Use provided fileName or generate a unique one based on component type and ID
+      let imageFileName = fileName;
       
-      // Process data URLs for images
-      if (src && src.startsWith('data:')) {
-        // Use provided fileName or generate a unique one
-        const imageFileName = fileName || `image-${component.id}-${Date.now()}.png`;
-        images[src] = imageFileName;
+      if (!imageFileName) {
+        const componentType = component.type || 'component';
+        const componentId = component.id || 'unknown';
+        const timestamp = Date.now();
+        imageFileName = `${componentType}-${componentId}-${timestamp}.png`;
       }
       
+      // Ensure the filename has a proper extension
+      if (!imageFileName.match(/\.(png|jpg|jpeg|gif|bmp|webp)$/i)) {
+        imageFileName += '.png';
+      }
+      
+      console.log(`Found image in component ${component.id}: ${imageFileName} (src length: ${src.length})`);
+      images[src] = imageFileName;
+    }
       // Also check for image property which might be used in some components
-      const image = component.props.image;
-      if (image && image.startsWith('data:')) {
-        const imageFileName = fileName || `image-${component.id}-${Date.now()}.png`;
-        images[image] = imageFileName;
+    const image = component.props.image;
+    if (image && typeof image === 'string' && image.startsWith('data:') && image.includes(',')) {
+      let imageFileName = fileName;
+      
+      if (!imageFileName) {
+        const componentType = component.type || 'component';
+        const componentId = component.id || 'unknown';
+        const timestamp = Date.now();
+        imageFileName = `${componentType}-${componentId}-image-${timestamp}.png`;
       }
+      
+      // Ensure the filename has a proper extension
+      if (!imageFileName.match(/\.(png|jpg|jpeg|gif|bmp|webp)$/i)) {
+        imageFileName += '.png';
+      }
+      
+      console.log(`Found image property in component ${component.id}: ${imageFileName} (image length: ${image.length})`);
+      images[image] = imageFileName;
     }
   };
-  
-  // Process each component
-  components.forEach(component => {
-    processComponent(component);
+  // Process each component with error handling
+  components.forEach((component, index) => {
+    try {
+      processComponent(component);
+    } catch (error) {
+      console.warn(`Error processing component at index ${index}:`, error);
+      // Continue processing other components
+    }
   });
-  
+    console.log(`Collected ${Object.keys(images).length} images from ${components.length} components`);
   return images;
 }

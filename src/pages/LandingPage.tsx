@@ -234,7 +234,7 @@ const LandingPage: React.FC = () => {
                      <img
                         src={logo}
                         alt='Buildfy Web'
-                        className='h-10 w-10 rounded-lg'
+                        className='h-12 w-12 rounded-lg'
                      />
                      <span className='text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
                         Buildfy Web
@@ -623,54 +623,51 @@ const LandingPage: React.FC = () => {
                      <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6'>
                         <CardContent className='p-0'>
                            <div className='flex items-center space-x-4'>
+                              <div className='w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center text-xl'>
+                                 👨‍💼
+                              </div>
+                              <div>
+                                 <h4 className='font-semibold text-white'>Pratyush Mishra</h4>
+                                 <p className='text-gray-400'>proxlight02@gmail.com</p>
+                              </div>
+                           </div>
+                        </CardContent>
+                     </Card>
+                     <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6'>
+                        <CardContent className='p-0'>
+                           <div className='flex items-center space-x-4'>
                               <div className='w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-xl'>
                                  📧
-                              </div>
+                              </div>{' '}
                               <div>
                                  <h4 className='font-semibold text-white'>Email Support</h4>
-                                 <p className='text-gray-400'>support@buildfy.com</p>
+                                 <p className='text-gray-400'>droppybuilder@gmail.com</p>
                               </div>
                            </div>
-                        </CardContent>
-                     </Card>
-
-                     <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6'>
-                        <CardContent className='p-0'>
-                           <div className='flex items-center space-x-4'>
-                              <div className='w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center text-xl'>
-                                 💬
-                              </div>
-                              <div>
-                                 <h4 className='font-semibold text-white'>Live Chat</h4>
-                                 <p className='text-gray-400'>Available 24/7</p>
-                              </div>
-                           </div>
-                        </CardContent>
-                     </Card>
-
-                     <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6'>
-                        <CardContent className='p-0'>
-                           <div className='flex items-center space-x-4'>
-                              <div className='w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center text-xl'>
-                                 📚
-                              </div>
-                              <div>
-                                 <h4 className='font-semibold text-white'>Documentation</h4>
-                                 <p className='text-gray-400'>docs.buildfy.com</p>
-                              </div>
-                           </div>
-                        </CardContent>
-                     </Card>
-
+                        </CardContent>{' '}
+                     </Card>{' '}
                      <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6'>
                         <CardContent className='p-0'>
                            <div className='flex items-center space-x-4'>
                               <div className='w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center text-xl'>
                                  🐛
-                              </div>
+                              </div>{' '}
                               <div>
                                  <h4 className='font-semibold text-white'>Bug Reports</h4>
-                                 <p className='text-gray-400'>bugs@buildfy.com</p>
+                                 <p className='text-gray-400'>droppybuilder@gmail.com</p>
+                              </div>
+                           </div>
+                        </CardContent>
+                     </Card>
+                     <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6'>
+                        <CardContent className='p-0'>
+                           <div className='flex items-center space-x-4'>
+                              <div className='w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center text-xl'>
+                                 👨‍💻
+                              </div>
+                              <div>
+                                 <h4 className='font-semibold text-white'>Nakul Srivastava</h4>
+                                 <p className='text-gray-400'>imnakul44@gmail.com</p>
                               </div>
                            </div>
                         </CardContent>
@@ -678,164 +675,26 @@ const LandingPage: React.FC = () => {
                   </div>
                </div>
             </div>
-         </section>
+         </section>{' '}
          {/* Footer */}
          <footer className='bg-black/20 backdrop-blur-md border-t border-white/10 py-12 px-6 sm:px-8'>
             <div className='max-w-7xl mx-auto'>
-               <div className='grid grid-cols-1 md:grid-cols-4 gap-8 mb-8'>
-                  <div>
-                     <div className='flex items-center space-x-3 mb-4'>
-                        {' '}
-                        <img
-                           src={logo}
-                           alt='Buildfy Web'
-                           className='h-8 w-8 rounded-lg'
-                        />
-                        <span className='text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
-                           Buildfy Web
-                        </span>
-                     </div>
-                     <p className='text-gray-400 mb-4'>
-                        Making Python GUI development accessible to everyone through visual design.
-                     </p>
+               <div className='text-center'>
+                  <div className='flex items-center justify-center space-x-3 mb-4'>
+                     <img
+                        src={logo}
+                        alt='Buildfy Web'
+                        className='h-10 w-10 rounded-lg'
+                     />
+                     <span className='text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+                        Buildfy Web
+                     </span>
                   </div>
-
-                  <div>
-                     <h4 className='font-semibold text-white mb-4'>Product</h4>
-                     <ul className='space-y-2 text-gray-400'>
-                        <li>
-                           <a
-                              href='#features'
-                              className='hover:text-purple-400 transition-colors'
-                           >
-                              Features
-                           </a>
-                        </li>
-                        <li>
-                           <a
-                              href='#pricing'
-                              className='hover:text-purple-400 transition-colors'
-                           >
-                              Pricing
-                           </a>
-                        </li>
-                        <li>
-                           <a
-                              href='#demo'
-                              className='hover:text-purple-400 transition-colors'
-                           >
-                              Demo
-                           </a>
-                        </li>
-                        <li>
-                           <a
-                              href='/docs'
-                              className='hover:text-purple-400 transition-colors'
-                           >
-                              Documentation
-                           </a>
-                        </li>
-                     </ul>
-                  </div>
-
-                  <div>
-                     <h4 className='font-semibold text-white mb-4'>Support</h4>
-                     <ul className='space-y-2 text-gray-400'>
-                        <li>
-                           <a
-                              href='#contact'
-                              className='hover:text-purple-400 transition-colors'
-                           >
-                              Contact
-                           </a>
-                        </li>
-                        <li>
-                           <a
-                              href='/help'
-                              className='hover:text-purple-400 transition-colors'
-                           >
-                              Help Center
-                           </a>
-                        </li>
-                        <li>
-                           <a
-                              href='/community'
-                              className='hover:text-purple-400 transition-colors'
-                           >
-                              Community
-                           </a>
-                        </li>
-                        <li>
-                           <a
-                              href='/status'
-                              className='hover:text-purple-400 transition-colors'
-                           >
-                              Status
-                           </a>
-                        </li>
-                     </ul>
-                  </div>
-
-                  <div>
-                     <h4 className='font-semibold text-white mb-4'>Connect</h4>
-                     <ul className='space-y-2 text-gray-400'>
-                        <li>
-                           <a
-                              href='https://twitter.com/buildfy'
-                              className='hover:text-purple-400 transition-colors'
-                           >
-                              Twitter
-                           </a>
-                        </li>
-                        <li>
-                           <a
-                              href='https://github.com/buildfy'
-                              className='hover:text-purple-400 transition-colors'
-                           >
-                              GitHub
-                           </a>
-                        </li>
-                        <li>
-                           <a
-                              href='https://discord.gg/buildfy'
-                              className='hover:text-purple-400 transition-colors'
-                           >
-                              Discord
-                           </a>
-                        </li>
-                        <li>
-                           <a
-                              href='https://linkedin.com/company/buildfy'
-                              className='hover:text-purple-400 transition-colors'
-                           >
-                              LinkedIn
-                           </a>
-                        </li>
-                     </ul>
-                  </div>
-               </div>
-
-               <div className='border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center'>
-                  <p className='text-gray-400 text-sm'>© 2025 Buildfy Web. All rights reserved.</p>
-                  <div className='flex space-x-6 text-sm text-gray-400 mt-4 md:mt-0'>
-                     <a
-                        href='/privacy'
-                        className='hover:text-purple-400 transition-colors'
-                     >
-                        Privacy Policy
-                     </a>
-                     <a
-                        href='/terms'
-                        className='hover:text-purple-400 transition-colors'
-                     >
-                        Terms of Service
-                     </a>
-                     <a
-                        href='/cookies'
-                        className='hover:text-purple-400 transition-colors'
-                     >
-                        Cookie Policy
-                     </a>
+                  <p className='text-gray-400 mb-8 max-w-2xl mx-auto'>
+                     Making Python GUI development accessible to everyone through visual design.
+                  </p>
+                  <div className='border-t border-white/10 pt-8'>
+                     <p className='text-gray-400 text-sm'>© 2025 Buildfy Web. All rights reserved.</p>
                   </div>
                </div>
             </div>

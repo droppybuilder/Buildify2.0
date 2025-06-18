@@ -1,224 +1,22 @@
-// import { useState, useEffect } from 'react';
-// import { useNavigate } from 'react-router-dom';
-// import { supabase } from '@/integrations/supabase/client';
-// import { toast } from 'sonner';
-// import { Input } from '@/components/ui/input';
-// import { Button } from '@/components/ui/button';
-// import { Label } from '@/components/ui/label';
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-// import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
-
-// export default function AuthPage() {
-//   const [email, setEmail] = useState('');
-//   const [password, setPassword] = useState('');
-//   const [loading, setLoading] = useState(false);
-//   const [showPassword, setShowPassword] = useState(false);
-//   const navigate = useNavigate();
-
-//   useEffect(() => {
-//     // Check if user is already logged in
-//     supabase.auth.getSession().then(({ data: { session } }) => {
-//       if (session) {
-//         navigate('/');
-//       }
-//     });
-
-//     // Set up auth state listener
-//     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-//       (event, session) => {
-//         if (session) {
-//           navigate('/');
-//         }
-//       }
-//     );
-
-//     return () => subscription.unsubscribe();
-//   }, [navigate]);
-
-//   const handleSignUp = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     setLoading(true);
-
-//     const { error } = await supabase.auth.signUp({
-//       email,
-//       password,
-//       options: {
-//         emailRedirectTo: `${window.location.origin}/auth`
-//       }
-//     });
-
-//     setLoading(false);
-
-//     if (error) {
-//       console.error('Signup error:', error);
-//       toast.error(`Signup error: ${error.message}`);
-//     } else {
-//       toast.success('Sign up successful! Please check your email for verification.');
-//     }
-//   };
-
-//   const handleSignIn = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     setLoading(true);
-
-//     const { error } = await supabase.auth.signInWithPassword({
-//       email,
-//       password,
-//     });
-
-//     setLoading(false);
-
-//     if (error) {
-//       console.error('Login error:', error);
-//       toast.error(`Login error: ${error.message}`);
-//     } else {
-//       toast.success('Login successful!');
-//     }
-//   };
-
-//   const togglePasswordVisibility = () => {
-//     setShowPassword(!showPassword);
-//   };
-
-//   return (
-//     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-100 p-4">
-//       <div className="w-full max-w-md">
-//         <div className="mb-8 text-center">
-//           <h1 className="text-4xl font-bold text-primary mb-2">Buildfy</h1>
-//           <p className="text-muted-foreground">Build your next project with ease</p>
-//         </div>
-
-//         <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
-//           <Tabs defaultValue="login" className="w-full">
-//             <div className="px-6 pt-6">
-//               <TabsList className="grid w-full grid-cols-2 mb-4">
-//                 <TabsTrigger value="login" className="text-sm">Login</TabsTrigger>
-//                 <TabsTrigger value="signup" className="text-sm">Sign Up</TabsTrigger>
-//               </TabsList>
-//             </div>
-
-//             <TabsContent value="login" className="p-6 pt-2">
-//               <form onSubmit={handleSignIn} className="space-y-4">
-//                 <div className="space-y-2">
-//                   <Label htmlFor="email-login">Email</Label>
-//                   <div className="relative">
-//                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-//                     <Input
-//                       id="email-login"
-//                       type="email"
-//                       placeholder="your.email@example.com"
-//                       value={email}
-//                       onChange={(e) => setEmail(e.target.value)}
-//                       className="pl-10"
-//                       required
-//                     />
-//                   </div>
-//                 </div>
-//                 <div className="space-y-2">
-//                   <div className="flex justify-between items-center">
-//                     <Label htmlFor="password-login">Password</Label>
-//                   </div>
-//                   <div className="relative">
-//                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-//                     <Input
-//                       id="password-login"
-//                       type={showPassword ? "text" : "password"}
-//                       placeholder="••••••••"
-//                       value={password}
-//                       onChange={(e) => setPassword(e.target.value)}
-//                       className="pl-10 pr-10"
-//                       required
-//                     />
-//                     <button
-//                       type="button"
-//                       onClick={togglePasswordVisibility}
-//                       className="absolute right-3 top-1/2 -translate-y-1/2"
-//                       aria-label={showPassword ? "Hide password" : "Show password"}
-//                     >
-//                       {showPassword ? (
-//                         <EyeOff className="h-4 w-4 text-muted-foreground" />
-//                       ) : (
-//                         <Eye className="h-4 w-4 text-muted-foreground" />
-//                       )}
-//                     </button>
-//                   </div>
-//                 </div>
-//                 <Button type="submit" className="w-full" disabled={loading}>
-//                   {loading ? 'Logging in...' : 'Login'}
-//                 </Button>
-//               </form>
-//             </TabsContent>
-
-//             <TabsContent value="signup" className="p-6 pt-2">
-//               <form onSubmit={handleSignUp} className="space-y-4">
-//                 <div className="space-y-2">
-//                   <Label htmlFor="email-signup">Email</Label>
-//                   <div className="relative">
-//                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-//                     <Input
-//                       id="email-signup"
-//                       type="email"
-//                       placeholder="your.email@example.com"
-//                       value={email}
-//                       onChange={(e) => setEmail(e.target.value)}
-//                       className="pl-10"
-//                       required
-//                     />
-//                   </div>
-//                 </div>
-//                 <div className="space-y-2">
-//                   <Label htmlFor="password-signup">Password</Label>
-//                   <div className="relative">
-//                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-//                     <Input
-//                       id="password-signup"
-//                       type={showPassword ? "text" : "password"}
-//                       placeholder="Create a strong password"
-//                       value={password}
-//                       onChange={(e) => setPassword(e.target.value)}
-//                       className="pl-10 pr-10"
-//                       required
-//                     />
-//                     <button
-//                       type="button"
-//                       onClick={togglePasswordVisibility}
-//                       className="absolute right-3 top-1/2 -translate-y-1/2"
-//                       aria-label={showPassword ? "Hide password" : "Show password"}
-//                     >
-//                       {showPassword ? (
-//                         <EyeOff className="h-4 w-4 text-muted-foreground" />
-//                       ) : (
-//                         <Eye className="h-4 w-4 text-muted-foreground" />
-//                       )}
-//                     </button>
-//                   </div>
-//                 </div>
-//                 <Button type="submit" className="w-full" disabled={loading}>
-//                   {loading ? 'Creating account...' : 'Create account'}
-//                 </Button>
-//               </form>
-//             </TabsContent>
-//           </Tabs>
-//         </div>
-
-//         <div className="mt-6 text-center">
-//           <p className="text-sm text-muted-foreground">
-//             By continuing, you agree to our Terms of Service and Privacy Policy.
-//           </p>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import logo from '/logo6.png'
 
 const AuthPage: React.FC = () => {
    const { loginWithGoogle, user } = useAuth()
    const navigate = useNavigate()
+   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+
+   // Mouse tracking for animated cursor
+   useEffect(() => {
+      const handleMouseMove = (e: MouseEvent) => {
+         setMousePosition({ x: e.clientX, y: e.clientY })
+      }
+      window.addEventListener('mousemove', handleMouseMove)
+      return () => window.removeEventListener('mousemove', handleMouseMove)
+   }, [])
 
    // Redirect if the user is already logged in
    useEffect(() => {
@@ -234,29 +32,63 @@ const AuthPage: React.FC = () => {
          navigate('/') // Redirect to the home page after successful login
       } catch (error) {
          console.error('Login failed:', (error as Error).message)
-         toast.error(`Login error: ${error.message}`)
+         toast.error(`Login error: ${(error as Error).message}`)
       }
    }
 
    return (
-      <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-100 p-4'>
-         <div className='w-full max-w-md'>
+      <div className='min-h-screen w-full relative overflow-x-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white flex items-center justify-center p-4'>
+         {/* Animated Cursor Effect */}
+         <div
+            className='fixed w-6 h-6 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full pointer-events-none z-50 opacity-50 transition-all duration-300 ease-out'
+            style={{
+               left: mousePosition.x - 12,
+               top: mousePosition.y - 12,
+               background: `radial-gradient(circle, rgba(168, 85, 247, 0.4) 0%, rgba(236, 72, 153, 0.4) 100%)`,
+            }}
+         />
+
+         {/* Dynamic Background */}
+         <div className='pointer-events-none fixed inset-0 -z-10'>
+            <div className='absolute top-[-20%] left-[-20%] w-[60vw] h-[60vw] bg-gradient-to-r from-purple-600/30 to-pink-600/30 rounded-full blur-3xl animate-float-1' />
+            <div className='absolute bottom-[-20%] right-[-20%] w-[60vw] h-[60vw] bg-gradient-to-r from-blue-600/30 to-cyan-600/30 rounded-full blur-3xl animate-float-2' />
+            <div className='absolute top-1/2 left-1/2 w-[40vw] h-[40vw] bg-gradient-to-r from-emerald-600/20 to-teal-600/20 rounded-full blur-3xl animate-float-3' />
+         </div>
+
+         <div className='w-full max-w-md z-10'>
+            {/* Header */}
             <div className='mb-8 text-center'>
-               <h1 className='text-4xl font-bold text-primary mb-2'>Buildfy</h1>
-               <p className='text-muted-foreground'>Build your next project with ease</p>
+               <div className='flex items-center justify-center space-x-4 mb-4'>
+                  <img
+                     src={logo}
+                     alt='Buildfy Web'
+                     className='h-12 w-12 rounded-lg'
+                  />
+                  <h1 className='text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+                     Buildfy Web
+                  </h1>
+               </div>
+               <p className='text-gray-300 text-lg'>Build your next Python GUI project with ease</p>
             </div>
 
-            <div className='bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100'>
-               <div className='p-6'>
+            {/* Auth Card */}
+            <div className='bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden'>
+               <div className='p-8'>
+                  <div className='text-center mb-6'>
+                     <h2 className='text-2xl font-semibold text-white mb-2'>Welcome Back</h2>
+                     <p className='text-gray-400'>Sign in to continue building amazing GUIs</p>
+                  </div>
+
                   <button
                      onClick={handleGoogleLogin}
-                     className='w-full bg-blue-900 text-white py-2 px-4 rounded-lg hover:bg-blue-600 flex items-center justify-center gap-4'
+                     className='w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-4 px-6 rounded-xl font-medium flex items-center justify-center gap-4 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl'
                   >
                      <svg
                         xmlns='http://www.w3.org/2000/svg'
-                        width='20'
-                        height='20'
+                        width='24'
+                        height='24'
                         viewBox='0 0 48 48'
+                        className='flex-shrink-0'
                      >
                         <path
                            fill='#FFC107'
@@ -275,17 +107,72 @@ const AuthPage: React.FC = () => {
                            d='M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z'
                         />
                      </svg>
-                     Login with Google
+                     <span className='text-lg'>Continue with Google</span>
                   </button>
+
+                  {/* Features highlight */}
+                  <div className='mt-8 pt-6 border-t border-white/10'>
+                     <p className='text-center text-gray-400 text-sm mb-4'>What you'll get:</p>
+                     <div className='space-y-3'>
+                        <div className='flex items-center space-x-3 text-gray-300'>
+                           <div className='w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full'></div>
+                           <span className='text-sm'>Visual drag-and-drop GUI builder</span>
+                        </div>
+                        <div className='flex items-center space-x-3 text-gray-300'>
+                           <div className='w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full'></div>
+                           <span className='text-sm'>Export clean Python code</span>
+                        </div>
+                        <div className='flex items-center space-x-3 text-gray-300'>
+                           <div className='w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full'></div>
+                           <span className='text-sm'>Cloud project management</span>
+                        </div>
+                     </div>
+                  </div>
                </div>
             </div>
 
-            <div className='mt-6 text-center'>
-               <p className='text-sm text-muted-foreground'>
-                  By continuing, you agree to our Terms of Service and Privacy Policy.
+            {/* Footer */}
+            <div className='mt-8 text-center'>
+               <p className='text-sm text-gray-400'>
+                  By continuing, you agree to our{' '}
+                  <a
+                     href='/terms'
+                     className='text-purple-400 hover:text-purple-300 transition-colors'
+                  >
+                     Terms of Service
+                  </a>{' '}
+                  and{' '}
+                  <a
+                     href='/privacy'
+                     className='text-purple-400 hover:text-purple-300 transition-colors'
+                  >
+                     Privacy Policy
+                  </a>
+                  .
                </p>
             </div>
          </div>
+
+         {/* Custom Styles */}
+         <style>{`
+            @keyframes float-1 {
+               0%, 100% { transform: translate(0, 0) rotate(0deg); }
+               33% { transform: translate(30px, -30px) rotate(120deg); }
+               66% { transform: translate(-20px, 20px) rotate(240deg); }
+            }
+            @keyframes float-2 {
+               0%, 100% { transform: translate(0, 0) rotate(0deg); }
+               33% { transform: translate(-30px, -30px) rotate(-120deg); }
+               66% { transform: translate(20px, 20px) rotate(-240deg); }
+            }
+            @keyframes float-3 {
+               0%, 100% { transform: translate(0, 0) scale(1); }
+               50% { transform: translate(20px, -20px) scale(1.1); }
+            }
+            .animate-float-1 { animation: float-1 20s ease-in-out infinite; }
+            .animate-float-2 { animation: float-2 25s ease-in-out infinite; }
+            .animate-float-3 { animation: float-3 15s ease-in-out infinite; }
+         `}</style>
       </div>
    )
 }

@@ -45,21 +45,20 @@ export const Sidebar = () => {
     { type: 'listbox', icon: List, label: 'Listbox', description: 'Selectable list' },
     { type: 'canvas', icon: LayoutGrid, label: 'Canvas', description: 'Drawing canvas' }
   ];
-  const ComponentCard = ({ item }: { item: any }) => (
-    <div
+  const ComponentCard = ({ item }: { item: any }) => (    <div
       draggable
       onDragStart={(e) => handleDragStart(e, item.type)}
-      className="group relative bg-white rounded-lg border border-slate-200/60 p-2.5 cursor-move transition-all duration-200 hover:border-blue-300 hover:shadow-md hover:shadow-blue-50 hover:-translate-y-0.5"
+      className="group relative bg-white rounded-lg border border-slate-200/60 p-2.5 cursor-move transition-all duration-200 hover:border-purple-300 hover:shadow-md hover:shadow-purple-50 hover:-translate-y-0.5"
     >
       <div className="flex flex-col items-center gap-2">
-        <div className="p-2 rounded-md bg-gradient-to-br from-blue-50 to-indigo-50 group-hover:from-blue-100 group-hover:to-indigo-100 transition-colors">
-          <item.icon size={16} className="text-blue-600" />
+        <div className="p-2 rounded-md bg-gradient-to-br from-purple-50 to-pink-50 group-hover:from-purple-100 group-hover:to-pink-100 transition-colors">
+          <item.icon size={16} className="text-purple-600" />
         </div>
         <div className="text-center">
           <div className="font-medium text-slate-700 text-xs">{item.label}</div>
         </div>
       </div>
-      <div className="absolute inset-0 rounded-lg ring-2 ring-blue-400 opacity-0 group-hover:opacity-20 transition-opacity"></div>
+      <div className="absolute inset-0 rounded-lg ring-2 ring-purple-400 opacity-0 group-hover:opacity-20 transition-opacity"></div>
     </div>
   );
   return (
@@ -67,7 +66,7 @@ export const Sidebar = () => {
       {/* Header */}
       <div className="px-4 py-3 border-b border-slate-200/50">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
+          <div className="p-1.5 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
             <Component className="w-4 h-4 text-white" />
           </div>
           <div>

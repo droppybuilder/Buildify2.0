@@ -95,13 +95,12 @@ export const Toolbar = ({
    return (
       <div className='flex items-center justify-between px-6 py-4 bg-white border-b border-slate-200/50 shadow-sm'>
          {/* Left Section - Logo & Project Actions */}
-         <div className='flex items-center gap-4'>
-            <div className='flex items-center gap-3'>
-               <div className='w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg'>
+         <div className='flex items-center gap-4'>            <div className='flex items-center gap-3'>
+               <div className='w-9 h-9 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg'>
                   <span className='text-white font-bold text-sm'>B</span>
                </div>
                <div className='hidden sm:block'>
-                  <span className='font-bold text-xl bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent'>Buildfy</span>
+                  <span className='font-bold text-xl bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent'>Buildfy</span>
                   <div className='text-xs text-slate-500 -mt-1'>Visual Builder</div>
                </div>
             </div>
@@ -161,10 +160,9 @@ export const Toolbar = ({
                               if (showCodePreview) onToggleCodePreview()
                               if (showLayers && onToggleLayers) onToggleLayers()
                               if (showWindowProperties && onToggleWindowProperties) onToggleWindowProperties()
-                           }}
-                           className={`gap-2 text-sm px-3 py-1.5 h-8 rounded-xl transition-all duration-200 ${
+                           }}                           className={`gap-2 text-sm px-3 py-1.5 h-8 rounded-xl transition-all duration-200 ${
                               !showCodePreview && !showLayers && !showWindowProperties 
-                                 ? 'bg-white text-blue-600 shadow-sm font-medium' 
+                                 ? 'bg-white text-purple-600 shadow-sm font-medium' 
                                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
                            }`}
                         >
@@ -184,10 +182,9 @@ export const Toolbar = ({
                         <Button
                            variant="ghost"
                            size='sm'
-                           onClick={onToggleCodePreview}
-                           className={`gap-2 text-sm px-3 py-1.5 h-8 rounded-xl transition-all duration-200 ${
+                           onClick={onToggleCodePreview}                           className={`gap-2 text-sm px-3 py-1.5 h-8 rounded-xl transition-all duration-200 ${
                               showCodePreview 
-                                 ? 'bg-white text-blue-600 shadow-sm font-medium' 
+                                 ? 'bg-white text-purple-600 shadow-sm font-medium' 
                                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
                            }`}
                         >
@@ -211,10 +208,9 @@ export const Toolbar = ({
                            <Button
                               variant='ghost'
                               size='sm'
-                              onClick={onToggleLayers}
-                              className={`px-3 h-9 rounded-lg transition-all ${
+                              onClick={onToggleLayers}                              className={`px-3 h-9 rounded-lg transition-all ${
                                  showLayers 
-                                    ? 'bg-blue-50 text-blue-600 border border-blue-200/50' 
+                                    ? 'bg-purple-50 text-purple-600 border border-purple-200/50' 
                                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                               }`}
                            >
@@ -235,10 +231,9 @@ export const Toolbar = ({
                            <Button
                               variant='ghost'
                               size='sm'
-                              onClick={onToggleWindowProperties}
-                              className={`px-3 h-9 rounded-lg transition-all ${
+                              onClick={onToggleWindowProperties}                              className={`px-3 h-9 rounded-lg transition-all ${
                                  showWindowProperties 
-                                    ? 'bg-blue-50 text-blue-600 border border-blue-200/50' 
+                                    ? 'bg-purple-50 text-purple-600 border border-purple-200/50' 
                                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                               }`}
                            >
@@ -271,14 +266,14 @@ export const Toolbar = ({
                </DropdownMenuTrigger>
                <DropdownMenuContent align='end' className='w-56 bg-white border-slate-200 shadow-xl rounded-xl p-2'>
                   <DropdownMenuItem onClick={() => setModalOpen(true)} className="rounded-lg">
-                     <MessageSquare className='mr-3 h-4 w-4 text-blue-500' />
+                     <MessageSquare className='mr-3 h-4 w-4 text-purple-500' />
                      <div>
                         <div className="font-medium">Feedback & Ideas</div>
                         <div className="text-xs text-slate-500">Share your thoughts</div>
                      </div>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/pricing')} className="rounded-lg">
-                     <CreditCard className='mr-3 h-4 w-4 text-emerald-500' />
+                     <CreditCard className='mr-3 h-4 w-4 text-pink-500' />
                      <div>
                         <div className="font-medium">Upgrade Plan</div>
                         <div className="text-xs text-slate-500">Unlock premium features</div>

@@ -185,14 +185,12 @@ export const ProjectToolbar: React.FC<ProjectToolbarProps> = ({
          <div className='flex items-center justify-between gap-6 p-4 bg-white border-b border-slate-200/50 shadow-sm'>
             {/* Left Side - Local Storage & New Project */}
             <div className='flex items-center gap-3'>
-               {/* New Project */}
-               <Button
+               {/* New Project */}               <Button
                   size='sm'
                   onClick={handleNewProject}
-                  className='flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white border-0 px-4 py-2.5 rounded-xl shadow-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-105'
-                  title='Create a new project (clears current work)'
-               >
-                  <FilePlus className='w-4 h-4' />
+                  className='flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0 px-4 py-2.5 rounded-xl shadow-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-105'
+                  title='Create a new project (clears current work)'               >
+                  <FilePlus className='w-4 h-4 text-white' />
                   New Project
                </Button>
 
@@ -275,17 +273,16 @@ export const ProjectToolbar: React.FC<ProjectToolbarProps> = ({
                      size='sm'
                      variant='outline'
                      onClick={handleSaveProject}
-                     className='flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white hover:text-white border-0 px-4 py-2.5 rounded-xl shadow-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-105'
+                     className='flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white hover:text-white border-0 px-4 py-2.5 rounded-xl shadow-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-105'
                      disabled={!user}
-                     title={!user ? 'Please log in to save to cloud' : 'Save your project to cloud storage'}
-                  >
-                     <Save className='w-4 h-4' />
+                     title={!user ? 'Please log in to save to cloud' : 'Save your project to cloud storage'}                  >
+                     <Save className='w-4 h-4 text-white' />
                      Save to Cloud
-                  </Button>                  <Button
+                  </Button><Button
                      size='sm'
                      variant='outline'
                      onClick={handleLoadProjects}
-                     className='flex items-center gap-2 border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 px-4 py-2.5 rounded-xl shadow-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-105'
+                     className='flex items-center gap-2 border-purple-300 text-purple-700 hover:bg-purple-50 hover:border-purple-400 hover:text-purple-700 px-4 py-2.5 rounded-xl shadow-sm font-medium transition-all duration-200 hover:shadow-md hover:scale-105'
                      disabled={!user}
                      title={!user ? 'Please log in to load from cloud' : 'Load projects from cloud storage'}
                   >

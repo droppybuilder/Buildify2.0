@@ -165,13 +165,12 @@ For more information on CustomTkinter API:
             >
               <Copy className="h-4 w-4" />
               <span>Copy</span>
-            </Button>
-            <Button 
+            </Button>            <Button 
               variant="default" 
               size="sm" 
               onClick={handleExport}
               disabled={isExporting}
-              className="flex items-center gap-1"
+              className="flex items-center gap-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white"
             >
               <Download className="h-4 w-4" />
               <span>{isExporting ? "Exporting..." : "Export Project"}</span>

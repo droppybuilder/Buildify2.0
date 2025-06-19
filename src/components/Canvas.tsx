@@ -62,25 +62,29 @@ const Canvas = ({
    } | null>(null)
    const [isSelecting, setIsSelecting] = useState(false)
    const [isMultiSelectKeyDown, setIsMultiSelectKeyDown] = useState(false)
-
-   const { subscription } = useSubscription()
+   
+   const { subscription, loading: subscriptionLoading } = useSubscription()
+   
    // Normalize tier for feature checks
    const normalizedTier = subscription?.tier === 'lifetime' ? 'pro' : subscription?.tier
    const isUnlimitedCanvas = normalizedTier === 'standard' || normalizedTier === 'pro'
+   
    const maxCanvasSize = isUnlimitedCanvas ? { width: 3000, height: 2000 } : { width: 800, height: 600 }
    // Enforce canvas size limit for free users
    const enforcedWindowSize = {
       width: Math.min(windowSize.width, maxCanvasSize.width),
       height: Math.min(windowSize.height, maxCanvasSize.height),
    }
+   
    // Warn if user tries to resize canvas beyond allowed size
    useEffect(() => {
+      // Only show warning if subscription has loaded and user doesn't have unlimited access
       if (windowSize.width > maxCanvasSize.width || windowSize.height > maxCanvasSize.height) {
-         if (!isUnlimitedCanvas) {
+         if (!isUnlimitedCanvas && !subscriptionLoading && subscription !== null) {
             toast.warning('Upgrade to Standard or Pro for unlimited canvas size!')
          }
       }
-   }, [windowSize, maxCanvasSize, isUnlimitedCanvas])
+   }, [windowSize, maxCanvasSize, isUnlimitedCanvas, subscription, subscriptionLoading])
 
    // Update titleInput when windowTitle changes
    useEffect(() => {

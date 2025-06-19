@@ -14,7 +14,9 @@ import {
   Gauge, 
   Layout, 
   List,
-  Text
+  Text,
+  Component,
+  Layers3
 } from "lucide-react";
 
 export const Sidebar = () => {
@@ -22,141 +24,103 @@ export const Sidebar = () => {
     e.dataTransfer.setData('componentType', type);
   };
 
-  return (
-    <div className="w-64 border-r flex flex-col shadow-sm bg-white border-border">
-      <div className="h-14 border-b flex items-center px-4 bg-white">
-        <span className="font-semibold text-gray-800">Design Widgets</span>
+  const basicElements = [
+    { type: 'button', icon: Square, label: 'Button', description: 'Interactive button element' },
+    { type: 'label', icon: Type, label: 'Label', description: 'Text display label' },
+    { type: 'entry', icon: TextCursor, label: 'Entry', description: 'Text input field' },
+    { type: 'image', icon: ImageIcon, label: 'Image', description: 'Image display' },
+    { type: 'paragraph', icon: Text, label: 'Paragraph', description: 'Multi-line text' }
+  ];
+
+  const inputControls = [
+    { type: 'slider', icon: SlidersHorizontal, label: 'Slider', description: 'Range input slider' },
+    { type: 'checkbox', icon: CheckSquare, label: 'Checkbox', description: 'Boolean checkbox' },
+    { type: 'datepicker', icon: Calendar, label: 'DatePicker', description: 'Date selection' },
+    { type: 'progressbar', icon: Gauge, label: 'ProgressBar', description: 'Progress indicator' }
+  ];
+
+  const layoutElements = [
+    { type: 'frame', icon: Frame, label: 'Frame', description: 'Container frame' },
+    { type: 'notebook', icon: Layout, label: 'Notebook', description: 'Tabbed container' },
+    { type: 'listbox', icon: List, label: 'Listbox', description: 'Selectable list' },
+    { type: 'canvas', icon: LayoutGrid, label: 'Canvas', description: 'Drawing canvas' }
+  ];
+  const ComponentCard = ({ item }: { item: any }) => (
+    <div
+      draggable
+      onDragStart={(e) => handleDragStart(e, item.type)}
+      className="group relative bg-white rounded-lg border border-slate-200/60 p-2.5 cursor-move transition-all duration-200 hover:border-blue-300 hover:shadow-md hover:shadow-blue-50 hover:-translate-y-0.5"
+    >
+      <div className="flex flex-col items-center gap-2">
+        <div className="p-2 rounded-md bg-gradient-to-br from-blue-50 to-indigo-50 group-hover:from-blue-100 group-hover:to-indigo-100 transition-colors">
+          <item.icon size={16} className="text-blue-600" />
+        </div>
+        <div className="text-center">
+          <div className="font-medium text-slate-700 text-xs">{item.label}</div>
+        </div>
       </div>
-      
-      <div className="p-4 overflow-auto flex-1">
-        <div className="space-y-6">
-          <div className="space-y-3">
-            <Label className="text-sm font-medium text-gray-700">Basic Elements</Label>
-            <div className="grid grid-cols-2 gap-3">
-              <div
-                draggable
-                onDragStart={(e) => handleDragStart(e, 'button')}
-                className="aspect-[4/1] rounded-lg border p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors border-gray-200 bg-white"
-              >
-                <Square size={16} />
-                <span>Button</span>
-              </div>
-              <div
-                draggable
-                onDragStart={(e) => handleDragStart(e, 'label')}
-                className="aspect-[4/1] rounded-lg border p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors border-gray-200 bg-white"
-              >
-                <Type size={16} />
-                <span>Label</span>
-              </div>
-              <div
-                draggable
-                onDragStart={(e) => handleDragStart(e, 'entry')}
-                className="aspect-[4/1] rounded-lg border p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors border-gray-200 bg-white"
-              >
-                <TextCursor size={16} />
-                <span>Entry</span>
-              </div>
-              <div
-                draggable
-                onDragStart={(e) => handleDragStart(e, 'image')}
-                className="aspect-[4/1] rounded-lg border p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors border-gray-200 bg-white"
-              >
-                <ImageIcon size={16} />
-                <span>Image</span>
-              </div>
-              <div
-                draggable
-                onDragStart={(e) => handleDragStart(e, 'paragraph')}
-                className="aspect-[4/1] rounded-lg border p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors border-gray-200 bg-white"
-              >
-                <Text size={16} />
-                <span>Paragraph</span>
-              </div>
+      <div className="absolute inset-0 rounded-lg ring-2 ring-blue-400 opacity-0 group-hover:opacity-20 transition-opacity"></div>
+    </div>
+  );
+  return (
+    <div className="w-64 bg-white border-r border-slate-200/50 flex flex-col shadow-sm">
+      {/* Header */}
+      <div className="px-4 py-3 border-b border-slate-200/50">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
+            <Component className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <h2 className="font-semibold text-slate-800 text-sm">Components</h2>
+            <p className="text-xs text-slate-500">Drag to canvas</p>
+          </div>
+        </div>
+      </div>
+        {/* Content */}
+      <div className="flex-1 overflow-auto px-4 py-4">
+        <div className="space-y-5">
+          {/* Basic Elements */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5">
+              <Layers3 size={14} className="text-slate-600" />
+              <Label className="text-xs font-semibold text-slate-700">Basic</Label>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {basicElements.map((item) => (
+                <ComponentCard key={item.type} item={item} />
+              ))}
             </div>
           </div>
 
-          <Separator className="my-4" />
+          <Separator className="bg-slate-200/60" />
 
-          <div className="space-y-3">
-            <Label className="text-sm font-medium text-gray-700">Input Controls</Label>
-            <div className="grid grid-cols-2 gap-3">
-              <div
-                draggable
-                onDragStart={(e) => handleDragStart(e, 'slider')}
-                className="aspect-[4/1] rounded-lg border p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors border-gray-200 bg-white"
-              >
-                <SlidersHorizontal size={16} />
-                <span>Slider</span>
-              </div>
-              <div
-                draggable
-                onDragStart={(e) => handleDragStart(e, 'checkbox')}
-                className="aspect-[4/1] rounded-lg border p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors border-gray-200 bg-white"
-              >
-                <CheckSquare size={16} />
-                <span>Checkbox</span>
-              </div>
-              <div
-                draggable
-                onDragStart={(e) => handleDragStart(e, 'datepicker')}
-                className="aspect-[4/1] rounded-lg border p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors border-gray-200 bg-white"
-              >
-                <Calendar size={16} />
-                <span>DatePicker</span>
-              </div>
-              <div
-                draggable
-                onDragStart={(e) => handleDragStart(e, 'progressbar')}
-                className="aspect-[4/1] rounded-lg border p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors border-gray-200 bg-white"
-              >
-                <Gauge size={16} />
-                <span>ProgressBar</span>
-              </div>
+          {/* Input Controls */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5">
+              <SlidersHorizontal size={14} className="text-slate-600" />
+              <Label className="text-xs font-semibold text-slate-700">Controls</Label>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {inputControls.map((item) => (
+                <ComponentCard key={item.type} item={item} />
+              ))}
             </div>
           </div>
 
-          <Separator className="my-4" />
+          <Separator className="bg-slate-200/60" />
 
-          <div className="space-y-3">
-            <Label className="text-sm font-medium text-gray-700">Layout</Label>
-            <div className="grid grid-cols-2 gap-3">
-              <div
-                draggable
-                onDragStart={(e) => handleDragStart(e, 'frame')}
-                className="aspect-[4/1] rounded-lg border p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors border-gray-200 bg-white"
-              >
-                <Frame size={16} />
-                <span>Frame</span>
-              </div>
-              <div
-                draggable
-                onDragStart={(e) => handleDragStart(e, 'notebook')}
-                className="aspect-[4/1] rounded-lg border p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors border-gray-200 bg-white"
-              >
-                <Layout size={16} />
-                <span>Notebook</span>
-              </div>
-              <div
-                draggable
-                onDragStart={(e) => handleDragStart(e, 'listbox')}
-                className="aspect-[4/1] rounded-lg border p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors border-gray-200 bg-white"
-              >
-                <List size={16} />
-                <span>Listbox</span>
-              </div>
-              <div
-                draggable
-                onDragStart={(e) => handleDragStart(e, 'canvas')}
-                className="aspect-[4/1] rounded-lg border p-2 text-center flex items-center justify-center gap-2 text-sm hover:border-primary hover:bg-gray-50/50 cursor-move transition-colors border-gray-200 bg-white"
-              >
-                <LayoutGrid size={16} />
-                <span>Canvas</span>
-              </div>
+          {/* Layout */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5">
+              <Layout size={14} className="text-slate-600" />
+              <Label className="text-xs font-semibold text-slate-700">Layout</Label>
             </div>
-          </div>
-          
-          <div className="h-6"></div>
+            <div className="grid grid-cols-2 gap-2">
+              {layoutElements.map((item) => (
+                <ComponentCard key={item.type} item={item} />
+              ))}
+            </div>
+          </div>          
         </div>
       </div>
     </div>

@@ -436,10 +436,9 @@ const Index = () => {
    })
 
    return (
-      <div className='h-screen flex overflow-hidden bg-white'>
+      <div className='h-screen flex overflow-hidden bg-slate-50'>
          <Sidebar />
          <main className='flex-1 flex flex-col overflow-hidden'>
-            {' '}
             <ProjectToolbar
                currentProject={projectManager.currentProject}
                setCurrentProject={projectManager.setCurrentProject}
@@ -472,12 +471,13 @@ const Index = () => {
                showLayers={showLayers}
                showWindowProperties={showWindowProperties}
             />
-            <div className='flex-1 flex overflow-hidden'>               {showCodePreview ? (
+            <div className='flex-1 flex overflow-hidden bg-slate-50'>
+               {showCodePreview ? (
                   <CodePreview
                      components={components}
                      visible={showCodePreview}
                      windowSettings={{ title: windowTitle, size: windowSize, bgColor: windowBgColor }}
-                     subscription={subscription} // Pass subscription prop
+                     subscription={subscription}
                   />
                ) : showLayers ? (
                   <Layers
@@ -497,30 +497,33 @@ const Index = () => {
                      setSize={handleSizeChange}
                      bgColor={windowBgColor}
                      setBgColor={handleBgColorChange}
-                  />
-               ) : (
-                  <div className='flex-1 overflow-auto bg-background p-6'>
-                     <WatermarkedCanvas>
-                        <Canvas
-                           components={components}
-                           setComponents={(newComponents) =>
-                              handleComponentsChange(newComponents, ACTION_TYPES.UPDATE_COMPONENT)
-                           }
-                           selectedComponent={selectedComponent}
-                           setSelectedComponent={handleComponentSelect}
-                           onDeleteComponent={handleDeleteComponent}
-                           selectedComponents={selectedComponents}
-                           setSelectedComponents={setSelectedComponents}
-                           windowTitle={windowTitle}
-                           windowSize={windowSize}
-                           windowBgColor={windowBgColor}
-                           setWindowTitle={(title) => handleWindowPropertiesChange(title, windowSize, windowBgColor)}
-                           onAddComponent={handleAddComponent}
-                        />
-                     </WatermarkedCanvas>
+                  />               ) : (
+                  <div className='flex-1 overflow-hidden bg-slate-50 p-2'>
+                     <div className='h-full w-full'>
+                        <div className='bg-white rounded-xl shadow-xl border border-slate-200/50 overflow-hidden w-full h-full'>
+                           <WatermarkedCanvas>
+                              <Canvas
+                                 components={components}
+                                 setComponents={(newComponents) =>
+                                    handleComponentsChange(newComponents, ACTION_TYPES.UPDATE_COMPONENT)
+                                 }
+                                 selectedComponent={selectedComponent}
+                                 setSelectedComponent={handleComponentSelect}
+                                 onDeleteComponent={handleDeleteComponent}
+                                 selectedComponents={selectedComponents}
+                                 setSelectedComponents={setSelectedComponents}
+                                 windowTitle={windowTitle}
+                                 windowSize={windowSize}
+                                 windowBgColor={windowBgColor}
+                                 setWindowTitle={(title) => handleWindowPropertiesChange(title, windowSize, windowBgColor)}
+                                 onAddComponent={handleAddComponent}
+                              />
+                           </WatermarkedCanvas>
+                        </div>
+                     </div>
                   </div>
                )}
-               <div className='w-80 border-l flex flex-col overflow-hidden border-border bg-gray-50'>
+               <div className='w-72 bg-white border-l border-slate-200/50 flex flex-col overflow-hidden shadow-lg'>
                   <PropertyPanel
                      selectedComponent={selectedComponent}
                      onUpdate={handleComponentUpdate}

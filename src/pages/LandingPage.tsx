@@ -286,10 +286,10 @@ const LandingPage: React.FC = () => {
                   <div className='flex items-center space-x-4'>
                      {userExists ? (
                         <Button
-                           onClick={() => navigate('/app')}
+                           onClick={() => navigate('/')}
                            className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-6 py-2 rounded-xl'
                         >
-                           Open App
+                           Enter your Canvas
                         </Button>
                      ) : (
                         <>

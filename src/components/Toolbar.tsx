@@ -93,17 +93,20 @@ export const Toolbar = ({
    }
 
    return (
-      <div className='flex items-center justify-between px-4 py-3 bg-background border-b border-border'>
+      <div className='flex items-center justify-between px-6 py-4 bg-white border-b border-slate-200/50 shadow-sm'>
          {/* Left Section - Logo & Project Actions */}
-         <div className='flex items-center gap-3'>
-            <div className='flex items-center gap-2'>
-               <div className='w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center'>
+         <div className='flex items-center gap-4'>
+            <div className='flex items-center gap-3'>
+               <div className='w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg'>
                   <span className='text-white font-bold text-sm'>B</span>
                </div>
-               <span className='font-semibold text-lg hidden sm:block'>Buildfy</span>
+               <div className='hidden sm:block'>
+                  <span className='font-bold text-xl bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent'>Buildfy</span>
+                  <div className='text-xs text-slate-500 -mt-1'>Visual Builder</div>
+               </div>
             </div>
             
-            <Separator orientation='vertical' className='h-6' />
+            <Separator orientation='vertical' className='h-8 bg-slate-200' />
             
             {/* Project Actions */}
             <div className='flex items-center gap-1'>
@@ -115,12 +118,12 @@ export const Toolbar = ({
                            size='sm'
                            onClick={onUndo}
                            disabled={!canUndo}
-                           className='px-2'
+                           className='px-3 h-9 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all'
                         >
                            <Undo2 size={16} />
                         </Button>
                      </TooltipTrigger>
-                     <TooltipContent>
+                     <TooltipContent side="bottom" className="bg-slate-900 text-white text-xs">
                         <p>Undo (Ctrl+Z)</p>
                      </TooltipContent>
                   </Tooltip>
@@ -134,40 +137,42 @@ export const Toolbar = ({
                            size='sm'
                            onClick={onRedo}
                            disabled={!canRedo}
-                           className='px-2'
+                           className='px-3 h-9 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all'
                         >
                            <Redo2 size={16} />
                         </Button>
                      </TooltipTrigger>
-                     <TooltipContent>
+                     <TooltipContent side="bottom" className="bg-slate-900 text-white text-xs">
                         <p>Redo (Ctrl+Shift+Z)</p>
                      </TooltipContent>
                   </Tooltip>
                </TooltipProvider>
             </div>
-         </div>
-
-         {/* Center Section - View Controls */}
-         <div className='flex items-center gap-2'>
-            <div className='flex items-center bg-muted rounded-lg p-1'>
+         </div>         {/* Center Section - View Controls */}
+         <div className='flex items-center gap-3'>
+            <div className='flex items-center bg-slate-100 rounded-2xl p-1 shadow-inner'>
                <TooltipProvider>
                   <Tooltip>
                      <TooltipTrigger asChild>
                         <Button
-                           variant={!showCodePreview && !showLayers && !showWindowProperties ? 'secondary' : 'ghost'}
+                           variant="ghost"
                            size='sm'
                            onClick={() => {
                               if (showCodePreview) onToggleCodePreview()
                               if (showLayers && onToggleLayers) onToggleLayers()
                               if (showWindowProperties && onToggleWindowProperties) onToggleWindowProperties()
                            }}
-                           className='gap-2 text-xs px-3'
+                           className={`gap-2 text-sm px-3 py-1.5 h-8 rounded-xl transition-all duration-200 ${
+                              !showCodePreview && !showLayers && !showWindowProperties 
+                                 ? 'bg-white text-blue-600 shadow-sm font-medium' 
+                                 : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
+                           }`}
                         >
                            <Eye size={14} />
                            Design
                         </Button>
                      </TooltipTrigger>
-                     <TooltipContent>
+                     <TooltipContent side="bottom" className="bg-slate-900 text-white text-xs">
                         <p>Design Mode</p>
                      </TooltipContent>
                   </Tooltip>
@@ -177,16 +182,20 @@ export const Toolbar = ({
                   <Tooltip>
                      <TooltipTrigger asChild>
                         <Button
-                           variant={showCodePreview ? 'secondary' : 'ghost'}
+                           variant="ghost"
                            size='sm'
                            onClick={onToggleCodePreview}
-                           className='gap-2 text-xs px-3'
+                           className={`gap-2 text-sm px-3 py-1.5 h-8 rounded-xl transition-all duration-200 ${
+                              showCodePreview 
+                                 ? 'bg-white text-blue-600 shadow-sm font-medium' 
+                                 : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
+                           }`}
                         >
                            <Code size={14} />
                            Code
                         </Button>
                      </TooltipTrigger>
-                     <TooltipContent>
+                     <TooltipContent side="bottom" className="bg-slate-900 text-white text-xs">
                         <p>View Generated Code</p>
                      </TooltipContent>
                   </Tooltip>
@@ -200,15 +209,19 @@ export const Toolbar = ({
                      <Tooltip>
                         <TooltipTrigger asChild>
                            <Button
-                              variant={showLayers ? 'secondary' : 'ghost'}
+                              variant='ghost'
                               size='sm'
                               onClick={onToggleLayers}
-                              className='px-2'
+                              className={`px-3 h-9 rounded-lg transition-all ${
+                                 showLayers 
+                                    ? 'bg-blue-50 text-blue-600 border border-blue-200/50' 
+                                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                              }`}
                            >
                               {showLayers ? <PanelLeftClose size={16} /> : <LayersIcon size={16} />}
                            </Button>
                         </TooltipTrigger>
-                        <TooltipContent>
+                        <TooltipContent side="bottom" className="bg-slate-900 text-white text-xs">
                            <p>{showLayers ? 'Hide Layers' : 'Show Layers'}</p>
                         </TooltipContent>
                      </Tooltip>
@@ -220,65 +233,108 @@ export const Toolbar = ({
                      <Tooltip>
                         <TooltipTrigger asChild>
                            <Button
-                              variant={showWindowProperties ? 'secondary' : 'ghost'}
+                              variant='ghost'
                               size='sm'
                               onClick={onToggleWindowProperties}
-                              className='px-2'
+                              className={`px-3 h-9 rounded-lg transition-all ${
+                                 showWindowProperties 
+                                    ? 'bg-blue-50 text-blue-600 border border-blue-200/50' 
+                                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                              }`}
                            >
                               <Settings size={16} />
                            </Button>
                         </TooltipTrigger>
-                        <TooltipContent>
+                        <TooltipContent side="bottom" className="bg-slate-900 text-white text-xs">
                            <p>{showWindowProperties ? 'Hide Window Properties' : 'Window Properties'}</p>
                         </TooltipContent>
                      </Tooltip>
                   </TooltipProvider>
                )}
             </div>
-         </div>
-
-         {/* Right Section - User Actions */}
-         <div className='flex items-center gap-2'>
+         </div>         {/* Right Section - User Actions */}
+         <div className='flex items-center gap-3'>
             {/* Component Count */}
-            <Badge variant='secondary' className='text-xs px-2 py-1'>
-               {components.length} components
-            </Badge>
+            <div className='flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-lg'>
+               <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+               <span className='text-sm font-medium text-slate-700'>{components.length}</span>
+               <span className='text-xs text-slate-500'>components</span>
+            </div>
 
             {/* Actions Menu */}
             <DropdownMenu>
                <DropdownMenuTrigger asChild>
-                  <Button variant='ghost' size='sm' className='gap-2 text-xs px-3'>
+                  <Button variant='ghost' className='gap-2 text-sm px-4 h-9 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all'>
                      <Menu size={14} />
                      <span className='hidden sm:inline'>More</span>
                   </Button>
                </DropdownMenuTrigger>
-               <DropdownMenuContent align='end' className='w-48'>
-                  <DropdownMenuItem onClick={() => setModalOpen(true)}>
-                     <MessageSquare className='mr-2 h-4 w-4' />
-                     Feedback & Ideas
+               <DropdownMenuContent align='end' className='w-56 bg-white border-slate-200 shadow-xl rounded-xl p-2'>
+                  <DropdownMenuItem onClick={() => setModalOpen(true)} className="rounded-lg">
+                     <MessageSquare className='mr-3 h-4 w-4 text-blue-500' />
+                     <div>
+                        <div className="font-medium">Feedback & Ideas</div>
+                        <div className="text-xs text-slate-500">Share your thoughts</div>
+                     </div>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/pricing')}>
-                     <CreditCard className='mr-2 h-4 w-4' />
-                     Upgrade Plan
+                  <DropdownMenuItem onClick={() => navigate('/pricing')} className="rounded-lg">
+                     <CreditCard className='mr-3 h-4 w-4 text-emerald-500' />
+                     <div>
+                        <div className="font-medium">Upgrade Plan</div>
+                        <div className="text-xs text-slate-500">Unlock premium features</div>
+                     </div>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate('/profile')}>
-                     <User className='mr-2 h-4 w-4' />
-                     Profile
+                  <DropdownMenuSeparator className="bg-slate-200" />
+                  <DropdownMenuItem onClick={handleSignOut} className="rounded-lg text-red-600 hover:bg-red-50">
+                     <LogOut className='mr-3 h-4 w-4' />
+                     <div>
+                        <div className="font-medium">Sign Out</div>
+                        <div className="text-xs text-red-500">End your session</div>
+                     </div>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleSignOut}>
-                     <LogOut className='mr-2 h-4 w-4' />
-                     Sign Out
+               </DropdownMenuContent>
+            </DropdownMenu>            {/* Profile Button */}
+            <DropdownMenu>
+               <DropdownMenuTrigger asChild>
+                  <button className='w-9 h-9 rounded-xl overflow-hidden shadow-lg border-2 border-white bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center hover:scale-105 transition-transform cursor-pointer'>
+                     {user?.photoURL ? (
+                        <img 
+                           src={user.photoURL} 
+                           alt="Profile" 
+                           className="w-full h-full object-cover"
+                           onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              const sibling = e.currentTarget.nextElementSibling as HTMLElement;
+                              if (sibling) sibling.style.display = 'flex';
+                           }}
+                        />
+                     ) : null}
+                     <span 
+                        className='text-white font-semibold text-sm flex items-center justify-center w-full h-full'
+                        style={{ display: user?.photoURL ? 'none' : 'flex' }}
+                     >
+                        {user?.displayName?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U'}
+                     </span>
+                  </button>
+               </DropdownMenuTrigger>
+               <DropdownMenuContent align='end' className='w-56 bg-white border-slate-200 shadow-xl rounded-xl p-2'>
+                  <DropdownMenuItem onClick={() => navigate('/profile')} className="rounded-lg">
+                     <User className='mr-3 h-4 w-4 text-slate-500' />
+                     <div>
+                        <div className="font-medium">My Profile</div>
+                        <div className="text-xs text-slate-500">Account settings</div>
+                     </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-slate-200" />
+                  <DropdownMenuItem onClick={handleSignOut} className="rounded-lg text-red-600 hover:bg-red-50">
+                     <LogOut className='mr-3 h-4 w-4' />
+                     <div>
+                        <div className="font-medium">Sign Out</div>
+                        <div className="text-xs text-red-500">End your session</div>
+                     </div>
                   </DropdownMenuItem>
                </DropdownMenuContent>
             </DropdownMenu>
-
-            {/* User Avatar */}
-            <div className='w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center'>
-               <span className='text-white font-medium text-sm'>
-                  {user?.displayName?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U'}
-               </span>
-            </div>
          </div>
 
          {/* Feedback Dialog */}

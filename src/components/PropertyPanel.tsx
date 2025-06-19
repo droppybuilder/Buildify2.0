@@ -185,12 +185,17 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
   const isActive = (property: string, value: string) => {
     return selectedComponent.props?.[property] === value;
   };
-  
-  // Return empty panel if no component is selected
+    // Return empty panel if no component is selected
   if (!selectedComponent) {
     return (
-      <div className="p-4 flex flex-col h-full justify-center items-center text-center text-muted-foreground">
-        <p>Select a component to view and edit its properties</p>
+      <div className="p-6 flex flex-col h-full justify-center items-center text-center">
+        <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center mb-4">
+          <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a4 4 0 004-4V5z" />
+          </svg>
+        </div>
+        <h3 className="font-semibold text-slate-700 mb-2">No Component Selected</h3>
+        <p className="text-sm text-slate-500 max-w-48">Select a component from the canvas to view and edit its properties</p>
       </div>
     );
   }
@@ -218,36 +223,50 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
     'paragraph',
     'listbox'
   ].includes(selectedComponent.type);
-  
-  return (
-    <ScrollArea className="h-full px-4">
-      <div className="py-4 space-y-6">
-        <div>
-          <h2 className="text-lg font-semibold">Properties</h2>
-          <p className="text-sm text-muted-foreground">
-            {selectedComponent.type.charAt(0).toUpperCase() + selectedComponent.type.slice(1)} - {selectedComponent.id}
-          </p>
+    return (
+    <div className="h-full flex flex-col bg-white">
+      {/* Header */}
+      <div className="px-6 py-5 border-b border-slate-200/50">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center border border-blue-100">
+            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+            </svg>
+          </div>
+          <div>
+            <h2 className="font-semibold text-slate-800">Properties</h2>
+            <p className="text-xs text-slate-500">
+              {selectedComponent.type.charAt(0).toUpperCase() + selectedComponent.type.slice(1)} • {selectedComponent.id}
+            </p>
+          </div>
         </div>
-        
-        <Separator />
-        
-        {/* Dimensions & Position section */}
-        <Collapsible 
-          open={dimensionsOpen} 
-          onOpenChange={setDimensionsOpen}
-          className="border rounded-md overflow-hidden"
-        >
-          <CollapsibleTrigger className="flex items-center justify-between w-full bg-muted px-3 py-2">
-            <h3 className="text-sm font-medium">Dimensions & Position</h3>
-            {dimensionsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </CollapsibleTrigger>
-          <CollapsibleContent className="p-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label htmlFor="width" className="text-xs">Width</Label>
-                <Input
-                  id="width"
-                  type="number"
+      </div>
+      
+      {/* Content */}
+      <ScrollArea className="flex-1">
+        <div className="p-6 space-y-6">
+          {/* Dimensions & Position section */}
+          <Collapsible 
+            open={dimensionsOpen} 
+            onOpenChange={setDimensionsOpen}
+            className="bg-slate-50 rounded-xl border border-slate-200/60 overflow-hidden"
+          >
+            <CollapsibleTrigger className="flex items-center justify-between w-full px-4 py-3 hover:bg-slate-100/50 transition-colors">
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                </svg>
+                <h3 className="text-sm font-semibold text-slate-700">Dimensions & Position</h3>
+              </div>
+              {dimensionsOpen ? <ChevronUp size={16} className="text-slate-500" /> : <ChevronDown size={16} className="text-slate-500" />}
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-4 pb-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="width" className="text-xs font-medium text-slate-600 mb-1.5 block">Width</Label>
+                  <Input
+                    id="width"
+                    type="number"
                   value={getValue('width', selectedComponent.size?.width || 0)}
                   onChange={(e) => handleNumberChange(e, 'size', 'width')}
                   onFocus={() => setInputFocused(true)}
@@ -1096,10 +1115,10 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
-            </div>
-          </div>
+            </div>          </div>
         )}
       </div>
-    </ScrollArea>
+      </ScrollArea>
+    </div>
   );
 };

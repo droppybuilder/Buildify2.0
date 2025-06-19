@@ -62,20 +62,20 @@ const Canvas = ({
    } | null>(null)
    const [isSelecting, setIsSelecting] = useState(false)
    const [isMultiSelectKeyDown, setIsMultiSelectKeyDown] = useState(false)
-   
+
    const { subscription, loading: subscriptionLoading } = useSubscription()
-   
+
    // Normalize tier for feature checks
    const normalizedTier = subscription?.tier === 'lifetime' ? 'pro' : subscription?.tier
    const isUnlimitedCanvas = normalizedTier === 'standard' || normalizedTier === 'pro'
-   
+
    const maxCanvasSize = isUnlimitedCanvas ? { width: 3000, height: 2000 } : { width: 800, height: 600 }
    // Enforce canvas size limit for free users
    const enforcedWindowSize = {
       width: Math.min(windowSize.width, maxCanvasSize.width),
       height: Math.min(windowSize.height, maxCanvasSize.height),
    }
-   
+
    // Warn if user tries to resize canvas beyond allowed size
    useEffect(() => {
       // Only show warning if subscription has loaded and user doesn't have unlimited access
@@ -233,13 +233,15 @@ const Canvas = ({
                   setSelectedComponent(selected[0])
                } else if (selected.length > 1) {
                   setSelectedComponent(null)
-               }            }
+               }
+            }
          }
       }
-      
+
       setIsSelecting(false)
       setSelectionBox(null)
-      handleMouseUp()   }
+      handleMouseUp()
+   }
 
    const handleMouseDown = (e: React.MouseEvent, component: Component) => {
       try {
@@ -870,10 +872,11 @@ const Canvas = ({
       }
 
       window.addEventListener('keydown', handleKeyDown)
-      return () => window.removeEventListener('keydown', handleKeyDown)   }, [selectedComponent, selectedComponents, clipboard, components])
+      return () => window.removeEventListener('keydown', handleKeyDown)
+   }, [selectedComponent, selectedComponents, clipboard, components])
 
    return (
-      <div className='w-full h-full p-8 flex items-center justify-center'>
+      <div className='w-full h-[76vh] overflow-y-auto p-8 flex items-start justify-center '>
          <div
             className='macos-window light flex flex-col'
             style={{
@@ -994,9 +997,10 @@ const Canvas = ({
                                     return
                                  }
                                  handleMouseDown(e, component)
-                              }}                              onContextMenu={(e) => {
+                              }}
+                              onContextMenu={(e) => {
                                  // Just set the selected component for context menu actions
-                                 setSelectedComponent(component);
+                                 setSelectedComponent(component)
                               }}
                               onMouseEnter={() => handleComponentMouseEnter(component.id)}
                               onMouseLeave={handleComponentMouseLeave}
@@ -1026,7 +1030,8 @@ const Canvas = ({
                                  </>
                               )}{' '}
                            </div>
-                        </ContextMenuTrigger>                        <ContextMenuContent>
+                        </ContextMenuTrigger>{' '}
+                        <ContextMenuContent>
                            <ContextMenuItem onClick={handleCopyComponent}>
                               <Copy className='mr-2 h-4 w-4' />
                               <span>Copy</span>

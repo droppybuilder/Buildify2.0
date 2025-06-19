@@ -20,8 +20,8 @@ export const useSubscription = () => {
    const [loading, setLoading] = useState(true)
    const [error, setError] = useState<Error | null>(null)
 
-   console.log('useSubscription hook initialized') // Debug log
-   console.log('Current user:', user) // Debug log
+   // console.log('useSubscription hook initialized') // Debug log
+   // console.log('Current user:', user) // Debug log
 
    const fetchSubscription = async () => {
       if (!user) {
@@ -32,7 +32,7 @@ export const useSubscription = () => {
       try {
          setLoading(true)
          const sub = await getSubscription(user.uid)
-         console.log('Fetched subscription:', sub) // Debug log
+         // console.log('Fetched subscription:', sub) // Debug log
          setSubscription(sub)
       } catch (err) {
          setError(err instanceof Error ? err : new Error('Unknown error occurred'))

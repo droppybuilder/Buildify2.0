@@ -342,12 +342,37 @@ const Index = () => {
          // Add this to history as a window settings change
          addToHistory([...components], ACTION_TYPES.WINDOW_SETTINGS)
       },
+      [components, addToHistory, windowSize]
+   )
+
+   // Create stable setter functions that don't rely on closures
+   const handleTitleChange = useCallback(
+      (title: string) => {
+         setWindowTitle(title)
+         addToHistory([...components], ACTION_TYPES.WINDOW_SETTINGS)
+      },
+      [components, addToHistory]
+   )
+
+   const handleSizeChange = useCallback(
+      (size: { width: number; height: number }) => {
+         setWindowSize(size)
+         addToHistory([...components], ACTION_TYPES.WINDOW_SETTINGS)
+      },
+      [components, addToHistory]
+   )
+
+   const handleBgColorChange = useCallback(
+      (color: string) => {
+         setWindowBgColor(color)
+         addToHistory([...components], ACTION_TYPES.WINDOW_SETTINGS)
+      },
       [components, addToHistory]
    )
 
    // Add debug log for subscription
    useEffect(() => {
-      console.log('Index.tsx subscription:', subscription)
+      // console.log('Index.tsx subscription:', subscription)
    }, [subscription])
 
    useEffect(() => {
@@ -401,18 +426,21 @@ const Index = () => {
       components,
       setComponents,
       windowTitle,
-      setWindowTitle,      windowSize,
+      setWindowTitle,
+      windowSize,
       setWindowSize,
       windowBgColor,
       setWindowBgColor,
       addToHistory,
-      ACTION_TYPES
+      ACTION_TYPES,
    })
 
    return (
       <div className='h-screen flex overflow-hidden bg-white'>
          <Sidebar />
-         <main className='flex-1 flex flex-col overflow-hidden'>            <ProjectToolbar
+         <main className='flex-1 flex flex-col overflow-hidden'>
+            {' '}
+            <ProjectToolbar
                currentProject={projectManager.currentProject}
                setCurrentProject={projectManager.setCurrentProject}
                hasUnsavedChanges={projectManager.hasUnsavedChanges}
@@ -428,7 +456,7 @@ const Index = () => {
                windowSettings={{
                   title: windowTitle,
                   size: windowSize,
-                  bgColor: windowBgColor
+                  bgColor: windowBgColor,
                }}
             />
             <Toolbar
@@ -465,11 +493,11 @@ const Index = () => {
                   <WindowProperties
                      visible={showWindowProperties}
                      title={windowTitle}
-                     setTitle={(title) => handleWindowPropertiesChange(title, windowSize, windowBgColor)}
+                     setTitle={handleTitleChange}
                      size={windowSize}
-                     setSize={(size) => handleWindowPropertiesChange(windowTitle, size, windowBgColor)}
+                     setSize={handleSizeChange}
                      bgColor={windowBgColor}
-                     setBgColor={(color) => handleWindowPropertiesChange(windowTitle, windowSize, color)}
+                     setBgColor={handleBgColorChange}
                   />
                ) : (
                   <div className='flex-1 overflow-auto bg-background p-6'>

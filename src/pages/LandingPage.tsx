@@ -5,6 +5,9 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { toast } from 'sonner'
+import { db } from '@/integrations/firebase/firebase.config'
+import { collection, addDoc } from 'firebase/firestore'
 import logo from '/logo6.png'
 
 const features = [
@@ -191,6 +194,7 @@ const LandingPage: React.FC = () => {
    const displayPlans = [...plans, lifetimePlan]
    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
    const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' })
+   const [isSubmitting, setIsSubmitting] = useState(false)
 
    useEffect(() => {
       const handleMouseMove = (e: MouseEvent) => {
@@ -200,12 +204,31 @@ const LandingPage: React.FC = () => {
       return () => window.removeEventListener('mousemove', handleMouseMove)
    }, [])
 
-   const handleContactSubmit = (e: React.FormEvent) => {
+   const handleContactSubmit = async (e: React.FormEvent) => {
       e.preventDefault()
-      // Handle contact form submission
-      console.log('Contact form submitted:', contactForm)
-      // Reset form
-      setContactForm({ name: '', email: '', message: '' })
+      setIsSubmitting(true)
+
+      try {
+         // Save to Firebase Firestore
+         await addDoc(collection(db, 'contactform'), {
+            name: contactForm.name,
+            email: contactForm.email,
+            message: contactForm.message,
+            timestamp: new Date(),
+            status: 'new',
+         })
+
+         // Show success toast
+         toast.success("Message sent successfully! 🎉 We'll get back to you soon.")
+
+         // Reset form
+         setContactForm({ name: '', email: '', message: '' })
+      } catch (error) {
+         console.error('Error submitting contact form:', error)
+         toast.error('Failed to send message. Please try again.')
+      } finally {
+         setIsSubmitting(false)
+      }
    }
 
    return (
@@ -229,7 +252,7 @@ const LandingPage: React.FC = () => {
          <nav className='fixed top-0 w-full bg-black/10 backdrop-blur-xl border-b border-white/10 z-40'>
             <div className='max-w-7xl mx-auto px-6 sm:px-8'>
                <div className='flex items-center justify-between h-16'>
-                  <div className='flex items-center space-x-4'>
+                  <div className='flex items-center space-x-3'>
                      {' '}
                      <img
                         src={logo}
@@ -608,12 +631,13 @@ const LandingPage: React.FC = () => {
                                  placeholder='Tell us how we can help...'
                                  required
                               />
-                           </div>
+                           </div>{' '}
                            <Button
                               type='submit'
-                              className='w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 py-3 rounded-xl'
+                              disabled={isSubmitting}
+                              className='w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 py-3 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed'
                            >
-                              Send Message 📧
+                              {isSubmitting ? 'Sending... ⏳' : 'Send Message 📧'}
                            </Button>
                         </form>
                      </CardContent>
@@ -680,7 +704,7 @@ const LandingPage: React.FC = () => {
          <footer className='bg-black/20 backdrop-blur-md border-t border-white/10 py-12 px-6 sm:px-8'>
             <div className='max-w-7xl mx-auto'>
                <div className='text-center'>
-                  <div className='flex items-center justify-center space-x-3 mb-4'>
+                  <div className='flex items-center justify-center space-x-2 mb-4'>
                      <img
                         src={logo}
                         alt='Buildfy Web'

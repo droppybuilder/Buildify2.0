@@ -58,7 +58,10 @@ const AuthPage: React.FC = () => {
          <div className='w-full max-w-md z-10'>
             {/* Header */}
             <div className='mb-8 text-center'>
-               <div className='flex items-center justify-center space-x-4 mb-4'>
+               <div
+                  className='flex items-center justify-center space-x-2 mb-4 cursor-pointer hover:scale-105 transition-transform duration-300'
+                  onClick={() => navigate('/')}
+               >
                   <img
                      src={logo}
                      alt='Buildfy Web'

@@ -148,9 +148,7 @@ export default function PricingPlans() {
       filteredPlans = plans.filter(p => ['pro', 'lifetime'].includes(p.tier))
    } else if (currentTier === 'lifetime') {
       filteredPlans = plans.filter(p => p.tier === 'lifetime')
-   }
-
-   const handleUpgrade = async (plan: PricingPlan) => {
+   }   const handleUpgrade = async (plan: PricingPlan) => {
       if (!user) {
          toast.error('Please login to upgrade your plan')
          navigate('/auth')
@@ -161,27 +159,43 @@ export default function PricingPlans() {
          return
       }
       setProcessing(plan.id)
-      // Call backend to get PayU payment form
-      const res = await fetch('/api/create-payu-payment', {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({
-            planId: plan.tier,
-            userId: user.uid,
-            userEmail: user.email,
-            userName: user.displayName || user.email,
-         }),
-      })
-      const html = await res.text()
-      // Open payment form in a new window
-      const payuWin = window.open('', '_blank')
-      if (payuWin) {
-         payuWin.document.write(html)
-         payuWin.document.close()
-      } else {
-         toast.error('Popup blocked! Please allow popups for this site.')
+      
+      try {
+         // Call DodoPayments API to create payment link
+         const response = await fetch('/api/payment/create', {
+            method: 'POST',
+            headers: { 
+               'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({
+               planId: plan.tier,
+               userId: user.uid,
+               userEmail: user.email,
+               userName: user.displayName || user.email,
+            }),
+         })
+         
+         const result = await response.json()
+         
+         if (result.success) {
+            // Store payment attempt for tracking
+            localStorage.setItem('pendingPayment', JSON.stringify({
+               paymentId: result.paymentId,
+               planId: plan.tier,
+               timestamp: Date.now()
+            }))
+            
+            // Redirect to DodoPayments checkout
+            window.location.href = result.paymentUrl
+         } else {
+            throw new Error(result.error || 'Payment creation failed')
+         }
+      } catch (error) {
+         console.error('Payment creation failed:', error)
+         toast.error(`Payment initialization failed: ${error.message}`)
+      } finally {
+         setProcessing(null)
       }
-      setProcessing(null)
    }
 
    const getCurrentPlan = () => {

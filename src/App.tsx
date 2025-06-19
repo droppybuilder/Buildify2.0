@@ -8,6 +8,7 @@ import NotFound from './pages/NotFound'
 import AuthPage from './components/Auth/AuthPage'
 import PricingPlans from './components/Subscription/PricingPlans'
 import ProfilePage from './components/Profile/ProfilePage'
+import PaymentSuccess from './pages/PaymentSuccess'
 import { AuthProvider } from './contexts/AuthContext'
 import ProtectedRoute from './components/Auth/ProtectedRoute'
 import { Analytics } from '@vercel/analytics/react'
@@ -38,15 +39,19 @@ const App = () => {
                   <Route
                      path='/pricing'
                      element={<PricingPlans />}
-                  />
-                  <Route
+                  />                  <Route
                      path='/profile'
                      element={
                         <ProtectedRoute>
                            <ProfilePage />
                         </ProtectedRoute>
                      }
-                  />                  <Route
+                  />
+                  <Route
+                     path='/payment-success'
+                     element={<PaymentSuccess />}
+                  />
+                  <Route
                      path='/'
                      element={
                         <ProtectedRoute>

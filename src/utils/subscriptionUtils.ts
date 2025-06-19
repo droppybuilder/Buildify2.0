@@ -139,12 +139,29 @@ export async function getSubscription(userId: string): Promise<Subscription | nu
 
       if (docSnap.exists()) {
          const data = docSnap.data()
-         // Map Firestore user fields to Subscription shape
+         
+         // Check if user has subscription data from webhook
+         if (data.subscription) {
+            return {
+               user_id: userId,
+               tier: data.subscription.tier || 'free',
+               subscriptionExpiry: data.subscription.subscriptionExpiry || null,
+               status: data.subscription.status || null,
+               dodo_payment_id: data.subscription.dodo_payment_id || null,
+               dodo_amount: data.subscription.dodo_amount || null,
+               currency: data.subscription.currency || null,
+               payment_method: data.subscription.payment_method || null,
+               customer_email: data.subscription.customer_email || null,
+               customer_name: data.subscription.customer_name || null,
+               updated_at: data.subscription.updated_at || null,
+            }
+         }
+         
+         // Fallback to legacy subscription_type field
          return {
             user_id: userId,
             tier: (data.subscription_type || 'free').toLowerCase(),
-            subscriptionExpiry: data.subscription?.subscriptionExpiry || data.subscriptionExpiry || null,
-            // Optionally add more fields if you store them
+            subscriptionExpiry: data.subscriptionExpiry || null,
          }
       } else {
          console.warn('No user found for user:', userId)

@@ -8,8 +8,13 @@ export interface Subscription {
    tier: 'free' | 'standard' | 'pro' | 'lifetime'
    starts_at?: string | null
    expires_at?: string | null
-   payu_txnid?: string | null
-   payu_amount?: string | null
+   dodo_payment_id?: string | null
+   dodo_amount?: string | null
+   currency?: string | null
+   payment_method?: string | null
+   customer_email?: string | null
+   customer_name?: string | null
+   status?: 'active' | 'cancelled' | 'payment_failed' | null
    updated_at?: string | null
    subscriptionExpiry?: string | null
 }

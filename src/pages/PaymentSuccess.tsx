@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button'
 
 const PaymentSuccess = () => {
    const navigate = useNavigate()
-   const { refetch } = useSubscription()
+   const { subscription, refetch } = useSubscription()
    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
    const [countdown, setCountdown] = useState(5)
+   const [refreshAttempts, setRefreshAttempts] = useState(0)
 
    // Mouse tracking for animated cursor
    useEffect(() => {
@@ -17,14 +18,68 @@ const PaymentSuccess = () => {
       }
       window.addEventListener('mousemove', handleMouseMove)
       return () => window.removeEventListener('mousemove', handleMouseMove)
-   }, [])
-
+   }, [])   // Separate useEffect for countdown timer
    useEffect(() => {
-      // Refetch subscription after payment
-      refetch()
-      toast.success('Payment successful! Your subscription has been updated.')
+      // Check URL parameters for payment details from DodoPayments
+      const urlParams = new URLSearchParams(window.location.search)
+      const paymentId = urlParams.get('payment_id')
+      const status = urlParams.get('status')
+      const success = urlParams.get('success')
 
-      // Countdown timer
+      console.log('Payment Success Page - URL Parameters:', {
+         paymentId,
+         status,
+         success,
+         fullUrl: window.location.href
+      })
+
+      // Show toast only once based on URL parameters
+      if (paymentId && (status === 'succeeded' || status === 'completed' || success === 'true')) {
+         // Clear pending payment from localStorage
+         localStorage.removeItem('pendingPayment')
+
+         // Refetch subscription after successful payment
+         console.log('Payment successful - refreshing subscription data...')
+         refetch()
+         toast.success('🎉 Payment successful! Your subscription has been activated.')
+         
+         // Set up periodic refresh to ensure subscription is updated
+         const refreshInterval = setInterval(async () => {
+            setRefreshAttempts(prev => {
+               const newAttempts = prev + 1
+               console.log(`Subscription refresh attempt ${newAttempts}`)
+               
+               if (newAttempts <= 5) { // Try up to 5 times
+                  refetch()
+                  return newAttempts
+               } else {
+                  clearInterval(refreshInterval)
+                  return newAttempts
+               }
+            })
+         }, 3000) // Refresh every 3 seconds
+
+         // Clear interval after 20 seconds
+         setTimeout(() => clearInterval(refreshInterval), 20000)
+         
+      } else if (status === 'failed' || success === 'false') {
+         toast.error('❌ Payment failed. Please try again.')
+         setTimeout(() => navigate('/pricing'), 3000)
+         return
+      } else {
+         // If no payment parameters, still refetch subscription but don't show toast
+         console.log('No payment parameters found - refreshing subscription data...')
+         refetch()
+      }
+   }, []) // Remove dependencies to prevent infinite re-renders
+
+   // Log subscription changes for debugging
+   useEffect(() => {
+      console.log('Subscription updated:', subscription)
+   }, [subscription])
+
+   // Separate useEffect for countdown timer
+   useEffect(() => {
       const timer = setInterval(() => {
          setCountdown((prev) => {
             if (prev <= 1) {
@@ -37,7 +92,7 @@ const PaymentSuccess = () => {
       }, 1000)
 
       return () => clearInterval(timer)
-   }, [refetch, navigate])
+   }, [])
 
    return (
       <div className='min-h-screen w-full relative overflow-x-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white flex items-center justify-center'>

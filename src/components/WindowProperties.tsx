@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { Button } from '@/components/ui/button'
 import { ColorInput } from '@/components/ColorInput'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
 
 interface WindowPropertiesProps {
@@ -14,6 +15,8 @@ interface WindowPropertiesProps {
    setSize: (size: { width: number; height: number }) => void
    bgColor: string
    setBgColor: (color: string) => void
+   appearanceMode?: string
+   setAppearanceMode?: (mode: string) => void
 }
 
 export const WindowProperties: React.FC<WindowPropertiesProps> = ({
@@ -24,18 +27,22 @@ export const WindowProperties: React.FC<WindowPropertiesProps> = ({
    setSize,
    bgColor,
    setBgColor,
+   appearanceMode = 'system',
+   setAppearanceMode,
 }) => {
    const [localTitle, setLocalTitle] = useState(title)
    const [localWidth, setLocalWidth] = useState(size.width.toString())
    const [localHeight, setLocalHeight] = useState(size.height.toString())
    const [localBgColor, setLocalBgColor] = useState(bgColor)
+   const [localAppearanceMode, setLocalAppearanceMode] = useState(appearanceMode)
 
    useEffect(() => {
       setLocalTitle(title)
       setLocalWidth(size.width.toString())
       setLocalHeight(size.height.toString())
       setLocalBgColor(bgColor)
-   }, [title, size, bgColor])
+      setLocalAppearanceMode(appearanceMode)
+   }, [title, size, bgColor, appearanceMode])
    const handlePresetSelect = (width: string, height: string) => {
       setLocalWidth(width)
       setLocalHeight(height)
@@ -48,13 +55,14 @@ export const WindowProperties: React.FC<WindowPropertiesProps> = ({
       if (isNaN(width) || isNaN(height) || width < 100 || height < 100) {
          toast.error('Invalid dimensions. Width and height must be at least 100px.')
          return
-      }
-
-      setTitle(localTitle)
+      }      setTitle(localTitle)
       // Also update document title
       document.title = localTitle
       setSize({ width, height })
       setBgColor(localBgColor)
+      if (setAppearanceMode) {
+         setAppearanceMode(localAppearanceMode)
+      }
       toast.success('Window properties updated')
    }
 
@@ -136,15 +144,28 @@ export const WindowProperties: React.FC<WindowPropertiesProps> = ({
                      1280×720
                   </Button>
                </div>
-            </div>
-
-            <div className='space-y-2'>
-               <Label htmlFor='window-bg'>Background Color</Label>
-               <ColorInput
-                  value={localBgColor}
-                  onChange={setLocalBgColor}
-                  label='Background Color'
-               />
+            </div>            <div className='grid grid-cols-2 gap-4'>
+               <div className='space-y-2'>
+                  <Label htmlFor='window-bg'>Background Color</Label>
+                  <ColorInput
+                     value={localBgColor}
+                     onChange={setLocalBgColor}
+                     label='Background Color'
+                  />
+               </div>
+               <div className='space-y-2'>
+                  <Label htmlFor='appearance-mode'>Appearance Mode</Label>
+                  <Select value={localAppearanceMode} onValueChange={setLocalAppearanceMode}>
+                     <SelectTrigger>
+                        <SelectValue placeholder="Select mode" />
+                     </SelectTrigger>
+                     <SelectContent>
+                        <SelectItem value="system">System</SelectItem>
+                        <SelectItem value="light">Light</SelectItem>
+                        <SelectItem value="dark">Dark</SelectItem>
+                     </SelectContent>
+                  </Select>
+               </div>
             </div>
 
             <Button

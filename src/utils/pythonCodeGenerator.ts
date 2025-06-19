@@ -1,16 +1,24 @@
 import { generateComponentCode } from './componentCodeGenerator'
 
+interface WindowSettings {
+   title: string;
+   size: { width: number; height: number };
+   bgColor: string;
+   appearanceMode?: string;
+}
+
 /**
  * Generates the complete Python code for the application
  * @param components The list of components to include in the code
- * @param windowSettings The window settings object containing title, size, and bgColor
+ * @param windowSettings The window settings object containing title, size, bgColor, and appearanceMode
  */
 export function generatePythonCode(
    components: any[], 
-   windowSettings = { 
+   windowSettings: WindowSettings = { 
       title: 'My CustomTkinter Application', 
       size: { width: 800, height: 600 }, 
-      bgColor: '#1A1A1A' 
+      bgColor: '#1A1A1A',
+      appearanceMode: 'system'
    }
 ): string {
    // Initialize code with imports and class definition
@@ -24,7 +32,7 @@ from pathlib import Path
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()        # Set appearance mode and default color theme
-        ctk.set_appearance_mode("system")  # Options: "light", "dark", "system"
+        ctk.set_appearance_mode("${windowSettings.appearanceMode || 'system'}")  # Options: "light", "dark", "system"
         ctk.set_default_color_theme("blue")  # Options: "blue", "green", "dark-blue"
 
         self.title("${windowSettings.title}")

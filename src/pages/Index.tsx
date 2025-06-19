@@ -44,6 +44,7 @@ const Index = () => {
    const [windowTitle, setWindowTitle] = useState('My CustomTkinter Application')
    const [windowSize, setWindowSize] = useState({ width: 800, height: 600 })
    const [windowBgColor, setWindowBgColor] = useState('#e8e8e8') // Set dark background as default
+   const [windowAppearanceMode, setWindowAppearanceMode] = useState('system')
 
    // Safe setter for selected component that includes validation
    const safeSetSelectedComponent = useCallback(
@@ -477,7 +478,7 @@ const Index = () => {
                         <CodePreview
                            components={components}
                            visible={showCodePreview}
-                           windowSettings={{ title: windowTitle, size: windowSize, bgColor: windowBgColor }}
+                           windowSettings={{ title: windowTitle, size: windowSize, bgColor: windowBgColor, appearanceMode: windowAppearanceMode }}
                            subscription={subscription}
                         />
                      </div>
@@ -513,8 +514,7 @@ const Index = () => {
                   </>
                ) : showWindowProperties ? (
                   <>
-                     <div className='flex-1 min-w-0'>
-                        <WindowProperties
+                     <div className='flex-1 min-w-0'>                        <WindowProperties
                            visible={showWindowProperties}
                            title={windowTitle}
                            setTitle={handleTitleChange}
@@ -522,6 +522,8 @@ const Index = () => {
                            setSize={handleSizeChange}
                            bgColor={windowBgColor}
                            setBgColor={handleBgColorChange}
+                           appearanceMode={windowAppearanceMode}
+                           setAppearanceMode={setWindowAppearanceMode}
                         />
                      </div>
                      <div className='w-72 bg-white border-l border-slate-200/50 flex flex-col overflow-hidden shadow-lg'>

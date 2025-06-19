@@ -14,18 +14,19 @@ interface CodePreviewProps {
     title: string;
     size: { width: number; height: number };
     bgColor: string;
+    appearanceMode?: string;
   };
   subscription?: Subscription | null;
 }
 
 export const CodePreview: React.FC<CodePreviewProps> = ({ 
   components, 
-  visible, 
-  windowSettings = { 
+  visible,   windowSettings = { 
     title: "My CustomTkinter Application", 
     size: { width: 800, height: 600 }, 
-    bgColor: "#1A1A1A" 
-  }, 
+    bgColor: "#1A1A1A",
+    appearanceMode: "system"
+  },
   subscription 
 }) => {
   const [code, setCode] = useState('');

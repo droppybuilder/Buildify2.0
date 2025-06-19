@@ -472,12 +472,11 @@ const Index = () => {
                showLayers={showLayers}
                showWindowProperties={showWindowProperties}
             />
-            <div className='flex-1 flex overflow-hidden'>
-               {showCodePreview ? (
+            <div className='flex-1 flex overflow-hidden'>               {showCodePreview ? (
                   <CodePreview
                      components={components}
                      visible={showCodePreview}
-                     windowTitle={windowTitle}
+                     windowSettings={{ title: windowTitle, size: windowSize, bgColor: windowBgColor }}
                      subscription={subscription} // Pass subscription prop
                   />
                ) : showLayers ? (

@@ -10,11 +10,24 @@ import { Subscription } from '@/hooks/useSubscription';
 interface CodePreviewProps {
   components: any[];
   visible: boolean;
-  windowTitle?: string;
+  windowSettings?: {
+    title: string;
+    size: { width: number; height: number };
+    bgColor: string;
+  };
   subscription?: Subscription | null;
 }
 
-export const CodePreview: React.FC<CodePreviewProps> = ({ components, visible, windowTitle = "My CustomTkinter Application", subscription }) => {
+export const CodePreview: React.FC<CodePreviewProps> = ({ 
+  components, 
+  visible, 
+  windowSettings = { 
+    title: "My CustomTkinter Application", 
+    size: { width: 800, height: 600 }, 
+    bgColor: "#1A1A1A" 
+  }, 
+  subscription 
+}) => {
   const [code, setCode] = useState('');
   const [isExporting, setIsExporting] = useState(false);
   const [codeTab, setCodeTab] = useState<'preview' | 'requirements' | 'readme'>('preview');
@@ -40,11 +53,10 @@ export const CodePreview: React.FC<CodePreviewProps> = ({ components, visible, w
         
         return componentCopy;
       });
-      
-      const pythonCode = generatePythonCode(preparedComponents, windowTitle);
+        const pythonCode = generatePythonCode(preparedComponents, windowSettings);
       setCode(pythonCode);
     }
-  }, [components, visible, windowTitle]);
+  }, [components, visible, windowSettings]);
 
   useEffect(() => {
     if (visible) {
@@ -81,9 +93,8 @@ export const CodePreview: React.FC<CodePreviewProps> = ({ components, visible, w
         
         return componentCopy;
       });
-      
-      console.log("Starting project export with prepared components:", preparedComponents.length);
-      await exportProject(preparedComponents, windowTitle);
+        console.log("Starting project export with prepared components:", preparedComponents.length);
+      await exportProject(preparedComponents, windowSettings);
       toast.success("Project exported successfully!");
     } catch (error) {
       console.error("Export error:", error);

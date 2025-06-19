@@ -1,14 +1,20 @@
-
-import { generateComponentCode } from './componentCodeGenerator';
+import { generateComponentCode } from './componentCodeGenerator'
 
 /**
  * Generates the complete Python code for the application
  * @param components The list of components to include in the code
- * @param windowTitle The title for the application window
+ * @param windowSettings The window settings object containing title, size, and bgColor
  */
-export function generatePythonCode(components: any[], windowTitle = "My CustomTkinter Application"): string {
-  // Initialize code with imports and class definition
-  let code = `import customtkinter as ctk
+export function generatePythonCode(
+   components: any[], 
+   windowSettings = { 
+      title: 'My CustomTkinter Application', 
+      size: { width: 800, height: 600 }, 
+      bgColor: '#1A1A1A' 
+   }
+): string {
+   // Initialize code with imports and class definition
+   let code = `import customtkinter as ctk
 import tkinter as tk
 from PIL import Image, ImageTk
 import os
@@ -21,13 +27,11 @@ class App(ctk.CTk):
 
         # Set appearance mode and default color theme
         ctk.set_appearance_mode("system")  # Options: "light", "dark", "system"
-        ctk.set_default_color_theme("blue")  # Options: "blue", "green", "dark-blue"
-
-        self.title("${windowTitle}")
-        self.geometry("800x600")
+        ctk.set_default_color_theme("blue")  # Options: "blue", "green", "dark-blue"        self.title("${windowSettings.title}")
+        self.geometry("${windowSettings.size.width}x${windowSettings.size.height}")
         
         # Set background color
-        self.configure(fg_color="#1A1A1A")  # Dark background to match web preview
+        self.configure(fg_color="${windowSettings.bgColor}")  # Dynamic background color
 
         # Configure grid layout (4x4) for better responsiveness
         self.grid_columnconfigure((0, 1, 2, 3), weight=1)
@@ -45,22 +49,22 @@ class App(ctk.CTk):
         
     def create_widgets(self):
         """Create and place all widgets"""
-`;
+`
 
-  // Process components and add widget creation code within the create_widgets method
-  if (components && components.length > 0) {
-    components.forEach(component => {
-      // Only include visible components
-      if (component.visible !== false) {
-        // Generate code for this component and add it to the main code
-        const componentCode = generateComponentCode(component, '        ');
-        code += componentCode;
-      }
-    });
-  }
+   // Process components and add widget creation code within the create_widgets method
+   if (components && components.length > 0) {
+      components.forEach((component) => {
+         // Only include visible components
+         if (component.visible !== false) {
+            // Generate code for this component and add it to the main code
+            const componentCode = generateComponentCode(component, '        ')
+            code += componentCode
+         }
+      })
+   }
 
-  // Add the load_image method as a separate method in the class with improved error handling
-  code += `
+   // Add the load_image method as a separate method in the class with improved error handling
+   code += `
     def load_image(self, path, size):
         """Load an image, resize it and return as CTkImage"""
         try:
@@ -102,10 +106,10 @@ class App(ctk.CTk):
                 print(f"Failed to create error placeholder: {e2}")
                 # Last resort - return None and let CustomTkinter handle it
                 return None
-`;
+`
 
-  // Add main method with error handling
-  code += `
+   // Add main method with error handling
+   code += `
 
 if __name__ == "__main__":
     try:
@@ -115,7 +119,7 @@ if __name__ == "__main__":
         print(f"Error running application: {e}")
         import traceback
         traceback.print_exc()
-`;
+`
 
-  return code;
+   return code
 }

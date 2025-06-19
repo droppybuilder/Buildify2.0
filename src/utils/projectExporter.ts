@@ -6,23 +6,29 @@ import { collectComponentImages } from './codeGeneratorUtils';
 /**
  * Exports the project as a ZIP file containing Python code and required files
  * @param components The list of components to export
- * @param windowTitle Optional title for the application window
+ * @param windowSettings Optional window settings object containing title, size, and bgColor
  */
-export async function exportProject(components: any[], windowTitle?: string) {
+export async function exportProject(
+  components: any[], 
+  windowSettings = { 
+    title: 'My CustomTkinter Application', 
+    size: { width: 800, height: 600 }, 
+    bgColor: '#1A1A1A' 
+  }
+) {
   try {
     console.log(`Starting project export with ${components.length} components`);
     
     // Create a new JSZip instance
     const zip = new JSZip();
-    
-    // Generate Python code
+      // Generate Python code
     console.log('Generating Python code...');
-    const pythonCode = generatePythonCode(components, windowTitle);
+    const pythonCode = generatePythonCode(components, windowSettings);
     
     // Add files to the zip
     zip.file("app.py", pythonCode);
     zip.file("requirements.txt", "customtkinter>=5.2.0\nPillow>=9.0.0\ntkcalendar>=1.6.1\n");
-    zip.file("README.md", generateReadmeContent(windowTitle));
+    zip.file("README.md", generateReadmeContent(windowSettings.title));
     
     // Create the assets directory
     const assets = zip.folder("assets");

@@ -300,10 +300,6 @@ export const Toolbar = ({
                </DropdownMenuTrigger>               <DropdownMenuContent align='end'>
                   <DropdownMenuItem onClick={() => navigate('/profile')}>Profile</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/pricing')}>Subscription</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setModalOpen(true)}>
-                     <MessageSquare className='mr-2 h-4 w-4' />
-                     Send Feedback
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleSignOut}>
                      <LogOut className='mr-2 h-4 w-4' />
                      Sign Out

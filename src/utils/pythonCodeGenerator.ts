@@ -23,11 +23,11 @@ from pathlib import Path
 
 class App(ctk.CTk):
     def __init__(self):
-        super().__init__()
-
-        # Set appearance mode and default color theme
+        super().__init__()        # Set appearance mode and default color theme
         ctk.set_appearance_mode("system")  # Options: "light", "dark", "system"
-        ctk.set_default_color_theme("blue")  # Options: "blue", "green", "dark-blue"        self.title("${windowSettings.title}")
+        ctk.set_default_color_theme("blue")  # Options: "blue", "green", "dark-blue"
+
+        self.title("${windowSettings.title}")
         self.geometry("${windowSettings.size.width}x${windowSettings.size.height}")
         
         # Set background color

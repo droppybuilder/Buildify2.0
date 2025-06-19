@@ -470,67 +470,105 @@ const Index = () => {
                showCodePreview={showCodePreview}
                showLayers={showLayers}
                showWindowProperties={showWindowProperties}
-            />
-            <div className='flex-1 flex overflow-hidden bg-slate-50'>
+            />            <div className='flex-1 flex overflow-hidden bg-slate-50'>
                {showCodePreview ? (
-                  <CodePreview
-                     components={components}
-                     visible={showCodePreview}
-                     windowSettings={{ title: windowTitle, size: windowSize, bgColor: windowBgColor }}
-                     subscription={subscription}
-                  />
+                  <>
+                     <div className='flex-1 min-w-0'>
+                        <CodePreview
+                           components={components}
+                           visible={showCodePreview}
+                           windowSettings={{ title: windowTitle, size: windowSize, bgColor: windowBgColor }}
+                           subscription={subscription}
+                        />
+                     </div>
+                     <div className='w-72 bg-white border-l border-slate-200/50 flex flex-col overflow-hidden shadow-lg'>
+                        <PropertyPanel
+                           selectedComponent={selectedComponent}
+                           onUpdate={handleComponentUpdate}
+                           setInputFocused={setInputFocused}
+                           inputFocused={inputFocused}
+                        />
+                     </div>
+                  </>
                ) : showLayers ? (
-                  <Layers
-                     components={components}
-                     onComponentsChange={handleComponentsChange}
-                     selectedComponent={selectedComponent}
-                     setSelectedComponent={handleComponentSelect}
-                     onOrderChange={handleComponentLayerOrderChange}
-                     visible={showLayers}
-                  />
+                  <>
+                     <div className='flex-1 min-w-0'>
+                        <Layers
+                           components={components}
+                           onComponentsChange={handleComponentsChange}
+                           selectedComponent={selectedComponent}
+                           setSelectedComponent={handleComponentSelect}
+                           onOrderChange={handleComponentLayerOrderChange}
+                           visible={showLayers}
+                        />
+                     </div>
+                     <div className='w-72 bg-white border-l border-slate-200/50 flex flex-col overflow-hidden shadow-lg'>
+                        <PropertyPanel
+                           selectedComponent={selectedComponent}
+                           onUpdate={handleComponentUpdate}
+                           setInputFocused={setInputFocused}
+                           inputFocused={inputFocused}
+                        />
+                     </div>
+                  </>
                ) : showWindowProperties ? (
-                  <WindowProperties
-                     visible={showWindowProperties}
-                     title={windowTitle}
-                     setTitle={handleTitleChange}
-                     size={windowSize}
-                     setSize={handleSizeChange}
-                     bgColor={windowBgColor}
-                     setBgColor={handleBgColorChange}
-                  />               ) : (
-                  <div className='flex-1 overflow-hidden bg-slate-50 p-2'>
-                     <div className='h-full w-full'>
-                        <div className='bg-white rounded-xl shadow-xl border border-slate-200/50 overflow-hidden w-full h-full'>
-                           <WatermarkedCanvas>
-                              <Canvas
-                                 components={components}
-                                 setComponents={(newComponents) =>
-                                    handleComponentsChange(newComponents, ACTION_TYPES.UPDATE_COMPONENT)
-                                 }
-                                 selectedComponent={selectedComponent}
-                                 setSelectedComponent={handleComponentSelect}
-                                 onDeleteComponent={handleDeleteComponent}
-                                 selectedComponents={selectedComponents}
-                                 setSelectedComponents={setSelectedComponents}
-                                 windowTitle={windowTitle}
-                                 windowSize={windowSize}
-                                 windowBgColor={windowBgColor}
-                                 setWindowTitle={(title) => handleWindowPropertiesChange(title, windowSize, windowBgColor)}
-                                 onAddComponent={handleAddComponent}
-                              />
-                           </WatermarkedCanvas>
+                  <>
+                     <div className='flex-1 min-w-0'>
+                        <WindowProperties
+                           visible={showWindowProperties}
+                           title={windowTitle}
+                           setTitle={handleTitleChange}
+                           size={windowSize}
+                           setSize={handleSizeChange}
+                           bgColor={windowBgColor}
+                           setBgColor={handleBgColorChange}
+                        />
+                     </div>
+                     <div className='w-72 bg-white border-l border-slate-200/50 flex flex-col overflow-hidden shadow-lg'>
+                        <PropertyPanel
+                           selectedComponent={selectedComponent}
+                           onUpdate={handleComponentUpdate}
+                           setInputFocused={setInputFocused}
+                           inputFocused={inputFocused}
+                        />
+                     </div>
+                  </>
+               ) : (
+                  <>
+                     <div className='flex-1 overflow-hidden bg-slate-50 p-2'>
+                        <div className='h-full w-full'>
+                           <div className='bg-white rounded-xl shadow-xl border border-slate-200/50 overflow-hidden w-full h-full'>
+                              <WatermarkedCanvas>
+                                 <Canvas
+                                    components={components}
+                                    setComponents={(newComponents) =>
+                                       handleComponentsChange(newComponents, ACTION_TYPES.UPDATE_COMPONENT)
+                                    }
+                                    selectedComponent={selectedComponent}
+                                    setSelectedComponent={handleComponentSelect}
+                                    onDeleteComponent={handleDeleteComponent}
+                                    selectedComponents={selectedComponents}
+                                    setSelectedComponents={setSelectedComponents}
+                                    windowTitle={windowTitle}
+                                    windowSize={windowSize}
+                                    windowBgColor={windowBgColor}
+                                    setWindowTitle={(title) => handleWindowPropertiesChange(title, windowSize, windowBgColor)}
+                                    onAddComponent={handleAddComponent}
+                                 />
+                              </WatermarkedCanvas>
+                           </div>
                         </div>
                      </div>
-                  </div>
+                     <div className='w-72 bg-white border-l border-slate-200/50 flex flex-col overflow-hidden shadow-lg'>
+                        <PropertyPanel
+                           selectedComponent={selectedComponent}
+                           onUpdate={handleComponentUpdate}
+                           setInputFocused={setInputFocused}
+                           inputFocused={inputFocused}
+                        />
+                     </div>
+                  </>
                )}
-               <div className='w-72 bg-white border-l border-slate-200/50 flex flex-col overflow-hidden shadow-lg'>
-                  <PropertyPanel
-                     selectedComponent={selectedComponent}
-                     onUpdate={handleComponentUpdate}
-                     setInputFocused={setInputFocused}
-                     inputFocused={inputFocused}
-                  />
-               </div>
             </div>
          </main>
       </div>

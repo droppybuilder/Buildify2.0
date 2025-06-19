@@ -24,12 +24,13 @@ export function getComponentProps(component: any): any {
   props.y = Math.round(component.position?.y || 0);
   props.width = Math.round(component.size?.width || 100);
   props.height = Math.round(component.size?.height || 30);
-  
-  // Extract style properties
+    // Extract style properties
   props.text = component.props?.text || '';
-  props.bg_color = component.props?.bgColor || '#1A1A1A';  // Dark background to match web preview
-  props.fg_color = component.props?.fgColor || component.props?.bgColor || '#3b82f6';
-  props.text_color = component.props?.textColor || '#ffffff';  // Default to white text for dark mode
+  props.bg_color = component.props?.bgColor || '#1A1A1A';  // Background color
+  // For CustomTkinter: fg_color is the component background (button, frame, etc.)
+  // fgColor from PropertyPanel is actually text color in the visual, but bgColor is the component background
+  props.fg_color = component.props?.bgColor || '#3b82f6';  // Component background color (button color, frame color, etc.)
+  props.text_color = component.props?.fgColor || '#ffffff';  // Text color
   props.cornerRadius = component.props?.cornerRadius || 8;
   props.borderWidth = component.props?.borderWidth !== undefined ? component.props?.borderWidth : 1;
   props.borderColor = component.props?.borderColor || '#e2e8f0';

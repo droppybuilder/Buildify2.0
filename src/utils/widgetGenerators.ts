@@ -217,6 +217,8 @@ function generateProgressBarCode(safeId: string, props: any, indent: string): st
 function generateParagraphCode(safeId: string, props: any, indent: string): string {
   let code = '';
   
+  // For textbox, we want the background color from the visual (bgColor) as fg_color in CTk
+  // but we already mapped props.fg_color to be the bgColor, so this is correct
   code += `${indent}self.${safeId} = ctk.CTkTextbox(self, width=${props.width || 200}, height=${props.height || 100}, corner_radius=${props.cornerRadius}, fg_color="${props.fg_color || 'transparent'}", text_color="${props.text_color || '#ffffff'}", border_width=${props.borderWidth}, border_color="${props.borderColor}", ${props.fontConfig})\n`;
   
   // Use grid layout if grid properties are specified, otherwise use place

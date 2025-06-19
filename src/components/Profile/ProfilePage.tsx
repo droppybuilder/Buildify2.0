@@ -85,7 +85,7 @@ const ProfilePage: React.FC = () => {
    const handleLogout = async () => {
       try {
          await signOut(auth) // Logs the user out
-         navigate('/auth') // Redirects to the auth page
+         navigate('/') // Redirects to the auth page
       } catch (error) {
          console.error('Error logging out:', error)
          alert('Failed to log out. Please try again.')
@@ -111,12 +111,12 @@ const ProfilePage: React.FC = () => {
 
    // Helper to format expiry date
    const getExpiryText = () => {
-      if (!subscription || !subscription.subscriptionExpiry) return null;
-      if (subscription.subscriptionExpiry === 'lifetime') return 'Never (Lifetime)';
-      const date = new Date(subscription.subscriptionExpiry);
-      if (isNaN(date.getTime())) return null;
-      return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
-   };
+      if (!subscription || !subscription.subscriptionExpiry) return null
+      if (subscription.subscriptionExpiry === 'lifetime') return 'Never (Lifetime)'
+      const date = new Date(subscription.subscriptionExpiry)
+      if (isNaN(date.getTime())) return null
+      return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+   }
 
    if (loading) {
       return (

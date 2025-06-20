@@ -91,22 +91,28 @@ function getDodoProductId(planId) {
 // Create payment with DodoPayments
 async function createDodoPayment({ productId, userId, userEmail, userName, planId }) {  const baseUrl = process.env.DODO_API_BASE_URL || 'https://test.dodopayments.com';
   const apiKey = process.env.DODO_PAYMENTS_API_KEY || '2RdhbTr4OeZimZOh.x38SM3G0x4_8o35V7lOfm_Wb04pjgr-jUpP1i_ccJRv2-Hcq';
-    // Fix the return URL to ensure it has proper protocol
+  // Fix the return URL to ensure it has proper protocol
   let returnUrl = process.env.BASE_URL || process.env.VERCEL_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001';
   
-  // Ensure the URL has the proper protocol
+  // Remove trailing slash if present to avoid double slashes
+  returnUrl = returnUrl.replace(/\/$/, '');
+  
+  // Ensure the URL has the proper protocol (prefer HTTPS for production)
   if (returnUrl && !returnUrl.startsWith('http://') && !returnUrl.startsWith('https://')) {
-    returnUrl = `http://${returnUrl}`;
+    // For production, use HTTPS; for localhost, use HTTP
+    if (returnUrl.includes('localhost') || returnUrl.includes('127.0.0.1')) {
+      returnUrl = `http://${returnUrl}`;
+    } else {
+      returnUrl = `https://${returnUrl}`;
+    }
   }
-  
+    console.log('🔍 Environment variables check:');
+  console.log('- BASE_URL:', process.env.BASE_URL);
+  console.log('- VERCEL_URL:', process.env.VERCEL_URL);
+  console.log('- Final returnUrl:', returnUrl);
+  console.log('- Final payment return_url:', `${returnUrl}/payment-success`);
   console.log('API Key check:', apiKey ? `${apiKey.substring(0, 10)}...` : 'NOT SET');
   console.log('Base URL:', baseUrl);
-  console.log('Return URL will be:', `${returnUrl}/payment-success`);
-  console.log('Full API URL:', `${baseUrl}/payments`);
-  
-  console.log('API Key check:', apiKey ? `${apiKey.substring(0, 10)}...` : 'NOT SET');
-  console.log('Base URL:', baseUrl);
-  console.log('Return URL will be:', `${returnUrl}/payment-success`);
   console.log('Full API URL:', `${baseUrl}/payments`);
   
   if (!apiKey) {

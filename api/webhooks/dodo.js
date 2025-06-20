@@ -87,9 +87,9 @@ export default async function handler(req, res) {
 async function handlePaymentSuccess(paymentData) {
   console.log('🔍 Processing payment success with data:', JSON.stringify(paymentData, null, 2));
   
-  // Extract data from different possible structures
-  const payment_id = paymentData.payment_id || paymentData.id;
-  const amount = paymentData.amount || paymentData.total;
+  // Extract data from the correct DodoPayments webhook structure
+  const payment_id = paymentData.payment_id;
+  const amount = paymentData.total_amount; // Fixed: was 'amount', should be 'total_amount'
   const currency = paymentData.currency;
   const customer = paymentData.customer || {};
   const metadata = paymentData.metadata || {};
@@ -120,22 +120,29 @@ async function handlePaymentSuccess(paymentData) {
 
     console.log('💾 Updating Firestore for user:', metadata.userId);
 
+    // Prepare subscription data with proper null checks
+    const subscriptionData = {
+      tier: metadata.planType,
+      paid: true,
+      status: 'active',
+      payment_method: 'dodo',
+      updated_at: new Date().toISOString(),
+      subscriptionExpiry: expiry
+    };
+
+    // Only add fields if they have values (not undefined)
+    if (payment_id) subscriptionData.dodo_payment_id = payment_id;
+    if (amount !== undefined && amount !== null) subscriptionData.dodo_amount = amount.toString();
+    if (currency) subscriptionData.currency = currency;
+    if (customer.email) subscriptionData.customer_email = customer.email;
+    if (customer.name) subscriptionData.customer_name = customer.name;
+
+    console.log('💾 Final subscription data:', subscriptionData);
+
     // Update user subscription in Firestore
     const userRef = db.collection('users').doc(metadata.userId);
     await userRef.set({
-      subscription: {
-        tier: metadata.planType,
-        paid: true,
-        dodo_payment_id: payment_id,
-        dodo_amount: amount,
-        currency: currency,
-        updated_at: new Date().toISOString(),
-        subscriptionExpiry: expiry,
-        status: 'active',
-        payment_method: 'dodo',
-        customer_email: customer.email,
-        customer_name: customer.name
-      }
+      subscription: subscriptionData
     }, { merge: true });
 
     console.log(`✅ Payment succeeded - subscription updated for user: ${metadata.userId}, plan: ${metadata.planType}`);

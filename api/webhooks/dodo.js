@@ -44,29 +44,32 @@ export default async function handler(req, res) {
     const payload = req.body;
 
     console.log('✅ Webhook verified successfully');
-    console.log('📦 DodoPayments webhook payload:', {
-      type: payload.type,
-      payment_id: payload.payment_id,
-      metadata: payload.metadata
-    });
+    console.log('📦 Full DodoPayments webhook payload:', JSON.stringify(payload, null, 2));
+    
+    // Extract the actual payment data from the payload
+    const eventType = payload.type;
+    const paymentData = payload.data || payload; // Use data if present, fallback to payload
+    
+    console.log('📦 Event type:', eventType);
+    console.log('📦 Payment data:', JSON.stringify(paymentData, null, 2));
 
     // Handle different webhook events
-    switch (payload.type) {
+    switch (eventType) {
       case 'payment.succeeded':
-        await handlePaymentSuccess(payload);
+        await handlePaymentSuccess(paymentData);
         break;
       case 'payment.failed':
-        await handlePaymentFailed(payload);
+        await handlePaymentFailed(paymentData);
         break;
       case 'subscription.activated':
-        await handleSubscriptionActivated(payload);
+        await handleSubscriptionActivated(paymentData);
         break;
       case 'subscription.cancelled':
-        await handleSubscriptionCancelled(payload);
+        await handleSubscriptionCancelled(paymentData);
         break;
       default:
-        console.log('Unhandled webhook type:', payload.type);
-    }    return res.status(200).json({ received: true });
+        console.log('Unhandled webhook type:', eventType);
+    }return res.status(200).json({ received: true });
   } catch (error) {
     console.error('❌ Webhook error:', {
       message: error.message,
@@ -81,17 +84,41 @@ export default async function handler(req, res) {
   }
 }
 
-async function handlePaymentSuccess(payload) {
-  const { customer, metadata, payment_id, amount, currency } = payload;
+async function handlePaymentSuccess(paymentData) {
+  console.log('🔍 Processing payment success with data:', JSON.stringify(paymentData, null, 2));
+  
+  // Extract data from different possible structures
+  const payment_id = paymentData.payment_id || paymentData.id;
+  const amount = paymentData.amount || paymentData.total;
+  const currency = paymentData.currency;
+  const customer = paymentData.customer || {};
+  const metadata = paymentData.metadata || {};
+  
+  console.log('🔍 Extracted values:', {
+    payment_id,
+    amount,
+    currency,
+    customer,
+    metadata
+  });
   
   try {
     if (!metadata?.userId || !metadata?.planType) {
-      console.error('Missing metadata in webhook payload');
+      console.error('❌ Missing metadata in webhook payload:', {
+        metadata,
+        hasUserId: !!metadata?.userId,
+        hasPlanType: !!metadata?.planType
+      });
+      
+      // Log the full payment data to understand the structure
+      console.error('❌ Full payment data for debugging:', JSON.stringify(paymentData, null, 2));
       return;
     }
 
     // Calculate subscription expiry based on plan
     const expiry = calculateSubscriptionExpiry(metadata.planType);
+
+    console.log('💾 Updating Firestore for user:', metadata.userId);
 
     // Update user subscription in Firestore
     const userRef = db.collection('users').doc(metadata.userId);
@@ -109,7 +136,9 @@ async function handlePaymentSuccess(payload) {
         customer_email: customer.email,
         customer_name: customer.name
       }
-    }, { merge: true });    console.log(`✅ Payment succeeded - updating subscription for user: ${metadata.userId}, plan: ${metadata.planType}`);
+    }, { merge: true });
+
+    console.log(`✅ Payment succeeded - subscription updated for user: ${metadata.userId}, plan: ${metadata.planType}`);
   } catch (error) {
     console.error('❌ Failed to update subscription:', error);
     throw error;

@@ -1,4 +1,26 @@
 // DodoPayments API integration for Vercel serverless functions
+
+// Simple in-memory rate limiting (for production, use Redis or database)
+const rateLimitMap = new Map();
+
+function rateLimit(identifier, maxRequests = 3, windowMs = 300000) {
+  const now = Date.now();
+  const userRequests = rateLimitMap.get(identifier) || [];
+  
+  // Remove old requests outside the window
+  const validRequests = userRequests.filter(time => now - time < windowMs);
+  
+  if (validRequests.length >= maxRequests) {
+    return false; // Rate limit exceeded
+  }
+  
+  // Add current request
+  validRequests.push(now);
+  rateLimitMap.set(identifier, validRequests);
+  
+  return true; // Request allowed
+}
+
 export default async function handler(req, res) {
   // Add CORS headers for local development
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -14,6 +36,15 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Rate limiting by IP address
+  const clientIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'unknown';
+  if (!rateLimit(clientIP, 3, 300000)) { // 3 requests per 5 minutes
+    return res.status(429).json({ 
+      success: false, 
+      error: 'Too many payment requests. Please try again later.' 
+    });
+  }
+
   try {
     const { planId, userId, userEmail, userName } = req.body;
     
@@ -25,6 +56,38 @@ export default async function handler(req, res) {
       return res.status(400).json({ 
         success: false, 
         error: 'Missing required fields: planId, userId, userEmail, userName' 
+      });
+    }
+
+    // Enhanced input validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(userEmail)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid email format' 
+      });
+    }
+
+    if (userId.length < 3 || userId.length > 50) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'User ID must be between 3 and 50 characters' 
+      });
+    }
+
+    if (userName.length < 1 || userName.length > 100) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'User name must be between 1 and 100 characters' 
+      });
+    }
+
+    // Validate plan ID
+    const validPlans = ['standard', 'pro', 'lifetime'];
+    if (!validPlans.includes(planId)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: `Invalid plan ID: ${planId}. Valid plans: ${validPlans.join(', ')}` 
       });
     }
 
@@ -140,6 +203,7 @@ async function createDodoPayment({ productId, userId, userEmail, userName, planI
       zipcode: "10001"
     },
     return_url: `${returnUrl}/payment-success`,
+    cancel_url: `${returnUrl}/pricing?status=cancelled`,
     metadata: {
       userId: userId,
       planType: planId,

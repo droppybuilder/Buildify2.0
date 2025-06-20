@@ -131,6 +131,18 @@ export default function PricingPlans() {
       return () => window.removeEventListener('mousemove', handleMouseMove)
    }, [])
 
+   // Check for cancelled payment
+   useEffect(() => {
+      const urlParams = new URLSearchParams(window.location.search)
+      const status = urlParams.get('status')
+      
+      if (status === 'cancelled') {
+         toast.error('❌ Payment was cancelled. Please try again when you\'re ready.')
+         // Clean up URL
+         window.history.replaceState({}, '', '/pricing')
+      }
+   }, [])
+
    // Helper to get the user's normalized tier
    const getCurrentTier = () => {
       if (!subscription) return 'free'

@@ -20,10 +20,9 @@
   "headers": [
     {
       "source": "/api/(.*)",
-      "headers": [
-        {
+      "headers": [        {
           "key": "Access-Control-Allow-Origin",
-          "value": "*"
+          "value": "https://buildfyweb.vercel.app"
         },
         {
           "key": "Access-Control-Allow-Methods",

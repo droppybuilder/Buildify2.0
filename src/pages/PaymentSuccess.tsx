@@ -61,10 +61,11 @@ const PaymentSuccess = () => {
 
          // Clear interval after 20 seconds
          setTimeout(() => clearInterval(refreshInterval), 20000)
-         
-      } else if (status === 'failed' || success === 'false') {
+           } else if (status === 'failed' || success === 'false') {
+         // Payment failed - redirect to pricing page immediately
+         console.log('Payment failed - redirecting to pricing page')
          toast.error('❌ Payment failed. Please try again.')
-         setTimeout(() => navigate('/pricing'), 3000)
+         navigate('/pricing')
          return
       } else {
          // If no payment parameters, still refetch subscription but don't show toast

@@ -12,6 +12,7 @@ import { auth } from '../../integrations/firebase/firebase.config'
 import { signOut } from 'firebase/auth'
 import { X } from 'lucide-react'
 import { useSubscription } from '@/hooks/useSubscription'
+import { toast } from 'sonner'
 
 interface Profile {
    id: string
@@ -26,10 +27,20 @@ const ProfilePage: React.FC = () => {
    const [profile, setProfile] = useState<Profile | null>(null)
    const [displayName, setDisplayName] = useState('')
    const [loading, setLoading] = useState(true)
+   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
    const navigate = useNavigate()
 
+   // Mouse tracking for animated cursor
    useEffect(() => {
-      let isMounted = true // Prevent state updates if component unmounts
+      const handleMouseMove = (e: MouseEvent) => {
+         setMousePosition({ x: e.clientX, y: e.clientY })
+      }
+      window.addEventListener('mousemove', handleMouseMove)
+      return () => window.removeEventListener('mousemove', handleMouseMove)
+   }, [])
+
+   useEffect(() => {
+      let isMounted = true
 
       const fetchProfile = async () => {
          try {
@@ -45,16 +56,16 @@ const ProfilePage: React.FC = () => {
 
             if (docSnap.exists() && isMounted) {
                const data = docSnap.data() as Profile
-               console.log('Fetched profile data:', data) // Debug log
+               console.log('Fetched profile data:', data)
                setProfile(data)
                setDisplayName(data.display_name || '')
             } else if (isMounted) {
                console.warn('No profile found for user:', user.uid)
-               setProfile(null) // Ensure profile is set to null if not found
+               setProfile(null)
             }
          } catch (error) {
             console.error('Error fetching profile:', error)
-            alert('Failed to load profile. Please try again later.')
+            toast.error('❌ Failed to load profile. Please try again later.')
          } finally {
             if (isMounted) setLoading(false)
          }
@@ -63,7 +74,7 @@ const ProfilePage: React.FC = () => {
       fetchProfile()
 
       return () => {
-         isMounted = false // Cleanup to prevent state updates after unmount
+         isMounted = false
       }
    }, [user, navigate])
 
@@ -75,20 +86,21 @@ const ProfilePage: React.FC = () => {
          await updateDoc(docRef, { display_name: displayName })
 
          setProfile({ ...profile, display_name: displayName })
-         alert('Profile updated successfully')
+         toast.success('✅ Profile updated successfully!')
       } catch (error) {
          console.error('Error updating profile:', error)
-         alert('Failed to update profile')
+         toast.error('❌ Failed to update profile. Please try again.')
       }
    }
 
    const handleLogout = async () => {
       try {
-         await signOut(auth) // Logs the user out
-         navigate('/') // Redirects to the auth page
+         await signOut(auth)
+         toast.success('👋 Successfully logged out!')
+         navigate('/')
       } catch (error) {
          console.error('Error logging out:', error)
-         alert('Failed to log out. Please try again.')
+         toast.error('❌ Failed to log out. Please try again.')
       }
    }
 
@@ -109,7 +121,6 @@ const ProfilePage: React.FC = () => {
          .toUpperCase()
    }
 
-   // Helper to format expiry date
    const getExpiryText = () => {
       if (!subscription || !subscription.subscriptionExpiry) return null
       if (subscription.subscriptionExpiry === 'lifetime') return 'Never (Lifetime)'
@@ -120,99 +131,119 @@ const ProfilePage: React.FC = () => {
 
    if (loading) {
       return (
-         <div className='container mx-auto p-6'>
-            <div className='flex justify-center'>
-               <span>Loading profile...</span>
+         <div className='min-h-screen w-full relative overflow-x-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white flex items-center justify-center'>
+            <div className='text-center'>
+               <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4'></div>
+               <span className='text-lg'>Loading profile...</span>
             </div>
          </div>
       )
    }
 
    return (
-      <div className='container mx-auto p-6 relative flex flex-col items-center min-h-[80vh]'>
+      <div className='min-h-screen w-full relative overflow-x-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white'>
+         {/* Animated Cursor Effect */}
+         <div
+            className='fixed pointer-events-none z-50 w-6 h-6 rounded-full bg-gradient-to-r from-pink-500 to-violet-500 opacity-30 blur-sm transition-all duration-75 ease-out'
+            style={{
+               left: mousePosition.x - 12,
+               top: mousePosition.y - 12,
+            }}
+         />
+         
          {/* Close Icon */}
          <button
-            className='absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors'
+            className='absolute top-4 right-4 p-2 rounded-full hover:bg-white/10 transition-colors z-10'
             onClick={() => navigate('/')}
             aria-label='Close'
          >
-            <X className='w-6 h-6 text-gray-500 hover:text-primary' />
+            <X className='w-6 h-6 text-white hover:text-pink-400' />
          </button>
-         <div className='w-full max-w-2xl flex flex-col gap-8 justify-center items-stretch'>
-            {/* Profile Information */}
-            <Card className='flex-1 flex flex-col justify-between'>
-               <CardHeader>
-                  <CardTitle>Profile Information</CardTitle>
-                  <CardDescription>Update your account details and preferences</CardDescription>
-               </CardHeader>
-               <CardContent className='space-y-6'>
-                  <div className='flex items-center space-x-4'>
-                     <Avatar className='h-16 w-16 border border-pink-400'>
-                        {profile?.avatar_url ? (
-                           <AvatarImage
-                              src={profile.avatar_url}
-                              alt={profile.display_name || profile.email}
-                           />
-                        ) : (
-                           <AvatarFallback>
-                              {profile?.display_name
-                                 ? getInitials(profile.display_name)
-                                 : profile?.email.charAt(0).toUpperCase()}
-                           </AvatarFallback>
-                        )}
-                     </Avatar>
-                     <div>
-                        <h3 className='text-lg font-medium'>{profile?.display_name || 'No display name set'}</h3>
-                        <p className='text-sm text-gray-500'>{profile?.email}</p>
+
+         <div className='container mx-auto p-6 relative flex flex-col items-center min-h-screen justify-center'>
+            <div className='w-full max-w-2xl flex flex-col gap-8 justify-center items-stretch'>
+               {/* Profile Information */}
+               <Card className='flex-1 flex flex-col justify-between bg-white/10 backdrop-blur-md border-white/20'>
+                  <CardHeader>
+                     <CardTitle className='text-white'>Profile Information</CardTitle>
+                     <CardDescription className='text-gray-300'>Update your account details and preferences</CardDescription>
+                  </CardHeader>
+                  <CardContent className='space-y-6'>
+                     <div className='flex items-center space-x-4'>
+                        <Avatar className='h-16 w-16 border border-pink-400'>
+                           {profile?.avatar_url ? (
+                              <AvatarImage
+                                 src={profile.avatar_url}
+                                 alt={profile.display_name || profile.email}
+                              />
+                           ) : (
+                              <AvatarFallback className='bg-gradient-to-r from-pink-500 to-violet-500 text-white'>
+                                 {profile?.display_name
+                                    ? getInitials(profile.display_name)
+                                    : profile?.email.charAt(0).toUpperCase()}
+                              </AvatarFallback>
+                           )}
+                        </Avatar>
+                        <div>
+                           <h3 className='text-lg font-medium text-white'>{profile?.display_name || 'No display name set'}</h3>
+                           <p className='text-sm text-gray-300'>{profile?.email}</p>
+                        </div>
                      </div>
-                  </div>
-                  <div className='space-y-2'>
-                     <Label htmlFor='display-name'>Display Name</Label>
-                     <Input
-                        id='display-name'
-                        value={displayName}
-                        onChange={(e) => setDisplayName(e.target.value)}
-                        placeholder='Enter your display name'
-                     />
-                  </div>
-                  <div className='flex justify-between'>
-                     <Button onClick={updateProfile}>Save Changes</Button>
+                     <div className='space-y-2'>
+                        <Label htmlFor='display-name' className='text-white'>Display Name</Label>
+                        <Input
+                           id='display-name'
+                           value={displayName}
+                           onChange={(e) => setDisplayName(e.target.value)}
+                           placeholder='Enter your display name'
+                           className='bg-white/10 border-white/20 text-white placeholder:text-gray-400'
+                        />
+                     </div>
+                     <div className='flex justify-between'>
+                        <Button onClick={updateProfile} className='bg-gradient-to-r from-pink-500 to-violet-500 hover:from-pink-600 hover:to-violet-600'>
+                           Save Changes
+                        </Button>
+                        <Button
+                           variant='destructive'
+                           onClick={handleLogout}
+                           className='bg-red-600 hover:bg-red-700'
+                        >
+                           Sign Out
+                        </Button>
+                     </div>
+                  </CardContent>
+               </Card>
+               
+               {/* Subscription Info */}
+               <Card className='flex-1 flex flex-col justify-between bg-white/10 backdrop-blur-md border-white/20'>
+                  <CardHeader>
+                     <CardTitle className='text-white'>Subscription</CardTitle>
+                     <CardDescription className='text-gray-300'>Your current plan and subscription information</CardDescription>
+                  </CardHeader>
+                  <CardContent className='space-y-4 flex flex-col flex-1'>
+                     <div>
+                        <h3 className='font-medium text-white'>Current Plan</h3>
+                        <p className='text-2xl font-bold capitalize bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent'>
+                           {subscription ? subscription.tier : 'Free'}
+                        </p>
+                     </div>
+                     {subscription && subscription.tier !== 'free' && (
+                        <div>
+                           <span className='text-sm text-gray-300'>
+                              Subscription expires: <b className='text-white'>{getExpiryText() || 'Unknown'}</b>
+                           </span>
+                        </div>
+                     )}
+                     <div className='flex-1'></div>
                      <Button
-                        variant='destructive'
-                        onClick={handleLogout}
+                        className='w-full mt-auto bg-gradient-to-r from-pink-500 to-violet-500 hover:from-pink-600 hover:to-violet-600'
+                        onClick={() => navigate('/pricing')}
                      >
-                        Sign Out
+                        Upgrade Plan
                      </Button>
-                  </div>
-               </CardContent>
-            </Card>
-            {/* Subscription Info */}
-            <Card className='flex-1 flex flex-col justify-between'>
-               <CardHeader>
-                  <CardTitle>Subscription</CardTitle>
-                  <CardDescription>Your current plan and subscription information</CardDescription>
-               </CardHeader>
-               <CardContent className='space-y-4 flex flex-col flex-1'>
-                  <div>
-                     <h3 className='font-medium'>Current Plan</h3>
-                     <p className='text-2xl font-bold capitalize'>{subscription ? subscription.tier : 'Free'}</p>
-                  </div>
-                  {subscription && subscription.tier !== 'free' && (
-                     <div>
-                        <span className='text-sm text-muted-foreground'>
-                           Subscription expires: <b>{getExpiryText() || 'Unknown'}</b>
-                        </span>
-                     </div>
-                  )}
-                  <div className='flex-1'></div>
-                  <Button
-                     className='w-full mt-auto'
-                     onClick={() => navigate('/pricing')}
-                  >
-                     Upgrade Plan
-                  </Button>
-               </CardContent>
-            </Card>
+                  </CardContent>
+               </Card>
+            </div>
          </div>
       </div>
    )

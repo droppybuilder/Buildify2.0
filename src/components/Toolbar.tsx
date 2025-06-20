@@ -17,7 +17,6 @@ import {
 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import {
    DropdownMenu,
@@ -35,6 +34,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { feedbackService } from '@/services/feedbackService'
 import { toast } from 'sonner'
+import { useNavigate } from 'react-router-dom'
 
 interface ToolbarProps {
    components: any[]
@@ -399,75 +399,146 @@ export const Toolbar = ({
                   </DropdownMenuItem>
                </DropdownMenuContent>
             </DropdownMenu>
-         </div>
+         </div>{' '}
          {/* Feedback Dialog */}
          <Dialog
             open={modalOpen}
             onOpenChange={setModalOpen}
          >
-            <DialogContent className='max-w-md mx-auto'>
+            {' '}
+            <DialogContent className='max-w-lg mx-auto bg-slate-900 border border-slate-700 text-white rounded-2xl p-8'>
                <DialogHeader>
-                  <DialogTitle>Share Your Feedback & Ideas</DialogTitle>
+                  <DialogTitle className='text-white bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent'>
+                     Share Your Feedback & Ideas
+                  </DialogTitle>
                </DialogHeader>
                <form onSubmit={handleSubmit}>
-                  <div className='space-y-4'>
-                     <div className='space-y-2'>
-                        <Label htmlFor='title'>Title</Label>
-                        <Input
-                           id='title'
-                           type='text'
-                           placeholder='Brief title for your feedback or idea'
-                           value={title}
-                           onChange={(e) => setTitle(e.target.value)}
-                           disabled={submitting}
-                           required
-                        />
-                     </div>
-                     <div className='space-y-2'>
-                        <Label htmlFor='description'>Description</Label>
-                        <textarea
-                           id='description'
-                           className='w-full min-h-[100px] p-3 border border-input bg-background rounded-md text-sm focus:border-primary focus:outline-none'
-                           placeholder='Please describe your feedback or feature request in detail...'
-                           value={description}
-                           onChange={(e) => setDescription(e.target.value)}
-                           disabled={submitting}
-                           required
-                        />
-                     </div>
-                     <div className='space-y-2'>
-                        <Label>Type</Label>
-                        <div className='flex gap-4'>
-                           <label className='flex items-center space-x-2'>
+                  <div className='space-y-5'>
+                     {/* Type Selection */}
+                     <div className='space-y-3'>
+                        <Label className='text-white font-medium'>Type</Label>
+
+                        <div className='flex gap-3'>
+                           {' '}
+                           <label
+                              className={`flex items-center space-x-3 cursor-pointer p-3 rounded-xl transition-all ${
+                                 submissionType === 'feedback'
+                                    ? 'bg-pink-500/20 border border-pink-500/30'
+                                    : 'hover:bg-slate-800/50 border border-transparent'
+                              }`}
+                           >
                               <input
                                  type='radio'
                                  value='feedback'
                                  checked={submissionType === 'feedback'}
                                  onChange={(e) => setSubmissionType(e.target.value as 'feedback' | 'feature-request')}
                                  disabled={submitting}
+                                 className='w-4 h-4 text-pink-500 bg-slate-800 border-slate-600 focus:ring-0 focus:ring-offset-0'
                               />
-                              <span className='text-sm'>General Feedback</span>
-                           </label>
-                           <label className='flex items-center space-x-2'>
+                              <span
+                                 className={`text-sm transition-colors ${
+                                    submissionType === 'feedback' ? 'text-pink-400 font-medium' : 'text-gray-300'
+                                 }`}
+                              >
+                                 💬 General Feedback
+                              </span>
+                           </label>{' '}
+                           <label
+                              className={`flex items-center space-x-3 cursor-pointer p-3 rounded-xl transition-all ${
+                                 submissionType === 'feature-request'
+                                    ? 'bg-violet-500/20 border border-violet-500/30'
+                                    : 'hover:bg-slate-800/50 border border-transparent'
+                              }`}
+                           >
                               <input
                                  type='radio'
                                  value='feature-request'
                                  checked={submissionType === 'feature-request'}
                                  onChange={(e) => setSubmissionType(e.target.value as 'feedback' | 'feature-request')}
                                  disabled={submitting}
+                                 className='w-4 h-4 text-violet-500 bg-slate-800 border-slate-600 focus:ring-0 focus:ring-offset-0'
                               />
-                              <span className='text-sm'>Feature Request</span>
+                              <span
+                                 className={`text-sm transition-colors ${
+                                    submissionType === 'feature-request'
+                                       ? 'text-violet-400 font-medium'
+                                       : 'text-gray-300'
+                                 }`}
+                              >
+                                 ✨ Feature Request
+                              </span>
                            </label>
                         </div>
+
+                        {/* Info Box */}
+                        <div
+                           className={`p-3 rounded-xl border transition-all ${
+                              submissionType === 'feedback'
+                                 ? 'bg-pink-500/10 border-pink-500/30'
+                                 : 'bg-violet-500/10 border-violet-500/30'
+                           }`}
+                        >
+                           <p className='text-xs text-gray-300'>
+                              {submissionType === 'feedback'
+                                 ? "� Request new features or functionality that doesn't currently exist in the app."
+                                 : '� Share your thoughts about the app, report bugs, or suggest improvements to existing features.'}
+                           </p>
+                        </div>
+                     </div>{' '}
+                     <div className='space-y-3'>
+                        <Label
+                           htmlFor='title'
+                           className='text-white'
+                        >
+                           {submissionType === 'feedback' ? 'Feedback Title' : 'Feature Title'}
+                        </Label>
+                        <Input
+                           id='title'
+                           type='text'
+                           placeholder={
+                              submissionType === 'feedback'
+                                 ? 'Brief title for your feedback...'
+                                 : 'Brief title for your feature request...'
+                           }
+                           value={title}
+                           onChange={(e) => setTitle(e.target.value)}
+                           disabled={submitting}
+                           required
+                           className='bg-slate-800 border-slate-600 text-white placeholder:text-gray-400 focus:border-pink-500 rounded-xl h-11 px-4'
+                        />
                      </div>
-                  </div>
-                  <DialogFooter>
+                     <div className='space-y-3'>
+                        <Label
+                           htmlFor='description'
+                           className='text-white'
+                        >
+                           {submissionType === 'feedback' ? 'Your Feedback' : 'Feature Description'}
+                        </Label>
+                        <textarea
+                           id='description'
+                           className='w-full min-h-[120px] p-4 border border-slate-600 bg-slate-800 rounded-xl text-sm text-white placeholder:text-gray-400 focus:border-pink-500 focus:outline-none resize-none'
+                           placeholder={
+                              submissionType === 'feedback'
+                                 ? "Please share your thoughts, suggestions, or issues you've encountered..."
+                                 : "Describe the feature you'd like to see. What problem would it solve? How would it work?..."
+                           }
+                           value={description}
+                           onChange={(e) => setDescription(e.target.value)}
+                           disabled={submitting}
+                           required
+                        />
+                     </div>
+                  </div>{' '}
+                  <DialogFooter className='pt-4'>
                      <Button
                         type='submit'
                         disabled={submitting || !description || !title}
+                        className='w-full bg-gradient-to-r from-pink-500 to-violet-500 hover:from-pink-600 hover:to-violet-600 text-white border-0 rounded-xl h-11'
                      >
-                        {submitting ? 'Submitting...' : 'Submit'}
-                     </Button>{' '}
+                        {submitting
+                           ? 'Submitting...'
+                           : `Submit ${submissionType === 'feedback' ? 'Feedback' : 'Feature Request'}`}
+                     </Button>
                   </DialogFooter>
                </form>
             </DialogContent>

@@ -284,8 +284,13 @@ export function getRemainingDays(subscription: Subscription | null): number | nu
    
    const expiryDate = new Date(subscription.subscriptionExpiry)
    const now = new Date()
+   
+   // Set both dates to start of day to avoid time zone issues
+   expiryDate.setHours(23, 59, 59, 999) // End of expiry day
+   now.setHours(0, 0, 0, 0) // Start of current day
+   
    const diffTime = expiryDate.getTime() - now.getTime()
-   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
    
    return Math.max(0, diffDays)
 }

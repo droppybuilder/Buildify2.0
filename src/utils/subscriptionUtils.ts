@@ -98,10 +98,45 @@ function normalizeTier(tier: string): 'free' | 'standard' | 'pro' {
 }
 
 /**
+ * Check if a subscription has expired
+ */
+export function isSubscriptionExpired(subscription: Subscription | null): boolean {
+   if (!subscription || !subscription.subscriptionExpiry) {
+      return false // No expiry data means it's free or lifetime
+   }
+   
+   if (subscription.subscriptionExpiry === 'lifetime') {
+      return false // Lifetime never expires
+   }
+   
+   const expiryDate = new Date(subscription.subscriptionExpiry)
+   const now = new Date()
+   
+   return expiryDate < now
+}
+
+/**
+ * Get the effective subscription tier, considering expiry
+ */
+export function getEffectiveTier(subscription: Subscription | null): 'free' | 'standard' | 'pro' | 'lifetime' {
+   if (!subscription) {
+      return 'free'
+   }
+   
+   // Check if subscription has expired
+   if (isSubscriptionExpired(subscription)) {
+      return 'free'
+   }
+   
+   return subscription.tier || 'free'
+}
+
+/**
  * Check if a subscription has a specific feature
  */
 export function hasFeature(subscription: Subscription | null, feature: string): boolean {
-   const tier = normalizeTier(subscription?.tier || 'free')
+   const effectiveTier = getEffectiveTier(subscription)
+   const tier = normalizeTier(effectiveTier)
    return TIER_FEATURES[tier].includes(feature)
 }
 
@@ -116,7 +151,8 @@ export function getFeatures(tier: 'free' | 'standard' | 'pro' | 'lifetime') {
  * Check if a widget is available for a subscription tier
  */
 export function isWidgetAvailable(widget: string, subscription: Subscription | null): boolean {
-   const tier = normalizeTier(subscription?.tier || 'free')
+   const effectiveTier = getEffectiveTier(subscription)
+   const tier = normalizeTier(effectiveTier)
    const advancedWidgets = ['DatePicker', 'ColorPicker', 'Slider', 'ProgressBar', 'TabView']
 
    // All users have access to basic widgets
@@ -140,9 +176,11 @@ export async function getSubscription(userId: string): Promise<Subscription | nu
       if (docSnap.exists()) {
          const data = docSnap.data()
          
+         let subscription: Subscription | null = null
+         
          // Check if user has subscription data from webhook
          if (data.subscription) {
-            return {
+            subscription = {
                user_id: userId,
                tier: data.subscription.tier || 'free',
                subscriptionExpiry: data.subscription.subscriptionExpiry || null,
@@ -155,14 +193,38 @@ export async function getSubscription(userId: string): Promise<Subscription | nu
                customer_name: data.subscription.customer_name || null,
                updated_at: data.subscription.updated_at || null,
             }
+         } else {
+            // Fallback to legacy subscription_type field
+            subscription = {
+               user_id: userId,
+               tier: (data.subscription_type || 'free').toLowerCase() as 'free' | 'standard' | 'pro' | 'lifetime',
+               subscriptionExpiry: data.subscriptionExpiry || null,
+            }
          }
          
-         // Fallback to legacy subscription_type field
-         return {
-            user_id: userId,
-            tier: (data.subscription_type || 'free').toLowerCase(),
-            subscriptionExpiry: data.subscriptionExpiry || null,
+         // Check if subscription has expired and update if necessary
+         if (subscription && isSubscriptionExpired(subscription)) {
+            console.log(`Subscription expired for user ${userId}, updating to free tier`)
+            
+            // Update the user's subscription to free tier
+            const expiredSubscriptionData = {
+               ...data.subscription,
+               tier: 'free',
+               status: 'expired',
+               updated_at: new Date().toISOString(),
+               expired_at: new Date().toISOString()
+            }
+            
+            await setDoc(docRef, {
+               subscription: expiredSubscriptionData
+            }, { merge: true })
+            
+            // Return the updated subscription
+            subscription.tier = 'free'
+            subscription.status = 'expired'
          }
+         
+         return subscription
       } else {
          console.warn('No user found for user:', userId)
          return null
@@ -183,4 +245,55 @@ export async function setSubscription(userId: string, subscriptionData: Subscrip
    } catch (error) {
       console.error('Error updating subscription:', error)
    }
+}
+
+/**
+ * Get subscription status text for display
+ */
+export function getSubscriptionStatus(subscription: Subscription | null): string {
+   if (!subscription) {
+      return 'Free'
+   }
+   
+   if (isSubscriptionExpired(subscription)) {
+      return 'Expired'
+   }
+   
+   if (subscription.status === 'cancelled') {
+      return 'Cancelled'
+   }
+   
+   if (subscription.status === 'payment_failed') {
+      return 'Payment Failed'
+   }
+   
+   if (subscription.tier === 'lifetime') {
+      return 'Lifetime'
+   }
+   
+   return 'Active'
+}
+
+/**
+ * Get remaining days until subscription expires
+ */
+export function getRemainingDays(subscription: Subscription | null): number | null {
+   if (!subscription || !subscription.subscriptionExpiry || subscription.subscriptionExpiry === 'lifetime') {
+      return null
+   }
+   
+   const expiryDate = new Date(subscription.subscriptionExpiry)
+   const now = new Date()
+   const diffTime = expiryDate.getTime() - now.getTime()
+   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+   
+   return Math.max(0, diffDays)
+}
+
+/**
+ * Check if subscription is expiring soon (within 7 days)
+ */
+export function isExpiringSoon(subscription: Subscription | null): boolean {
+   const remainingDays = getRemainingDays(subscription)
+   return remainingDays !== null && remainingDays <= 7
 }

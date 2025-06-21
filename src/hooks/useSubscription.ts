@@ -14,7 +14,7 @@ export interface Subscription {
    payment_method?: string | null
    customer_email?: string | null
    customer_name?: string | null
-   status?: 'active' | 'cancelled' | 'payment_failed' | null
+   status?: 'active' | 'cancelled' | 'payment_failed' | 'expired' | null
    updated_at?: string | null
    subscriptionExpiry?: string | null
 }

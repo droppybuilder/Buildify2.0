@@ -18,7 +18,7 @@ const PaymentSuccess = () => {
       }
       window.addEventListener('mousemove', handleMouseMove)
       return () => window.removeEventListener('mousemove', handleMouseMove)
-   }, [])   // Separate useEffect for countdown timer
+   }, []) // Separate useEffect for countdown timer
    useEffect(() => {
       // Check URL parameters for payment details from DodoPayments
       const urlParams = new URLSearchParams(window.location.search)
@@ -30,7 +30,7 @@ const PaymentSuccess = () => {
          paymentId,
          status,
          success,
-         fullUrl: window.location.href
+         fullUrl: window.location.href,
       })
 
       // Show toast only once based on URL parameters
@@ -42,14 +42,15 @@ const PaymentSuccess = () => {
          console.log('Payment successful - refreshing subscription data...')
          refetch()
          toast.success('🎉 Payment successful! Your subscription has been activated.')
-         
+
          // Set up periodic refresh to ensure subscription is updated
          const refreshInterval = setInterval(async () => {
-            setRefreshAttempts(prev => {
+            setRefreshAttempts((prev) => {
                const newAttempts = prev + 1
                console.log(`Subscription refresh attempt ${newAttempts}`)
-               
-               if (newAttempts <= 5) { // Try up to 5 times
+
+               if (newAttempts <= 5) {
+                  // Try up to 5 times
                   refetch()
                   return newAttempts
                } else {
@@ -61,7 +62,7 @@ const PaymentSuccess = () => {
 
          // Clear interval after 20 seconds
          setTimeout(() => clearInterval(refreshInterval), 20000)
-           } else if (status === 'failed' || success === 'false') {
+      } else if (status === 'failed' || success === 'false') {
          // Payment failed - redirect to pricing page immediately
          console.log('Payment failed - redirecting to pricing page')
          toast.error('❌ Payment failed. Please try again.')
@@ -183,7 +184,7 @@ const PaymentSuccess = () => {
                   <Button
                      onClick={() => navigate('/')}
                      variant='outline'
-                     className='border-white/20 text-white hover:bg-white/10 backdrop-blur-sm py-3 px-8 rounded-xl'
+                     className='border-white/20 text-gray-600 hover:bg-white/10 backdrop-blur-sm py-3 px-8 rounded-xl'
                   >
                      🏠 Go to Dashboard
                   </Button>

@@ -13,6 +13,7 @@ import { signOut } from 'firebase/auth'
 import { X } from 'lucide-react'
 import { useSubscription } from '@/hooks/useSubscription'
 import { toast } from 'sonner'
+import { getSubscriptionStatus, getRemainingDays, isExpiringSoon, isSubscriptionExpired } from '@/utils/subscriptionUtils'
 
 interface Profile {
    id: string
@@ -219,19 +220,56 @@ const ProfilePage: React.FC = () => {
                   <CardHeader>
                      <CardTitle className='text-white'>Subscription</CardTitle>
                      <CardDescription className='text-gray-300'>Your current plan and subscription information</CardDescription>
-                  </CardHeader>
-                  <CardContent className='space-y-4 flex flex-col flex-1'>
+                  </CardHeader>                  <CardContent className='space-y-4 flex flex-col flex-1'>
                      <div>
                         <h3 className='font-medium text-white'>Current Plan</h3>
-                        <p className='text-2xl font-bold capitalize bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent'>
-                           {subscription ? subscription.tier : 'Free'}
-                        </p>
+                        <div className='flex items-center gap-2'>
+                           <p className='text-2xl font-bold capitalize bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent'>
+                              {subscription ? subscription.tier : 'Free'}
+                           </p>
+                           {subscription && (
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                 isSubscriptionExpired(subscription) 
+                                    ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                    : isExpiringSoon(subscription)
+                                    ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                                    : 'bg-green-500/20 text-green-400 border border-green-500/30'
+                              }`}>
+                                 {getSubscriptionStatus(subscription)}
+                              </span>
+                           )}
+                        </div>
                      </div>
                      {subscription && subscription.tier !== 'free' && (
-                        <div>
-                           <span className='text-sm text-gray-300'>
-                              Subscription expires: <b className='text-white'>{getExpiryText() || 'Unknown'}</b>
-                           </span>
+                        <div className='space-y-2'>
+                           <div>
+                              <span className='text-sm text-gray-300'>
+                                 Subscription expires: <b className='text-white'>{getExpiryText() || 'Unknown'}</b>
+                              </span>
+                           </div>
+                           {!isSubscriptionExpired(subscription) && getRemainingDays(subscription) !== null && (
+                              <div>
+                                 <span className={`text-sm ${
+                                    isExpiringSoon(subscription) ? 'text-yellow-400' : 'text-gray-300'
+                                 }`}>
+                                    {getRemainingDays(subscription)} days remaining
+                                 </span>
+                              </div>
+                           )}
+                           {isSubscriptionExpired(subscription) && (
+                              <div className='p-3 rounded-lg bg-red-500/10 border border-red-500/30'>
+                                 <p className='text-red-400 text-sm'>
+                                    ⚠️ Your subscription has expired. Upgrade to continue enjoying premium features.
+                                 </p>
+                              </div>
+                           )}
+                           {isExpiringSoon(subscription) && !isSubscriptionExpired(subscription) && (
+                              <div className='p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30'>
+                                 <p className='text-yellow-400 text-sm'>
+                                    ⏰ Your subscription expires soon. Consider renewing to avoid interruption.
+                                 </p>
+                              </div>
+                           )}
                         </div>
                      )}
                      <div className='flex-1'></div>
@@ -239,7 +277,7 @@ const ProfilePage: React.FC = () => {
                         className='w-full mt-auto bg-gradient-to-r from-pink-500 to-violet-500 hover:from-pink-600 hover:to-violet-600'
                         onClick={() => navigate('/pricing')}
                      >
-                        Upgrade Plan
+                        {isSubscriptionExpired(subscription) ? 'Renew Subscription' : 'Upgrade Plan'}
                      </Button>
                   </CardContent>
                </Card>

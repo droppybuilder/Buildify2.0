@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { useSubscription } from '@/hooks/useSubscription'
 import { useAuth } from '@/contexts/AuthContext'
+import { isSubscriptionExpired, isExpiringSoon, getRemainingDays } from '@/utils/subscriptionUtils'
 
 interface PlanFeature {
    name: string
@@ -323,15 +324,44 @@ export default function PricingPlans() {
                   </Card>
                ))}
             </div>
-            
-            {/* Show expiry for upgraded users */}
+              {/* Show expiry for upgraded users */}
             {subscription && subscription.tier !== 'free' && (
-               <div className='mt-8 text-center'>
+               <div className='mt-8 text-center space-y-4'>
                   <div className='inline-flex items-center px-6 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full'>
                      <span className='text-sm text-gray-300'>
                         Subscription expires: <span className='text-white font-semibold'>{getExpiryText() || 'Unknown'}</span>
                      </span>
+                     {getRemainingDays(subscription) !== null && (
+                        <span className={`ml-3 px-2 py-1 rounded-full text-xs font-medium ${
+                           isSubscriptionExpired(subscription) 
+                              ? 'bg-red-500/20 text-red-400'
+                              : isExpiringSoon(subscription)
+                              ? 'bg-yellow-500/20 text-yellow-400'
+                              : 'bg-green-500/20 text-green-400'
+                        }`}>
+                           {isSubscriptionExpired(subscription) 
+                              ? 'Expired' 
+                              : `${getRemainingDays(subscription)} days left`
+                           }
+                        </span>
+                     )}
                   </div>
+                  
+                  {isSubscriptionExpired(subscription) && (
+                     <div className='max-w-md mx-auto p-4 rounded-xl bg-red-500/10 border border-red-500/30'>
+                        <p className='text-red-400 text-sm'>
+                           ⚠️ Your subscription has expired. You've been moved to the free tier. Upgrade to restore premium features.
+                        </p>
+                     </div>
+                  )}
+                  
+                  {isExpiringSoon(subscription) && !isSubscriptionExpired(subscription) && (
+                     <div className='max-w-md mx-auto p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/30'>
+                        <p className='text-yellow-400 text-sm'>
+                           ⏰ Your subscription expires soon! Renew now to avoid any interruption to your premium features.
+                        </p>
+                     </div>
+                  )}
                </div>
             )}
          </div>

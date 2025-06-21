@@ -247,283 +247,280 @@ const LandingPage: React.FC = () => {
             <div className='absolute top-[-20%] left-[-20%] w-[60vw] h-[60vw] bg-gradient-to-r from-purple-600/30 to-pink-600/30 rounded-full blur-3xl animate-float-1' />
             <div className='absolute bottom-[-20%] right-[-20%] w-[60vw] h-[60vw] bg-gradient-to-r from-blue-600/30 to-cyan-600/30 rounded-full blur-3xl animate-float-2' />
             <div className='absolute top-1/2 left-1/2 w-[40vw] h-[40vw] bg-gradient-to-r from-emerald-600/20 to-teal-600/20 rounded-full blur-3xl animate-float-3' />
-         </div>
-         {/* Navbar */}
+         </div>         {/* Navbar */}
          <nav className='fixed top-0 w-full bg-black/10 backdrop-blur-xl border-b border-white/10 z-40'>
-            <div className='max-w-7xl mx-auto px-6 sm:px-8'>
-               <div className='flex items-center justify-between h-16'>
-                  <div className='flex items-center space-x-3'>
-                     {' '}
+            <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+               <div className='flex items-center justify-between h-16 sm:h-18'>
+                  <div className='flex items-center space-x-2 sm:space-x-3 min-w-0 flex-shrink-0'>
                      <img
                         src={logo}
                         alt='Buildfy Web'
-                        className='h-12 w-12 rounded-lg'
+                        className='h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 rounded-lg flex-shrink-0'
                      />
-                     <span className='text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+                     <span className='text-base sm:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent truncate max-w-[120px] sm:max-w-none'>
                         Buildfy Web
                      </span>
                   </div>
-                  <div className='hidden md:flex items-center space-x-8'>
+                  <div className='hidden md:flex items-center space-x-4 lg:space-x-6 xl:space-x-8'>
                      <a
                         href='#features'
-                        className='hover:text-purple-400 transition-colors'
+                        className='hover:text-purple-400 transition-colors text-sm lg:text-base whitespace-nowrap'
                      >
                         Features
                      </a>
                      <a
                         href='#pricing'
-                        className='hover:text-purple-400 transition-colors'
+                        className='hover:text-purple-400 transition-colors text-sm lg:text-base whitespace-nowrap'
                      >
                         Pricing
                      </a>
                      <a
                         href='#contact'
-                        className='hover:text-purple-400 transition-colors'
+                        className='hover:text-purple-400 transition-colors text-sm lg:text-base whitespace-nowrap'
                      >
                         Contact
                      </a>
                   </div>
-                  <div className='flex items-center space-x-4'>
+                  <div className='flex items-center space-x-2 sm:space-x-3 flex-shrink-0'>
                      {userExists ? (
                         <Button
                            onClick={() => navigate('/')}
-                           className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-6 py-2 rounded-xl'
+                           className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-2 sm:px-4 lg:px-6 py-2 rounded-xl text-xs sm:text-sm lg:text-base whitespace-nowrap'
                         >
-                           Enter your Canvas
+                           <span className='hidden sm:inline'>Enter Canvas</span>
+                           <span className='sm:hidden'>Canvas</span>
                         </Button>
                      ) : (
                         <>
                            <Button
                               variant='ghost'
                               onClick={() => navigate('/auth')}
-                              className='hover:bg-white/10'
+                              className='hover:bg-white/10 px-2 sm:px-3 lg:px-4 text-xs sm:text-sm lg:text-base whitespace-nowrap'
                            >
-                              Sign In
+                              <span className='hidden sm:inline'>Sign In</span>
+                              <span className='sm:hidden'>Login</span>
                            </Button>
                            <Button
                               onClick={() => navigate('/auth')}
-                              className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-6 py-2 rounded-xl'
+                              className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-2 sm:px-4 lg:px-6 py-2 rounded-xl text-xs sm:text-sm lg:text-base whitespace-nowrap'
                            >
-                              Get Started
+                              <span className='hidden sm:inline'>Get Started</span>
+                              <span className='sm:hidden'>Start</span>
                            </Button>
                         </>
                      )}
                   </div>
                </div>
             </div>
-         </nav>
-         {/* Hero Section */}
-         <section className='relative pt-32 pb-20 px-6 sm:px-8'>
-            <div className='max-w-6xl mx-auto text-center'>
-               <Badge className='mb-6 bg-gradient-to-r from-purple-600/20 to-pink-600/20 text-purple-300 border-purple-500/30 px-4 py-2'>
-                  🚀 Web version of the popular Buildfy Tool
-               </Badge>
+         </nav>         {/* Hero Section */}
+         <section className='relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8'>
+            <div className='max-w-6xl mx-auto text-center pt-20 sm:pt-24 pb-8 sm:pb-12'>
+               <div className='flex flex-col items-center justify-center space-y-6 sm:space-y-8'>
+                  <Badge className='bg-gradient-to-r from-purple-600/20 to-pink-600/20 text-purple-300 border-purple-500/30 px-3 sm:px-4 py-2 text-xs sm:text-sm lg:text-base'>
+                     🚀 Web version of the popular Buildfy Tool
+                  </Badge>
 
-               <h1 className='text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent leading-tight'>
-                  Build Python GUIs
-                  <br />
-                  <span className='bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
-                     Visually & Effortlessly
-                  </span>
-               </h1>
+                  <h1 className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-bold bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent leading-tight'>
+                     Build Python GUIs
+                     <br />
+                     <span className='bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+                        Visually & Effortlessly
+                     </span>
+                  </h1>
 
-               <p className='text-xl md:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed'>
-                  Create stunning Tkinter desktop applications with our intuitive drag-and-drop interface. No coding
-                  required - just design, customize, and export production-ready Python code.
-               </p>
+                  <p className='text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed px-2 sm:px-4'>
+                     Create stunning Tkinter desktop applications with our intuitive drag-and-drop interface. No coding
+                     required - just design, customize, and export production-ready Python code.
+                  </p>
 
-               <div className='flex flex-col sm:flex-row gap-4 justify-center items-center mb-16'>
-                  {' '}
-                  <Button
-                     size='lg'
-                     onClick={() => navigate(userExists ? '/app' : '/auth')}
-                     className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-8 py-3 text-lg rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300'
-                  >
-                     🚀 Start Building Now
-                  </Button>
-                  <Button
-                     size='lg'
-                     variant='outline'
-                     onClick={() => document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' })}
-                     className='border-purple-500/50 text-purple-300 hover:bg-purple-500/10 px-8 py-4 text-lg rounded-xl'
-                  >
-                     ▶️ Watch Demo
-                  </Button>
-               </div>
-
-               {/* Stats */}
-               <div className='grid grid-cols-2 md:grid-cols-4 gap-8 mb-20'>
-                  {[
-                     { number: '10,000+', label: 'GUIs Created' },
-                     { number: '5,000+', label: 'Happy Developers' },
-                     { number: '50+', label: 'UI Components' },
-                     { number: '99%', label: 'Code Quality' },
-                  ].map((stat, index) => (
-                     <div
-                        key={index}
-                        className='text-center'
+                  <div className='flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center w-full max-w-md sm:max-w-none'>
+                     <Button
+                        size='lg'
+                        onClick={() => navigate(userExists ? '/app' : '/auth')}
+                        className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-6 sm:px-8 py-3 text-sm sm:text-base lg:text-lg rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300 w-full sm:w-auto min-w-[200px]'
                      >
-                        <div className='text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
-                           {stat.number}
+                        🚀 Start Building Now
+                     </Button>
+                     <Button
+                        size='lg'
+                        variant='outline'
+                        onClick={() => document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' })}
+                        className='border-purple-500/50 text-purple-300 hover:bg-purple-500/10 px-6 sm:px-8 py-3 text-sm sm:text-base lg:text-lg rounded-xl w-full sm:w-auto min-w-[200px]'
+                     >
+                        ▶️ Watch Demo
+                     </Button>
+                  </div>
+
+                  {/* Stats */}
+                  <div className='grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 w-full max-w-4xl mx-auto pt-8 sm:pt-12'>
+                     {[
+                        { number: '10,000+', label: 'GUIs Created' },
+                        { number: '5,000+', label: 'Happy Developers' },
+                        { number: '50+', label: 'UI Components' },
+                        { number: '99%', label: 'Code Quality' },
+                     ].map((stat, index) => (
+                        <div
+                           key={index}
+                           className='text-center'
+                        >
+                           <div className='text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+                              {stat.number}
+                           </div>
+                           <div className='text-gray-400 text-xs sm:text-sm lg:text-base'>{stat.label}</div>
                         </div>
-                        <div className='text-gray-400 text-sm md:text-base'>{stat.label}</div>
-                     </div>
-                  ))}
+                     ))}
+                  </div>
                </div>
             </div>
-         </section>
-         {/* Reviews Marquee */}
-         <section className='py-16 overflow-hidden'>
-            <div className='max-w-7xl mx-auto px-6 sm:px-8'>
-               <h2 className='text-4xl font-bold text-center mb-12 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+         </section>         {/* Reviews Marquee */}
+         <section className='py-12 sm:py-16 lg:py-20 overflow-hidden'>
+            <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+               <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-8 sm:mb-12 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
                   What Developers Say
                </h2>
                <div className='relative'>
-                  <div className='flex animate-marquee space-x-8'>
+                  <div className='flex animate-marquee space-x-6 sm:space-x-8'>
                      {[...reviews, ...reviews].map((review, index) => (
                         <Card
                            key={index}
-                           className='flex-shrink-0 w-80 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6'
+                           className='flex-shrink-0 w-72 sm:w-80 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 sm:p-6'
                         >
                            <CardContent className='p-0'>
-                              <div className='flex items-center mb-4'>
-                                 <span className='text-3xl mr-3'>{review.avatar}</span>
-                                 <div>
-                                    <h4 className='font-semibold text-white'>{review.name}</h4>
-                                    <p className='text-gray-400 text-sm'>{review.role}</p>
+                              <div className='flex items-center mb-3 sm:mb-4'>
+                                 <span className='text-2xl sm:text-3xl mr-2 sm:mr-3'>{review.avatar}</span>
+                                 <div className='min-w-0 flex-1'>
+                                    <h4 className='font-semibold text-white text-sm sm:text-base truncate'>{review.name}</h4>
+                                    <p className='text-gray-400 text-xs sm:text-sm truncate'>{review.role}</p>
                                  </div>
-                                 <div className='ml-auto flex text-yellow-400'>
+                                 <div className='ml-2 flex text-yellow-400 text-sm'>
                                     {Array.from({ length: review.rating }).map((_, i) => (
                                        <span key={i}>⭐</span>
                                     ))}
                                  </div>
                               </div>
-                              <p className='text-gray-300 italic'>"{review.text}"</p>
+                              <p className='text-gray-300 text-sm sm:text-base italic leading-relaxed'>"{review.text}"</p>
                            </CardContent>
                         </Card>
                      ))}
                   </div>
                </div>
             </div>
-         </section>
-         {/* Features Section */}
+         </section>         {/* Features Section */}
          <section
             id='features'
-            className='py-20 px-6 sm:px-8'
+            className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8'
          >
             <div className='max-w-7xl mx-auto'>
-               <div className='text-center mb-16'>
-                  <h2 className='text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+               <div className='text-center mb-12 sm:mb-16'>
+                  <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
                      Powerful Features
                   </h2>
-                  <p className='text-xl text-gray-300 max-w-3xl mx-auto'>
+                  <p className='text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed'>
                      Everything you need to build professional Python GUIs without writing a single line of code
                   </p>
                </div>
 
-               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
+               <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8'>
                   {features.map((feature, index) => (
                      <Card
                         key={index}
-                        className='group bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300 transform hover:scale-105'
+                        className='group bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 sm:p-8 hover:bg-white/10 transition-all duration-300 transform hover:scale-105'
                      >
                         <CardContent className='p-0'>
                            <div
-                              className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${feature.gradient} flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform duration-300`}
+                              className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-r ${feature.gradient} flex items-center justify-center text-xl sm:text-2xl mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300`}
                            >
                               {feature.icon}
                            </div>
-                           <h3 className='text-xl font-semibold mb-4 text-white'>{feature.title}</h3>
-                           <p className='text-gray-300 leading-relaxed'>{feature.desc}</p>
+                           <h3 className='text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-white'>{feature.title}</h3>
+                           <p className='text-gray-300 text-sm sm:text-base leading-relaxed'>{feature.desc}</p>
                         </CardContent>
                      </Card>
                   ))}
                </div>
             </div>
-         </section>
-         {/* Demo Section */}
+         </section>         {/* Demo Section */}
          <section
             id='demo'
-            className='py-20 px-6 sm:px-8 bg-gradient-to-r from-purple-900/20 to-pink-900/20'
+            className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-purple-900/20 to-pink-900/20'
          >
             <div className='max-w-6xl mx-auto text-center'>
-               <h2 className='text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+               <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
                   See Buildfy in Action
                </h2>
-               <p className='text-xl text-gray-300 mb-12 max-w-3xl mx-auto'>
+               <p className='text-lg sm:text-xl text-gray-300 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed'>
                   Watch how easy it is to create professional Python GUIs with our visual builder
                </p>
 
-               <div className='relative rounded-3xl overflow-hidden bg-gradient-to-r from-purple-600/20 to-pink-600/20 p-8 backdrop-blur-md border border-white/10'>
-                  <div className='aspect-video bg-gray-800 rounded-2xl flex items-center justify-center text-6xl'>
+               <div className='relative rounded-2xl sm:rounded-3xl overflow-hidden bg-gradient-to-r from-purple-600/20 to-pink-600/20 p-4 sm:p-6 lg:p-8 backdrop-blur-md border border-white/10'>
+                  <div className='aspect-video bg-gray-800 rounded-xl sm:rounded-2xl flex items-center justify-center text-4xl sm:text-5xl lg:text-6xl'>
                      ▶️
                   </div>
-                  <div className='absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-3xl' />
+                  <div className='absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-2xl sm:rounded-3xl' />
                   <Button
                      size='lg'
-                     className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-8 py-4 text-lg rounded-xl shadow-2xl'
+                     className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg rounded-xl shadow-2xl'
                   >
                      ▶️ Play Demo
                   </Button>
                </div>
             </div>
-         </section>
-         {/* Pricing Section */}
+         </section>         {/* Pricing Section */}
          <section
             id='pricing'
-            className='py-20 px-6 sm:px-8'
+            className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8'
          >
             <div className='max-w-7xl mx-auto'>
-               <div className='text-center mb-16'>
-                  <h2 className='text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+               <div className='text-center mb-12 sm:mb-16'>
+                  <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
                      Choose Your Plan
                   </h2>
-                  <p className='text-xl text-gray-300 max-w-3xl mx-auto'>
+                  <p className='text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed'>
                      Start free and scale as you grow. All plans include our core features.
                   </p>
                </div>
 
-               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8'>
+               <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8'>
                   {displayPlans.map((plan) => (
                      <Card
                         key={plan.id}
-                        className={`relative bg-white/5 backdrop-blur-md border rounded-2xl p-8 hover:bg-white/10 transition-all duration-300 transform hover:scale-105 ${
+                        className={`relative bg-white/5 backdrop-blur-md border rounded-2xl p-6 sm:p-8 hover:bg-white/10 transition-all duration-300 transform hover:scale-105 ${
                            plan.tier === 'pro' ? 'border-purple-500 ring-2 ring-purple-500/20' : 'border-white/10'
                         }`}
                      >
                         {plan.tier === 'pro' && (
-                           <Badge className='absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1'>
+                           <Badge className='absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 sm:px-4 py-1 text-xs sm:text-sm'>
                               Most Popular
                            </Badge>
                         )}
                         <CardContent className='p-0'>
-                           <div className='text-center mb-8'>
-                              <h3 className='text-2xl font-bold mb-2 text-white'>{plan.name}</h3>
-                              <p className='text-gray-400 mb-4'>{plan.description}</p>
+                           <div className='text-center mb-6 sm:mb-8'>
+                              <h3 className='text-xl sm:text-2xl font-bold mb-2 text-white'>{plan.name}</h3>
+                              <p className='text-gray-400 text-sm sm:text-base mb-3 sm:mb-4'>{plan.description}</p>
                               <div className='flex items-baseline justify-center'>
-                                 <span className='text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+                                 <span className='text-3xl sm:text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
                                     {plan.price}
                                  </span>
-                                 <span className='text-gray-400 ml-2'>/{plan.billingPeriod}</span>
+                                 <span className='text-gray-400 ml-2 text-sm sm:text-base'>/{plan.billingPeriod}</span>
                               </div>
                            </div>
 
-                           <ul className='space-y-3 mb-8'>
+                           <ul className='space-y-2 sm:space-y-3 mb-6 sm:mb-8'>
                               {plan.features.map((feature, index) => (
                                  <li
                                     key={index}
-                                    className={`flex items-center ${
+                                    className={`flex items-center text-sm sm:text-base ${
                                        feature.included ? 'text-green-400' : 'text-gray-500'
                                     }`}
                                  >
-                                    <span className='mr-3'>{feature.included ? '✅' : '❌'}</span>
-                                    {feature.name}
+                                    <span className='mr-2 sm:mr-3 text-xs sm:text-sm'>{feature.included ? '✅' : '❌'}</span>
+                                    <span className='leading-tight'>{feature.name}</span>
                                  </li>
                               ))}
                            </ul>
 
                            <Button
-                              className={`w-full py-3 rounded-xl ${
+                              className={`w-full py-2 sm:py-3 rounded-xl text-sm sm:text-base ${
                                  plan.tier === 'pro'
                                     ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
                                     : 'bg-white/10 hover:bg-white/20 border border-white/20'
@@ -537,38 +534,37 @@ const LandingPage: React.FC = () => {
                   ))}
                </div>
             </div>
-         </section>
-         {/* Team Section */}
-         <section className='py-20 px-6 sm:px-8 bg-gradient-to-r from-purple-900/20 to-pink-900/20'>
+         </section>         {/* Team Section */}
+         <section className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-purple-900/20 to-pink-900/20'>
             <div className='max-w-5xl mx-auto'>
-               <div className='text-center mb-16'>
-                  <h2 className='text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+               <div className='text-center mb-12 sm:mb-16'>
+                  <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
                      Meet Our Team
                   </h2>
-                  <p className='text-xl text-gray-300 max-w-3xl mx-auto'>
+                  <p className='text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed'>
                      The passionate developers behind Buildfy, making GUI development accessible to everyone
                   </p>
                </div>
 
-               <div className='flex flex-col md:flex-row gap-8 justify-center items-center'>
+               <div className='flex flex-col sm:flex-row gap-6 sm:gap-8 justify-center items-center'>
                   {team.map((member, index) => (
                      <Card
                         key={index}
-                        className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300 transform hover:scale-105 max-w-sm'
+                        className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 sm:p-8 hover:bg-white/10 transition-all duration-300 transform hover:scale-105 w-full max-w-sm'
                      >
                         <CardContent className='p-0 text-center'>
                            <img
                               src={member.img}
                               alt={member.name}
-                              className='w-24 h-24 rounded-full mx-auto mb-6 ring-4 ring-purple-500/20'
+                              className='w-20 h-20 sm:w-24 sm:h-24 rounded-full mx-auto mb-4 sm:mb-6 ring-4 ring-purple-500/20'
                            />
-                           <h3 className='text-xl font-semibold mb-2 text-white'>{member.name}</h3>
-                           <p className='text-purple-400 mb-4'>{member.role}</p>
+                           <h3 className='text-lg sm:text-xl font-semibold mb-2 text-white'>{member.name}</h3>
+                           <p className='text-purple-400 mb-3 sm:mb-4 text-sm sm:text-base'>{member.role}</p>
                            <Button
                               variant='outline'
                               size='sm'
                               onClick={() => window.open(member.peerlist, '_blank')}
-                              className='border-purple-500/50 text-purple-300 hover:bg-purple-500/10'
+                              className='border-purple-500/50 text-purple-300 hover:bg-purple-500/10 text-xs sm:text-sm'
                            >
                               View Profile
                            </Button>
@@ -577,36 +573,36 @@ const LandingPage: React.FC = () => {
                   ))}
                </div>
             </div>
-         </section>
-         {/* Contact Section */}
+         </section>         {/* Contact Section */}
          <section
             id='contact'
-            className='py-20 px-6 sm:px-8'
+            className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8'
          >
             <div className='max-w-5xl mx-auto'>
-               <div className='text-center mb-16'>
-                  <h2 className='text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+               <div className='text-center mb-12 sm:mb-16'>
+                  <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
                      Get in Touch
                   </h2>
-                  <p className='text-xl text-gray-300 max-w-3xl mx-auto'>
+                  <p className='text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed'>
                      Have questions? Need support? Want to collaborate? We'd love to hear from you!
                   </p>
-               </div>{' '}
-               <div className='grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch'>
+               </div>
+
+               <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-stretch'>
                   {/* Contact Form */}
-                  <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-8 h-full'>
+                  <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 sm:p-8 h-full'>
                      <CardContent className='p-0 h-full flex flex-col'>
-                        <h3 className='text-2xl font-semibold mb-6 text-white'>Send us a message</h3>
+                        <h3 className='text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-white'>Send us a message</h3>
                         <form
                            onSubmit={handleContactSubmit}
-                           className='space-y-6'
+                           className='space-y-4 sm:space-y-6 flex-1'
                         >
                            <div>
                               <label className='block text-sm font-medium text-gray-300 mb-2'>Name</label>
                               <Input
                                  value={contactForm.name}
                                  onChange={(e) => setContactForm((prev) => ({ ...prev, name: e.target.value }))}
-                                 className='bg-white/10 border-white/20 text-white placeholder-gray-400 rounded-xl'
+                                 className='bg-white/10 border-white/20 text-white placeholder-gray-400 rounded-xl text-sm sm:text-base'
                                  placeholder='Your name'
                                  required
                               />
@@ -617,81 +613,83 @@ const LandingPage: React.FC = () => {
                                  type='email'
                                  value={contactForm.email}
                                  onChange={(e) => setContactForm((prev) => ({ ...prev, email: e.target.value }))}
-                                 className='bg-white/10 border-white/20 text-white placeholder-gray-400 rounded-xl'
+                                 className='bg-white/10 border-white/20 text-white placeholder-gray-400 rounded-xl text-sm sm:text-base'
                                  placeholder='your@email.com'
                                  required
                               />
                            </div>
-                           <div>
+                           <div className='flex-1'>
                               <label className='block text-sm font-medium text-gray-300 mb-2'>Message</label>
                               <Textarea
                                  value={contactForm.message}
                                  onChange={(e) => setContactForm((prev) => ({ ...prev, message: e.target.value }))}
-                                 className='bg-white/10 border-white/20 text-white placeholder-gray-400 rounded-xl min-h-[120px]'
+                                 className='bg-white/10 border-white/20 text-white placeholder-gray-400 rounded-xl min-h-[100px] sm:min-h-[120px] text-sm sm:text-base resize-none'
                                  placeholder='Tell us how we can help...'
                                  required
                               />
-                           </div>{' '}
+                           </div>
+
                            <Button
                               type='submit'
                               disabled={isSubmitting}
-                              className='w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 py-3 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed'
+                              className='w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 py-2 sm:py-3 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base'
                            >
                               {isSubmitting ? 'Sending... ⏳' : 'Send Message 📧'}
                            </Button>
                         </form>
                      </CardContent>
-                  </Card>{' '}
+                  </Card>
+
                   {/* Contact Info */}
-                  <div className='space-y-8 h-full flex flex-col justify-center'>
-                     <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6'>
+                  <div className='space-y-4 sm:space-y-6 lg:space-y-8 h-full flex flex-col justify-center'>
+                     <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 sm:p-6'>
                         <CardContent className='p-0'>
-                           <div className='flex items-center space-x-4'>
-                              <div className='w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center text-xl'>
+                           <div className='flex items-center space-x-3 sm:space-x-4'>
+                              <div className='w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center text-lg sm:text-xl flex-shrink-0'>
                                  👨‍💼
                               </div>
-                              <div>
-                                 <h4 className='font-semibold text-white'>Pratyush Mishra</h4>
-                                 <p className='text-gray-400'>proxlight02@gmail.com</p>
+                              <div className='min-w-0 flex-1'>
+                                 <h4 className='font-semibold text-white text-sm sm:text-base'>Pratyush Mishra</h4>
+                                 <p className='text-gray-400 text-xs sm:text-sm break-all'>proxlight02@gmail.com</p>
                               </div>
                            </div>
                         </CardContent>
                      </Card>
-                     <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6'>
+                     <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 sm:p-6'>
                         <CardContent className='p-0'>
-                           <div className='flex items-center space-x-4'>
-                              <div className='w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-xl'>
+                           <div className='flex items-center space-x-3 sm:space-x-4'>
+                              <div className='w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-lg sm:text-xl flex-shrink-0'>
                                  📧
-                              </div>{' '}
-                              <div>
-                                 <h4 className='font-semibold text-white'>Email Support</h4>
-                                 <p className='text-gray-400'>droppybuilder@gmail.com</p>
                               </div>
-                           </div>
-                        </CardContent>{' '}
-                     </Card>{' '}
-                     <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6'>
-                        <CardContent className='p-0'>
-                           <div className='flex items-center space-x-4'>
-                              <div className='w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center text-xl'>
-                                 🐛
-                              </div>{' '}
-                              <div>
-                                 <h4 className='font-semibold text-white'>Bug Reports</h4>
-                                 <p className='text-gray-400'>droppybuilder@gmail.com</p>
+                              <div className='min-w-0 flex-1'>
+                                 <h4 className='font-semibold text-white text-sm sm:text-base'>Email Support</h4>
+                                 <p className='text-gray-400 text-xs sm:text-sm break-all'>droppybuilder@gmail.com</p>
                               </div>
                            </div>
                         </CardContent>
                      </Card>
-                     <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6'>
+                     <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 sm:p-6'>
                         <CardContent className='p-0'>
-                           <div className='flex items-center space-x-4'>
-                              <div className='w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center text-xl'>
+                           <div className='flex items-center space-x-3 sm:space-x-4'>
+                              <div className='w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center text-lg sm:text-xl flex-shrink-0'>
+                                 🐛
+                              </div>
+                              <div className='min-w-0 flex-1'>
+                                 <h4 className='font-semibold text-white text-sm sm:text-base'>Bug Reports</h4>
+                                 <p className='text-gray-400 text-xs sm:text-sm break-all'>droppybuilder@gmail.com</p>
+                              </div>
+                           </div>
+                        </CardContent>
+                     </Card>
+                     <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 sm:p-6'>
+                        <CardContent className='p-0'>
+                           <div className='flex items-center space-x-3 sm:space-x-4'>
+                              <div className='w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center text-lg sm:text-xl flex-shrink-0'>
                                  👨‍💻
                               </div>
-                              <div>
-                                 <h4 className='font-semibold text-white'>Nakul Srivastava</h4>
-                                 <p className='text-gray-400'>imnakul44@gmail.com</p>
+                              <div className='min-w-0 flex-1'>
+                                 <h4 className='font-semibold text-white text-sm sm:text-base'>Nakul Srivastava</h4>
+                                 <p className='text-gray-400 text-xs sm:text-sm break-all'>imnakul44@gmail.com</p>
                               </div>
                            </div>
                         </CardContent>
@@ -699,26 +697,25 @@ const LandingPage: React.FC = () => {
                   </div>
                </div>
             </div>
-         </section>{' '}
-         {/* Footer */}
-         <footer className='bg-black/20 backdrop-blur-md border-t border-white/10 py-12 px-6 sm:px-8'>
+         </section>{' '}         {/* Footer */}
+         <footer className='bg-black/20 backdrop-blur-md border-t border-white/10 py-8 sm:py-12 px-4 sm:px-6 lg:px-8'>
             <div className='max-w-7xl mx-auto'>
                <div className='text-center'>
-                  <div className='flex items-center justify-center space-x-2 mb-4'>
+                  <div className='flex items-center justify-center space-x-2 mb-3 sm:mb-4'>
                      <img
                         src={logo}
                         alt='Buildfy Web'
-                        className='h-10 w-10 rounded-lg'
+                        className='h-8 w-8 sm:h-10 sm:w-10 rounded-lg'
                      />
-                     <span className='text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+                     <span className='text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
                         Buildfy Web
                      </span>
                   </div>
-                  <p className='text-gray-400 mb-8 max-w-2xl mx-auto'>
+                  <p className='text-gray-400 text-sm sm:text-base mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed'>
                      Making Python GUI development accessible to everyone through visual design.
                   </p>
-                  <div className='border-t border-white/10 pt-8'>
-                     <p className='text-gray-400 text-sm'>© 2025 Buildfy Web. All rights reserved.</p>
+                  <div className='border-t border-white/10 pt-6 sm:pt-8'>
+                     <p className='text-gray-400 text-xs sm:text-sm'>© 2025 Buildfy Web. All rights reserved.</p>
                   </div>
                </div>
             </div>

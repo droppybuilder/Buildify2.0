@@ -128,11 +128,13 @@ async function handlePaymentSuccess(paymentData) {
       payment_method: 'dodo',
       updated_at: new Date().toISOString(),
       subscriptionExpiry: expiry
-    };
-
-    // Only add fields if they have values (not undefined)
+    };    // Only add fields if they have values (not undefined)
     if (payment_id) subscriptionData.dodo_payment_id = payment_id;
-    if (amount !== undefined && amount !== null) subscriptionData.dodo_amount = amount.toString();
+    if (amount !== undefined && amount !== null) {
+      // Convert amount from cents to dollars for display
+      const dollarAmount = (parseFloat(amount) / 100).toFixed(2);
+      subscriptionData.dodo_amount = dollarAmount;
+    }
     if (currency) subscriptionData.currency = currency;
     if (customer.email) subscriptionData.customer_email = customer.email;
     if (customer.name) subscriptionData.customer_name = customer.name;

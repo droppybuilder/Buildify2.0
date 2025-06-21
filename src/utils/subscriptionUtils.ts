@@ -302,3 +302,31 @@ export function isExpiringSoon(subscription: Subscription | null): boolean {
    const remainingDays = getRemainingDays(subscription)
    return remainingDays !== null && remainingDays <= 7
 }
+
+/**
+ * Format amount for display - handles both cents and dollar formats
+ */
+export function formatAmount(amount: string | number, currency: string = 'USD'): string {
+  if (!amount) return '0.00';
+  
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+  
+  // If amount is greater than 1000, it's likely in cents, convert to dollars
+  const displayAmount = numAmount > 1000 ? numAmount / 100 : numAmount;
+  
+  const currencySymbol = currency === 'USD' ? '$' : currency === 'INR' ? '₹' : currency;
+  
+  return `${currencySymbol}${displayAmount.toFixed(2)}`;
+}
+
+/**
+ * Normalize amount from various formats to dollars
+ */
+export function normalizeAmountToDollars(amount: string | number): number {
+  if (!amount) return 0;
+  
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+  
+  // If amount is greater than 1000, it's likely in cents, convert to dollars
+  return numAmount > 1000 ? numAmount / 100 : numAmount;
+}

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { toast } from 'sonner'
 import { projectService, ProjectData, SaveProjectData } from '@/services/projectService'
 import { useAuth } from '@/contexts/AuthContext'
+import { useSubscription } from '@/hooks/useSubscription'
 
 export interface UseProjectManagerProps {
   components: any[]
@@ -29,6 +30,7 @@ export const useProjectManager = ({
   ACTION_TYPES
 }: UseProjectManagerProps) => {
   const { user } = useAuth()
+  const { subscription } = useSubscription()
   
   const [currentProject, setCurrentProject] = useState<ProjectData | null>(null)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
@@ -122,18 +124,36 @@ export const useProjectManager = ({
       throw new Error('User not authenticated')
     }
 
+    // Cloud project limits by plan
+    const planLimits: Record<string, number | null> = {
+      free: 3,
+      standard: 10,
+      pro: 20,
+      lifetime: null // unlimited
+    }
+    const userTier = subscription?.tier || 'free'
+    const limit = planLimits[userTier] ?? 3
+
+    // Only check limit for new projects (not updates)
+    if (!projectId && limit !== null) {
+      const userProjects = await projectService.getUserProjects(user.uid)
+      if (userProjects.length >= limit) {
+        toast.error(`Cloud project limit reached for your plan (${limit}). Delete a project or upgrade your plan to save more.`)
+        throw new Error('Cloud project limit reached')
+      }
+    }
+
     const projectData: SaveProjectData = {
       name: projectName,
       components,
-      windowSettings: {
-        title: windowTitle,
+      windowSettings: {        title: windowTitle,
         size: windowSize,
         bgColor: windowBgColor
       }
     }
 
     try {
-      const savedProjectId = await projectService.saveProject(user.uid, projectData, projectId)
+      const savedProjectId = await projectService.saveProject(user.uid, projectData, projectId, user.email || undefined)
       
       // Update current project if it's a new save
       if (!projectId) {
@@ -143,6 +163,7 @@ export const useProjectManager = ({
           components,
           windowSettings: projectData.windowSettings,
           userId: user.uid,
+          userEmail: user.email || undefined,
           createdAt: new Date(),
           updatedAt: new Date()
         }
@@ -154,7 +175,8 @@ export const useProjectManager = ({
           name: projectName,
           components,
           windowSettings: projectData.windowSettings,
-          updatedAt: new Date()        } : null)
+          updatedAt: new Date()
+        } : null)
       }
 
       // Clear both local and cloud unsaved changes since we just saved to cloud
@@ -167,7 +189,7 @@ export const useProjectManager = ({
       console.error('Save project error:', error)
       throw error
     }
-  }, [user, components, windowTitle, windowSize, windowBgColor, getCurrentStateHash])
+  }, [user, components, windowTitle, windowSize, windowBgColor, getCurrentStateHash, subscription])
 
   const handleLoadProject = useCallback((project: ProjectData) => {
     setComponents(project.components || [])

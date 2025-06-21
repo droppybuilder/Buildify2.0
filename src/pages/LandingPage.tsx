@@ -109,8 +109,7 @@ const team = [
    },
 ]
 
-const plans = [
-   {
+const plans = [   {
       id: 'free',
       name: 'Free',
       description: 'Basic features for hobbyists',
@@ -122,13 +121,13 @@ const plans = [
          { name: 'Limited canvas size', included: true },
          { name: 'Watermarked exports', included: true },
          { name: 'Community support', included: true },
+         { name: 'Cloud projects (limit: 3)', included: true },
          { name: 'Export code', included: false },
          { name: 'Advanced widgets', included: false },
          { name: 'No watermarks', included: false },
          { name: 'Priority support', included: false },
       ],
-   },
-   {
+   },   {
       id: 'standard',
       name: 'Standard',
       description: 'For serious developers',
@@ -142,6 +141,7 @@ const plans = [
          { name: 'Community support', included: true },
          { name: 'Advanced widgets', included: true },
          { name: 'Email support', included: true },
+         { name: 'Cloud projects (limit: 10)', included: true },
          { name: 'Priority support', included: false },
          { name: 'Custom integrations', included: false },
       ],
@@ -162,7 +162,7 @@ const plans = [
          { name: 'Email support', included: true },
          { name: 'Priority support', included: true },
          { name: 'Custom integrations', included: true },
-         { name: 'AI Integration', included: true },
+         { name: 'Cloud projects (limit: 20)', included: true },
       ],
    },
 ]
@@ -184,7 +184,7 @@ const lifetimePlan = {
       { name: 'Priority support', included: true },
       { name: 'Custom integrations', included: true },
       { name: 'Lifetime updates', included: true },
-      { name: 'AI Integration', included: true },
+      { name: 'Cloud projects (unlimited)', included: true },
    ],
 }
 

@@ -25,6 +25,7 @@ export interface ProjectData {
   createdAt: any
   updatedAt: any
   userId: string
+  userEmail?: string
 }
 
 export interface SaveProjectData {
@@ -46,8 +47,7 @@ class ProjectService {
     }
     return ProjectService.instance
   }
-
-  async saveProject(userId: string, projectData: SaveProjectData, projectId?: string): Promise<string> {
+  async saveProject(userId: string, projectData: SaveProjectData, projectId?: string, userEmail?: string): Promise<string> {
     try {
       const id = projectId || doc(collection(db, 'projects')).id
       const docRef = doc(db, 'projects', id)
@@ -55,6 +55,7 @@ class ProjectService {
       const dataToSave = {
         ...projectData,
         userId,
+        ...(userEmail && { userEmail }),
         updatedAt: serverTimestamp(),
         ...(projectId ? {} : { createdAt: serverTimestamp() })
       }
@@ -135,8 +136,7 @@ class ProjectService {
       console.error('Error deleting project:', error)
       throw new Error('Failed to delete project')
     }
-  }
-  async duplicateProject(projectId: string, newName: string, userId: string): Promise<string> {
+  }  async duplicateProject(projectId: string, newName: string, userId: string, userEmail?: string): Promise<string> {
     try {
       const project = await this.loadProject(projectId, userId)
       if (!project) {
@@ -149,7 +149,7 @@ class ProjectService {
         windowSettings: project.windowSettings
       }
 
-      return await this.saveProject(project.userId, duplicatedData)
+      return await this.saveProject(project.userId, duplicatedData, undefined, userEmail)
     } catch (error) {
       console.error('Error duplicating project:', error)
       throw new Error('Failed to duplicate project')

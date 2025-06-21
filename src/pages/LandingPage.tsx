@@ -51,46 +51,53 @@ const features = [
 
 const reviews = [
    {
-      name: 'Alex Chen',
-      role: 'Python Developer',
+      name: 'Ritika Sharma',
+      role: 'Educator',
       rating: 5,
-      text: 'Buildfy revolutionized my workflow! Building Tkinter GUIs has never been this easy.',
-      avatar: '👨‍💻',
+      text: 'It\'s intuitive and easy to use, making it perfect for my tutorials. I\'d love to see more customization options in the future, but overall, it\'s a great tool for beginners. Looking forward to what\'s next!',
+      avatar: '👩‍🏫',
    },
    {
-      name: 'Sarah Johnson',
-      role: 'Software Engineer',
+      name: 'Daniel Kim',
+      role: 'YouTuber',
       rating: 5,
-      text: 'The drag-and-drop interface is intuitive. Saved me hours of coding!',
+      text: 'I\'ve been using the free version for my YouTube tutorials, and it\'s perfect for beginners! The interface is simple, and it\'s easy to create basic UIs. It\'s a great tool to learn with, and I\'m excited to try the Pro version soon!',
+      avatar: '📹',
+   },
+   {
+      name: 'Meera Joshi',
+      role: 'Pro User',
+      rating: 5,
+      text: 'I recently tried the Pro version after using the free one, and I\'m honestly impressed. The additional features like customizable themes, more widget options, and the ability to save and export projects have made my development process so much smoother. Definitely worth the investment for anyone serious about building Python applications with great UIs!',
       avatar: '👩‍💻',
    },
    {
-      name: 'Michael Torres',
-      role: 'Data Scientist',
+      name: 'Liam Garcia',
+      role: 'Developer',
       rating: 5,
-      text: 'Perfect for creating quick GUI prototypes. The code export is clean and professional.',
-      avatar: '🧑‍🔬',
+      text: 'I\'ve been looking for a tool that simplifies GUI creation, and this product is exactly what I needed! The drag-and-drop interface is so intuitive, and the ability to quickly customize widgets and layouts saved me hours of work. Highly recommend for anyone working on Python projects!',
+      avatar: '👨‍💻',
    },
    {
-      name: 'Emily Davis',
-      role: 'Freelancer',
+      name: 'Tanmay Bansal',
+      role: 'Python Developer',
       rating: 5,
-      text: 'Client presentations are now 10x better with beautiful UIs created in minutes.',
-      avatar: '👩‍🎨',
+      text: 'Great product loved using it. It is not a virus — sometimes the Python code is flagged as a virus file. I have connected with the creator, and they sent me the Python file which is great and contains no virus.',
+      avatar: '🛡️',
    },
    {
-      name: 'David Kim',
-      role: 'Startup Founder',
+      name: 'Sofia Ahmed',
+      role: 'Tutorial Creator',
       rating: 5,
-      text: 'Buildfy helped us launch our MVP faster. No more struggling with Tkinter layouts!',
+      text: 'I\'ve been using the free version for a few of my Python tutorials, and I\'m really impressed with how easy it is to use. The interface is clean, and it\'s super beginner-friendly. I love how quickly I can create simple UIs. Still, it\'s an excellent starting point!',
+      avatar: '👩‍🎓',
+   },
+   {
+      name: 'Arjun Nair',
+      role: 'App Developer',
+      rating: 5,
+      text: 'I started with the free version and loved the simplicity, but once I tried the Pro version, it blew me away! The extra features, especially the ability to fully customize the widgets and export options, have taken my projects to the next level.',
       avatar: '🚀',
-   },
-   {
-      name: 'Lisa Wang',
-      role: 'CS Student',
-      rating: 5,
-      text: 'Learning GUI development became fun! The visual approach makes everything clear.',
-      avatar: '🎓',
    },
 ]
 
@@ -376,7 +383,7 @@ const LandingPage: React.FC = () => {
          <section className='py-12 sm:py-16 lg:py-20 overflow-hidden'>
             <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
                <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-8 sm:mb-12 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
-                  What Developers Say
+                  What Buildfy Users Say
                </h2>
                <div className='relative'>
                   <div className='flex animate-marquee space-x-6 sm:space-x-8'>

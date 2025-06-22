@@ -204,7 +204,8 @@ export function generateCheckboxCode(component: any, isTkinter: boolean): string
         text_color="${component.props?.fgColor || '#000000'}",
         fg_color="${component.props?.checkedColor || '#3b82f6'}",
         border_color="${component.props?.borderColor || '#e2e8f0'}")
-self.checkbox_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})`;
+self.checkbox_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)})
+${component.props?.checked ? `self.checkbox_${safeId}.select()` : `self.checkbox_${safeId}.deselect()`}`;
   } else {
     // For Eel, we just return a comment since components are handled via JSON
     return `# Checkbox ${safeId} is managed in the JavaScript UI`;

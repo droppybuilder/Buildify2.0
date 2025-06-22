@@ -566,23 +566,21 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
               />
-            </div>
-            <div className="flex items-center gap-2">
+            </div>            <div className="flex items-center gap-2">
               <Switch 
-                checked={props.checked || false}
+                checked={getValue('checked', props.checked || false)}
                 onCheckedChange={(checked) => updateProperty('checked', checked)}
               />
               <Label>Default Checked</Label>
-            </div>
-            <div>
-              <Label>Text Color</Label>
+            </div><div>
+              <Label>Label Text Color</Label>
               <ColorInput
                 value={props.fgColor || '#000000'}
                 onChange={(value) => updateProperty('fgColor', value)}
               />
             </div>
             <div>
-              <Label>Checked Color</Label>
+              <Label>Checkbox Color (when checked)</Label>
               <ColorInput
                 value={props.checkedColor || '#3b82f6'}
                 onChange={(value) => updateProperty('checkedColor', value)}

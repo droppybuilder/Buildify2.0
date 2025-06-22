@@ -781,8 +781,7 @@ const Canvas = ({
                borderWidth: 0,
             }
          case 'frame':
-            return {
-               relief: 'flat',
+            return {               relief: 'flat',
                ...borderProps,
                ...colorProps,
                ...fontProps,
@@ -790,7 +789,7 @@ const Canvas = ({
          case 'checkbox':
             return {
                text: 'Checkbox',
-               checked: false,
+               checked: true,
                fgColor: '#000000',
                borderColor: '#e2e8f0',
                checkedColor: '#3b82f6',
@@ -1244,19 +1243,24 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
                   fontWeight: component.props?.fontWeight || 'normal',
                   fontStyle: component.props?.fontStyle || 'normal',
                }}
-            >
-               <div
-                  className='w-4 h-4 border flex items-center justify-center'
+            >               <div
+                  className='w-4 h-4 flex items-center justify-center'
                   style={{
                      backgroundColor: component.props?.checked
                         ? component.props?.checkedColor || '#3b82f6'
-                        : 'transparent',
+                        : 'white',
+                     border: '2px solid',
                      borderColor: component.props?.borderColor || '#e2e8f0',
-                     borderWidth: 1,
                      borderRadius: 3,
-                  }}
-               >
-                  {component.props?.checked && <div className='text-white font-bold text-xs'>✓</div>}
+                  }}               >
+                  {component.props?.checked && (
+                     <div 
+                        className='text-white font-bold text-xs flex items-center justify-center w-full h-full'
+                        style={{ fontSize: '10px' }}
+                     >
+                        ✓
+                     </div>
+                  )}
                </div>
                {component.props?.text || 'Checkbox'}
             </div>

@@ -31,12 +31,26 @@ export function getComponentProps(component: any): any {
   // fgColor from PropertyPanel is actually text color in the visual, but bgColor is the component background
   props.fg_color = component.props?.bgColor || '#3b82f6';  // Component background color (button color, frame color, etc.)
   props.text_color = component.props?.fgColor || '#ffffff';  // Text color
-  
-  // Special handling for checkbox colors
+    // Special handling for checkbox colors
   if (component.type === 'checkbox') {
     props.fg_color = component.props?.checkedColor || '#3b82f6';  // Checkbox color when checked
     props.text_color = component.props?.fgColor || '#000000';     // Text label color
     props.borderColor = component.props?.borderColor || '#e2e8f0'; // Border color
+  }
+  
+  // Special handling for slider colors
+  if (component.type === 'slider') {
+    props.fg_color = component.props?.bgColor || '#e2e8f0';        // Slider track background
+    props.progress_color = component.props?.progressColor || '#3b82f6'; // Progress/fill color
+    props.button_color = component.props?.buttonColor || '#ffffff';     // Slider button/thumb color
+    props.borderColor = component.props?.borderColor || '#cbd5e1';      // Border color
+  }
+  
+  // Special handling for progress bar colors
+  if (component.type === 'progressbar') {
+    props.fg_color = component.props?.bgColor || '#e2e8f0';        // Progress bar background
+    props.progress_color = component.props?.progressColor || '#3b82f6'; // Progress fill color
+    props.borderColor = component.props?.borderColor || '#e2e8f0';      // Border color
   }
   
   props.cornerRadius = component.props?.cornerRadius || 8;

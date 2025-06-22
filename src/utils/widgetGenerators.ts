@@ -159,7 +159,14 @@ function generateTextboxCode(safeId: string, props: any, indent: string): string
 function generateSliderCode(safeId: string, props: any, indent: string): string {
   let code = '';
   
-  code += `${indent}self.${safeId} = ctk.CTkSlider(self, width=${props.width || 160}, height=${props.height || 16}, from_=0, to=1, corner_radius=${props.cornerRadius}, border_width=${props.borderWidth}, button_color="${props.fg_color || '#3b82f6'}", button_hover_color="${adjustColorBrightness(props.fg_color || '#3b82f6', -20)}", progress_color="${props.fg_color || '#3b82f6'}", fg_color="${adjustColorBrightness(props.fg_color || '#3b82f6', -40)}")\n`;
+  // Use the mapped color properties for slider
+  const bgColor = props.fg_color || '#e2e8f0';
+  const progressColor = props.progress_color || '#3b82f6';
+  const buttonColor = props.button_color || '#ffffff';
+  const buttonHoverColor = adjustColorBrightness(buttonColor, -20);
+  const borderColor = props.borderColor || '#cbd5e1';
+  
+  code += `${indent}self.${safeId} = ctk.CTkSlider(self, width=${props.width || 160}, height=${props.height || 16}, from_=${props.from || 0}, to=${props.to || 100}, corner_radius=${props.cornerRadius}, border_width=${props.borderWidth || 0}, button_color="${buttonColor}", button_hover_color="${buttonHoverColor}", progress_color="${progressColor}", fg_color="${bgColor}", border_color="${borderColor}")\n`;
   code += `${indent}self.${safeId}.set(${props.value || 0.5})\n`;
   
   // Use grid layout if grid properties are specified, otherwise use place
@@ -200,7 +207,12 @@ function generateSwitchCode(safeId: string, props: any, indent: string): string 
 function generateProgressBarCode(safeId: string, props: any, indent: string): string {
   let code = '';
   
-  code += `${indent}self.${safeId} = ctk.CTkProgressBar(self, width=${props.width || 160}, height=${props.height || 16}, corner_radius=${props.cornerRadius}, border_width=${props.borderWidth}, progress_color="${props.fg_color || '#3b82f6'}", fg_color="${adjustColorBrightness(props.fg_color || '#3b82f6', -40)}")\n`;
+  // Use the mapped color properties for progress bar
+  const bgColor = props.fg_color || '#e2e8f0';
+  const progressColor = props.progress_color || '#3b82f6';
+  const borderColor = props.borderColor || '#e2e8f0';
+  
+  code += `${indent}self.${safeId} = ctk.CTkProgressBar(self, width=${props.width || 160}, height=${props.height || 16}, corner_radius=${props.cornerRadius}, border_width=${props.borderWidth || 0}, progress_color="${progressColor}", fg_color="${bgColor}", border_color="${borderColor}")\n`;
   code += `${indent}self.${safeId}.set(${props.value || 0.5})\n`;
   
   // Use grid layout if grid properties are specified, otherwise use place

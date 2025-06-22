@@ -766,8 +766,7 @@ const Canvas = ({
                src: '',
                fit: 'contain',
                ...borderProps,
-               bgColor: 'white',
-               fileName: 'placeholder.png',
+               bgColor: 'white',               fileName: 'placeholder.png',
                alt: 'Image',
             }
          case 'slider':
@@ -778,10 +777,12 @@ const Canvas = ({
                orient: 'horizontal',
                bgColor: '#e2e8f0',
                progressColor: '#3b82f6',
+               buttonColor: '#ffffff',
+               borderColor: '#cbd5e1',
                borderWidth: 0,
             }
          case 'frame':
-            return {               relief: 'flat',
+            return {relief: 'flat',
                ...borderProps,
                ...colorProps,
                ...fontProps,
@@ -795,8 +796,7 @@ const Canvas = ({
                checkedColor: '#3b82f6',
                ...fontProps,
             }
-         case 'datepicker':
-            return {
+         case 'datepicker':            return {
                format: 'yyyy-mm-dd',
                ...colorProps,
                ...fontProps,
@@ -808,6 +808,7 @@ const Canvas = ({
                maxValue: 100,
                progressColor: '#3b82f6',
                bgColor: '#e2e8f0',
+               borderColor: '#e2e8f0',
                cornerRadius: 4,
                borderWidth: 0,
                ...fontProps,
@@ -1194,8 +1195,7 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
                   fontWeight: component.props?.fontWeight || 'normal',
                   fontStyle: component.props?.fontStyle || 'normal',
                   padding: `${component.props?.padding || 8}px`,
-               }}
-            >
+               }}            >
                {component.props?.text || component.props?.placeholder || 'Enter text here...'}
             </div>
          )
@@ -1211,6 +1211,7 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
                   className='w-full h-2 rounded-full relative'
                   style={{
                      backgroundColor: component.props?.bgColor || '#e2e8f0',
+                     border: component.props?.borderWidth ? `${component.props.borderWidth}px solid ${component.props?.borderColor || '#cbd5e1'}` : 'none',
                   }}
                >
                   <div
@@ -1221,11 +1222,12 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
                      }}
                   />
                   <div
-                     className='absolute h-4 w-4 rounded-full bg-white shadow-md top-1/2 -mt-2'
+                     className='absolute h-4 w-4 rounded-full shadow-md top-1/2 -mt-2'
                      style={{
                         left: `calc(${component.props?.value || 50}% - 8px)`,
-                        borderWidth: 1,
-                        borderColor: '#cbd5e1',
+                        backgroundColor: component.props?.buttonColor || '#ffffff',
+                        borderWidth: 2,
+                        borderColor: component.props?.borderColor || '#cbd5e1',
                         cursor: 'pointer',
                      }}
                   />

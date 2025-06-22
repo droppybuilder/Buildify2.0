@@ -890,12 +890,29 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                 value={props.bgColor || '#e5e7eb'}
                 onChange={(value) => updateProperty('bgColor', value)}
               />
-            </div>
-            <div>
+            </div>            <div>
               <Label>Progress Color</Label>
               <ColorInput
                 value={props.progressColor || '#3b82f6'}
                 onChange={(value) => updateProperty('progressColor', value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="borderWidth">Border Width</Label>
+              <Input
+                id="borderWidth"
+                type="number"
+                value={getValue('borderWidth', props.borderWidth || 0)}
+                onChange={(e) => handleNumberChange(e, 'borderWidth')}
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => setInputFocused(false)}
+              />
+            </div>
+            <div>
+              <Label>Border Color</Label>
+              <ColorInput
+                value={props.borderColor || '#e2e8f0'}
+                onChange={(value) => updateProperty('borderColor', value)}
               />
             </div>
             <div>

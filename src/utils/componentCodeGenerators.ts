@@ -1,4 +1,6 @@
 
+import { adjustColorBrightness } from './codeGeneratorUtils';
+
 /**
  * Collection of code generators for specific component types
  * Extracted from codeGenerator.ts to improve organization
@@ -173,15 +175,20 @@ export function generateSliderCode(component: any, isTkinter: boolean): string {
   
   if (isTkinter) {
     const borderWidth = component.props?.borderWidth !== undefined ? component.props?.borderWidth : 0;
+    const borderColor = component.props?.borderColor || '#cbd5e1';
     
     return `self.slider_${safeId} = ctk.CTkSlider(self.root, 
         from_=${component.props?.from || 0}, 
         to=${component.props?.to || 100}, 
         orientation="${component.props?.orientation || 'horizontal'}",
         border_width=${borderWidth},
-        bg_color="${component.props?.bgColor || '#e2e8f0'}",
-        progress_color="${component.props?.progressColor || '#3b82f6'}")
-self.slider_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
+        border_color="${borderColor}",
+        fg_color="${component.props?.bgColor || '#e2e8f0'}",
+        progress_color="${component.props?.progressColor || '#3b82f6'}",
+        button_color="${component.props?.buttonColor || '#ffffff'}",
+        button_hover_color="${component.props?.buttonColor ? adjustColorBrightness(component.props.buttonColor, -20) : '#e0e0e0'}")
+self.slider_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
+self.slider_${safeId}.set(${(component.props?.value || 50) / 100})`;
   } else {
     // For Eel, we just return a comment since components are handled via JSON
     return `# Slider ${safeId} is managed in the JavaScript UI`;

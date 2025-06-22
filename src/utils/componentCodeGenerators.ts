@@ -43,10 +43,10 @@ export function generateLabelCode(component: any, isTkinter: boolean): string {
   if (isTkinter) {
     const fontWeight = component.props?.fontWeight === 'bold' ? 'bold' : 'normal';
     const fontStyle = component.props?.fontStyle === 'italic' ? 'italic' : 'roman';
-    
-    return `self.label_${safeId} = ctk.CTkLabel(self.root, 
+      return `self.label_${safeId} = ctk.CTkLabel(self.root, 
         text="${component.props?.text || 'Label'}",
         text_color="${component.props?.fgColor || '#000000'}",
+        fg_color="${component.props?.bgColor || 'transparent'}",
         font=("${component.props?.font || 'Arial'}", ${component.props?.fontSize || 12}, "${fontWeight} ${fontStyle}"))
 self.label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})`;
   } else {
@@ -94,12 +94,11 @@ export function generateImageCode(component: any, isTkinter: boolean): string {
   const borderWidth = component.props?.borderWidth !== undefined ? component.props?.borderWidth : 1;
   const borderColor = component.props?.borderColor || '#e2e8f0';
   
-  if (isTkinter) {
-    return `# Image setup for ${safeId}
+  if (isTkinter) {    return `# Image setup for ${safeId}
 # Make sure to place the image file "${fileName}" in your project directory
 self.img_${safeId} = ctk.CTkImage(light_image=Image.open("${fileName}"), 
                                  size=(${Math.round(component.size.width)}, ${Math.round(component.size.height)}))
-self.image_label_${safeId} = ctk.CTkLabel(self.root, image=self.img_${safeId}, text="")
+self.image_label_${safeId} = ctk.CTkLabel(self.root, image=self.img_${safeId}, text="", fg_color="${component.props?.bgColor || 'transparent'}")
 self.image_label_${safeId}.place(x=${Math.round(component.position.x)}, y=${Math.round(component.position.y)}, width=${Math.round(component.size.width)}, height=${Math.round(component.size.height)})
 # Keep reference to prevent garbage collection
 self._image_references.append(self.img_${safeId})`;

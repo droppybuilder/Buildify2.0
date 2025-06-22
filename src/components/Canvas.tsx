@@ -713,9 +713,7 @@ const Canvas = ({
          borderColor: '#e2e8f0',
          borderWidth: 1,
          cornerRadius: 8,
-      }
-
-      // Common color properties
+      }      // Common color properties
       const colorProps = {
          bgColor: '#ffffff',
          fgColor: '#000000',
@@ -735,6 +733,7 @@ const Canvas = ({
                text: 'Label',
                ...fontProps,
                fgColor: '#000000',
+               bgColor: 'white',
             }
          case 'entry':
             return {
@@ -767,6 +766,7 @@ const Canvas = ({
                src: '',
                fit: 'contain',
                ...borderProps,
+               bgColor: 'white',
                fileName: 'placeholder.png',
                alt: 'Image',
             }
@@ -1104,13 +1104,13 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
                }}
             >
                {component.props?.text || 'Button'}
-            </div>
-         )
+            </div>         )
       case 'label':
          return (
             <div
                className='h-full w-full flex items-center'
                style={{
+                  backgroundColor: component.props?.bgColor || 'transparent',
                   color: component.props?.fgColor || '#000000',
                   fontFamily: component.props?.font || 'Arial',
                   fontSize: `${component.props?.fontSize || 12}px`,
@@ -1137,14 +1137,13 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
                }}
             >
                {component.props?.placeholder || 'Enter text...'}
-            </div>
-         )
+            </div>         )
       case 'image':
          return (
             <div
                className='h-full w-full flex items-center justify-center'
                style={{
-                  backgroundColor: '#f3f4f6',
+                  backgroundColor: component.props?.bgColor || 'transparent',
                   border: `${component.props?.borderWidth || 1}px solid ${component.props?.borderColor || '#e2e8f0'}`,
                   borderRadius: `${component.props?.cornerRadius || 8}px`,
                   overflow: 'hidden',

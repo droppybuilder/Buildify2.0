@@ -5,9 +5,11 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { db } from '@/integrations/firebase/firebase.config'
 import { collection, addDoc } from 'firebase/firestore'
+import { useIsMobile } from '@/hooks/use-mobile'
 import logo from '/logo6.png'
 
 const features = [
@@ -199,11 +201,13 @@ const lifetimePlan = {
 
 const LandingPage: React.FC = () => {
    const navigate = useNavigate()
+   const isMobile = useIsMobile()
    const userExists = Boolean(localStorage.getItem('user'))
    const displayPlans = [...plans, lifetimePlan]
    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
    const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' })
    const [isSubmitting, setIsSubmitting] = useState(false)
+   const [showMobileDialog, setShowMobileDialog] = useState(false)
 
    useEffect(() => {
       const handleMouseMove = (e: MouseEvent) => {
@@ -237,6 +241,14 @@ const LandingPage: React.FC = () => {
          toast.error('Failed to send message. Please try again.')
       } finally {
          setIsSubmitting(false)
+      }
+   }
+
+   const handleNavigation = (path: string) => {
+      if (isMobile) {
+         setShowMobileDialog(true)
+      } else {
+         navigate(path)
       }
    }
 
@@ -290,11 +302,11 @@ const LandingPage: React.FC = () => {
                      >
                         Contact
                      </a>
-                  </div>
+                  </div>{' '}
                   <div className='flex items-center space-x-2 sm:space-x-3 flex-shrink-0'>
                      {userExists ? (
                         <Button
-                           onClick={() => navigate('/')}
+                           onClick={() => handleNavigation('/')}
                            className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-2 sm:px-4 lg:px-6 py-2 rounded-xl text-xs sm:text-sm lg:text-base whitespace-nowrap'
                         >
                            <span className='hidden sm:inline'>Enter Canvas</span>
@@ -304,14 +316,14 @@ const LandingPage: React.FC = () => {
                         <>
                            <Button
                               variant='ghost'
-                              onClick={() => navigate('/auth')}
+                              onClick={() => handleNavigation('/auth')}
                               className='hover:bg-white/10 px-2 sm:px-3 lg:px-4 text-xs sm:text-sm lg:text-base whitespace-nowrap'
                            >
                               <span className='hidden sm:inline'>Sign In</span>
                               <span className='sm:hidden'>Login</span>
                            </Button>
                            <Button
-                              onClick={() => navigate('/auth')}
+                              onClick={() => handleNavigation('/auth')}
                               className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-2 sm:px-4 lg:px-6 py-2 rounded-xl text-xs sm:text-sm lg:text-base whitespace-nowrap'
                            >
                               <span className='hidden sm:inline'>Get Started</span>
@@ -330,7 +342,6 @@ const LandingPage: React.FC = () => {
                   <Badge className='bg-gradient-to-r from-purple-600/20 to-pink-600/20 text-purple-300 border-purple-500/30 px-3 sm:px-4 py-2 text-xs sm:text-sm lg:text-base'>
                      🚀 Web version of the popular Buildfy Tool
                   </Badge>
-
                   <h1 className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-bold bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent leading-tight'>
                      Build Python GUIs
                      <br />
@@ -338,16 +349,14 @@ const LandingPage: React.FC = () => {
                         Visually & Effortlessly
                      </span>
                   </h1>
-
                   <p className='text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed px-2 sm:px-4'>
                      Create stunning Tkinter desktop applications with our intuitive drag-and-drop interface. No coding
                      required - just design, customize, and export production-ready Python code.
-                  </p>
-
+                  </p>{' '}
                   <div className='flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center w-full max-w-md sm:max-w-none'>
                      <Button
                         size='lg'
-                        onClick={() => navigate(userExists ? '/app' : '/auth')}
+                        onClick={() => handleNavigation(userExists ? '/app' : '/auth')}
                         className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-6 sm:px-8 py-3 text-sm sm:text-base lg:text-lg rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300 w-full sm:w-auto min-w-[200px]'
                      >
                         🚀 Start Building Now
@@ -361,7 +370,6 @@ const LandingPage: React.FC = () => {
                         ▶️ Watch Trailer
                      </Button>
                   </div>
-
                   {/* Stats */}
                   <div className='grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 w-full max-w-4xl mx-auto pt-8 sm:pt-12'>
                      {[
@@ -473,7 +481,7 @@ const LandingPage: React.FC = () => {
                   <video
                      className='w-full aspect-video rounded-xl sm:rounded-2xl object-cover'
                      controls
-                     poster='/thumbnail.png'
+                     poster='/deviceframes.png'
                   >
                      <source
                         src='https://res.cloudinary.com/dp2bzu9e2/video/upload/v1750582299/IMG_9655_eiwlv3.mp4'
@@ -524,7 +532,6 @@ const LandingPage: React.FC = () => {
                                  <span className='text-gray-400 ml-2 text-sm sm:text-base'>/{plan.billingPeriod}</span>
                               </div>
                            </div>
-
                            <ul className='space-y-2 sm:space-y-3 mb-6 sm:mb-8'>
                               {plan.features.map((feature, index) => (
                                  <li
@@ -539,15 +546,14 @@ const LandingPage: React.FC = () => {
                                     <span className='leading-tight'>{feature.name}</span>
                                  </li>
                               ))}
-                           </ul>
-
+                           </ul>{' '}
                            <Button
                               className={`w-full py-2 sm:py-3 rounded-xl text-sm sm:text-base ${
                                  plan.tier === 'pro'
                                     ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
                                     : 'bg-white/10 hover:bg-white/20 border border-white/20'
                               }`}
-                              onClick={() => navigate('/auth')}
+                              onClick={() => handleNavigation('/auth')}
                            >
                               Get Started
                            </Button>
@@ -743,8 +749,49 @@ const LandingPage: React.FC = () => {
                      <p className='text-gray-400 text-xs sm:text-sm'>© 2025 Buildfy Web. All rights reserved.</p>
                   </div>
                </div>
-            </div>
+            </div>{' '}
          </footer>{' '}
+         {/* Mobile Device Dialog */}
+         <Dialog
+            open={showMobileDialog}
+            onOpenChange={setShowMobileDialog}
+         >
+            <DialogContent className='bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 border-purple-500/50 text-white max-w-sm mx-auto rounded-xl'>
+               <DialogHeader>
+                  <DialogTitle className='text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent text-center'>
+                     📱 Mobile Device Detected
+                  </DialogTitle>
+                  <DialogDescription className='text-gray-300 text-center text-base leading-relaxed mt-4'>
+                     Buildfy Web works best on larger screens for the optimal visual building experience.
+                  </DialogDescription>
+               </DialogHeader>
+
+               <div className='space-y-4 mt-6'>
+                  <div className='text-center'>
+                     <h4 className='font-semibold text-white mb-3'>Continue on a bigger screen:</h4>
+                     <div className='flex justify-center space-x-4 text-4xl mb-4'>
+                        <span title='Tablet'>📱</span>
+                        <span title='Laptop'>💻</span>
+                        <span title='Desktop'>🖥️</span>
+                     </div>
+                  </div>
+
+                  <div className='bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20'>
+                     <p className='text-sm text-gray-300 text-center leading-relaxed'>
+                        For the best drag-and-drop experience and full access to all features, please visit Buildfy Web
+                        on a tablet, laptop, or desktop computer.
+                     </p>
+                  </div>
+
+                  <Button
+                     onClick={() => setShowMobileDialog(false)}
+                     className='w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 py-3 rounded-xl text-base'
+                  >
+                     Got it! 👍
+                  </Button>
+               </div>
+            </DialogContent>
+         </Dialog>
          {/* Custom Styles */}
          <style>{`
             @keyframes float-1 {

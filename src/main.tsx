@@ -10,6 +10,7 @@ import 'prismjs/components/prism-javascript'
 import { DirectionProvider } from '@radix-ui/react-direction'
 import 'prismjs/themes/prism.css'
 import { SpeedInsights } from '@vercel/speed-insights/react'
+import { Analytics } from '@vercel/analytics/react'
 
 // Create a client
 const queryClient = new QueryClient()
@@ -18,6 +19,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
    <React.StrictMode>
       <DirectionProvider dir='ltr'>
          <BrowserRouter>
+            <Analytics />
             <SpeedInsights />
             <QueryClientProvider client={queryClient}>
                <App />

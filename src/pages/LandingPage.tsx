@@ -54,28 +54,28 @@ const reviews = [
       name: 'Ritika Sharma',
       role: 'Educator',
       rating: 5,
-      text: 'It\'s intuitive and easy to use, making it perfect for my tutorials. I\'d love to see more customization options in the future, but overall, it\'s a great tool for beginners. Looking forward to what\'s next!',
+      text: "It's intuitive and easy to use, making it perfect for my tutorials. I'd love to see more customization options in the future, but overall, it's a great tool for beginners. Looking forward to what's next!",
       avatar: '👩‍🏫',
    },
    {
       name: 'Daniel Kim',
       role: 'YouTuber',
       rating: 5,
-      text: 'I\'ve been using the free version for my YouTube tutorials, and it\'s perfect for beginners! The interface is simple, and it\'s easy to create basic UIs. It\'s a great tool to learn with, and I\'m excited to try the Pro version soon!',
+      text: "I've been using the free version for my YouTube tutorials, and it's perfect for beginners! The interface is simple, and it's easy to create basic UIs. It's a great tool to learn with, and I'm excited to try the Pro version soon!",
       avatar: '📹',
    },
    {
       name: 'Meera Joshi',
       role: 'Pro User',
       rating: 5,
-      text: 'I recently tried the Pro version after using the free one, and I\'m honestly impressed. The additional features like customizable themes, more widget options, and the ability to save and export projects have made my development process so much smoother. Definitely worth the investment for anyone serious about building Python applications with great UIs!',
+      text: "I recently tried the Pro version after using the free one, and I'm honestly impressed. The additional features like customizable themes, more widget options, and the ability to save and export projects have made my development process so much smoother. Definitely worth the investment for anyone serious about building Python applications with great UIs!",
       avatar: '👩‍💻',
    },
    {
       name: 'Liam Garcia',
       role: 'Developer',
       rating: 5,
-      text: 'I\'ve been looking for a tool that simplifies GUI creation, and this product is exactly what I needed! The drag-and-drop interface is so intuitive, and the ability to quickly customize widgets and layouts saved me hours of work. Highly recommend for anyone working on Python projects!',
+      text: "I've been looking for a tool that simplifies GUI creation, and this product is exactly what I needed! The drag-and-drop interface is so intuitive, and the ability to quickly customize widgets and layouts saved me hours of work. Highly recommend for anyone working on Python projects!",
       avatar: '👨‍💻',
    },
    {
@@ -89,7 +89,7 @@ const reviews = [
       name: 'Sofia Ahmed',
       role: 'Tutorial Creator',
       rating: 5,
-      text: 'I\'ve been using the free version for a few of my Python tutorials, and I\'m really impressed with how easy it is to use. The interface is clean, and it\'s super beginner-friendly. I love how quickly I can create simple UIs. Still, it\'s an excellent starting point!',
+      text: "I've been using the free version for a few of my Python tutorials, and I'm really impressed with how easy it is to use. The interface is clean, and it's super beginner-friendly. I love how quickly I can create simple UIs. Still, it's an excellent starting point!",
       avatar: '👩‍🎓',
    },
    {
@@ -116,7 +116,8 @@ const team = [
    },
 ]
 
-const plans = [   {
+const plans = [
+   {
       id: 'free',
       name: 'Free',
       description: 'Basic features for hobbyists',
@@ -134,7 +135,8 @@ const plans = [   {
          { name: 'No watermarks', included: false },
          { name: 'Priority support', included: false },
       ],
-   },   {
+   },
+   {
       id: 'standard',
       name: 'Standard',
       description: 'For serious developers',
@@ -254,7 +256,8 @@ const LandingPage: React.FC = () => {
             <div className='absolute top-[-20%] left-[-20%] w-[60vw] h-[60vw] bg-gradient-to-r from-purple-600/30 to-pink-600/30 rounded-full blur-3xl animate-float-1' />
             <div className='absolute bottom-[-20%] right-[-20%] w-[60vw] h-[60vw] bg-gradient-to-r from-blue-600/30 to-cyan-600/30 rounded-full blur-3xl animate-float-2' />
             <div className='absolute top-1/2 left-1/2 w-[40vw] h-[40vw] bg-gradient-to-r from-emerald-600/20 to-teal-600/20 rounded-full blur-3xl animate-float-3' />
-         </div>         {/* Navbar */}
+         </div>{' '}
+         {/* Navbar */}
          <nav className='fixed top-0 w-full bg-black/10 backdrop-blur-xl border-b border-white/10 z-40'>
             <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
                <div className='flex items-center justify-between h-16 sm:h-18'>
@@ -319,7 +322,8 @@ const LandingPage: React.FC = () => {
                   </div>
                </div>
             </div>
-         </nav>         {/* Hero Section */}
+         </nav>{' '}
+         {/* Hero Section */}
          <section className='relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8'>
             <div className='max-w-6xl mx-auto text-center pt-20 sm:pt-24 pb-8 sm:pb-12'>
                <div className='flex flex-col items-center justify-center space-y-6 sm:space-y-8'>
@@ -347,14 +351,14 @@ const LandingPage: React.FC = () => {
                         className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-6 sm:px-8 py-3 text-sm sm:text-base lg:text-lg rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300 w-full sm:w-auto min-w-[200px]'
                      >
                         🚀 Start Building Now
-                     </Button>
+                     </Button>{' '}
                      <Button
                         size='lg'
                         variant='outline'
                         onClick={() => document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' })}
                         className='border-purple-500/50 text-purple-300 hover:bg-purple-500/10 px-6 sm:px-8 py-3 text-sm sm:text-base lg:text-lg rounded-xl w-full sm:w-auto min-w-[200px]'
                      >
-                        ▶️ Watch Demo
+                        ▶️ Watch Trailer
                      </Button>
                   </div>
 
@@ -379,7 +383,8 @@ const LandingPage: React.FC = () => {
                   </div>
                </div>
             </div>
-         </section>         {/* Reviews Marquee */}
+         </section>{' '}
+         {/* Reviews Marquee */}
          <section className='py-12 sm:py-16 lg:py-20 overflow-hidden'>
             <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
                <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-8 sm:mb-12 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
@@ -396,7 +401,9 @@ const LandingPage: React.FC = () => {
                               <div className='flex items-center mb-3 sm:mb-4'>
                                  <span className='text-2xl sm:text-3xl mr-2 sm:mr-3'>{review.avatar}</span>
                                  <div className='min-w-0 flex-1'>
-                                    <h4 className='font-semibold text-white text-sm sm:text-base truncate'>{review.name}</h4>
+                                    <h4 className='font-semibold text-white text-sm sm:text-base truncate'>
+                                       {review.name}
+                                    </h4>
                                     <p className='text-gray-400 text-xs sm:text-sm truncate'>{review.role}</p>
                                  </div>
                                  <div className='ml-2 flex text-yellow-400 text-sm'>
@@ -405,14 +412,17 @@ const LandingPage: React.FC = () => {
                                     ))}
                                  </div>
                               </div>
-                              <p className='text-gray-300 text-sm sm:text-base italic leading-relaxed'>"{review.text}"</p>
+                              <p className='text-gray-300 text-sm sm:text-base italic leading-relaxed'>
+                                 "{review.text}"
+                              </p>
                            </CardContent>
                         </Card>
                      ))}
                   </div>
                </div>
             </div>
-         </section>         {/* Features Section */}
+         </section>{' '}
+         {/* Features Section */}
          <section
             id='features'
             className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8'
@@ -446,7 +456,8 @@ const LandingPage: React.FC = () => {
                   ))}
                </div>
             </div>
-         </section>         {/* Demo Section */}
+         </section>{' '}
+         {/* Demo Section */}
          <section
             id='demo'
             className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-purple-900/20 to-pink-900/20'
@@ -457,22 +468,24 @@ const LandingPage: React.FC = () => {
                </h2>
                <p className='text-lg sm:text-xl text-gray-300 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed'>
                   Watch how easy it is to create professional Python GUIs with our visual builder
-               </p>
-
+               </p>{' '}
                <div className='relative rounded-2xl sm:rounded-3xl overflow-hidden bg-gradient-to-r from-purple-600/20 to-pink-600/20 p-4 sm:p-6 lg:p-8 backdrop-blur-md border border-white/10'>
-                  <div className='aspect-video bg-gray-800 rounded-xl sm:rounded-2xl flex items-center justify-center text-4xl sm:text-5xl lg:text-6xl'>
-                     ▶️
-                  </div>
-                  <div className='absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-2xl sm:rounded-3xl' />
-                  <Button
-                     size='lg'
-                     className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg rounded-xl shadow-2xl'
+                  <video
+                     className='w-full aspect-video rounded-xl sm:rounded-2xl object-cover'
+                     controls
+                     poster='/deviceframes.png'
                   >
-                     ▶️ Play Demo
-                  </Button>
+                     <source
+                        src='https://res.cloudinary.com/dp2bzu9e2/video/upload/v1750582299/IMG_9655_eiwlv3.mp4'
+                        type='video/mp4'
+                     />
+                     Your browser does not support the video tag.
+                  </video>
+                  <div className='absolute inset-0 bg-gradient-to-t from-black/30 to-transparent rounded-2xl sm:rounded-3xl pointer-events-none' />
                </div>
             </div>
-         </section>         {/* Pricing Section */}
+         </section>{' '}
+         {/* Pricing Section */}
          <section
             id='pricing'
             className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8'
@@ -520,7 +533,9 @@ const LandingPage: React.FC = () => {
                                        feature.included ? 'text-green-400' : 'text-gray-500'
                                     }`}
                                  >
-                                    <span className='mr-2 sm:mr-3 text-xs sm:text-sm'>{feature.included ? '✅' : '❌'}</span>
+                                    <span className='mr-2 sm:mr-3 text-xs sm:text-sm'>
+                                       {feature.included ? '✅' : '❌'}
+                                    </span>
                                     <span className='leading-tight'>{feature.name}</span>
                                  </li>
                               ))}
@@ -541,7 +556,8 @@ const LandingPage: React.FC = () => {
                   ))}
                </div>
             </div>
-         </section>         {/* Team Section */}
+         </section>{' '}
+         {/* Team Section */}
          <section className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-purple-900/20 to-pink-900/20'>
             <div className='max-w-5xl mx-auto'>
                <div className='text-center mb-12 sm:mb-16'>
@@ -580,7 +596,8 @@ const LandingPage: React.FC = () => {
                   ))}
                </div>
             </div>
-         </section>         {/* Contact Section */}
+         </section>{' '}
+         {/* Contact Section */}
          <section
             id='contact'
             className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8'
@@ -704,7 +721,8 @@ const LandingPage: React.FC = () => {
                   </div>
                </div>
             </div>
-         </section>{' '}         {/* Footer */}
+         </section>{' '}
+         {/* Footer */}
          <footer className='bg-black/20 backdrop-blur-md border-t border-white/10 py-8 sm:py-12 px-4 sm:px-6 lg:px-8'>
             <div className='max-w-7xl mx-auto'>
                <div className='text-center'>

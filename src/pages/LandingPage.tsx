@@ -481,7 +481,7 @@ const LandingPage: React.FC = () => {
                   <video
                      className='w-full aspect-video rounded-xl sm:rounded-2xl object-cover'
                      controls
-                     poster='/deviceframes.png'
+                     poster='/thumbnail.png'
                   >
                      <source
                         src='https://res.cloudinary.com/dp2bzu9e2/video/upload/v1750582299/IMG_9655_eiwlv3.mp4'

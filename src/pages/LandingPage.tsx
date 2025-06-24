@@ -254,6 +254,61 @@ const LandingPage: React.FC = () => {
 
    return (
       <div className='min-h-screen w-full relative overflow-x-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white'>
+         {' '}
+         {/* ===== TEMPORARY LAUNCH BADGES - REMOVE AFTER LAUNCH ===== */}
+         <div className='launch-badges fixed top-16 sm:top-18 left-0 right-0 z-30 bg-gradient-to-r from-black/30  via-purple-700/70 to-black/30 backdrop-blur-md'>
+            <div className='max-w-7xl mx-auto px-4 py-3'>
+               <div className='flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6'>
+                  <div className='flex items-center gap-2'>
+                     <span className='text-white text-sm sm:text-base font-semibold animate-pulse'>
+                        🚀 We're Live on
+                     </span>
+                  </div>
+                  <div className='flex flex-col sm:flex-row items-center gap-3 sm:gap-4'>
+                     {/* Product Hunt Badge */}
+                     <a
+                        href='https://www.producthunt.com/products/buildfy-web?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-buildfy&#0045;web'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='transition-transform hover:scale-105'
+                     >
+                        <img
+                           src='https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=982539&theme=light&t=1750756805683'
+                           alt='Buildfy Web - Turn Ideas into Python Apps — Without Writing Code | Product Hunt'
+                           style={{ width: '220px', height: '48px' }}
+                           width='220'
+                           height='48'
+                           className='rounded-md shadow-lg'
+                        />
+                     </a>
+                     {/* Peerlist Badge */}
+                     <a
+                        href='https://peerlist.io/pratyush2002'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='transition-transform hover:scale-105'
+                     >
+                        <img
+                           src='/Launch_SVG_Light.svg'
+                           alt='Peerlist Launch Badge'
+                           style={{ width: '220px', height: '48px' }}
+                           width='220'
+                           height='48'
+                           className='rounded-md shadow-lg bg-white/10 p-1'
+                        />
+                     </a>
+                  </div>
+                  <button
+                     className='hidden sm:block text-white/70 hover:text-white text-xs transition-colors'
+                     onClick={() => document.querySelector('.launch-badges')?.remove()}
+                     title='Hide badges'
+                  >
+                     ✕
+                  </button>
+               </div>
+            </div>
+         </div>
+         {/* ===== END TEMPORARY LAUNCH BADGES ===== */}
          {/* Animated Cursor Effect */}
          <div
             className='fixed w-6 h-6 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full pointer-events-none z-50 opacity-50 transition-all duration-300 ease-out'
@@ -337,7 +392,7 @@ const LandingPage: React.FC = () => {
          </nav>{' '}
          {/* Hero Section */}
          <section className='relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8'>
-            <div className='max-w-6xl mx-auto text-center pt-20 sm:pt-24 pb-8 sm:pb-12'>
+            <div className='max-w-6xl mx-auto text-center pt-32 sm:pt-36 pb-8 sm:pb-12'>
                <div className='flex flex-col items-center justify-center space-y-6 sm:space-y-8'>
                   <Badge className='bg-gradient-to-r from-purple-600/20 to-pink-600/20 text-purple-300 border-purple-500/30 px-3 sm:px-4 py-2 text-xs sm:text-sm lg:text-base'>
                      🚀 Web version of the popular Buildfy Tool

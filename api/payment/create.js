@@ -46,9 +46,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { planId, userId, userEmail, userName, testMode } = req.body;
+    const { planId, userId, userEmail, userName, testMode, billingData } = req.body;
     
-    console.log('Payment creation request:', { planId, userId, userEmail, userName, testMode });
+    console.log('Payment creation request:', { planId, userId, userEmail, userName, testMode, billingData });
     
     // If in test mode, add test prefix to avoid real charges
     const isTestMode = testMode === true || userId?.startsWith('test-') || userEmail?.includes('+test');
@@ -62,6 +62,14 @@ export default async function handler(req, res) {
       return res.status(400).json({ 
         success: false, 
         error: 'Missing required fields: planId, userId, userEmail, userName' 
+      });
+    }
+
+    // Validate billing data if provided
+    if (billingData && (!billingData.street || !billingData.city || !billingData.state || !billingData.zipcode || !billingData.country)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Incomplete billing information. Please provide all billing details.' 
       });
     }
 
@@ -123,7 +131,8 @@ export default async function handler(req, res) {
       userName,
       planId,
       isTestMode,
-      returnUrl
+      returnUrl,
+      billingData
     });
 
     console.log('Payment created successfully:', payment.payment_id);
@@ -184,7 +193,7 @@ function getDodoProductId(planId) {
 }
 
 // Create payment with DodoPayments
-async function createDodoPayment({ productId, userId, userEmail, userName, planId, isTestMode, returnUrl }) {  
+async function createDodoPayment({ productId, userId, userEmail, userName, planId, isTestMode, returnUrl, billingData }) {  
   const baseUrl = process.env.DODO_API_BASE_URL || 'https://live.dodopayments.com';
   const apiKey = process.env.DODO_PAYMENTS_API_KEY;
   
@@ -197,6 +206,7 @@ async function createDodoPayment({ productId, userId, userEmail, userName, planI
   console.log('- Final returnUrl:', returnUrl);
   console.log('- Final payment return_url:', `${returnUrl}/payment-success`);
   console.log('- Final cancel_url:', `${returnUrl}/pricing?status=cancelled`);
+  console.log('- Billing data provided:', !!billingData);
   console.log('API Key check:', apiKey ? `${apiKey.substring(0, 10)}...` : 'NOT SET');
   console.log('Base URL:', baseUrl);
   console.log('Full API URL:', `${baseUrl}/payments`);
@@ -229,6 +239,20 @@ async function createDodoPayment({ productId, userId, userEmail, userName, planI
       environment: 'production'
     }
   };
+
+  // Add billing data if provided
+  if (billingData) {
+    payload.billing = {
+      street: billingData.street,
+      city: billingData.city,
+      state: billingData.state,
+      zipcode: billingData.zipcode,
+      country: billingData.country
+    };
+    console.log('✅ Billing data added to payload:', payload.billing);
+  } else {
+    console.log('ℹ️ No billing data provided - DODO will auto-detect location');
+  }
 
   console.log('Payment payload:', JSON.stringify(payload, null, 2));
 

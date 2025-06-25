@@ -8,6 +8,15 @@ import { toast } from 'sonner'
 import { useSubscription } from '@/hooks/useSubscription'
 import { useAuth } from '@/contexts/AuthContext'
 import { isSubscriptionExpired, isExpiringSoon, getRemainingDays } from '@/utils/subscriptionUtils'
+import BillingForm from '@/components/BillingForm'
+
+interface BillingData {
+  street: string;
+  city: string;
+  state: string;
+  zipcode: string;
+  country: string;
+}
 
 interface PlanFeature {
    name: string
@@ -117,6 +126,8 @@ function normalizeTier(tier: Tier): 'free' | 'standard' | 'pro' {
 export default function PricingPlans() {
    const [processing, setProcessing] = useState<string | null>(null)
    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+   const [showBillingForm, setShowBillingForm] = useState(false)
+   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null)
    const { subscription, loading } = useSubscription()
    const { user } = useAuth()
    const navigate = useNavigate()
@@ -169,20 +180,30 @@ export default function PricingPlans() {
          toast.info('You are already on the Free plan.')
          return
       }
-      setProcessing(plan.id)
+      
+      // Show billing form for paid plans
+      setSelectedPlan(plan)
+      setShowBillingForm(true)
+   }
+
+   const handleBillingSubmit = async (billingData: BillingData) => {
+      if (!user || !selectedPlan) return
+      
+      setProcessing(selectedPlan.id)
       
       try {
-         // Call DodoPayments API to create payment link
+         // Call DodoPayments API to create payment link with billing data
          const response = await fetch('/api/payment/create', {
             method: 'POST',
             headers: { 
                'Content-Type': 'application/json' 
             },
             body: JSON.stringify({
-               planId: plan.tier,
+               planId: selectedPlan.tier,
                userId: user.uid,
                userEmail: user.email,
                userName: user.displayName || user.email,
+               billingData: billingData
             }),
          })
          
@@ -192,7 +213,7 @@ export default function PricingPlans() {
             // Store payment attempt for tracking
             localStorage.setItem('pendingPayment', JSON.stringify({
                paymentId: result.paymentId,
-               planId: plan.tier,
+               planId: selectedPlan.tier,
                timestamp: Date.now()
             }))
             
@@ -228,14 +249,17 @@ export default function PricingPlans() {
          
          // Log detailed error for debugging
          console.error('Detailed payment error:', {
-            planId: plan.tier,
+            planId: selectedPlan.tier,
             userId: user.uid,
             userEmail: user.email,
             error: error.message,
+            billingData: billingData,
             timestamp: new Date().toISOString()
          })
       } finally {
          setProcessing(null)
+         setShowBillingForm(false)
+         setSelectedPlan(null)
       }
    }
 
@@ -256,7 +280,38 @@ export default function PricingPlans() {
       if (isNaN(date.getTime())) return null;
       return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
    };   return (
-      <div className='min-h-screen w-full relative overflow-x-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white'>
+      <>
+         {/* Billing Form Modal */}
+         {showBillingForm && selectedPlan && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+               <div className="bg-white rounded-lg max-w-md w-full">
+                  <div className="p-4 border-b">
+                     <div className="flex justify-between items-center">
+                        <h2 className="text-lg font-semibold text-gray-900">Complete Your Purchase</h2>
+                        <button
+                           onClick={() => {
+                              setShowBillingForm(false)
+                              setSelectedPlan(null)
+                           }}
+                           className="text-gray-400 hover:text-gray-600"
+                        >
+                           ✕
+                        </button>
+                     </div>
+                  </div>
+                  <div className="p-4">
+                     <BillingForm
+                        onSubmit={handleBillingSubmit}
+                        loading={processing === selectedPlan.id}
+                        planName={selectedPlan.name}
+                        planPrice={selectedPlan.price}
+                     />
+                  </div>
+               </div>
+            </div>
+         )}
+
+         <div className='min-h-screen w-full relative overflow-x-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white'>
          {/* Animated Cursor Effect */}
          <div
             className='fixed w-6 h-6 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full pointer-events-none z-50 opacity-50 transition-all duration-300 ease-out'
@@ -415,5 +470,6 @@ export default function PricingPlans() {
             .animate-float-3 { animation: float-3 15s ease-in-out infinite; }
          `}</style>
       </div>
+      </>
    )
 }

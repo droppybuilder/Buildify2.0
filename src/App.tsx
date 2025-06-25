@@ -9,6 +9,10 @@ import AuthPage from './components/Auth/AuthPage'
 import PricingPlans from './components/Subscription/PricingPlans'
 import ProfilePage from './components/Profile/ProfilePage'
 import PaymentSuccess from './pages/PaymentSuccess'
+import PaymentPending from './pages/PaymentPending'
+import PaymentDebug from './pages/PaymentDebug'
+import WebhookLogs from './pages/WebhookLogs'
+import LiveTesting from './pages/LiveTesting'
 import { AuthProvider } from './contexts/AuthContext'
 import ProtectedRoute from './components/Auth/ProtectedRoute'
 import { Analytics } from '@vercel/analytics/react'
@@ -50,6 +54,22 @@ const App = () => {
                   <Route
                      path='/payment-success'
                      element={<PaymentSuccess />}
+                  />
+                  <Route
+                     path='/payment-pending'
+                     element={<PaymentPending />}
+                  />
+                  <Route
+                     path='/payment-debug'
+                     element={<PaymentDebug />}
+                  />
+                  <Route
+                     path='/webhook-logs'
+                     element={<WebhookLogs />}
+                  />
+                  <Route
+                     path='/live-testing'
+                     element={<LiveTesting />}
                   />
                   <Route
                      path='/'

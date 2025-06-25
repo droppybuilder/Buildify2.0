@@ -209,6 +209,26 @@ const LandingPage: React.FC = () => {
    const [isSubmitting, setIsSubmitting] = useState(false)
    const [showMobileDialog, setShowMobileDialog] = useState(false)
 
+   // Check for URL parameters (payment status, etc.)
+   useEffect(() => {
+      const urlParams = new URLSearchParams(window.location.search)
+      const status = urlParams.get('status')
+      
+      if (status === 'cancelled') {
+         toast.info('💭 Payment was cancelled. You can try again anytime!')
+         // Clean up URL
+         window.history.replaceState({}, '', '/landing')
+      } else if (status === 'expired') {
+         toast.warning('⏰ Payment session expired. Please start a new payment.')
+         // Clean up URL  
+         window.history.replaceState({}, '', '/landing')
+      } else if (status === 'timeout') {
+         toast.error('⏱️ Payment check timed out. If you made a payment, please contact support.')
+         // Clean up URL
+         window.history.replaceState({}, '', '/landing')
+      }
+   }, [])
+
    useEffect(() => {
       const handleMouseMove = (e: MouseEvent) => {
          setMousePosition({ x: e.clientX, y: e.clientY })
@@ -308,7 +328,44 @@ const LandingPage: React.FC = () => {
                </div>
             </div>
          </div>
-         {/* ===== END TEMPORARY LAUNCH BADGES ===== */}
+         
+         {/* ===== PAYMENT SUPPORT NOTICE ===== */}
+         <div className='payment-notice fixed top-32 sm:top-36 left-0 right-0 z-25 bg-gradient-to-r from-blue-600/20 via-indigo-600/20 to-blue-600/20 backdrop-blur-md border-y border-blue-500/30'>
+            <div className='max-w-7xl mx-auto px-4 py-2'>
+               <div className='flex flex-col sm:flex-row items-center justify-center gap-2 text-center'>
+                  <span className='text-blue-300 text-xs sm:text-sm'>
+                     💳 Having payment issues? 
+                  </span>
+                  <a 
+                     href='/payment-debug' 
+                     className='text-blue-200 hover:text-white text-xs sm:text-sm underline transition-colors'
+                  >
+                     Check payment status
+                  </a>
+                  <span className='text-blue-300 text-xs sm:text-sm'>
+                     or 
+                  </span>
+                  <a 
+                     href='#contact' 
+                     className='text-blue-200 hover:text-white text-xs sm:text-sm underline transition-colors'
+                     onClick={(e) => {
+                        e.preventDefault()
+                        document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
+                     }}
+                  >
+                     contact support
+                  </a>
+                  <button
+                     className='hidden sm:block text-blue-300/70 hover:text-white text-xs transition-colors ml-4'
+                     onClick={() => document.querySelector('.payment-notice')?.remove()}
+                     title='Hide notice'
+                  >
+                     ✕
+                  </button>
+               </div>
+            </div>
+         </div>
+         {/* ===== END PAYMENT SUPPORT NOTICE ===== */}
          {/* Animated Cursor Effect */}
          <div
             className='fixed w-6 h-6 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full pointer-events-none z-50 opacity-50 transition-all duration-300 ease-out'
@@ -392,7 +449,7 @@ const LandingPage: React.FC = () => {
          </nav>{' '}
          {/* Hero Section */}
          <section className='relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8'>
-            <div className='max-w-6xl mx-auto text-center pt-32 sm:pt-36 pb-8 sm:pb-12'>
+            <div className='max-w-6xl mx-auto text-center pt-40 sm:pt-44 pb-8 sm:pb-12'>
                <div className='flex flex-col items-center justify-center space-y-6 sm:space-y-8'>
                   <Badge className='bg-gradient-to-r from-purple-600/20 to-pink-600/20 text-purple-300 border-purple-500/30 px-3 sm:px-4 py-2 text-xs sm:text-sm lg:text-base'>
                      🚀 Web version of the popular Buildfy Tool

@@ -46,9 +46,15 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { planId, userId, userEmail, userName } = req.body;
+    const { planId, userId, userEmail, userName, testMode } = req.body;
     
-    console.log('Payment creation request:', { planId, userId, userEmail, userName });
+    console.log('Payment creation request:', { planId, userId, userEmail, userName, testMode });
+    
+    // If in test mode, add test prefix to avoid real charges
+    const isTestMode = testMode === true || userId?.startsWith('test-') || userEmail?.includes('+test');
+    if (isTestMode) {
+      console.log('🧪 TEST MODE DETECTED - Using test configuration');
+    }
     
     // Validate required fields
     if (!planId || !userId || !userEmail || !userName) {
@@ -117,14 +123,32 @@ export default async function handler(req, res) {
     return res.status(200).json({
       success: true,
       paymentUrl: payment.payment_link,
-      paymentId: payment.payment_id
+      paymentId: payment.payment_id,
+      statusUrl: `${returnUrl}/payment-pending?payment_id=${payment.payment_id}`
     });
   } catch (error) {
     console.error('DodoPayments API Error:', error);
+    
+    // Provide more specific error messages
+    let userMessage = 'Payment creation failed';
+    
+    if (error.message.includes('network') || error.message.includes('fetch')) {
+      userMessage = 'Network error. Please check your internet connection and try again.';
+    } else if (error.message.includes('400')) {
+      userMessage = 'Invalid payment request. Please check your details and try again.';
+    } else if (error.message.includes('401') || error.message.includes('403')) {
+      userMessage = 'Payment service authentication error. Please contact support.';
+    } else if (error.message.includes('429')) {
+      userMessage = 'Too many payment requests. Please wait and try again.';
+    } else if (error.message.includes('500')) {
+      userMessage = 'Payment service temporarily unavailable. Please try again later.';
+    }
+    
     return res.status(500).json({ 
       success: false, 
-      error: 'Payment creation failed',
-      details: error.message 
+      error: userMessage,
+      details: error.message,
+      retryable: !error.message.includes('400') && !error.message.includes('401') // Allow retry for non-client errors
     });
   }
 }
@@ -169,11 +193,13 @@ async function createDodoPayment({ productId, userId, userEmail, userName, planI
       returnUrl = `https://${returnUrl}`;
     }
   }
-    console.log('🔍 Environment variables check:');
+  
+  console.log('🔍 Environment variables check:');
   console.log('- BASE_URL:', process.env.BASE_URL);
   console.log('- VERCEL_URL:', process.env.VERCEL_URL);
   console.log('- Final returnUrl:', returnUrl);
   console.log('- Final payment return_url:', `${returnUrl}/payment-success`);
+  console.log('- Final cancel_url:', `${returnUrl}/pricing?status=cancelled`);
   console.log('API Key check:', apiKey ? `${apiKey.substring(0, 10)}...` : 'NOT SET');
   console.log('Base URL:', baseUrl);
   console.log('Full API URL:', `${baseUrl}/payments`);
@@ -208,7 +234,9 @@ async function createDodoPayment({ productId, userId, userEmail, userName, planI
       userId: userId,
       planType: planId,
       timestamp: new Date().toISOString(),
-      source: 'buildfy-web'
+      source: 'buildfy-web',
+      testMode: isTestMode ? 'true' : 'false',
+      environment: 'production'
     }
   };
 

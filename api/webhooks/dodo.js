@@ -16,19 +16,35 @@ export default async function handler(req, res) {
   // Enhanced logging for debugging
   console.log('🎯 DodoPayments webhook called!', {
     method: req.method,
+    url: req.url,
     headers: {
       'webhook-id': req.headers['webhook-id'],
       'webhook-timestamp': req.headers['webhook-timestamp'], 
       'webhook-signature': req.headers['webhook-signature'] ? 'present' : 'missing',
-      'content-type': req.headers['content-type']
+      'content-type': req.headers['content-type'],
+      'user-agent': req.headers['user-agent']
     },
     bodyType: typeof req.body,
-    bodyKeys: req.body ? Object.keys(req.body) : []
+    bodyKeys: req.body ? Object.keys(req.body) : [],
+    environment: {
+      webhook_key_configured: !!process.env.DODO_WEBHOOK_KEY,
+      webhook_key_preview: process.env.DODO_WEBHOOK_KEY ? 
+        `${process.env.DODO_WEBHOOK_KEY.substring(0, 10)}...` : 'NOT SET'
+    }
   });
 
   if (req.method !== 'POST') {
     console.log('❌ Method not allowed:', req.method);
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // Check if webhook key is configured
+  if (!process.env.DODO_WEBHOOK_KEY) {
+    console.error('❌ DODO_WEBHOOK_KEY not configured');
+    return res.status(500).json({ 
+      error: 'Webhook key not configured',
+      debug: 'DODO_WEBHOOK_KEY environment variable is missing'
+    });
   }
 
   try {

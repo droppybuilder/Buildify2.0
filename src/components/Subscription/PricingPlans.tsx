@@ -196,14 +196,44 @@ export default function PricingPlans() {
                timestamp: Date.now()
             }))
             
+            // Show user-friendly message
+            toast.success('🔄 Redirecting to secure payment...')
+            
             // Redirect to DodoPayments checkout
             window.location.href = result.paymentUrl
          } else {
-            throw new Error(result.error || 'Payment creation failed')
+            // Show specific error message from API
+            const errorMessage = result.error || 'Payment creation failed'
+            const canRetry = result.retryable !== false
+            
+            throw new Error(errorMessage + (canRetry ? ' (You can try again)' : ''))
          }
       } catch (error) {
          console.error('Payment creation failed:', error)
-         toast.error(`Payment initialization failed: ${error.message}`)
+         
+         // Provide user-friendly error messages
+         let displayMessage = error.message
+         
+         if (error.message.includes('network') || error.message.includes('fetch')) {
+            displayMessage = '🌐 Network error. Please check your connection and try again.'
+         } else if (error.message.includes('server') || error.message.includes('500')) {
+            displayMessage = '⚠️ Payment service unavailable. Please try again in a few minutes.'
+         } else if (error.message.includes('rate limit') || error.message.includes('429')) {
+            displayMessage = '⏳ Too many requests. Please wait and try again.'
+         } else if (!error.message.includes('(You can try again)')) {
+            displayMessage = `❌ ${error.message}`
+         }
+         
+         toast.error(displayMessage)
+         
+         // Log detailed error for debugging
+         console.error('Detailed payment error:', {
+            planId: plan.tier,
+            userId: user.uid,
+            userEmail: user.email,
+            error: error.message,
+            timestamp: new Date().toISOString()
+         })
       } finally {
          setProcessing(null)
       }

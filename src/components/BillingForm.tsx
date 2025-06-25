@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { MapPin, CreditCard } from 'lucide-react';
 
@@ -85,6 +84,8 @@ export default function BillingForm({ onSubmit, loading = false, planName, planP
 
   const [errors, setErrors] = useState<Partial<BillingData>>({});
 
+  console.log('🔍 BillingForm rendered:', { planName, planPrice, loading });
+
   const validateForm = () => {
     const newErrors: Partial<BillingData> = {};
 
@@ -100,6 +101,7 @@ export default function BillingForm({ onSubmit, loading = false, planName, planP
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('🔍 Form submitted:', billingData);
     if (validateForm()) {
       onSubmit(billingData);
     }
@@ -179,18 +181,21 @@ export default function BillingForm({ onSubmit, loading = false, planName, planP
 
               <div>
                 <Label htmlFor="country">Country *</Label>
-                <Select value={billingData.country} onValueChange={(value) => handleChange('country', value)}>
-                  <SelectTrigger className={errors.country ? 'border-red-500' : ''}>
-                    <SelectValue placeholder="Select country" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {COUNTRIES.map((country) => (
-                      <SelectItem key={country.code} value={country.code}>
-                        {country.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <select
+                  id="country"
+                  value={billingData.country}
+                  onChange={(e) => handleChange('country', e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    errors.country ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                >
+                  <option value="">Select country</option>
+                  {COUNTRIES.map((country) => (
+                    <option key={country.code} value={country.code}>
+                      {country.name}
+                    </option>
+                  ))}
+                </select>
                 {errors.country && <p className="text-sm text-red-500 mt-1">{errors.country}</p>}
               </div>
             </div>

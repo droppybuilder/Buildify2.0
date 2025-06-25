@@ -171,6 +171,8 @@ export default function PricingPlans() {
    } else if (currentTier === 'lifetime') {
       filteredPlans = plans.filter(p => p.tier === 'lifetime')
    }   const handleUpgrade = async (plan: PricingPlan) => {
+      console.log('🔍 handleUpgrade called:', { planId: plan.id, planTier: plan.tier, showBillingForm, selectedPlan: selectedPlan?.id })
+      
       if (!user) {
          toast.error('Please login to upgrade your plan')
          navigate('/auth')
@@ -182,8 +184,14 @@ export default function PricingPlans() {
       }
       
       // Show billing form for paid plans
+      console.log('🔍 Setting selectedPlan and showBillingForm to true')
       setSelectedPlan(plan)
       setShowBillingForm(true)
+      
+      // Debug: Check state after setting
+      setTimeout(() => {
+         console.log('🔍 State after setting:', { showBillingForm: true, selectedPlan: plan.id })
+      }, 100)
    }
 
    const handleBillingSubmit = async (billingData: BillingData) => {
@@ -281,19 +289,55 @@ export default function PricingPlans() {
       return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
    };   return (
       <>
+         {/* Debug info */}
+         {process.env.NODE_ENV === 'development' && (
+            <div className="fixed top-4 right-4 bg-black text-white p-2 text-xs z-[10001]">
+               Debug: showBillingForm={showBillingForm.toString()}, selectedPlan={selectedPlan?.id || 'null'}
+            </div>
+         )}
+         
          {/* Billing Form Modal */}
          {showBillingForm && selectedPlan && (
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-               <div className="bg-white rounded-lg max-w-md w-full">
-                  <div className="p-4 border-b">
+            <div 
+               className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+               style={{
+                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                  backdropFilter: 'blur(8px)',
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  zIndex: 9999
+               }}
+               onClick={(e) => {
+                  // Close modal when clicking backdrop
+                  if (e.target === e.currentTarget) {
+                     setShowBillingForm(false)
+                     setSelectedPlan(null)
+                     setProcessing(null)
+                  }
+               }}
+            >
+               <div 
+                  className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto"
+                  style={{
+                     position: 'relative',
+                     zIndex: 10000
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+               >
+                  <div className="p-4 border-b sticky top-0 bg-white">
                      <div className="flex justify-between items-center">
                         <h2 className="text-lg font-semibold text-gray-900">Complete Your Purchase</h2>
                         <button
                            onClick={() => {
                               setShowBillingForm(false)
                               setSelectedPlan(null)
+                              setProcessing(null)
                            }}
-                           className="text-gray-400 hover:text-gray-600"
+                           className="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-100 rounded"
+                           style={{ fontSize: '18px', lineHeight: '1' }}
                         >
                            ✕
                         </button>

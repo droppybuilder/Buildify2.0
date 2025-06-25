@@ -171,7 +171,7 @@ async function handlePaymentSuccess(paymentData) {
 }
 
 async function handlePaymentFailed(payload) {
-  const { metadata, payment_id, failure_reason } = payload;
+  const { metadata, payment_id, error_message, error_code } = payload;
   
   try {
     if (!metadata?.userId) {
@@ -186,14 +186,15 @@ async function handlePaymentFailed(payload) {
       payment_attempts: {
         [payment_id]: {
           status: 'failed',
-          reason: failure_reason,
+          reason: error_message || error_code || 'Payment failed',
+          error_code: error_code || 'UNKNOWN',
           attempted_at: new Date().toISOString(),
           plan_type: metadata.planType
         }
       }
     }, { merge: true });
 
-    console.log(`Payment failed for user: ${metadata.userId}, reason: ${failure_reason}`);
+    console.log(`Payment failed for user: ${metadata.userId}, reason: ${error_message || error_code}`);
   } catch (error) {
     console.error('Failed to log payment failure:', error);
     throw error;

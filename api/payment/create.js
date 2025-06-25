@@ -218,13 +218,6 @@ async function createDodoPayment({ productId, userId, userEmail, userName, planI
       name: userName,
       create_new_customer: true
     },
-    billing: {
-      city: "New York",
-      country: "US", 
-      state: "NY",
-      street: "123 Main St",
-      zipcode: "10001"
-    },
     return_url: `${returnUrl}/payment-success`,
     cancel_url: `${returnUrl}/pricing?status=cancelled`,
     metadata: {

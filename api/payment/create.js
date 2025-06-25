@@ -36,9 +36,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Rate limiting by IP address
+  // Rate limiting by IP address - increased limits for testing
   const clientIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'unknown';
-  if (!rateLimit(clientIP, 3, 300000)) { // 3 requests per 5 minutes
+  if (!rateLimit(clientIP, 10, 300000)) { // 10 requests per 5 minutes
     return res.status(429).json({ 
       success: false, 
       error: 'Too many payment requests. Please try again later.' 
@@ -109,13 +109,21 @@ export default async function handler(req, res) {
 
     console.log('Using product ID:', productId);
 
+    // Fix the return URL to ensure it has proper protocol
+    let returnUrl = process.env.BASE_URL || process.env.VERCEL_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001';
+    if (!returnUrl.startsWith('http://') && !returnUrl.startsWith('https://')) {
+      returnUrl = 'https://' + returnUrl;
+    }
+
     // Create payment using DodoPayments API
     const payment = await createDodoPayment({
       productId,
       userId,
       userEmail,
       userName,
-      planId
+      planId,
+      isTestMode,
+      returnUrl
     });
 
     console.log('Payment created successfully:', payment.payment_id);
@@ -176,23 +184,12 @@ function getDodoProductId(planId) {
 }
 
 // Create payment with DodoPayments
-async function createDodoPayment({ productId, userId, userEmail, userName, planId }) {  const baseUrl = process.env.DODO_API_BASE_URL || 'https://test.dodopayments.com';
-  const apiKey = process.env.DODO_PAYMENTS_API_KEY || '2RdhbTr4OeZimZOh.x38SM3G0x4_8o35V7lOfm_Wb04pjgr-jUpP1i_ccJRv2-Hcq';
-  // Fix the return URL to ensure it has proper protocol
-  let returnUrl = process.env.BASE_URL || process.env.VERCEL_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001';
+async function createDodoPayment({ productId, userId, userEmail, userName, planId, isTestMode, returnUrl }) {  
+  const baseUrl = process.env.DODO_API_BASE_URL || 'https://live.dodopayments.com';
+  const apiKey = process.env.DODO_PAYMENTS_API_KEY;
   
   // Remove trailing slash if present to avoid double slashes
   returnUrl = returnUrl.replace(/\/$/, '');
-  
-  // Ensure the URL has the proper protocol (prefer HTTPS for production)
-  if (returnUrl && !returnUrl.startsWith('http://') && !returnUrl.startsWith('https://')) {
-    // For production, use HTTPS; for localhost, use HTTP
-    if (returnUrl.includes('localhost') || returnUrl.includes('127.0.0.1')) {
-      returnUrl = `http://${returnUrl}`;
-    } else {
-      returnUrl = `https://${returnUrl}`;
-    }
-  }
   
   console.log('🔍 Environment variables check:');
   console.log('- BASE_URL:', process.env.BASE_URL);

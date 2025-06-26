@@ -8,15 +8,23 @@ import { toast } from 'sonner'
 import { useSubscription } from '@/hooks/useSubscription'
 import { useAuth } from '@/contexts/AuthContext'
 import { isSubscriptionExpired, isExpiringSoon, getRemainingDays } from '@/utils/subscriptionUtils'
-import BillingForm from '@/components/BillingForm'
 
-interface BillingData {
-  street: string;
-  city: string;
-  state: string;
-  zipcode: string;
-  country: string;
-}
+/**
+ * 🎯 PAYMENT SYSTEM OVERVIEW
+ * 
+ * This component handles subscription upgrades using DODO Payments static links.
+ * 
+ * How it works:
+ * 1. User clicks "Upgrade" button
+ * 2. handleUpgrade() creates a DODO static payment URL with user metadata
+ * 3. User is redirected to DODO's secure checkout (handles billing, currency, payment methods)
+ * 4. After payment, DODO sends webhook to /api/webhooks/dodo
+ * 5. Webhook updates user subscription in Firebase
+ * 6. User gets instant access to new features
+ * 
+ * Security: No sensitive data in frontend, DODO handles PCI compliance
+ * Benefits: Simple, reliable, supports local currencies/payment methods
+ */
 
 interface PlanFeature {
    name: string
@@ -126,8 +134,6 @@ function normalizeTier(tier: Tier): 'free' | 'standard' | 'pro' {
 export default function PricingPlans() {
    const [processing, setProcessing] = useState<string | null>(null)
    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-   const [showBillingForm, setShowBillingForm] = useState(false)
-   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null)
    const { subscription, loading } = useSubscription()
    const { user } = useAuth()
    const navigate = useNavigate()
@@ -141,25 +147,125 @@ export default function PricingPlans() {
       return () => window.removeEventListener('mousemove', handleMouseMove)
    }, [])
 
-   // Check for cancelled payment
+   // Handle payment status from URL (cancelled, expired, etc.)
    useEffect(() => {
       const urlParams = new URLSearchParams(window.location.search)
       const status = urlParams.get('status')
       
       if (status === 'cancelled') {
          toast.error('❌ Payment was cancelled. Please try again when you\'re ready.')
-         // Clean up URL
          window.history.replaceState({}, '', '/pricing')
       }
    }, [])
 
-   // Helper to get the user's normalized tier
+   // Get DODO product IDs for each plan (these come from your environment variables)
+   const getProductId = (planTier: string): string | null => {
+      const productIds = {
+         'standard': import.meta.env.VITE_DODO_STANDARD_PRODUCT_ID || 'pdt_4lEkfDCzFAnt4MjQ4L8Ze', // Fallback for standard
+         'pro': import.meta.env.VITE_DODO_PRO_PRODUCT_ID || 'pdt_bcgKHxp7021M9qnIa5gIO', // Fallback for pro
+         'lifetime': import.meta.env.VITE_DODO_LIFETIME_PRODUCT_ID || 'pdt_OFNzyUH2xSJmmbcvknmfO' // Fallback for lifetime
+      }
+      return productIds[planTier as keyof typeof productIds] || null
+   }
+
+   // 🚀 PAYMENT HANDLER: Creates DODO static payment link and redirects user
+   // This is the core payment function - handles all subscription upgrades
+   const handleUpgrade = async (plan: PricingPlan) => {
+      // Step 1: Validate user authentication
+      if (!user) {
+         toast.error('Please login to upgrade your plan')
+         navigate('/auth')
+         return
+      }
+      
+      if (plan.tier === 'free') {
+         toast.info('You are already on the Free plan.')
+         return
+      }
+      
+      // Step 2: Get DODO product ID for this plan (from your DODO dashboard)
+      const productId = getProductId(plan.tier)
+      if (!productId) {
+         toast.error('Product configuration error. Please contact support.')
+         console.error('Missing product ID for plan:', plan.tier)
+         return
+      }
+      
+      setProcessing(plan.id)
+      
+      try {
+         // Step 3: Create DODO static payment URL with user metadata
+         // IMPORTANT: For local testing, we must use production URLs because DODO validates them
+         const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+         const baseUrl = isLocal 
+            ? 'https://buildify20.vercel.app'  // Use your production URL for DODO validation
+            : window.location.origin          // Use current URL in production
+            
+         const returnUrl = `${baseUrl}/payment-success`
+         const cancelUrl = `${baseUrl}/pricing?status=cancelled`
+         
+         // Build the static payment URL with all required parameters
+         const params = new URLSearchParams({
+            quantity: '1',
+            redirect_url: returnUrl,
+            cancel_url: cancelUrl,
+            email: user.email || '',
+            fullName: user.displayName || user.email || '',
+            metadata_userId: user.uid,                    // Used by webhook to identify user
+            metadata_planType: plan.tier,                 // Used by webhook to set subscription
+            metadata_source: 'droppy-builder-web',
+            metadata_environment: import.meta.env.MODE || 'development',
+            metadata_timestamp: new Date().toISOString()
+         })
+         
+         const staticPaymentUrl = `https://checkout.dodopayments.com/buy/${productId}?${params.toString()}`
+         
+         console.log('🔗 Payment URL created:', {
+            productId,
+            planTier: plan.tier,
+            returnUrl,
+            cancelUrl,
+            isLocal,
+            baseUrl,
+            fullUrl: staticPaymentUrl,
+            environment: import.meta.env.MODE
+         })
+         
+         // Show user-friendly message about redirects during local testing
+         if (isLocal) {
+            toast.info('🌐 Local testing: Redirects will go to production site after payment')
+         }
+         
+         // Step 4: Store payment attempt locally (for tracking)
+         localStorage.setItem('pendingPayment', JSON.stringify({
+            planId: plan.tier,
+            timestamp: Date.now(),
+            method: 'static_link',
+            productId: productId
+         }))
+         
+         console.log('🔗 Redirecting to DODO checkout for plan:', plan.tier)
+         toast.success('🔄 Redirecting to secure payment...')
+         
+         // Step 5: Redirect to DODO - they handle everything else!
+         // (billing collection, currency conversion, payment processing)
+         window.location.href = staticPaymentUrl
+         
+      } catch (error) {
+         console.error('Redirect failed:', error)
+         toast.error('Failed to redirect to payment. Please try again.')
+      } finally {
+         setProcessing(null)
+      }
+   }
+
+   // Helper to get the user's current tier
    const getCurrentTier = () => {
       if (!subscription) return 'free'
       return normalizeTier(subscription.tier)
    }
 
-   // Filter plans based on current tier
+   // Filter plans based on current tier (show upgrade paths only)
    const currentTier = getCurrentTier()
    let filteredPlans: PricingPlan[] = []
    if (currentTier === 'free') {
@@ -170,105 +276,6 @@ export default function PricingPlans() {
       filteredPlans = plans.filter(p => ['pro', 'lifetime'].includes(p.tier))
    } else if (currentTier === 'lifetime') {
       filteredPlans = plans.filter(p => p.tier === 'lifetime')
-   }   const handleUpgrade = async (plan: PricingPlan) => {
-      console.log('🔍 handleUpgrade called:', { planId: plan.id, planTier: plan.tier, showBillingForm, selectedPlan: selectedPlan?.id })
-      
-      if (!user) {
-         toast.error('Please login to upgrade your plan')
-         navigate('/auth')
-         return
-      }
-      if (plan.tier === 'free') {
-         toast.info('You are already on the Free plan.')
-         return
-      }
-      
-      // Show billing form for paid plans
-      console.log('🔍 Setting selectedPlan and showBillingForm to true')
-      setSelectedPlan(plan)
-      setShowBillingForm(true)
-      
-      // Debug: Check state after setting
-      setTimeout(() => {
-         console.log('🔍 State after setting:', { showBillingForm: true, selectedPlan: plan.id })
-      }, 100)
-   }
-
-   const handleBillingSubmit = async (billingData: BillingData) => {
-      if (!user || !selectedPlan) return
-      
-      setProcessing(selectedPlan.id)
-      
-      try {
-         // Call DodoPayments API to create payment link with billing data
-         const response = await fetch('/api/payment/create', {
-            method: 'POST',
-            headers: { 
-               'Content-Type': 'application/json' 
-            },
-            body: JSON.stringify({
-               planId: selectedPlan.tier,
-               userId: user.uid,
-               userEmail: user.email,
-               userName: user.displayName || user.email,
-               billingData: billingData
-            }),
-         })
-         
-         const result = await response.json()
-         
-         if (result.success) {
-            // Store payment attempt for tracking
-            localStorage.setItem('pendingPayment', JSON.stringify({
-               paymentId: result.paymentId,
-               planId: selectedPlan.tier,
-               timestamp: Date.now()
-            }))
-            
-            // Show user-friendly message
-            toast.success('🔄 Redirecting to secure payment...')
-            
-            // Redirect to DodoPayments checkout
-            window.location.href = result.paymentUrl
-         } else {
-            // Show specific error message from API
-            const errorMessage = result.error || 'Payment creation failed'
-            const canRetry = result.retryable !== false
-            
-            throw new Error(errorMessage + (canRetry ? ' (You can try again)' : ''))
-         }
-      } catch (error) {
-         console.error('Payment creation failed:', error)
-         
-         // Provide user-friendly error messages
-         let displayMessage = error.message
-         
-         if (error.message.includes('network') || error.message.includes('fetch')) {
-            displayMessage = '🌐 Network error. Please check your connection and try again.'
-         } else if (error.message.includes('server') || error.message.includes('500')) {
-            displayMessage = '⚠️ Payment service unavailable. Please try again in a few minutes.'
-         } else if (error.message.includes('rate limit') || error.message.includes('429')) {
-            displayMessage = '⏳ Too many requests. Please wait and try again.'
-         } else if (!error.message.includes('(You can try again)')) {
-            displayMessage = `❌ ${error.message}`
-         }
-         
-         toast.error(displayMessage)
-         
-         // Log detailed error for debugging
-         console.error('Detailed payment error:', {
-            planId: selectedPlan.tier,
-            userId: user.uid,
-            userEmail: user.email,
-            error: error.message,
-            billingData: billingData,
-            timestamp: new Date().toISOString()
-         })
-      } finally {
-         setProcessing(null)
-         setShowBillingForm(false)
-         setSelectedPlan(null)
-      }
    }
 
    const getCurrentPlan = () => {
@@ -288,74 +295,7 @@ export default function PricingPlans() {
       if (isNaN(date.getTime())) return null;
       return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
    };   return (
-      <>
-         {/* Debug info */}
-         {process.env.NODE_ENV === 'development' && (
-            <div className="fixed top-4 right-4 bg-black text-white p-2 text-xs z-[10001]">
-               Debug: showBillingForm={showBillingForm.toString()}, selectedPlan={selectedPlan?.id || 'null'}
-            </div>
-         )}
-         
-         {/* Billing Form Modal */}
-         {showBillingForm && selectedPlan && (
-            <div 
-               className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-               style={{
-                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                  backdropFilter: 'blur(8px)',
-                  position: 'fixed',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  zIndex: 9999
-               }}
-               onClick={(e) => {
-                  // Close modal when clicking backdrop
-                  if (e.target === e.currentTarget) {
-                     setShowBillingForm(false)
-                     setSelectedPlan(null)
-                     setProcessing(null)
-                  }
-               }}
-            >
-               <div 
-                  className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto"
-                  style={{
-                     position: 'relative',
-                     zIndex: 10000
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-               >
-                  <div className="p-4 border-b sticky top-0 bg-white">
-                     <div className="flex justify-between items-center">
-                        <h2 className="text-lg font-semibold text-gray-900">Complete Your Purchase</h2>
-                        <button
-                           onClick={() => {
-                              setShowBillingForm(false)
-                              setSelectedPlan(null)
-                              setProcessing(null)
-                           }}
-                           className="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-100 rounded"
-                           style={{ fontSize: '18px', lineHeight: '1' }}
-                        >
-                           ✕
-                        </button>
-                     </div>
-                  </div>
-                  <div className="p-4">
-                     <BillingForm
-                        onSubmit={handleBillingSubmit}
-                        loading={processing === selectedPlan.id}
-                        planName={selectedPlan.name}
-                        planPrice={selectedPlan.price}
-                     />
-                  </div>
-               </div>
-            </div>
-         )}
-
-         <div className='min-h-screen w-full relative overflow-x-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white'>
+      <div className='min-h-screen w-full relative overflow-x-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white'>
          {/* Animated Cursor Effect */}
          <div
             className='fixed w-6 h-6 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full pointer-events-none z-50 opacity-50 transition-all duration-300 ease-out'
@@ -514,6 +454,5 @@ export default function PricingPlans() {
             .animate-float-3 { animation: float-3 15s ease-in-out infinite; }
          `}</style>
       </div>
-      </>
    )
 }

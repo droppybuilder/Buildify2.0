@@ -8,12 +8,15 @@ import { toast } from 'sonner'
 import { useSubscription } from '@/hooks/useSubscription'
 import { useAuth } from '@/contexts/AuthContext'
 import { isSubscriptionExpired, isExpiringSoon, getRemainingDays } from '@/utils/subscriptionUtils'
+import { doc, getDoc } from 'firebase/firestore'
+import { db } from '@/integrations/firebase/firebase.config'
+import { updateDoc } from 'firebase/firestore'
 
 /**
  * 🎯 PAYMENT SYSTEM OVERVIEW
- * 
+ *
  * This component handles subscription upgrades using DODO Payments static links.
- * 
+ *
  * How it works:
  * 1. User clicks "Upgrade" button
  * 2. handleUpgrade() creates a DODO static payment URL with user metadata
@@ -21,7 +24,7 @@ import { isSubscriptionExpired, isExpiringSoon, getRemainingDays } from '@/utils
  * 4. After payment, DODO sends webhook to /api/webhooks/dodo
  * 5. Webhook updates user subscription in Firebase
  * 6. User gets instant access to new features
- * 
+ *
  * Security: No sensitive data in frontend, DODO handles PCI compliance
  * Benefits: Simple, reliable, supports local currencies/payment methods
  */
@@ -42,7 +45,8 @@ interface PricingPlan {
    subtitle?: string
 }
 
-const plans: PricingPlan[] = [   {
+const plans: PricingPlan[] = [
+   {
       id: 'free',
       name: 'Free',
       description: 'Basic features for hobbyists',
@@ -61,7 +65,8 @@ const plans: PricingPlan[] = [   {
          { name: 'No watermarks', included: false },
          { name: 'Priority support', included: false },
       ],
-   },   {
+   },
+   {
       id: 'standard',
       name: 'Standard',
       description: 'For serious developers',
@@ -80,7 +85,8 @@ const plans: PricingPlan[] = [   {
          { name: 'Priority support', included: false },
          { name: 'Custom integrations', included: false },
       ],
-   },   {
+   },
+   {
       id: 'pro',
       name: 'Pro',
       description: 'For professional developers',
@@ -99,7 +105,8 @@ const plans: PricingPlan[] = [   {
          { name: 'Custom integrations', included: true },
          { name: 'Cloud projects (limit: 20)', included: true },
       ],
-   },   {
+   },
+   {
       id: 'lifetime',
       name: 'Lifetime',
       description: 'Pay once - Use Forever',
@@ -123,12 +130,12 @@ const plans: PricingPlan[] = [   {
 ]
 
 // Add helper to normalize tier
-type Tier = 'free' | 'standard' | 'pro' | 'lifetime';
+type Tier = 'free' | 'standard' | 'pro' | 'lifetime'
 function normalizeTier(tier: Tier): 'free' | 'standard' | 'pro' {
-  if (tier === 'lifetime') return 'pro';
-  if (tier === 'pro') return 'pro';
-  if (tier === 'standard') return 'standard';
-  return 'free';
+   if (tier === 'lifetime') return 'pro'
+   if (tier === 'pro') return 'pro'
+   if (tier === 'standard') return 'standard'
+   return 'free'
 }
 
 export default function PricingPlans() {
@@ -137,6 +144,8 @@ export default function PricingPlans() {
    const { subscription, loading } = useSubscription()
    const { user } = useAuth()
    const navigate = useNavigate()
+   const [failedPayment, setFailedPayment] = useState<any>(null)
+   const [checkingFailed, setCheckingFailed] = useState(false)
 
    // Mouse tracking for animated cursor
    useEffect(() => {
@@ -151,9 +160,9 @@ export default function PricingPlans() {
    useEffect(() => {
       const urlParams = new URLSearchParams(window.location.search)
       const status = urlParams.get('status')
-      
+
       if (status === 'cancelled') {
-         toast.error('❌ Payment was cancelled. Please try again when you\'re ready.')
+         toast.error("❌ Payment was cancelled. Please try again when you're ready.")
          window.history.replaceState({}, '', '/pricing')
       }
    }, [])
@@ -161,9 +170,9 @@ export default function PricingPlans() {
    // Get DODO product IDs for each plan (these come from your environment variables)
    const getProductId = (planTier: string): string | null => {
       const productIds = {
-         'standard': import.meta.env.VITE_DODO_STANDARD_PRODUCT_ID || 'pdt_4lEkfDCzFAnt4MjQ4L8Ze', // Fallback for standard
-         'pro': import.meta.env.VITE_DODO_PRO_PRODUCT_ID || 'pdt_bcgKHxp7021M9qnIa5gIO', // Fallback for pro
-         'lifetime': import.meta.env.VITE_DODO_LIFETIME_PRODUCT_ID || 'pdt_OFNzyUH2xSJmmbcvknmfO' // Fallback for lifetime
+         standard: import.meta.env.VITE_DODO_STANDARD_PRODUCT_ID || 'pdt_4lEkfDCzFAnt4MjQ4L8Ze', // Fallback for standard
+         pro: import.meta.env.VITE_DODO_PRO_PRODUCT_ID || 'pdt_bcgKHxp7021M9qnIa5gIO', // Fallback for pro
+         lifetime: import.meta.env.VITE_DODO_LIFETIME_PRODUCT_ID || 'pdt_OFNzyUH2xSJmmbcvknmfO', // Fallback for lifetime
       }
       return productIds[planTier as keyof typeof productIds] || null
    }
@@ -177,12 +186,12 @@ export default function PricingPlans() {
          navigate('/auth')
          return
       }
-      
+
       if (plan.tier === 'free') {
          toast.info('You are already on the Free plan.')
          return
       }
-      
+
       // Step 2: Get DODO product ID for this plan (from your DODO dashboard)
       const productId = getProductId(plan.tier)
       if (!productId) {
@@ -190,20 +199,20 @@ export default function PricingPlans() {
          console.error('Missing product ID for plan:', plan.tier)
          return
       }
-      
+
       setProcessing(plan.id)
-      
+
       try {
          // Step 3: Create DODO static payment URL with user metadata
          // IMPORTANT: For local testing, we must use production URLs because DODO validates them
          const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-         const baseUrl = isLocal 
-            ? 'https://buildify20.vercel.app'  // Use your production URL for DODO validation
-            : window.location.origin          // Use current URL in production
-            
+         const baseUrl = isLocal
+            ? 'https://buildify20.vercel.app' // Use your production URL for DODO validation
+            : window.location.origin // Use current URL in production
+
          const returnUrl = `${baseUrl}/payment-success`
          const cancelUrl = `${baseUrl}/pricing?status=cancelled`
-         
+
          // Build the static payment URL with all required parameters
          const params = new URLSearchParams({
             quantity: '1',
@@ -211,15 +220,15 @@ export default function PricingPlans() {
             cancel_url: cancelUrl,
             email: user.email || '',
             fullName: user.displayName || user.email || '',
-            metadata_userId: user.uid,                    // Used by webhook to identify user
-            metadata_planType: plan.tier,                 // Used by webhook to set subscription
+            metadata_userId: user.uid, // Used by webhook to identify user
+            metadata_planType: plan.tier, // Used by webhook to set subscription
             metadata_source: 'droppy-builder-web',
             metadata_environment: import.meta.env.MODE || 'development',
-            metadata_timestamp: new Date().toISOString()
+            metadata_timestamp: new Date().toISOString(),
          })
-         
+
          const staticPaymentUrl = `https://checkout.dodopayments.com/buy/${productId}?${params.toString()}`
-         
+
          console.log('🔗 Payment URL created:', {
             productId,
             planTier: plan.tier,
@@ -228,35 +237,80 @@ export default function PricingPlans() {
             isLocal,
             baseUrl,
             fullUrl: staticPaymentUrl,
-            environment: import.meta.env.MODE
+            environment: import.meta.env.MODE,
          })
-         
+
          // Show user-friendly message about redirects during local testing
          if (isLocal) {
             toast.info('🌐 Local testing: Redirects will go to production site after payment')
          }
-         
+
          // Step 4: Store payment attempt locally (for tracking)
-         localStorage.setItem('pendingPayment', JSON.stringify({
-            planId: plan.tier,
-            timestamp: Date.now(),
-            method: 'static_link',
-            productId: productId
-         }))
-         
+         localStorage.setItem(
+            'pendingPayment',
+            JSON.stringify({
+               planId: plan.tier,
+               timestamp: Date.now(),
+               method: 'static_link',
+               productId: productId,
+            })
+         )
+
          console.log('🔗 Redirecting to DODO checkout for plan:', plan.tier)
          toast.success('🔄 Redirecting to secure payment...')
-         
+
          // Step 5: Redirect to DODO - they handle everything else!
          // (billing collection, currency conversion, payment processing)
          window.location.href = staticPaymentUrl
-         
       } catch (error) {
          console.error('Redirect failed:', error)
          toast.error('Failed to redirect to payment. Please try again.')
       } finally {
          setProcessing(null)
       }
+   }
+
+   // Fetch latest failed payment attempt from Firestore
+   useEffect(() => {
+      if (!user) return
+      setCheckingFailed(true)
+      const fetchFailedPayment = async () => {
+         try {
+            const userDoc = await getDoc(doc(db, 'users', user.uid))
+            const attempts = userDoc.data()?.payment_attempts || {}
+            // Find all failed attempts, sort by attempted_at desc
+            const failedAttempts = Object.entries(attempts)
+               .map(([id, data]: any) => ({ payment_id: id, ...data }))
+               .filter(a => a.status === 'failed')
+               .sort((a, b) => {
+                  const aTime = a.attempted_at ? new Date(a.attempted_at).getTime() : 0;
+                  const bTime = b.attempted_at ? new Date(b.attempted_at).getTime() : 0;
+                  return bTime - aTime;
+               });
+            // Only show the latest failed attempt if it is not seen
+            const latest = failedAttempts[0];
+            if (latest && !latest.seen) {
+               setFailedPayment(latest);
+            } else {
+               setFailedPayment(null);
+            }
+         } catch (e) {
+            setFailedPayment(null)
+         } finally {
+            setCheckingFailed(false)
+         }
+      }
+      fetchFailedPayment()
+   }, [user])
+
+   const dismissFailedBanner = async () => {
+      if (!user || !failedPayment) return
+      try {
+         await updateDoc(doc(db, 'users', user.uid), {
+            [`payment_attempts.${failedPayment.payment_id}.seen`]: true
+         })
+      } catch (e) {}
+      setFailedPayment(null)
    }
 
    // Helper to get the user's current tier
@@ -271,11 +325,11 @@ export default function PricingPlans() {
    if (currentTier === 'free') {
       filteredPlans = plans
    } else if (currentTier === 'standard') {
-      filteredPlans = plans.filter(p => ['standard', 'pro', 'lifetime'].includes(p.tier))
+      filteredPlans = plans.filter((p) => ['standard', 'pro', 'lifetime'].includes(p.tier))
    } else if (currentTier === 'pro') {
-      filteredPlans = plans.filter(p => ['pro', 'lifetime'].includes(p.tier))
+      filteredPlans = plans.filter((p) => ['pro', 'lifetime'].includes(p.tier))
    } else if (currentTier === 'lifetime') {
-      filteredPlans = plans.filter(p => p.tier === 'lifetime')
+      filteredPlans = plans.filter((p) => p.tier === 'lifetime')
    }
 
    const getCurrentPlan = () => {
@@ -289,13 +343,32 @@ export default function PricingPlans() {
 
    // Helper to format expiry date
    const getExpiryText = () => {
-      if (!subscription || !subscription.subscriptionExpiry) return null;
-      if (subscription.subscriptionExpiry === 'lifetime') return 'Never (Lifetime)';
-      const date = new Date(subscription.subscriptionExpiry);
-      if (isNaN(date.getTime())) return null;
-      return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
-   };   return (
+      if (!subscription || !subscription.subscriptionExpiry) return null
+      if (subscription.subscriptionExpiry === 'lifetime') return 'Never (Lifetime)'
+      const date = new Date(subscription.subscriptionExpiry)
+      if (isNaN(date.getTime())) return null
+      return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+   }
+   return (
       <div className='min-h-screen w-full relative overflow-x-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white'>
+         {/* Failed Payment Banner */}
+         {failedPayment && (
+            <div className='max-w-lg mx-auto mt-6 mb-4 p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-between gap-4'>
+               <div className='flex-1'>
+                  <span className='text-red-400 text-sm font-medium'>
+                     ❌ Payment failed: {failedPayment.reason || 'Unknown error'}
+                  </span>
+               </div>
+               <button
+                  className='ml-4 px-3 py-1 rounded bg-red-500/20 text-red-200 hover:bg-red-500/40 transition-colors text-xs font-semibold'
+                  onClick={dismissFailedBanner}
+                  aria-label='Dismiss payment failure banner'
+               >
+                  Dismiss
+               </button>
+            </div>
+         )}
+
          {/* Animated Cursor Effect */}
          <div
             className='fixed w-6 h-6 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full pointer-events-none z-50 opacity-50 transition-all duration-300 ease-out'
@@ -313,7 +386,7 @@ export default function PricingPlans() {
             <div className='absolute top-1/2 left-1/2 w-[40vw] h-[40vw] bg-gradient-to-r from-emerald-600/20 to-teal-600/20 rounded-full blur-3xl animate-float-3' />
          </div>
 
-         <div className='container mx-auto py-20 relative z-10'>
+         <div className='container mx-auto py-10 relative z-10'>
             {/* Close Icon */}
             <button
                className='absolute top-4 right-4 p-2 rounded-full hover:bg-white/10 transition-colors backdrop-blur-sm border border-white/10'
@@ -341,7 +414,9 @@ export default function PricingPlans() {
                      <div className='absolute -top-6 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-5 py-1 rounded-full font-semibold shadow-lg text-sm border border-purple-400/30 w-44 text-center'>
                         {plan.subtitle}
                      </div>
-                     <h3 className='text-2xl font-bold mt-6 mb-1 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>{plan.name}</h3>
+                     <h3 className='text-2xl font-bold mt-6 mb-1 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+                        {plan.name}
+                     </h3>
                      <div className='mb-4'>
                         <span className='text-4xl font-bold text-white'>{plan.price}</span>
                         <span className='text-gray-300 ml-1 text-base'>/{plan.billingPeriod}</span>
@@ -374,7 +449,7 @@ export default function PricingPlans() {
                      <CardFooter className='w-full flex flex-col items-center mt-auto'>
                         <Button
                            className={`w-full py-3 rounded-xl font-medium transition-all duration-300 ${
-                              isCurrentPlan(plan.tier) 
+                              isCurrentPlan(plan.tier)
                                  ? 'bg-gray-600 hover:bg-gray-700 text-white'
                                  : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white hover:scale-105 shadow-lg hover:shadow-xl'
                            }`}
@@ -391,41 +466,45 @@ export default function PricingPlans() {
                   </Card>
                ))}
             </div>
-              {/* Show expiry for upgraded users */}
+            {/* Show expiry for upgraded users */}
             {subscription && subscription.tier !== 'free' && (
                <div className='mt-8 text-center space-y-4'>
                   <div className='inline-flex items-center px-6 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full'>
                      <span className='text-sm text-gray-300'>
-                        Subscription expires: <span className='text-white font-semibold'>{getExpiryText() || 'Unknown'}</span>
+                        Subscription expires:{' '}
+                        <span className='text-white font-semibold'>{getExpiryText() || 'Unknown'}</span>
                      </span>
                      {getRemainingDays(subscription) !== null && (
-                        <span className={`ml-3 px-2 py-1 rounded-full text-xs font-medium ${
-                           isSubscriptionExpired(subscription) 
-                              ? 'bg-red-500/20 text-red-400'
-                              : isExpiringSoon(subscription)
-                              ? 'bg-yellow-500/20 text-yellow-400'
-                              : 'bg-green-500/20 text-green-400'
-                        }`}>
-                           {isSubscriptionExpired(subscription) 
-                              ? 'Expired' 
-                              : `${getRemainingDays(subscription)} days left`
-                           }
+                        <span
+                           className={`ml-3 px-2 py-1 rounded-full text-xs font-medium ${
+                              isSubscriptionExpired(subscription)
+                                 ? 'bg-red-500/20 text-red-400'
+                                 : isExpiringSoon(subscription)
+                                 ? 'bg-yellow-500/20 text-yellow-400'
+                                 : 'bg-green-500/20 text-green-400'
+                           }`}
+                        >
+                           {isSubscriptionExpired(subscription)
+                              ? 'Expired'
+                              : `${getRemainingDays(subscription)} days left`}
                         </span>
                      )}
                   </div>
-                  
+
                   {isSubscriptionExpired(subscription) && (
                      <div className='max-w-md mx-auto p-4 rounded-xl bg-red-500/10 border border-red-500/30'>
                         <p className='text-red-400 text-sm'>
-                           ⚠️ Your subscription has expired. You've been moved to the free tier. Upgrade to restore premium features.
+                           ⚠️ Your subscription has expired. You've been moved to the free tier. Upgrade to restore
+                           premium features.
                         </p>
                      </div>
                   )}
-                  
+
                   {isExpiringSoon(subscription) && !isSubscriptionExpired(subscription) && (
                      <div className='max-w-md mx-auto p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/30'>
                         <p className='text-yellow-400 text-sm'>
-                           ⏰ Your subscription expires soon! Renew now to avoid any interruption to your premium features.
+                           ⏰ Your subscription expires soon! Renew now to avoid any interruption to your premium
+                           features.
                         </p>
                      </div>
                   )}

@@ -13,6 +13,7 @@ import { useSubscription } from '@/hooks/useSubscription'
 import { useProjectManager } from '@/hooks/useProjectManager'
 import WatermarkedCanvas from '@/components/WatermarkedCanvas'
 import { FEATURES, hasFeature } from '@/utils/subscriptionUtils'
+import { X } from 'lucide-react'
 
 // Define what constitutes a major state change for undo/redo
 const ACTION_TYPES = {
@@ -45,6 +46,10 @@ const Index = () => {
    const [windowSize, setWindowSize] = useState({ width: 800, height: 600 })
    const [windowBgColor, setWindowBgColor] = useState('#e8e8e8') // Set dark background as default
    const [windowAppearanceMode, setWindowAppearanceMode] = useState('system')
+   const [showUpdateBanner, setShowUpdateBanner] = useState(() => {
+      // Only show if not dismissed before
+      return localStorage.getItem('updateBannerDismissed') !== 'true'
+   })
 
    // Safe setter for selected component that includes validation
    const safeSetSelectedComponent = useCallback(
@@ -436,10 +441,35 @@ const Index = () => {
       ACTION_TYPES,
    })
 
+   const handleDismissBanner = () => {
+      setShowUpdateBanner(false)
+      localStorage.setItem('updateBannerDismissed', 'true')
+   }
+
    return (
       <div className='h-screen flex overflow-hidden bg-slate-50'>
          <Sidebar />
          <main className='flex-1 flex flex-col overflow-hidden'>
+            {/* --- Easily removable update banner start --- */}
+            {showUpdateBanner && (
+               <div className='bg-gray-700 border-b border-purple-300 text-purple-300 px-4 py-2 flex items-center justify-between shadow-sm z-20 rounded-xl w-full max-w-4xl mx-auto text-sm absolute top-14 right-0 left-0'>
+                  <div className='flex items-center gap-2'>
+                     <span className='font-semibold'>New Update:</span>
+                     <span>
+                        Notification Panel added for latest Announcements, make sure to check it out, There's an
+                        Important Update for you... | Its in Toolbar section, Beside Profile image 👉
+                     </span>
+                  </div>
+                  <button
+                     className='ml-4 p-1 rounded hover:bg-purple-200 transition-colors'
+                     onClick={handleDismissBanner}
+                     aria-label='Dismiss update banner'
+                  >
+                     <X className='h-5 w-5 text-purple-300 hover:text-purple-800' />
+                  </button>
+               </div>
+            )}
+            {/* --- Easily removable update banner end --- */}
             <ProjectToolbar
                currentProject={projectManager.currentProject}
                setCurrentProject={projectManager.setCurrentProject}
@@ -471,14 +501,20 @@ const Index = () => {
                showCodePreview={showCodePreview}
                showLayers={showLayers}
                showWindowProperties={showWindowProperties}
-            />            <div className='flex-1 flex overflow-hidden bg-slate-50'>
+            />{' '}
+            <div className='flex-1 flex overflow-hidden bg-slate-50'>
                {showCodePreview ? (
                   <>
                      <div className='flex-1 min-w-0'>
                         <CodePreview
                            components={components}
                            visible={showCodePreview}
-                           windowSettings={{ title: windowTitle, size: windowSize, bgColor: windowBgColor, appearanceMode: windowAppearanceMode }}
+                           windowSettings={{
+                              title: windowTitle,
+                              size: windowSize,
+                              bgColor: windowBgColor,
+                              appearanceMode: windowAppearanceMode,
+                           }}
                            subscription={subscription}
                         />
                      </div>
@@ -514,7 +550,9 @@ const Index = () => {
                   </>
                ) : showWindowProperties ? (
                   <>
-                     <div className='flex-1 min-w-0'>                        <WindowProperties
+                     <div className='flex-1 min-w-0'>
+                        {' '}
+                        <WindowProperties
                            visible={showWindowProperties}
                            title={windowTitle}
                            setTitle={handleTitleChange}
@@ -554,7 +592,9 @@ const Index = () => {
                                     windowTitle={windowTitle}
                                     windowSize={windowSize}
                                     windowBgColor={windowBgColor}
-                                    setWindowTitle={(title) => handleWindowPropertiesChange(title, windowSize, windowBgColor)}
+                                    setWindowTitle={(title) =>
+                                       handleWindowPropertiesChange(title, windowSize, windowBgColor)
+                                    }
                                     onAddComponent={handleAddComponent}
                                  />
                               </WatermarkedCanvas>

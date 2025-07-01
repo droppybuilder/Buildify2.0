@@ -14,6 +14,7 @@ import {
    EyeOff,
    PanelLeftClose,
    PanelLeftOpen,
+   Bell,
 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -28,7 +29,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { signOut } from 'firebase/auth'
 import { auth } from '@/integrations/firebase/firebase.config'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -70,6 +71,78 @@ export const Toolbar = ({
    const [description, setDescription] = useState('')
    const [submissionType, setSubmissionType] = useState<'feedback' | 'feature-request'>('feedback')
    const [submitting, setSubmitting] = useState(false)
+
+   // Notification state
+   const defaultNotifications = [
+      {
+         id: '1',
+         title: 'Payments Got Smoother!',
+         content: `Payments now support adaptive currency and payment methods. Pay in your local currency and with methods supported in your country. 
+         Like, Indian users can pay via UPI now. 
+
+         Also From now on, New Updates will come here in Notification Panel, so make sure to check it out regularly!
+         
+         Any Feedback, query or feature request, please let us know through our feedback form, its highly appreciated - Available at More Options in Toolbar Area, beside profile icon!
+         Thank you for using Buildfy!`,
+         date: '2025-07-01',
+      },
+      {
+         id: '2',
+         title: 'Welcome to Buildfy!',
+         content: 'Thank you for using Buildfy. Share your feedback or request features anytime!',
+         date: '2025-06-20',
+      },
+   ]
+
+   // Helper to get notification read state from localStorage
+   const getReadMap = () => {
+      try {
+         const stored = localStorage.getItem('buildfyNotificationRead')
+         return stored ? JSON.parse(stored) : {}
+      } catch {
+         return {}
+      }
+   }
+
+   // Helper to persist notification read state
+   const setReadMap = (readMap: Record<string, boolean>) => {
+      localStorage.setItem('buildfyNotificationRead', JSON.stringify(readMap))
+   }
+
+   // Initialize notifications with correct read state
+   const getInitialNotifications = () => {
+      const readMap = getReadMap()
+      return defaultNotifications.map((n) => ({ ...n, read: !!readMap[n.id] }))
+   }
+
+   const [notifications, setNotifications] = useState(getInitialNotifications)
+   const [showNotifications, setShowNotifications] = useState(false)
+   const [activeNotification, setActiveNotification] = useState<any>(null)
+
+   // Count unread notifications
+   const unreadCount = notifications.filter((n) => !n.read).length
+
+   // When notifications list changes (e.g. new notification added), merge with localStorage read state
+   useEffect(() => {
+      const readMap = getReadMap()
+      setNotifications((prev) => defaultNotifications.map((n) => ({ ...n, read: !!readMap[n.id] })))
+   }, [])
+
+   // Handler to open notification modal and mark as read
+   const handleNotificationClick = (notification: any) => {
+      setActiveNotification(notification)
+      setNotifications((prev) => {
+         const updated = prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n))
+         // Persist to localStorage immediately
+         const readMap = getReadMap()
+         readMap[notification.id] = true
+         setReadMap(readMap)
+         return updated
+      })
+   }
+
+   // Handler to close notification modal
+   const closeNotificationModal = () => setActiveNotification(null)
 
    const handleSignOut = async () => {
       await signOut(auth)
@@ -336,7 +409,7 @@ export const Toolbar = ({
                      </div>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className='bg-slate-200' />
-                  <DropdownMenuItem
+                  {/* <DropdownMenuItem
                      onClick={handleSignOut}
                      className='rounded-lg text-red-600 hover:bg-red-50'
                   >
@@ -345,7 +418,7 @@ export const Toolbar = ({
                         <div className='font-medium'>Sign Out</div>
                         <div className='text-xs text-red-500'>End your session</div>
                      </div>
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                </DropdownMenuContent>
             </DropdownMenu>{' '}
             {/* Profile Button */}
@@ -399,6 +472,89 @@ export const Toolbar = ({
                   </DropdownMenuItem>
                </DropdownMenuContent>
             </DropdownMenu>
+            {/* Notification Bell */}
+            <div className='relative'>
+               <Button
+                  variant='ghost'
+                  className='p-0 w-10 h-10 rounded-full flex items-center justify-center relative shadow-lg bg-gradient-to-br from-pink-100/60 via-purple-100/60 to-white border-2 border-purple-400'
+                  onClick={() => setShowNotifications((prev) => !prev)}
+                  aria-label='Notifications'
+               >
+                  <Bell
+                     size={32}
+                     className='text-pink-500 drop-shadow-lg'
+                  />
+                  {unreadCount > 0 ? (
+                     <span className='absolute top-1 right-1 w-4 h-4 bg-gradient-to-br from-pink-500 via-purple-500 to-pink-400 rounded-full border-2 border-white animate-pulse shadow-lg'></span>
+                  ) : (
+                     <span className='absolute top-1 right-1 w-4 h-4 bg-gray-300 rounded-full border-2 border-white opacity-50'></span>
+                  )}
+               </Button>
+               {showNotifications && (
+                  <div className='absolute right-0 mt-2 w-[320px] bg-white border border-pink-400/40 shadow-2xl rounded-2xl z-50 p-4 flex flex-col gap-3 max-h-[24rem] overflow-y-auto backdrop-blur-xl'>
+                     <div className=' flex items-center gap-2'>
+                        <Bell
+                           className='text-pink-400'
+                           size={20}
+                        />
+                        <span className='font-bold text-base bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent'>
+                           Notifications
+                        </span>
+                        {unreadCount > 0 && (
+                           <span className='ml-2 px-2 py-0.5 rounded-full bg-pink-500 text-white text-xs font-semibold'>
+                              {unreadCount} new
+                           </span>
+                        )}
+                     </div>
+                     {notifications.length === 0 && (
+                        <div className='text-center text-gray-400 py-8 text-base'>No notifications</div>
+                     )}
+                     {notifications.map((n) => (
+                        <div
+                           key={n.id}
+                           className={`cursor-pointer rounded-xl p-3 mb-2 shadow-lg border border-transparent transition-all bg-gradient-to-br from-white via-pink-50 to-purple-50 hover:from-pink-100 hover:to-purple-100 hover:border-pink-300/60 hover:scale-[1.03]`}
+                           onClick={() => handleNotificationClick(n)}
+                        >
+                           <div className='flex items-center justify-between mb-1'>
+                              <div className='font-bold text-base bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent'>
+                                 {n.title}
+                              </div>
+                              {!n.read && (
+                                 <span className='ml-2 w-2.5 h-2.5 bg-pink-400 rounded-full border-2 border-white shadow-lg animate-pulse'></span>
+                              )}
+                           </div>
+                           <div className='text-xs text-gray-400 mb-1'>{n.date}</div>
+                           <div className='text-sm text-slate-600 truncate'>
+                              {n.content.length > 60 ? n.content.slice(0, 60) + '…' : n.content}
+                           </div>
+                        </div>
+                     ))}
+                  </div>
+               )}
+            </div>
+            {/* Notification Modal */}
+            {activeNotification && (
+               <Dialog
+                  open={true}
+                  onOpenChange={closeNotificationModal}
+               >
+                  <DialogContent className='max-w-md mx-auto bg-white border border-slate-300 text-slate-900 rounded-2xl p-8'>
+                     <DialogHeader>
+                        <DialogTitle className='text-pink-600'>{activeNotification.title}</DialogTitle>
+                     </DialogHeader>
+                     <div className='mt-4 text-base whitespace-pre-line'>{activeNotification.content}</div>
+                     <div className='mt-2 text-xs text-gray-400'>Received: {activeNotification.date}</div>
+                     {/* <DialogFooter className='pt-4'>
+                        <Button
+                           onClick={closeNotificationModal}
+                           className='bg-pink-500 text-white rounded-xl'
+                        >
+                           Close
+                        </Button>
+                     </DialogFooter> */}
+                  </DialogContent>
+               </Dialog>
+            )}
          </div>{' '}
          {/* Feedback Dialog */}
          <Dialog

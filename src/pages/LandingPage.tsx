@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import { db } from '@/integrations/firebase/firebase.config'
 import { collection, addDoc } from 'firebase/firestore'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { useScrollAnimation } from '@/hooks/useScrollAnimation'
 import logo from '/logo6.png'
 import { ContainerScroll } from '@/components/ui/container-scroll-animation'
 import { HeroSection } from '@/components/ui/hero-section-1'
@@ -211,6 +212,13 @@ const LandingPage: React.FC = () => {
    const [isSubmitting, setIsSubmitting] = useState(false)
    const [showMobileDialog, setShowMobileDialog] = useState(false)
 
+   // Scroll animations
+   const featuresAnimation = useScrollAnimation({ threshold: 0.15 })
+   const demoAnimation = useScrollAnimation({ threshold: 0.2 })
+   const pricingAnimation = useScrollAnimation({ threshold: 0.15 })
+   const teamAnimation = useScrollAnimation({ threshold: 0.2 })
+   const contactAnimation = useScrollAnimation({ threshold: 0.15 })
+
    // Mouse tracking for animated cursor
    useEffect(() => {
       const handleMouseMove = (e: MouseEvent) => {
@@ -256,7 +264,7 @@ const LandingPage: React.FC = () => {
    }
 
    return (
-      <div className='min-h-screen w-full relative overflow-x-hidden bg-neutral-950 text-purple-100'>
+      <div className='min-h-screen w-full relative overflow-x-hidden bg-slate-950 text-purple-100 font-sans'>
          {/* Animated Cursor Effect */}
          <div
             className='fixed w-6 h-6 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full pointer-events-none z-50 opacity-50 transition-all duration-300 ease-out'
@@ -272,15 +280,24 @@ const LandingPage: React.FC = () => {
          />
          {/* Features Section */}
          <section
+            ref={featuresAnimation.elementRef}
             id='features'
-            className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-neutral-950'
+            className={`py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-slate-950 relative transition-all duration-1000 ease-out ${
+               featuresAnimation.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
          >
-            <div className='max-w-7xl mx-auto'>
+            {/* Background effects */}
+            <div className='absolute inset-0 overflow-hidden'>
+               <div className='absolute top-1/4 -left-1/4 w-96 h-96 bg-purple-900/10 rounded-full blur-3xl animate-pulse-slow' />
+               <div className='absolute bottom-1/4 -right-1/4 w-96 h-96 bg-blue-900/10 rounded-full blur-3xl animate-pulse-slow' style={{ animationDelay: '2s' }} />
+            </div>
+            
+            <div className='max-w-7xl mx-auto relative z-10'>
                <div className='text-center mb-12 sm:mb-16'>
-                  <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-purple-300'>
+                  <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-purple-300 font-display'>
                      Powerful Features
                   </h2>
-                  <p className='text-lg sm:text-xl text-purple-200 max-w-3xl mx-auto leading-relaxed'>
+                  <p className='text-lg sm:text-xl text-purple-200 max-w-3xl mx-auto leading-relaxed font-sans'>
                      Everything you need to build professional Python GUIs without writing a single line of code
                   </p>
                </div>
@@ -289,7 +306,15 @@ const LandingPage: React.FC = () => {
                   {features.map((feature, index) => (
                      <Card
                         key={index}
-                        className='group bg-purple-900/60 backdrop-blur-md border border-purple-800 rounded-2xl p-6 sm:p-8 hover:bg-purple-800/80 transition-all duration-300 transform hover:scale-105'
+                        className={`group bg-slate-900/60 backdrop-blur-md border border-purple-800/50 rounded-2xl p-6 sm:p-8 hover:bg-slate-900/80 hover:border-purple-600/70 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 shadow-lg shadow-purple-950/20 hover:shadow-purple-900/30 hover:shadow-xl ${
+                           featuresAnimation.isVisible 
+                             ? 'opacity-100 translate-y-0 translate-x-0' 
+                             : `opacity-0 ${index % 2 === 0 ? 'translate-x-[-30px]' : 'translate-x-[30px]'} translate-y-4`
+                        }`}
+                        style={{ 
+                           transitionDelay: featuresAnimation.isVisible ? `${0.1 * index}s` : '0s',
+                           transitionDuration: '0.8s'
+                        }}
                      >
                         <CardContent className='p-0'>
                            <div
@@ -297,10 +322,10 @@ const LandingPage: React.FC = () => {
                            >
                               {feature.icon}
                            </div>
-                           <h3 className='text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-purple-200'>
+                           <h3 className='text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-purple-200 font-display'>
                               {feature.title}
                            </h3>
-                           <p className='text-purple-300 text-sm sm:text-base leading-relaxed'>{feature.desc}</p>
+                           <p className='text-purple-300 text-sm sm:text-base leading-relaxed font-sans'>{feature.desc}</p>
                         </CardContent>
                      </Card>
                   ))}
@@ -308,9 +333,11 @@ const LandingPage: React.FC = () => {
             </div>
          </section>{' '}
          {/* Reviews Marquee */}
-         <section className='py-12 sm:py-16 lg:py-20 overflow-x-auto bg-neutral-950'>
-            <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-               <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-8 sm:mb-12 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+         <section className='py-12 sm:py-16 lg:py-20 overflow-x-auto bg-slate-950 relative'>
+            {/* Subtle gradient overlay */}
+            <div className='absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-950/50 to-slate-950 pointer-events-none' />
+            <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10'>
+               <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-8 sm:mb-12 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent font-display'>
                   What Buildfy Users Say
                </h2>
                <div className='relative'>
@@ -318,7 +345,7 @@ const LandingPage: React.FC = () => {
                      {[...reviews, ...reviews].map((review, index) => (
                         <Card
                            key={index}
-                           className='flex-shrink-0 w-72 sm:w-80 bg-purple-900/60 backdrop-blur-md border border-purple-800 rounded-2xl p-4 sm:p-6'
+                           className='flex-shrink-0 w-72 sm:w-80 bg-slate-900/60 backdrop-blur-md border border-purple-800/50 rounded-2xl p-4 sm:p-6 hover:border-purple-600/70 hover:bg-slate-900/80 hover:scale-105 transition-all duration-300 shadow-lg shadow-purple-950/20'
                         >
                            <CardContent className='p-0'>
                               <div className='flex items-center mb-3 sm:mb-4'>
@@ -347,19 +374,32 @@ const LandingPage: React.FC = () => {
          </section>{' '}
          {/* Demo Section */}
          <section
+            ref={demoAnimation.elementRef}
             id='demo'
-            className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-neutral-950'
+            className={`py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-slate-950 relative transition-all duration-1000 ease-out ${
+               demoAnimation.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+            }`}
          >
-            <div className='max-w-6xl mx-auto text-center'>
-               <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-purple-300'>
+            {/* Animated background elements */}
+            <div className='absolute inset-0 overflow-hidden'>
+               <div className='absolute top-0 left-1/3 w-72 h-72 bg-purple-800/5 rounded-full blur-3xl animate-float-gentle' />
+               <div className='absolute bottom-0 right-1/3 w-72 h-72 bg-pink-800/5 rounded-full blur-3xl animate-float-gentle' style={{ animationDelay: '3s' }} />
+            </div>
+            
+            <div className='max-w-6xl mx-auto text-center relative z-10'>
+               <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-purple-300 font-display'>
                   See Buildfy in Action
                </h2>
-               <p className='text-lg sm:text-xl text-purple-200 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed'>
+               <p className='text-lg sm:text-xl text-purple-200 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed font-sans'>
                   Watch how easy it is to create professional Python GUIs with our visual builder
                </p>
-               <div className='relative rounded-2xl sm:rounded-3xl overflow-hidden bg-gradient-to-r from-purple-600/20 to-pink-600/20 p-4 sm:p-6 lg:p-8 backdrop-blur-md border border-white/10'>
+               <div className={`relative rounded-2xl sm:rounded-3xl overflow-hidden bg-gradient-to-r from-purple-600/20 to-pink-600/20 p-4 sm:p-6 lg:p-8 backdrop-blur-md border border-purple-800/50 hover:border-purple-600/70 transition-all duration-700 shadow-2xl shadow-purple-950/30 hover:shadow-purple-900/40 ${
+                  demoAnimation.isVisible ? 'scale-100 rotate-0' : 'scale-95 rotate-1'
+               }`} style={{ transitionDelay: demoAnimation.isVisible ? '0.4s' : '0s' }}>
                   <video
-                     className='w-full aspect-video rounded-xl sm:rounded-2xl object-cover'
+                     className={`w-full aspect-video rounded-xl sm:rounded-2xl object-cover transition-transform duration-700 ${
+                        demoAnimation.isVisible ? 'scale-100' : 'scale-105'
+                     }`}
                      controls
                      poster='/thumbnail.png'
                   >
@@ -375,26 +415,40 @@ const LandingPage: React.FC = () => {
          </section>{' '}
          {/* Pricing Section */}
          <section
+            ref={pricingAnimation.elementRef}
             id='pricing'
-            className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-neutral-950'
+            className={`py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-slate-950 relative transition-all duration-1000 ease-out ${
+               pricingAnimation.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
          >
-            <div className='max-w-7xl mx-auto'>
+            {/* Background gradient overlay */}
+            <div className='absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900/20 to-slate-950' />
+            
+            <div className='max-w-7xl mx-auto relative z-10'>
                <div className='text-center mb-12 sm:mb-16'>
-                  <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-purple-300'>
+                  <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-purple-300 font-display'>
                      Choose Your Plan
                   </h2>
-                  <p className='text-lg sm:text-xl text-purple-200 max-w-3xl mx-auto leading-relaxed'>
+                  <p className='text-lg sm:text-xl text-purple-200 max-w-3xl mx-auto leading-relaxed font-sans'>
                      Start free and scale as you grow. All plans include our core features.
                   </p>
                </div>
 
                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8'>
-                  {displayPlans.map((plan) => (
+                  {displayPlans.map((plan, index) => (
                      <Card
                         key={plan.id}
-                        className={`relative bg-purple-900/60 backdrop-blur-md border rounded-2xl p-6 sm:p-8 hover:bg-purple-800/80 transition-all duration-300 transform hover:scale-105 ${
-                           plan.tier === 'pro' ? 'border-purple-500 ring-2 ring-purple-500/20' : 'border-purple-800'
+                        className={`relative bg-slate-900/60 backdrop-blur-md border rounded-2xl p-6 sm:p-8 hover:bg-slate-900/80 hover:border-purple-600/70 transition-all duration-500 transform hover:scale-105 hover:-translate-y-3 shadow-lg shadow-purple-950/20 hover:shadow-purple-900/40 hover:shadow-2xl ${
+                           plan.tier === 'pro' ? 'border-purple-500 ring-2 ring-purple-500/20 hover:ring-purple-400/30' : 'border-purple-800/50'
+                        } ${
+                           pricingAnimation.isVisible 
+                             ? 'opacity-100 translate-y-0' 
+                             : 'opacity-0 translate-y-6'
                         }`}
+                        style={{ 
+                           transitionDelay: pricingAnimation.isVisible ? `${0.15 * index}s` : '0s',
+                           transitionDuration: '0.7s'
+                        }}
                      >
                         {plan.tier === 'pro' && (
                            <Badge className='absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 sm:px-4 py-1 text-xs sm:text-sm'>
@@ -444,13 +498,24 @@ const LandingPage: React.FC = () => {
             </div>
          </section>{' '}
          {/* Team Section */}
-         <section className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-neutral-950'>
-            <div className='max-w-5xl mx-auto'>
+         <section 
+            ref={teamAnimation.elementRef}
+            className={`py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-slate-950 relative transition-all duration-1000 ease-out ${
+               teamAnimation.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
+         >
+            {/* Subtle animated background */}
+            <div className='absolute inset-0 overflow-hidden'>
+               <div className='absolute top-1/2 left-0 w-64 h-64 bg-purple-900/5 rounded-full blur-3xl animate-pulse-slow' />
+               <div className='absolute top-1/2 right-0 w-64 h-64 bg-pink-900/5 rounded-full blur-3xl animate-pulse-slow' style={{ animationDelay: '4s' }} />
+            </div>
+            
+            <div className='max-w-5xl mx-auto relative z-10'>
                <div className='text-center mb-12 sm:mb-16'>
-                  <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-purple-300'>
+                  <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-purple-300 font-display'>
                      Meet Our Team
                   </h2>
-                  <p className='text-lg sm:text-xl text-purple-200 max-w-3xl mx-auto leading-relaxed'>
+                  <p className='text-lg sm:text-xl text-purple-200 max-w-3xl mx-auto leading-relaxed font-sans'>
                      The passionate developers behind Buildfy, making GUI development accessible to everyone
                   </p>
                </div>
@@ -459,7 +524,15 @@ const LandingPage: React.FC = () => {
                   {team.map((member, index) => (
                      <Card
                         key={index}
-                        className='bg-purple-900/60 backdrop-blur-md border border-purple-800 rounded-2xl p-6 sm:p-8 hover:bg-purple-800/80 transition-all duration-300 transform hover:scale-105 w-full max-w-sm'
+                        className={`bg-slate-900/60 backdrop-blur-md border border-purple-800/50 rounded-2xl p-6 sm:p-8 hover:bg-slate-900/80 hover:border-purple-600/70 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 w-full max-w-sm shadow-lg shadow-purple-950/20 hover:shadow-purple-900/30 hover:shadow-xl ${
+                           teamAnimation.isVisible 
+                             ? 'opacity-100 translate-x-0' 
+                             : `opacity-0 ${index === 0 ? 'translate-x-[-40px]' : 'translate-x-[40px]'}`
+                        }`}
+                        style={{ 
+                           transitionDelay: teamAnimation.isVisible ? `${0.2 * index}s` : '0s',
+                           transitionDuration: '0.8s'
+                        }}
                      >
                         <CardContent className='p-0 text-center'>
                            <img
@@ -485,24 +558,35 @@ const LandingPage: React.FC = () => {
          </section>{' '}
          {/* Contact Section */}
          <section
+            ref={contactAnimation.elementRef}
             id='contact'
-            className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-neutral-950'
+            className={`py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-slate-950 relative transition-all duration-1000 ease-out ${
+               contactAnimation.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
          >
-            <div className='max-w-5xl mx-auto'>
+            {/* Animated background gradients */}
+            <div className='absolute inset-0 overflow-hidden'>
+               <div className='absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-purple-900/10 to-pink-900/10 rounded-full blur-3xl animate-float-gentle' />
+               <div className='absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-blue-900/10 to-purple-900/10 rounded-full blur-3xl animate-float-gentle' style={{ animationDelay: '5s' }} />
+            </div>
+            
+            <div className='max-w-5xl mx-auto relative z-10'>
                <div className='text-center mb-12 sm:mb-16'>
-                  <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-purple-300'>
+                  <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-purple-300 font-display'>
                      Get in Touch
                   </h2>
-                  <p className='text-lg sm:text-xl text-purple-200 max-w-3xl mx-auto leading-relaxed'>
+                  <p className='text-lg sm:text-xl text-purple-200 max-w-3xl mx-auto leading-relaxed font-sans'>
                      Have questions? Need support? Want to collaborate? We'd love to hear from you!
                   </p>
                </div>
 
                <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-stretch'>
                   {/* Contact Form */}
-                  <Card className='bg-purple-900/60 backdrop-blur-md border border-purple-800 rounded-2xl p-6 sm:p-8 h-full'>
+                  <Card className={`bg-slate-900/60 backdrop-blur-md border border-purple-800/50 rounded-2xl p-6 sm:p-8 h-full hover:border-purple-600/70 hover:bg-slate-900/80 transition-all duration-500 shadow-lg shadow-purple-950/20 hover:shadow-purple-900/30 ${
+                     contactAnimation.isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[-40px]'
+                  }`} style={{ transitionDelay: contactAnimation.isVisible ? '0.4s' : '0s', transitionDuration: '0.8s' }}>
                      <CardContent className='p-0 h-full flex flex-col'>
-                        <h3 className='text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-purple-200'>
+                        <h3 className='text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-purple-200 font-display'>
                            Send us a message
                         </h3>
                         <form
@@ -553,8 +637,10 @@ const LandingPage: React.FC = () => {
                   </Card>
 
                   {/* Contact Info */}
-                  <div className='space-y-4 sm:space-y-6 lg:space-y-8 h-full flex flex-col justify-center'>
-                     <Card className='bg-purple-900/60 backdrop-blur-md border border-purple-800 rounded-2xl p-4 sm:p-6'>
+                  <div className={`space-y-4 sm:space-y-6 lg:space-y-8 h-full flex flex-col justify-center transition-all duration-800 ease-out ${
+                     contactAnimation.isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[40px]'
+                  }`} style={{ transitionDelay: contactAnimation.isVisible ? '0.6s' : '0s' }}>
+                     <Card className='bg-slate-900/60 backdrop-blur-md border border-purple-800/50 rounded-2xl p-4 sm:p-6 hover:border-purple-600/70 hover:bg-slate-900/80 transition-all duration-300 hover:scale-105 shadow-lg shadow-purple-950/20'>
                         <CardContent className='p-0'>
                            <div className='flex items-center space-x-3 sm:space-x-4'>
                               <div className='w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center text-lg sm:text-xl flex-shrink-0'>
@@ -567,7 +653,7 @@ const LandingPage: React.FC = () => {
                            </div>
                         </CardContent>
                      </Card>
-                     <Card className='bg-purple-900/60 backdrop-blur-md border border-purple-800 rounded-2xl p-4 sm:p-6'>
+                     <Card className='bg-slate-900/60 backdrop-blur-md border border-purple-800/50 rounded-2xl p-4 sm:p-6 hover:border-purple-600/70 hover:bg-slate-900/80 transition-all duration-300 hover:scale-105 shadow-lg shadow-purple-950/20'>
                         <CardContent className='p-0'>
                            <div className='flex items-center space-x-3 sm:space-x-4'>
                               <div className='w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-lg sm:text-xl flex-shrink-0'>
@@ -580,7 +666,7 @@ const LandingPage: React.FC = () => {
                            </div>
                         </CardContent>
                      </Card>
-                     <Card className='bg-purple-900/60 backdrop-blur-md border border-purple-800 rounded-2xl p-4 sm:p-6'>
+                     <Card className='bg-slate-900/60 backdrop-blur-md border border-purple-800/50 rounded-2xl p-4 sm:p-6 hover:border-purple-600/70 hover:bg-slate-900/80 transition-all duration-300 hover:scale-105 shadow-lg shadow-purple-950/20'>
                         <CardContent className='p-0'>
                            <div className='flex items-center space-x-3 sm:space-x-4'>
                               <div className='w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center text-lg sm:text-xl flex-shrink-0'>
@@ -593,7 +679,7 @@ const LandingPage: React.FC = () => {
                            </div>
                         </CardContent>
                      </Card>
-                     <Card className='bg-purple-900/60 backdrop-blur-md border border-purple-800 rounded-2xl p-4 sm:p-6'>
+                     <Card className='bg-slate-900/60 backdrop-blur-md border border-purple-800/50 rounded-2xl p-4 sm:p-6 hover:border-purple-600/70 hover:bg-slate-900/80 transition-all duration-300 hover:scale-105 shadow-lg shadow-purple-950/20'>
                         <CardContent className='p-0'>
                            <div className='flex items-center space-x-3 sm:space-x-4'>
                               <div className='w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center text-lg sm:text-xl flex-shrink-0'>
@@ -613,67 +699,29 @@ const LandingPage: React.FC = () => {
             </div>
          </section>{' '}
          {/* Footer */}
-         <footer className='bg-neutral-950 border-t border-purple-900 py-8 sm:py-12 px-4 sm:px-6 lg:px-8'>
-            <div className='max-w-7xl mx-auto'>
+         <footer className='bg-slate-950 border-t border-purple-900/50 py-8 sm:py-12 px-4 sm:px-6 lg:px-8 relative'>
+            {/* Footer background effect */}
+            <div className='absolute inset-0 bg-gradient-to-t from-slate-950 to-slate-900/20' />
+            
+            <div className='max-w-7xl mx-auto relative z-10'>
                <div className='text-center'>
                   <div className='flex items-center justify-center space-x-2 mb-3 sm:mb-4'>
                      <img
                         src={logo}
                         alt='Buildfy Web'
-                        className='h-8 w-8 sm:h-10 sm:w-10 rounded-lg'
+                        className='h-8 w-8 sm:h-10 sm:w-10 rounded-lg hover:scale-110 transition-transform duration-300'
                      />
-                     <span className='text-xl sm:text-2xl font-bold text-purple-300'>Buildfy Web</span>
+                     <span className='text-xl sm:text-2xl font-bold text-purple-300 font-display'>Buildfy Web</span>
                   </div>
-                  <p className='text-purple-300 text-sm sm:text-base mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed'>
+                  <p className='text-purple-300 text-sm sm:text-base mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed font-sans'>
                      Making Python GUI development accessible to everyone through visual design.
                   </p>
-                  <div className='border-t border-white/10 pt-6 sm:pt-8'>
+                  <div className='border-t border-purple-900/30 pt-6 sm:pt-8'>
                      <p className='text-purple-700 text-xs sm:text-sm'>© 2025 Buildfy Web. All rights reserved.</p>
                   </div>
                </div>
             </div>{' '}
          </footer>{' '}
-         {/* Mobile Device Dialog */}
-         <Dialog
-            open={showMobileDialog}
-            onOpenChange={setShowMobileDialog}
-         >
-            <DialogContent className='bg-neutral-950 border-purple-800 text-purple-100 max-w-sm mx-auto rounded-xl'>
-               <DialogHeader>
-                  <DialogTitle className='text-xl sm:text-2xl font-bold text-purple-300 text-center'>
-                     📱 Mobile Device Detected
-                  </DialogTitle>
-                  <DialogDescription className='text-purple-300 text-center text-base leading-relaxed mt-4'>
-                     Buildfy Web works best on larger screens for the optimal visual building experience.
-                  </DialogDescription>
-               </DialogHeader>
-
-               <div className='space-y-4 mt-6'>
-                  <div className='text-center'>
-                     <h4 className='font-semibold text-purple-200 mb-3'>Continue on a bigger screen:</h4>
-                     <div className='flex justify-center space-x-4 text-4xl mb-4'>
-                        <span title='Tablet'>📱</span>
-                        <span title='Laptop'>💻</span>
-                        <span title='Desktop'>🖥️</span>
-                     </div>
-                  </div>
-
-                  <div className='bg-purple-900/60 backdrop-blur-md rounded-xl p-4 border border-purple-800'>
-                     <p className='text-sm text-purple-300 text-center leading-relaxed'>
-                        For the best drag-and-drop experience and full access to all features, please visit Buildfy Web
-                        on a tablet, laptop, or desktop computer.
-                     </p>
-                  </div>
-
-                  <Button
-                     onClick={() => setShowMobileDialog(false)}
-                     className='w-full bg-purple-800 hover:bg-purple-700 py-3 rounded-xl text-base'
-                  >
-                     Got it! 👍
-                  </Button>
-               </div>
-            </DialogContent>
-         </Dialog>
          {/* Custom Styles */}
          <style>{`
             @keyframes float-1 {
@@ -694,37 +742,54 @@ const LandingPage: React.FC = () => {
                0% { transform: translateX(0); }
                100% { transform: translateX(-50%); }
             }
+            @keyframes float-gentle {
+               0%, 100% { transform: translateY(0px) rotate(0deg); }
+               50% { transform: translateY(-20px) rotate(180deg); }
+            }
+            @keyframes pulse-slow {
+               0%, 100% { opacity: 0.4; transform: scale(1); }
+               50% { opacity: 0.8; transform: scale(1.05); }
+            }
+            @keyframes bounce-gentle {
+               0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+               40% { transform: translateY(-10px); }
+               60% { transform: translateY(-5px); }
+            }
+            
             .animate-float-1 { animation: float-1 20s ease-in-out infinite; }
             .animate-float-2 { animation: float-2 25s ease-in-out infinite; }
             .animate-float-3 { animation: float-3 15s ease-in-out infinite; }
             .animate-marquee { animation: marquee 30s linear infinite; }
+            .animate-float-gentle { animation: float-gentle 8s ease-in-out infinite; }
+            .animate-pulse-slow { animation: pulse-slow 4s ease-in-out infinite; }
+            .animate-bounce-gentle { animation: bounce-gentle 2s ease-in-out infinite; }
          `}</style>
          {/* Mobile Device Dialog */}
          <Dialog
             open={showMobileDialog}
             onOpenChange={setShowMobileDialog}
          >
-            <DialogContent className='bg-neutral-950 border-purple-800 text-purple-100 max-w-sm mx-auto rounded-xl'>
+            <DialogContent className='bg-slate-950 border-purple-800 text-purple-100 max-w-sm mx-auto rounded-xl backdrop-blur-md'>
                <DialogHeader>
-                  <DialogTitle className='text-xl sm:text-2xl font-bold text-purple-300 text-center'>
+                  <DialogTitle className='text-xl sm:text-2xl font-bold text-purple-300 text-center animate-fade-in-up'>
                      📱 Mobile Device Detected
                   </DialogTitle>
-                  <DialogDescription className='text-purple-300 text-center text-base leading-relaxed mt-4'>
+                  <DialogDescription className='text-purple-300 text-center text-base leading-relaxed mt-4 animate-fade-in-up' style={{ animationDelay: '0.2s' }}>
                      Buildfy Web works best on larger screens for the optimal visual building experience.
                   </DialogDescription>
                </DialogHeader>
 
                <div className='space-y-4 mt-6'>
-                  <div className='text-center'>
+                  <div className='text-center animate-fade-in-up' style={{ animationDelay: '0.4s' }}>
                      <h4 className='font-semibold text-purple-200 mb-3'>Continue on a bigger screen:</h4>
-                     <div className='flex justify-center space-x-4 text-4xl mb-4'>
-                        <span title='Tablet'>📱</span>
-                        <span title='Laptop'>💻</span>
-                        <span title='Desktop'>🖥️</span>
+                     <div className='flex justify-center space-x-4 text-4xl mb-4 animate-bounce-gentle'>
+                        <span title='Tablet' className='hover:scale-125 transition-transform duration-300'>📱</span>
+                        <span title='Laptop' className='hover:scale-125 transition-transform duration-300'>💻</span>
+                        <span title='Desktop' className='hover:scale-125 transition-transform duration-300'>🖥️</span>
                      </div>
                   </div>
 
-                  <div className='bg-purple-900/60 backdrop-blur-md rounded-xl p-4 border border-purple-800'>
+                  <div className='bg-slate-900/60 backdrop-blur-md rounded-xl p-4 border border-purple-800/50 hover:border-purple-600/70 transition-colors duration-300 animate-fade-in-up' style={{ animationDelay: '0.6s' }}>
                      <p className='text-sm text-purple-300 text-center leading-relaxed'>
                         For the best drag-and-drop experience and full access to all features, please visit Buildfy Web
                         on a tablet, laptop, or desktop computer.
@@ -733,7 +798,8 @@ const LandingPage: React.FC = () => {
 
                   <Button
                      onClick={() => setShowMobileDialog(false)}
-                     className='w-full bg-purple-800 hover:bg-purple-700 py-3 rounded-xl text-base'
+                     className='w-full bg-purple-800 hover:bg-purple-700 py-3 rounded-xl text-base hover:scale-105 transition-all duration-300 animate-fade-in-up'
+                     style={{ animationDelay: '0.8s' }}
                   >
                      Got it! 👍
                   </Button>

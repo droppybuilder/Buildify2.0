@@ -3,6 +3,7 @@ import { ArrowRight, ChevronRight, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { AnimatedGroup } from '@/components/ui/animated-group'
 import { cn } from '@/lib/utils'
+import { useScrollAnimation } from '@/hooks/useScrollAnimation'
 import logo from '/logo6.png'
 
 const transitionVariants = {
@@ -39,13 +40,16 @@ export function HeroSection({
    handleNavigation: (path: string) => void
    userExists: boolean
 }) {
+   const heroContentAnimation = useScrollAnimation<HTMLDivElement>({ threshold: 0.2, triggerOnce: true })
+   const heroImageAnimation = useScrollAnimation<HTMLDivElement>({ threshold: 0.1, triggerOnce: true })
+
    return (
       <>
          <HeroHeader
             handleNavigation={handleNavigation}
             userExists={userExists}
          />
-         <main className='overflow-hidden bg-neutral-950 relative'>
+         <main className='overflow-hidden bg-slate-950 relative'>
             {/* Purple Theme Background Effects */}
             <div className='pointer-events-none fixed inset-0 -z-10'>
                <div className='absolute top-[-20%] left-[-20%] w-[60vw] h-[60vw] bg-purple-900/20 rounded-full blur-3xl animate-float-1' />
@@ -80,11 +84,24 @@ export function HeroSection({
                      className='absolute inset-0 -z-10 size-full [background:radial-gradient(125%_125%_at_50%_100%,transparent_0%,var(--background)_75%)]'
                   />
                   <div className='mx-auto max-w-7xl px-6'>
-                     <div className='text-center sm:mx-auto lg:mr-auto lg:mt-0'>
-                        <AnimatedGroup variants={transitionVariants}>
+                     <div 
+                        ref={heroContentAnimation.elementRef}
+                        className={cn(
+                           'text-center sm:mx-auto lg:mr-auto lg:mt-0 transition-all duration-1000 ease-out',
+                           heroContentAnimation.isVisible 
+                              ? 'opacity-100 translate-y-0' 
+                              : 'opacity-0 translate-y-8'
+                        )}
+                     >
+                        <div className={cn(
+                           'transition-all duration-700 delay-200 ease-out',
+                           heroContentAnimation.isVisible 
+                              ? 'opacity-100 translate-x-0' 
+                              : 'opacity-0 -translate-x-4'
+                        )}>
                            <a
                               href='#features'
-                              className='hover:bg-purple-900/30 bg-purple-900/20 group mx-auto flex w-fit items-center gap-4 rounded-full border border-purple-800 p-1 pl-4 shadow-md shadow-purple-950/20 transition-all duration-300'
+                              className='hover:bg-purple-900/30 bg-purple-900/20 group mx-auto flex w-fit items-center gap-4 rounded-full border border-purple-800 p-1 pl-4 shadow-md shadow-purple-950/20 transition-all duration-300 hover:scale-105'
                            >
                               <span className='text-purple-200 text-sm'>🚀 We're Live on Product Hunt!</span>
                               <span className='block h-4 w-0.5 border-l border-purple-700 bg-purple-700'></span>
@@ -101,26 +118,45 @@ export function HeroSection({
                               </div>
                            </a>
 
-                           <h1 className='mt-8 max-w-4xl mx-auto text-balance text-6xl md:text-7xl lg:mt-12 xl:text-[5.25rem] font-bold text-purple-100'>
-                              Turn Ideas into{' '}
-                              <span className='bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
-                                 Python Apps
-                              </span>{' '}
-                              — Without Writing Code
-                           </h1>
-                           <p className='mx-auto mt-8 max-w-2xl text-balance text-lg text-purple-200 leading-relaxed'>
-                              Build professional Python GUIs with our visual drag-and-drop builder. Export clean,
-                              production-ready code instantly. No coding experience required.
-                           </p>
-                        </AnimatedGroup>
+                           <div className={cn(
+                              'transition-all duration-900 delay-400 ease-out',
+                              heroContentAnimation.isVisible 
+                                 ? 'opacity-100 translate-y-0' 
+                                 : 'opacity-0 translate-y-6'
+                           )}>
+                              <h1 className='mt-8 max-w-4xl mx-auto text-balance text-4xl sm:text-5xl md:text-6xl lg:text-7xl lg:mt-12 xl:text-[5.25rem] font-bold text-purple-100 font-display leading-tight'>
+                                 <span className='block'>Turn Ideas into</span>
+                                 <span className='bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent block'>
+                                    Python Apps
+                                 </span>
+                                 <span className='block text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-[4rem] mt-2'>
+                                    Without Writing Code
+                                 </span>
+                              </h1>
+                           </div>
 
-                        <AnimatedGroup
-                           variants={transitionVariants}
-                           className='mt-8 sm:mt-12 flex flex-col items-center justify-center gap-4 sm:gap-2 md:flex-row'
-                        >
+                           <div className={cn(
+                              'transition-all duration-1000 delay-600 ease-out',
+                              heroContentAnimation.isVisible 
+                                 ? 'opacity-100 translate-y-0' 
+                                 : 'opacity-0 translate-y-4'
+                           )}>
+                              <p className='mx-auto mt-8 max-w-2xl text-balance text-lg text-purple-200 leading-relaxed font-sans'>
+                                 Build professional Python GUIs with our visual drag-and-drop builder. Export clean,
+                                 production-ready code instantly. No coding experience required.
+                              </p>
+                           </div>
+                        </div>
+
+                        <div className={cn(
+                           'mt-8 sm:mt-12 flex flex-col items-center justify-center gap-4 sm:gap-2 md:flex-row transition-all duration-1100 delay-800 ease-out',
+                           heroContentAnimation.isVisible 
+                              ? 'opacity-100 translate-y-0' 
+                              : 'opacity-0 translate-y-6'
+                        )}>
                            <div
                               key={1}
-                              className='bg-purple-600/20 rounded-[14px] border border-purple-600 p-0.5'
+                              className='bg-purple-600/20 rounded-[14px] border border-purple-600 p-0.5 hover:scale-105 transition-transform duration-200'
                            >
                               <Button
                                  asChild
@@ -137,33 +173,42 @@ export function HeroSection({
                               asChild
                               size='lg'
                               variant='ghost'
-                              className='h-11 rounded-xl px-8 hover:bg-purple-900/30 text-purple-200 border border-purple-800'
+                              className='h-11 rounded-xl px-8 hover:bg-purple-900/30 text-purple-200 border border-purple-800 hover:scale-105 transition-all duration-200'
                            >
                               <a href='#demo'>
                                  <span className='text-nowrap'>Watch Demo</span>
                               </a>
                            </Button>
-                        </AnimatedGroup>
+                        </div>
                      </div>
                   </div>
 
-                  <AnimatedGroup variants={transitionVariants}>
-                     <div className='relative mt-8 overflow-hidden px-2 sm:mr-0 sm:mt-12 md:mt-16'>
-                        <div
-                           aria-hidden
-                           className='bg-gradient-to-b to-neutral-950 absolute inset-0 z-10 from-transparent from-35%'
+                  <div 
+                     ref={heroImageAnimation.elementRef}
+                     className={cn(
+                        'relative mt-8 overflow-hidden px-2 sm:mr-0 sm:mt-12 md:mt-16 transition-all duration-1200 ease-out',
+                        heroImageAnimation.isVisible 
+                           ? 'opacity-100 translate-y-0 scale-100' 
+                           : 'opacity-0 translate-y-12 scale-95'
+                     )}
+                  >
+                     <div
+                        aria-hidden
+                        className='bg-gradient-to-b to-slate-950 absolute inset-0 z-10 from-transparent from-35%'
+                     />
+                     <div className={cn(
+                        'relative mx-auto max-w-sm sm:max-w-6xl overflow-hidden rounded-2xl border border-purple-800 p-4 shadow-lg shadow-purple-950/30 bg-purple-900/20 backdrop-blur-md transition-all duration-300 hover:shadow-purple-900/40 hover:border-purple-700',
+                        heroImageAnimation.isVisible && 'hover:scale-[1.02]'
+                     )}>
+                        <img
+                           className='aspect-video relative rounded-2xl w-full object-contain'
+                           src='/BD2.png'
+                           alt='Buildfy Web Dashboard - Visual Python GUI Builder'
+                           width='2700'
+                           height='1440'
                         />
-                        <div className='relative mx-auto max-w-sm sm:max-w-6xl overflow-hidden rounded-2xl border border-purple-800 p-4 shadow-lg shadow-purple-950/30 bg-purple-900/20 backdrop-blur-md'>
-                           <img
-                              className='aspect-video relative rounded-2xl w-full object-contain'
-                              src='/BD2.png'
-                              alt='Buildfy Web Dashboard - Visual Python GUI Builder'
-                              width='2700'
-                              height='1440'
-                           />
-                        </div>
                      </div>
-                  </AnimatedGroup>
+                  </div>
                </div>
             </section>
             {/* <section className='bg-neutral-950 pb-16 pt-16 md:pb-32'>
@@ -245,7 +290,7 @@ const HeroHeader = ({
                className={cn(
                   'mx-auto max-w-6xl px-6 transition-all duration-300 lg:px-12',
                   isScrolled &&
-                     'bg-neutral-950/90 max-w-4xl rounded-2xl border border-purple-900 backdrop-blur-lg lg:px-5'
+                  'bg-slate-950/90 max-w-4xl rounded-2xl border border-purple-900 backdrop-blur-lg lg:px-5'
                )}
             >
                <div className='relative flex flex-wrap items-center justify-between gap-6 py-3 lg:gap-0 lg:py-4'>
@@ -260,7 +305,7 @@ const HeroHeader = ({
                            alt='Buildfy Web'
                            className='h-8 w-8 sm:h-10 sm:w-10 rounded-lg'
                         />
-                        <span className='text-lg font-bold text-purple-300'>Buildfy Web</span>
+                        <span className='text-lg font-bold text-purple-300 font-display'>Buildfy Web</span>
                      </a>
 
                      <button
@@ -288,7 +333,7 @@ const HeroHeader = ({
                      </ul>
                   </div>
 
-                  <div className='bg-neutral-950/90 group-data-[state=active]:block lg:group-data-[state=active]:flex mb-6 hidden w-full flex-wrap items-center justify-end space-y-8 rounded-3xl border border-purple-800 p-6 shadow-2xl shadow-purple-950/20 md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:gap-6 lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none'>
+                  <div className='bg-slate-950/90 group-data-[state=active]:block lg:group-data-[state=active]:flex mb-6 hidden w-full flex-wrap items-center justify-end space-y-8 rounded-3xl border border-purple-800 p-6 shadow-2xl shadow-purple-950/20 md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:gap-6 lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none'>
                      <div className='lg:hidden'>
                         <ul className='space-y-6 text-base'>
                            {menuItems.map((item, index) => (

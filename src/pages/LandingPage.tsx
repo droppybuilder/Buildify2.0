@@ -11,6 +11,8 @@ import { db } from '@/integrations/firebase/firebase.config'
 import { collection, addDoc } from 'firebase/firestore'
 import { useIsMobile } from '@/hooks/use-mobile'
 import logo from '/logo6.png'
+import { ContainerScroll } from '@/components/ui/container-scroll-animation'
+import { HeroSection } from '@/components/ui/hero-section-1'
 
 const features = [
    {
@@ -254,62 +256,7 @@ const LandingPage: React.FC = () => {
    }
 
    return (
-      <div className='min-h-screen w-full relative overflow-x-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white'>
-         {' '}
-         {/* ===== TEMPORARY LAUNCH BADGES - REMOVE AFTER LAUNCH ===== */}
-         <div className='launch-badges fixed top-16 sm:top-18 left-0 right-0 z-30 bg-gradient-to-r from-black/30  via-purple-700/70 to-black/30 backdrop-blur-md'>
-            <div className='max-w-7xl mx-auto px-4 py-3'>
-               <div className='flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6'>
-                  <div className='flex items-center gap-2'>
-                     <span className='text-white text-sm sm:text-base font-semibold animate-pulse'>
-                        🚀 We're Live on
-                     </span>
-                  </div>
-                  <div className='flex flex-col sm:flex-row items-center gap-3 sm:gap-4'>
-                     {/* Product Hunt Badge */}
-                     <a
-                        href='https://www.producthunt.com/products/buildfy-web?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-buildfy&#0045;web'
-                        target='_blank'
-                        rel='noopener noreferrer'
-                        className='transition-transform hover:scale-105'
-                     >
-                        <img
-                           src='https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=982539&theme=light&t=1750756805683'
-                           alt='Buildfy Web - Turn Ideas into Python Apps — Without Writing Code | Product Hunt'
-                           style={{ width: '220px', height: '48px' }}
-                           width='220'
-                           height='48'
-                           className='rounded-md shadow-lg'
-                        />
-                     </a>
-                     {/* Peerlist Badge */}
-                     <a
-                        href='https://peerlist.io/pratyush2002'
-                        target='_blank'
-                        rel='noopener noreferrer'
-                        className='transition-transform hover:scale-105'
-                     >
-                        <img
-                           src='/Launch_SVG_Light.svg'
-                           alt='Peerlist Launch Badge'
-                           style={{ width: '220px', height: '48px' }}
-                           width='220'
-                           height='48'
-                           className='rounded-md shadow-lg bg-white/10 p-1'
-                        />
-                     </a>
-                  </div>
-                  <button
-                     className='hidden sm:block text-white/70 hover:text-white text-xs transition-colors'
-                     onClick={() => document.querySelector('.launch-badges')?.remove()}
-                     title='Hide badges'
-                  >
-                     ✕
-                  </button>
-               </div>
-            </div>
-         </div>
-         
+      <div className='min-h-screen w-full relative overflow-x-hidden bg-neutral-950 text-purple-100'>
          {/* Animated Cursor Effect */}
          <div
             className='fixed w-6 h-6 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full pointer-events-none z-50 opacity-50 transition-all duration-300 ease-out'
@@ -319,156 +266,68 @@ const LandingPage: React.FC = () => {
                background: `radial-gradient(circle, rgba(168, 85, 247, 0.4) 0%, rgba(236, 72, 153, 0.4) 100%)`,
             }}
          />
-         {/* Dynamic Background */}
-         <div className='pointer-events-none fixed inset-0 -z-10'>
-            <div className='absolute top-[-20%] left-[-20%] w-[60vw] h-[60vw] bg-gradient-to-r from-purple-600/30 to-pink-600/30 rounded-full blur-3xl animate-float-1' />
-            <div className='absolute bottom-[-20%] right-[-20%] w-[60vw] h-[60vw] bg-gradient-to-r from-blue-600/30 to-cyan-600/30 rounded-full blur-3xl animate-float-2' />
-            <div className='absolute top-1/2 left-1/2 w-[40vw] h-[40vw] bg-gradient-to-r from-emerald-600/20 to-teal-600/20 rounded-full blur-3xl animate-float-3' />
-         </div>{' '}
-         {/* Navbar */}
-         <nav className='fixed top-0 w-full bg-black/10 backdrop-blur-xl border-b border-white/10 z-40'>
-            <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-               <div className='flex items-center justify-between h-16 sm:h-18'>
-                  <div className='flex items-center space-x-2 sm:space-x-3 min-w-0 flex-shrink-0'>
-                     <img
-                        src={logo}
-                        alt='Buildfy Web'
-                        className='h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 rounded-lg flex-shrink-0'
-                     />
-                     <span className='text-base sm:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent truncate max-w-[120px] sm:max-w-none'>
-                        Buildfy Web
-                     </span>
-                  </div>
-                  <div className='hidden md:flex items-center space-x-4 lg:space-x-6 xl:space-x-8'>
-                     <a
-                        href='#features'
-                        className='hover:text-purple-400 transition-colors text-sm lg:text-base whitespace-nowrap'
-                     >
-                        Features
-                     </a>
-                     <a
-                        href='#pricing'
-                        className='hover:text-purple-400 transition-colors text-sm lg:text-base whitespace-nowrap'
-                     >
-                        Pricing
-                     </a>
-                     <a
-                        href='#contact'
-                        className='hover:text-purple-400 transition-colors text-sm lg:text-base whitespace-nowrap'
-                     >
-                        Contact
-                     </a>
-                  </div>{' '}
-                  <div className='flex items-center space-x-2 sm:space-x-3 flex-shrink-0'>
-                     {userExists ? (
-                        <Button
-                           onClick={() => handleNavigation('/')}
-                           className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-2 sm:px-4 lg:px-6 py-2 rounded-xl text-xs sm:text-sm lg:text-base whitespace-nowrap'
-                        >
-                           <span className='hidden sm:inline'>Enter Canvas</span>
-                           <span className='sm:hidden'>Canvas</span>
-                        </Button>
-                     ) : (
-                        <>
-                           <Button
-                              variant='ghost'
-                              onClick={() => handleNavigation('/auth')}
-                              className='hover:bg-white/10 px-2 sm:px-3 lg:px-4 text-xs sm:text-sm lg:text-base whitespace-nowrap'
-                           >
-                              <span className='hidden sm:inline'>Sign In</span>
-                              <span className='sm:hidden'>Login</span>
-                           </Button>
-                           <Button
-                              onClick={() => handleNavigation('/auth')}
-                              className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-2 sm:px-4 lg:px-6 py-2 rounded-xl text-xs sm:text-sm lg:text-base whitespace-nowrap'
-                           >
-                              <span className='hidden sm:inline'>Get Started</span>
-                              <span className='sm:hidden'>Start</span>
-                           </Button>
-                        </>
-                     )}
-                  </div>
+         <HeroSection
+            handleNavigation={handleNavigation}
+            userExists={userExists}
+         />
+         {/* Features Section */}
+         <section
+            id='features'
+            className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-neutral-950'
+         >
+            <div className='max-w-7xl mx-auto'>
+               <div className='text-center mb-12 sm:mb-16'>
+                  <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-purple-300'>
+                     Powerful Features
+                  </h2>
+                  <p className='text-lg sm:text-xl text-purple-200 max-w-3xl mx-auto leading-relaxed'>
+                     Everything you need to build professional Python GUIs without writing a single line of code
+                  </p>
                </div>
-            </div>
-         </nav>{' '}
-         {/* Hero Section */}
-         <section className='relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8'>
-            <div className='max-w-6xl mx-auto text-center pt-40 sm:pt-44 pb-8 sm:pb-12'>
-               <div className='flex flex-col items-center justify-center space-y-6 sm:space-y-8'>
-                  <Badge className='bg-gradient-to-r from-purple-600/20 to-pink-600/20 text-purple-300 border-purple-500/30 px-3 sm:px-4 py-2 text-xs sm:text-sm lg:text-base'>
-                     🚀 Web version of the popular Buildfy Tool
-                  </Badge>
-                  <h1 className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-bold bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent leading-tight'>
-                     Build Python GUIs
-                     <br />
-                     <span className='bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
-                        Visually & Effortlessly
-                     </span>
-                  </h1>
-                  <p className='text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed px-2 sm:px-4'>
-                     Create stunning Tkinter desktop applications with our intuitive drag-and-drop interface. No coding
-                     required - just design, customize, and export production-ready Python code.
-                  </p>{' '}
-                  <div className='flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center w-full max-w-md sm:max-w-none'>
-                     <Button
-                        size='lg'
-                        onClick={() => handleNavigation(userExists ? '/app' : '/auth')}
-                        className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-6 sm:px-8 py-3 text-sm sm:text-base lg:text-lg rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300 w-full sm:w-auto min-w-[200px]'
+
+               <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8'>
+                  {features.map((feature, index) => (
+                     <Card
+                        key={index}
+                        className='group bg-purple-900/60 backdrop-blur-md border border-purple-800 rounded-2xl p-6 sm:p-8 hover:bg-purple-800/80 transition-all duration-300 transform hover:scale-105'
                      >
-                        🚀 Start Building Now
-                     </Button>{' '}
-                     <Button
-                        size='lg'
-                        variant='outline'
-                        onClick={() => document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' })}
-                        className='border-purple-500/50 text-purple-300 hover:bg-purple-500/10 px-6 sm:px-8 py-3 text-sm sm:text-base lg:text-lg rounded-xl w-full sm:w-auto min-w-[200px]'
-                     >
-                        ▶️ Watch Trailer
-                     </Button>
-                  </div>
-                  {/* Stats */}
-                  <div className='grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 w-full max-w-4xl mx-auto pt-8 sm:pt-12'>
-                     {[
-                        { number: '10,000+', label: 'GUIs Created' },
-                        { number: '5,000+', label: 'Happy Developers' },
-                        { number: '50+', label: 'UI Components' },
-                        { number: '99%', label: 'Code Quality' },
-                     ].map((stat, index) => (
-                        <div
-                           key={index}
-                           className='text-center'
-                        >
-                           <div className='text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
-                              {stat.number}
+                        <CardContent className='p-0'>
+                           <div
+                              className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-r ${feature.gradient} flex items-center justify-center text-xl sm:text-2xl mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300`}
+                           >
+                              {feature.icon}
                            </div>
-                           <div className='text-gray-400 text-xs sm:text-sm lg:text-base'>{stat.label}</div>
-                        </div>
-                     ))}
-                  </div>
+                           <h3 className='text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-purple-200'>
+                              {feature.title}
+                           </h3>
+                           <p className='text-purple-300 text-sm sm:text-base leading-relaxed'>{feature.desc}</p>
+                        </CardContent>
+                     </Card>
+                  ))}
                </div>
             </div>
          </section>{' '}
          {/* Reviews Marquee */}
-         <section className='py-12 sm:py-16 lg:py-20 overflow-hidden'>
+         <section className='py-12 sm:py-16 lg:py-20 overflow-x-auto bg-neutral-950'>
             <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
                <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-8 sm:mb-12 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
                   What Buildfy Users Say
                </h2>
                <div className='relative'>
-                  <div className='flex animate-marquee space-x-6 sm:space-x-8'>
+                  <div className='flex animate-marquee space-x-6 sm:space-x-8 min-w-[200%]'>
                      {[...reviews, ...reviews].map((review, index) => (
                         <Card
                            key={index}
-                           className='flex-shrink-0 w-72 sm:w-80 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 sm:p-6'
+                           className='flex-shrink-0 w-72 sm:w-80 bg-purple-900/60 backdrop-blur-md border border-purple-800 rounded-2xl p-4 sm:p-6'
                         >
                            <CardContent className='p-0'>
                               <div className='flex items-center mb-3 sm:mb-4'>
                                  <span className='text-2xl sm:text-3xl mr-2 sm:mr-3'>{review.avatar}</span>
                                  <div className='min-w-0 flex-1'>
-                                    <h4 className='font-semibold text-white text-sm sm:text-base truncate'>
+                                    <h4 className='font-semibold text-purple-200 text-sm sm:text-base truncate'>
                                        {review.name}
                                     </h4>
-                                    <p className='text-gray-400 text-xs sm:text-sm truncate'>{review.role}</p>
+                                    <p className='text-purple-300 text-xs sm:text-sm truncate'>{review.role}</p>
                                  </div>
                                  <div className='ml-2 flex text-yellow-400 text-sm'>
                                     {Array.from({ length: review.rating }).map((_, i) => (
@@ -476,7 +335,7 @@ const LandingPage: React.FC = () => {
                                     ))}
                                  </div>
                               </div>
-                              <p className='text-gray-300 text-sm sm:text-base italic leading-relaxed'>
+                              <p className='text-purple-200 text-sm sm:text-base italic leading-relaxed'>
                                  "{review.text}"
                               </p>
                            </CardContent>
@@ -486,53 +345,18 @@ const LandingPage: React.FC = () => {
                </div>
             </div>
          </section>{' '}
-         {/* Features Section */}
-         <section
-            id='features'
-            className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8'
-         >
-            <div className='max-w-7xl mx-auto'>
-               <div className='text-center mb-12 sm:mb-16'>
-                  <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
-                     Powerful Features
-                  </h2>
-                  <p className='text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed'>
-                     Everything you need to build professional Python GUIs without writing a single line of code
-                  </p>
-               </div>
-
-               <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8'>
-                  {features.map((feature, index) => (
-                     <Card
-                        key={index}
-                        className='group bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 sm:p-8 hover:bg-white/10 transition-all duration-300 transform hover:scale-105'
-                     >
-                        <CardContent className='p-0'>
-                           <div
-                              className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-r ${feature.gradient} flex items-center justify-center text-xl sm:text-2xl mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300`}
-                           >
-                              {feature.icon}
-                           </div>
-                           <h3 className='text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-white'>{feature.title}</h3>
-                           <p className='text-gray-300 text-sm sm:text-base leading-relaxed'>{feature.desc}</p>
-                        </CardContent>
-                     </Card>
-                  ))}
-               </div>
-            </div>
-         </section>{' '}
          {/* Demo Section */}
          <section
             id='demo'
-            className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-purple-900/20 to-pink-900/20'
+            className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-neutral-950'
          >
             <div className='max-w-6xl mx-auto text-center'>
-               <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+               <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-purple-300'>
                   See Buildfy in Action
                </h2>
-               <p className='text-lg sm:text-xl text-gray-300 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed'>
+               <p className='text-lg sm:text-xl text-purple-200 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed'>
                   Watch how easy it is to create professional Python GUIs with our visual builder
-               </p>{' '}
+               </p>
                <div className='relative rounded-2xl sm:rounded-3xl overflow-hidden bg-gradient-to-r from-purple-600/20 to-pink-600/20 p-4 sm:p-6 lg:p-8 backdrop-blur-md border border-white/10'>
                   <video
                      className='w-full aspect-video rounded-xl sm:rounded-2xl object-cover'
@@ -552,14 +376,14 @@ const LandingPage: React.FC = () => {
          {/* Pricing Section */}
          <section
             id='pricing'
-            className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8'
+            className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-neutral-950'
          >
             <div className='max-w-7xl mx-auto'>
                <div className='text-center mb-12 sm:mb-16'>
-                  <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+                  <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-purple-300'>
                      Choose Your Plan
                   </h2>
-                  <p className='text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed'>
+                  <p className='text-lg sm:text-xl text-purple-200 max-w-3xl mx-auto leading-relaxed'>
                      Start free and scale as you grow. All plans include our core features.
                   </p>
                </div>
@@ -568,8 +392,8 @@ const LandingPage: React.FC = () => {
                   {displayPlans.map((plan) => (
                      <Card
                         key={plan.id}
-                        className={`relative bg-white/5 backdrop-blur-md border rounded-2xl p-6 sm:p-8 hover:bg-white/10 transition-all duration-300 transform hover:scale-105 ${
-                           plan.tier === 'pro' ? 'border-purple-500 ring-2 ring-purple-500/20' : 'border-white/10'
+                        className={`relative bg-purple-900/60 backdrop-blur-md border rounded-2xl p-6 sm:p-8 hover:bg-purple-800/80 transition-all duration-300 transform hover:scale-105 ${
+                           plan.tier === 'pro' ? 'border-purple-500 ring-2 ring-purple-500/20' : 'border-purple-800'
                         }`}
                      >
                         {plan.tier === 'pro' && (
@@ -579,13 +403,13 @@ const LandingPage: React.FC = () => {
                         )}
                         <CardContent className='p-0'>
                            <div className='text-center mb-6 sm:mb-8'>
-                              <h3 className='text-xl sm:text-2xl font-bold mb-2 text-white'>{plan.name}</h3>
-                              <p className='text-gray-400 text-sm sm:text-base mb-3 sm:mb-4'>{plan.description}</p>
+                              <h3 className='text-xl sm:text-2xl font-bold mb-2 text-purple-200'>{plan.name}</h3>
+                              <p className='text-purple-300 text-sm sm:text-base mb-3 sm:mb-4'>{plan.description}</p>
                               <div className='flex items-baseline justify-center'>
-                                 <span className='text-3xl sm:text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
-                                    {plan.price}
+                                 <span className='text-3xl sm:text-4xl font-bold text-purple-400'>{plan.price}</span>
+                                 <span className='text-purple-300 ml-2 text-sm sm:text-base'>
+                                    /{plan.billingPeriod}
                                  </span>
-                                 <span className='text-gray-400 ml-2 text-sm sm:text-base'>/{plan.billingPeriod}</span>
                               </div>
                            </div>
                            <ul className='space-y-2 sm:space-y-3 mb-6 sm:mb-8'>
@@ -593,7 +417,7 @@ const LandingPage: React.FC = () => {
                                  <li
                                     key={index}
                                     className={`flex items-center text-sm sm:text-base ${
-                                       feature.included ? 'text-green-400' : 'text-gray-500'
+                                       feature.included ? 'text-green-400' : 'text-purple-700'
                                     }`}
                                  >
                                     <span className='mr-2 sm:mr-3 text-xs sm:text-sm'>
@@ -606,8 +430,8 @@ const LandingPage: React.FC = () => {
                            <Button
                               className={`w-full py-2 sm:py-3 rounded-xl text-sm sm:text-base ${
                                  plan.tier === 'pro'
-                                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
-                                    : 'bg-white/10 hover:bg-white/20 border border-white/20'
+                                    ? 'bg-purple-800 hover:bg-purple-700'
+                                    : 'bg-purple-900 hover:bg-purple-800 border border-purple-800'
                               }`}
                               onClick={() => handleNavigation('/auth')}
                            >
@@ -620,13 +444,13 @@ const LandingPage: React.FC = () => {
             </div>
          </section>{' '}
          {/* Team Section */}
-         <section className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-purple-900/20 to-pink-900/20'>
+         <section className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-neutral-950'>
             <div className='max-w-5xl mx-auto'>
                <div className='text-center mb-12 sm:mb-16'>
-                  <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+                  <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-purple-300'>
                      Meet Our Team
                   </h2>
-                  <p className='text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed'>
+                  <p className='text-lg sm:text-xl text-purple-200 max-w-3xl mx-auto leading-relaxed'>
                      The passionate developers behind Buildfy, making GUI development accessible to everyone
                   </p>
                </div>
@@ -635,7 +459,7 @@ const LandingPage: React.FC = () => {
                   {team.map((member, index) => (
                      <Card
                         key={index}
-                        className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 sm:p-8 hover:bg-white/10 transition-all duration-300 transform hover:scale-105 w-full max-w-sm'
+                        className='bg-purple-900/60 backdrop-blur-md border border-purple-800 rounded-2xl p-6 sm:p-8 hover:bg-purple-800/80 transition-all duration-300 transform hover:scale-105 w-full max-w-sm'
                      >
                         <CardContent className='p-0 text-center'>
                            <img
@@ -643,13 +467,13 @@ const LandingPage: React.FC = () => {
                               alt={member.name}
                               className='w-20 h-20 sm:w-24 sm:h-24 rounded-full mx-auto mb-4 sm:mb-6 ring-4 ring-purple-500/20'
                            />
-                           <h3 className='text-lg sm:text-xl font-semibold mb-2 text-white'>{member.name}</h3>
+                           <h3 className='text-lg sm:text-xl font-semibold mb-2 text-purple-200'>{member.name}</h3>
                            <p className='text-purple-400 mb-3 sm:mb-4 text-sm sm:text-base'>{member.role}</p>
                            <Button
                               variant='outline'
                               size='sm'
                               onClick={() => window.open(member.peerlist, '_blank')}
-                              className='border-purple-500/50 text-purple-300 hover:bg-purple-500/10 text-xs sm:text-sm'
+                              className='border-purple-700 text-purple-300 hover:bg-purple-800/30 text-xs sm:text-sm'
                            >
                               View Profile
                            </Button>
@@ -662,54 +486,56 @@ const LandingPage: React.FC = () => {
          {/* Contact Section */}
          <section
             id='contact'
-            className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8'
+            className='py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-neutral-950'
          >
             <div className='max-w-5xl mx-auto'>
                <div className='text-center mb-12 sm:mb-16'>
-                  <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
+                  <h2 className='text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-purple-300'>
                      Get in Touch
                   </h2>
-                  <p className='text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed'>
+                  <p className='text-lg sm:text-xl text-purple-200 max-w-3xl mx-auto leading-relaxed'>
                      Have questions? Need support? Want to collaborate? We'd love to hear from you!
                   </p>
                </div>
 
                <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-stretch'>
                   {/* Contact Form */}
-                  <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 sm:p-8 h-full'>
+                  <Card className='bg-purple-900/60 backdrop-blur-md border border-purple-800 rounded-2xl p-6 sm:p-8 h-full'>
                      <CardContent className='p-0 h-full flex flex-col'>
-                        <h3 className='text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-white'>Send us a message</h3>
+                        <h3 className='text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-purple-200'>
+                           Send us a message
+                        </h3>
                         <form
                            onSubmit={handleContactSubmit}
                            className='space-y-4 sm:space-y-6 flex-1'
                         >
                            <div>
-                              <label className='block text-sm font-medium text-gray-300 mb-2'>Name</label>
+                              <label className='block text-sm font-medium text-purple-300 mb-2'>Name</label>
                               <Input
                                  value={contactForm.name}
                                  onChange={(e) => setContactForm((prev) => ({ ...prev, name: e.target.value }))}
-                                 className='bg-white/10 border-white/20 text-white placeholder-gray-400 rounded-xl text-sm sm:text-base'
+                                 className='bg-purple-950 border-purple-800 text-purple-100 placeholder-purple-400 rounded-xl text-sm sm:text-base'
                                  placeholder='Your name'
                                  required
                               />
                            </div>
                            <div>
-                              <label className='block text-sm font-medium text-gray-300 mb-2'>Email</label>
+                              <label className='block text-sm font-medium text-purple-300 mb-2'>Email</label>
                               <Input
                                  type='email'
                                  value={contactForm.email}
                                  onChange={(e) => setContactForm((prev) => ({ ...prev, email: e.target.value }))}
-                                 className='bg-white/10 border-white/20 text-white placeholder-gray-400 rounded-xl text-sm sm:text-base'
+                                 className='bg-purple-950 border-purple-800 text-purple-100 placeholder-purple-400 rounded-xl text-sm sm:text-base'
                                  placeholder='your@email.com'
                                  required
                               />
                            </div>
                            <div className='flex-1'>
-                              <label className='block text-sm font-medium text-gray-300 mb-2'>Message</label>
+                              <label className='block text-sm font-medium text-purple-300 mb-2'>Message</label>
                               <Textarea
                                  value={contactForm.message}
                                  onChange={(e) => setContactForm((prev) => ({ ...prev, message: e.target.value }))}
-                                 className='bg-white/10 border-white/20 text-white placeholder-gray-400 rounded-xl min-h-[100px] sm:min-h-[120px] text-sm sm:text-base resize-none'
+                                 className='bg-purple-950 border-purple-800 text-purple-100 placeholder-purple-400 rounded-xl min-h-[100px] sm:min-h-[120px] text-sm sm:text-base resize-none'
                                  placeholder='Tell us how we can help...'
                                  required
                               />
@@ -718,7 +544,7 @@ const LandingPage: React.FC = () => {
                            <Button
                               type='submit'
                               disabled={isSubmitting}
-                              className='w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 py-2 sm:py-3 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base'
+                              className='w-full bg-purple-800 hover:bg-purple-700 py-2 sm:py-3 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base'
                            >
                               {isSubmitting ? 'Sending... ⏳' : 'Send Message 📧'}
                            </Button>
@@ -728,54 +554,56 @@ const LandingPage: React.FC = () => {
 
                   {/* Contact Info */}
                   <div className='space-y-4 sm:space-y-6 lg:space-y-8 h-full flex flex-col justify-center'>
-                     <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 sm:p-6'>
+                     <Card className='bg-purple-900/60 backdrop-blur-md border border-purple-800 rounded-2xl p-4 sm:p-6'>
                         <CardContent className='p-0'>
                            <div className='flex items-center space-x-3 sm:space-x-4'>
                               <div className='w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center text-lg sm:text-xl flex-shrink-0'>
                                  👨‍💼
                               </div>
                               <div className='min-w-0 flex-1'>
-                                 <h4 className='font-semibold text-white text-sm sm:text-base'>Pratyush Mishra</h4>
-                                 <p className='text-gray-400 text-xs sm:text-sm break-all'>proxlight02@gmail.com</p>
+                                 <h4 className='font-semibold text-purple-200 text-sm sm:text-base'>Pratyush Mishra</h4>
+                                 <p className='text-purple-300 text-xs sm:text-sm break-all'>proxlight02@gmail.com</p>
                               </div>
                            </div>
                         </CardContent>
                      </Card>
-                     <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 sm:p-6'>
+                     <Card className='bg-purple-900/60 backdrop-blur-md border border-purple-800 rounded-2xl p-4 sm:p-6'>
                         <CardContent className='p-0'>
                            <div className='flex items-center space-x-3 sm:space-x-4'>
                               <div className='w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-lg sm:text-xl flex-shrink-0'>
                                  📧
                               </div>
                               <div className='min-w-0 flex-1'>
-                                 <h4 className='font-semibold text-white text-sm sm:text-base'>Email Support</h4>
-                                 <p className='text-gray-400 text-xs sm:text-sm break-all'>droppybuilder@gmail.com</p>
+                                 <h4 className='font-semibold text-purple-200 text-sm sm:text-base'>Email Support</h4>
+                                 <p className='text-purple-300 text-xs sm:text-sm break-all'>droppybuilder@gmail.com</p>
                               </div>
                            </div>
                         </CardContent>
                      </Card>
-                     <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 sm:p-6'>
+                     <Card className='bg-purple-900/60 backdrop-blur-md border border-purple-800 rounded-2xl p-4 sm:p-6'>
                         <CardContent className='p-0'>
                            <div className='flex items-center space-x-3 sm:space-x-4'>
                               <div className='w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center text-lg sm:text-xl flex-shrink-0'>
                                  🐛
                               </div>
                               <div className='min-w-0 flex-1'>
-                                 <h4 className='font-semibold text-white text-sm sm:text-base'>Bug Reports</h4>
-                                 <p className='text-gray-400 text-xs sm:text-sm break-all'>droppybuilder@gmail.com</p>
+                                 <h4 className='font-semibold text-purple-200 text-sm sm:text-base'>Bug Reports</h4>
+                                 <p className='text-purple-300 text-xs sm:text-sm break-all'>droppybuilder@gmail.com</p>
                               </div>
                            </div>
                         </CardContent>
                      </Card>
-                     <Card className='bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 sm:p-6'>
+                     <Card className='bg-purple-900/60 backdrop-blur-md border border-purple-800 rounded-2xl p-4 sm:p-6'>
                         <CardContent className='p-0'>
                            <div className='flex items-center space-x-3 sm:space-x-4'>
                               <div className='w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center text-lg sm:text-xl flex-shrink-0'>
                                  👨‍💻
                               </div>
                               <div className='min-w-0 flex-1'>
-                                 <h4 className='font-semibold text-white text-sm sm:text-base'>Nakul Srivastava</h4>
-                                 <p className='text-gray-400 text-xs sm:text-sm break-all'>imnakul44@gmail.com</p>
+                                 <h4 className='font-semibold text-purple-200 text-sm sm:text-base'>
+                                    Nakul Srivastava
+                                 </h4>
+                                 <p className='text-purple-300 text-xs sm:text-sm break-all'>imnakul44@gmail.com</p>
                               </div>
                            </div>
                         </CardContent>
@@ -785,7 +613,7 @@ const LandingPage: React.FC = () => {
             </div>
          </section>{' '}
          {/* Footer */}
-         <footer className='bg-black/20 backdrop-blur-md border-t border-white/10 py-8 sm:py-12 px-4 sm:px-6 lg:px-8'>
+         <footer className='bg-neutral-950 border-t border-purple-900 py-8 sm:py-12 px-4 sm:px-6 lg:px-8'>
             <div className='max-w-7xl mx-auto'>
                <div className='text-center'>
                   <div className='flex items-center justify-center space-x-2 mb-3 sm:mb-4'>
@@ -794,15 +622,13 @@ const LandingPage: React.FC = () => {
                         alt='Buildfy Web'
                         className='h-8 w-8 sm:h-10 sm:w-10 rounded-lg'
                      />
-                     <span className='text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent'>
-                        Buildfy Web
-                     </span>
+                     <span className='text-xl sm:text-2xl font-bold text-purple-300'>Buildfy Web</span>
                   </div>
-                  <p className='text-gray-400 text-sm sm:text-base mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed'>
+                  <p className='text-purple-300 text-sm sm:text-base mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed'>
                      Making Python GUI development accessible to everyone through visual design.
                   </p>
                   <div className='border-t border-white/10 pt-6 sm:pt-8'>
-                     <p className='text-gray-400 text-xs sm:text-sm'>© 2025 Buildfy Web. All rights reserved.</p>
+                     <p className='text-purple-700 text-xs sm:text-sm'>© 2025 Buildfy Web. All rights reserved.</p>
                   </div>
                </div>
             </div>{' '}
@@ -812,19 +638,19 @@ const LandingPage: React.FC = () => {
             open={showMobileDialog}
             onOpenChange={setShowMobileDialog}
          >
-            <DialogContent className='bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 border-purple-500/50 text-white max-w-sm mx-auto rounded-xl'>
+            <DialogContent className='bg-neutral-950 border-purple-800 text-purple-100 max-w-sm mx-auto rounded-xl'>
                <DialogHeader>
-                  <DialogTitle className='text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent text-center'>
+                  <DialogTitle className='text-xl sm:text-2xl font-bold text-purple-300 text-center'>
                      📱 Mobile Device Detected
                   </DialogTitle>
-                  <DialogDescription className='text-gray-300 text-center text-base leading-relaxed mt-4'>
+                  <DialogDescription className='text-purple-300 text-center text-base leading-relaxed mt-4'>
                      Buildfy Web works best on larger screens for the optimal visual building experience.
                   </DialogDescription>
                </DialogHeader>
 
                <div className='space-y-4 mt-6'>
                   <div className='text-center'>
-                     <h4 className='font-semibold text-white mb-3'>Continue on a bigger screen:</h4>
+                     <h4 className='font-semibold text-purple-200 mb-3'>Continue on a bigger screen:</h4>
                      <div className='flex justify-center space-x-4 text-4xl mb-4'>
                         <span title='Tablet'>📱</span>
                         <span title='Laptop'>💻</span>
@@ -832,8 +658,8 @@ const LandingPage: React.FC = () => {
                      </div>
                   </div>
 
-                  <div className='bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20'>
-                     <p className='text-sm text-gray-300 text-center leading-relaxed'>
+                  <div className='bg-purple-900/60 backdrop-blur-md rounded-xl p-4 border border-purple-800'>
+                     <p className='text-sm text-purple-300 text-center leading-relaxed'>
                         For the best drag-and-drop experience and full access to all features, please visit Buildfy Web
                         on a tablet, laptop, or desktop computer.
                      </p>
@@ -841,7 +667,7 @@ const LandingPage: React.FC = () => {
 
                   <Button
                      onClick={() => setShowMobileDialog(false)}
-                     className='w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 py-3 rounded-xl text-base'
+                     className='w-full bg-purple-800 hover:bg-purple-700 py-3 rounded-xl text-base'
                   >
                      Got it! 👍
                   </Button>
@@ -873,6 +699,47 @@ const LandingPage: React.FC = () => {
             .animate-float-3 { animation: float-3 15s ease-in-out infinite; }
             .animate-marquee { animation: marquee 30s linear infinite; }
          `}</style>
+         {/* Mobile Device Dialog */}
+         <Dialog
+            open={showMobileDialog}
+            onOpenChange={setShowMobileDialog}
+         >
+            <DialogContent className='bg-neutral-950 border-purple-800 text-purple-100 max-w-sm mx-auto rounded-xl'>
+               <DialogHeader>
+                  <DialogTitle className='text-xl sm:text-2xl font-bold text-purple-300 text-center'>
+                     📱 Mobile Device Detected
+                  </DialogTitle>
+                  <DialogDescription className='text-purple-300 text-center text-base leading-relaxed mt-4'>
+                     Buildfy Web works best on larger screens for the optimal visual building experience.
+                  </DialogDescription>
+               </DialogHeader>
+
+               <div className='space-y-4 mt-6'>
+                  <div className='text-center'>
+                     <h4 className='font-semibold text-purple-200 mb-3'>Continue on a bigger screen:</h4>
+                     <div className='flex justify-center space-x-4 text-4xl mb-4'>
+                        <span title='Tablet'>📱</span>
+                        <span title='Laptop'>💻</span>
+                        <span title='Desktop'>🖥️</span>
+                     </div>
+                  </div>
+
+                  <div className='bg-purple-900/60 backdrop-blur-md rounded-xl p-4 border border-purple-800'>
+                     <p className='text-sm text-purple-300 text-center leading-relaxed'>
+                        For the best drag-and-drop experience and full access to all features, please visit Buildfy Web
+                        on a tablet, laptop, or desktop computer.
+                     </p>
+                  </div>
+
+                  <Button
+                     onClick={() => setShowMobileDialog(false)}
+                     className='w-full bg-purple-800 hover:bg-purple-700 py-3 rounded-xl text-base'
+                  >
+                     Got it! 👍
+                  </Button>
+               </div>
+            </DialogContent>
+         </Dialog>
       </div>
    )
 }

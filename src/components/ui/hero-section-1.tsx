@@ -50,11 +50,30 @@ export function HeroSection({
             userExists={userExists}
          />
          <main className='overflow-hidden bg-slate-950 relative'>
-            {/* Purple Theme Background Effects */}
+            {/* Enhanced Purple Theme Background Effects */}
             <div className='pointer-events-none fixed inset-0 -z-10'>
                <div className='absolute top-[-20%] left-[-20%] w-[60vw] h-[60vw] bg-purple-900/20 rounded-full blur-3xl animate-float-1' />
                <div className='absolute bottom-[-20%] right-[-20%] w-[60vw] h-[60vw] bg-purple-800/15 rounded-full blur-3xl animate-float-2' />
                <div className='absolute top-1/2 left-1/2 w-[40vw] h-[40vw] bg-purple-700/10 rounded-full blur-3xl animate-float-3' />
+
+               {/* Additional floating elements */}
+               <div className='absolute top-[20%] right-[10%] w-32 h-32 bg-pink-500/5 rounded-full blur-2xl animate-float-1' />
+               <div className='absolute bottom-[30%] left-[15%] w-24 h-24 bg-purple-400/8 rounded-full blur-xl animate-float-2' />
+               <div className='absolute top-[60%] right-[20%] w-16 h-16 bg-purple-600/10 rounded-full blur-lg animate-float-3' />
+            </div>
+
+            {/* Floating decorative elements */}
+            <div className='pointer-events-none absolute inset-0 -z-5'>
+               {/* Geometric shapes */}
+               <div className='absolute top-[25%] left-[8%] w-2 h-2 bg-purple-400/30 rounded-full animate-float-1' />
+               <div className='absolute top-[15%] right-[12%] w-1 h-1 bg-pink-400/40 rounded-full animate-float-2' />
+               <div className='absolute bottom-[40%] left-[5%] w-3 h-3 bg-purple-500/20 rounded-full animate-float-3' />
+               <div className='absolute top-[70%] right-[8%] w-1.5 h-1.5 bg-purple-300/35 rounded-full animate-float-1' />
+               <div className='absolute bottom-[20%] right-[25%] w-2 h-2 bg-pink-500/25 rounded-full animate-float-2' />
+
+               {/* Subtle lines */}
+               <div className='absolute top-[30%] left-[20%] w-16 h-0.5 bg-gradient-to-r from-transparent via-purple-400/20 to-transparent rotate-45 animate-float-3' />
+               <div className='absolute bottom-[50%] right-[15%] w-12 h-0.5 bg-gradient-to-r from-transparent via-pink-400/15 to-transparent -rotate-45 animate-float-1' />
             </div>
 
             <div
@@ -84,29 +103,31 @@ export function HeroSection({
                      className='absolute inset-0 -z-10 size-full [background:radial-gradient(125%_125%_at_50%_100%,transparent_0%,var(--background)_75%)]'
                   />
                   <div className='mx-auto max-w-7xl px-6'>
-                     <div 
+                     <div
                         ref={heroContentAnimation.elementRef}
                         className={cn(
-                           'text-center sm:mx-auto lg:mr-auto lg:mt-0 transition-all duration-1000 ease-out',
-                           heroContentAnimation.isVisible 
-                              ? 'opacity-100 translate-y-0' 
-                              : 'opacity-0 translate-y-8'
+                           'text-center sm:mx-auto lg:mr-auto lg:mt-0 transition-all duration-1500 ease-out',
+                           heroContentAnimation.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                         )}
                      >
-                        <div className={cn(
-                           'transition-all duration-700 delay-200 ease-out',
-                           heroContentAnimation.isVisible 
-                              ? 'opacity-100 translate-x-0' 
-                              : 'opacity-0 -translate-x-4'
-                        )}>
+                        <div
+                           className={cn(
+                              'transition-all duration-1200 delay-300 ease-out',
+                              heroContentAnimation.isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'
+                           )}
+                        >
                            <a
                               href='#features'
-                              className='hover:bg-purple-900/30 bg-purple-900/20 group mx-auto flex w-fit items-center gap-4 rounded-full border border-purple-800 p-1 pl-4 shadow-md shadow-purple-950/20 transition-all duration-300 hover:scale-105'
+                              className='hover:bg-purple-900/30 bg-purple-900/20 group mx-auto flex w-fit items-center gap-4 rounded-full border border-purple-800 p-1 pl-4 shadow-md shadow-purple-950/20 transition-all duration-300 hover:scale-105 relative'
                            >
-                              <span className='text-purple-200 text-sm'>🚀 We're Live on Product Hunt!</span>
-                              <span className='block h-4 w-0.5 border-l border-purple-700 bg-purple-700'></span>
+                              {/* Subtle glow behind badge */}
+                              <div className='absolute inset-0 bg-purple-600/10 blur-xl rounded-full opacity-50' />
+                              <span className='text-purple-200 text-sm relative z-10'>
+                                 🚀 We're Live on Product Hunt!
+                              </span>
+                              <span className='block h-4 w-0.5 border-l border-purple-700 bg-purple-700 relative z-10'></span>
 
-                              <div className='bg-purple-800 group-hover:bg-purple-700 size-6 overflow-hidden rounded-full duration-500'>
+                              <div className='bg-purple-800 group-hover:bg-purple-700 size-6 overflow-hidden rounded-full duration-500 relative z-10'>
                                  <div className='flex w-12 -translate-x-1/2 duration-500 ease-in-out group-hover:translate-x-0'>
                                     <span className='flex size-6'>
                                        <ArrowRight className='m-auto size-3 text-purple-200' />
@@ -118,42 +139,65 @@ export function HeroSection({
                               </div>
                            </a>
 
-                           <div className={cn(
-                              'transition-all duration-900 delay-400 ease-out',
-                              heroContentAnimation.isVisible 
-                                 ? 'opacity-100 translate-y-0' 
-                                 : 'opacity-0 translate-y-6'
-                           )}>
-                              <h1 className='mt-8 max-w-4xl mx-auto text-balance text-4xl sm:text-5xl md:text-6xl lg:text-7xl lg:mt-12 xl:text-[5.25rem] font-bold text-purple-100 font-display leading-tight'>
-                                 <span className='block'>Turn Ideas into</span>
-                                 <span className='bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent block'>
-                                    Python Apps
-                                 </span>
-                                 <span className='block text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-[4rem] mt-2'>
-                                    Without Writing Code
-                                 </span>
-                              </h1>
+                           <div
+                              className={cn(
+                                 'transition-all duration-1400 delay-600 ease-out',
+                                 heroContentAnimation.isVisible
+                                    ? 'opacity-100 translate-y-0'
+                                    : 'opacity-0 translate-y-6'
+                              )}
+                           >
+                              <div className='relative'>
+                                 {/* Brightness glow behind text */}
+                                 <div className='absolute inset-0 bg-gradient-to-r from-purple-600/10 via-pink-500/15 to-purple-600/10 blur-3xl scale-110 opacity-60' />
+                                 <h1 className='relative mt-8 max-w-4xl mx-auto text-balance text-4xl sm:text-5xl md:text-6xl lg:text-7xl lg:mt-12 xl:text-[5.25rem] font-bold text-purple-100 font-display leading-tight'>
+                                    <span className='block relative'>
+                                       Turn Ideas into
+                                       {/* Subtle text shadow */}
+                                       <div className='absolute inset-0 text-purple-300/20 blur-sm'>
+                                          Turn Ideas into
+                                       </div>
+                                    </span>
+                                    <span className='bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent block relative'>
+                                       Python Apps
+                                       {/* Enhanced glow for gradient text */}
+                                       {/* <div className='absolute inset-0 bg-gradient-to-r from-purple-400/30 to-pink-400/30 blur-xl -z-10' /> */}
+                                    </span>
+                                    <span className='block text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-[4rem] mt-2 relative'>
+                                       Without Writing Code
+                                       <div className='absolute inset-0 text-purple-300/20 blur-sm'>
+                                          Without Writing Code
+                                       </div>
+                                    </span>
+                                 </h1>
+                              </div>
                            </div>
 
-                           <div className={cn(
-                              'transition-all duration-1000 delay-600 ease-out',
-                              heroContentAnimation.isVisible 
-                                 ? 'opacity-100 translate-y-0' 
-                                 : 'opacity-0 translate-y-4'
-                           )}>
-                              <p className='mx-auto mt-8 max-w-2xl text-balance text-lg text-purple-200 leading-relaxed font-sans'>
-                                 Build professional Python GUIs with our visual drag-and-drop builder. Export clean,
-                                 production-ready code instantly. No coding experience required.
-                              </p>
+                           <div
+                              className={cn(
+                                 'transition-all duration-1300 delay-900 ease-out',
+                                 heroContentAnimation.isVisible
+                                    ? 'opacity-100 translate-y-0'
+                                    : 'opacity-0 translate-y-4'
+                              )}
+                           >
+                              <div className='relative'>
+                                 {/* Subtle glow behind description */}
+                                 <div className='absolute inset-0 bg-purple-500/5 blur-2xl scale-105' />
+                                 <p className='relative mx-auto mt-8 max-w-2xl text-balance text-lg text-purple-200 leading-relaxed font-sans'>
+                                    Build professional Python GUIs with our visual drag-and-drop builder. Export clean,
+                                    production-ready code instantly. No coding experience required.
+                                 </p>
+                              </div>
                            </div>
                         </div>
 
-                        <div className={cn(
-                           'mt-8 sm:mt-12 flex flex-col items-center justify-center gap-4 sm:gap-2 md:flex-row transition-all duration-1100 delay-800 ease-out',
-                           heroContentAnimation.isVisible 
-                              ? 'opacity-100 translate-y-0' 
-                              : 'opacity-0 translate-y-6'
-                        )}>
+                        <div
+                           className={cn(
+                              'mt-8 sm:mt-12 flex flex-col items-center justify-center gap-4 sm:gap-2 md:flex-row transition-all duration-1400 delay-1200 ease-out',
+                              heroContentAnimation.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+                           )}
+                        >
                            <div
                               key={1}
                               className='bg-purple-600/20 rounded-[14px] border border-purple-600 p-0.5 hover:scale-105 transition-transform duration-200'
@@ -183,12 +227,12 @@ export function HeroSection({
                      </div>
                   </div>
 
-                  <div 
+                  <div
                      ref={heroImageAnimation.elementRef}
                      className={cn(
-                        'relative mt-8 overflow-hidden px-2 sm:mr-0 sm:mt-12 md:mt-16 transition-all duration-1200 ease-out',
-                        heroImageAnimation.isVisible 
-                           ? 'opacity-100 translate-y-0 scale-100' 
+                        'relative mt-8 overflow-hidden px-2 sm:mr-0 sm:mt-12 md:mt-16 transition-all duration-1600 delay-500 ease-out',
+                        heroImageAnimation.isVisible
+                           ? 'opacity-100 translate-y-0 scale-100'
                            : 'opacity-0 translate-y-12 scale-95'
                      )}
                   >
@@ -196,10 +240,16 @@ export function HeroSection({
                         aria-hidden
                         className='bg-gradient-to-b to-slate-950 absolute inset-0 z-10 from-transparent from-35%'
                      />
-                     <div className={cn(
-                        'relative mx-auto max-w-sm sm:max-w-6xl overflow-hidden rounded-2xl border border-purple-800 p-4 shadow-lg shadow-purple-950/30 bg-purple-900/20 backdrop-blur-md transition-all duration-300 hover:shadow-purple-900/40 hover:border-purple-700',
-                        heroImageAnimation.isVisible && 'hover:scale-[1.02]'
-                     )}>
+                     <div
+                        className={cn(
+                           'relative mx-auto max-w-sm sm:max-w-6xl overflow-hidden rounded-2xl border border-purple-800 p-4 shadow-lg shadow-purple-950/30 bg-purple-900/20 backdrop-blur-md transition-all duration-300 hover:shadow-purple-900/40 hover:border-purple-700',
+                           heroImageAnimation.isVisible && 'hover:scale-[1.02]'
+                        )}
+                     >
+                        {/* Enhanced glow around image container */}
+                        <div className='absolute -inset-1 bg-gradient-to-r from-purple-600/20 via-pink-500/20 to-purple-600/20 blur-xl opacity-75 -z-10' />
+                        <div className='absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-2xl' />
+
                         <img
                            className='aspect-video relative rounded-2xl w-full object-contain'
                            src='/BD2.png'
@@ -207,6 +257,12 @@ export function HeroSection({
                            width='2700'
                            height='1440'
                         />
+
+                        {/* Floating elements around the image */}
+                        <div className='absolute -top-2 -left-2 w-4 h-4 bg-purple-400/30 rounded-full animate-float-1' />
+                        <div className='absolute -top-1 -right-3 w-2 h-2 bg-pink-400/40 rounded-full animate-float-2' />
+                        <div className='absolute -bottom-2 -left-1 w-3 h-3 bg-purple-500/25 rounded-full animate-float-3' />
+                        <div className='absolute -bottom-1 -right-2 w-1.5 h-1.5 bg-pink-500/35 rounded-full animate-float-1' />
                      </div>
                   </div>
                </div>
@@ -290,7 +346,7 @@ const HeroHeader = ({
                className={cn(
                   'mx-auto max-w-6xl px-6 transition-all duration-300 lg:px-12',
                   isScrolled &&
-                  'bg-slate-950/90 max-w-4xl rounded-2xl border border-purple-900 backdrop-blur-lg lg:px-5'
+                     'bg-slate-950/90 max-w-4xl rounded-2xl border border-purple-900 backdrop-blur-lg lg:px-5'
                )}
             >
                <div className='relative flex flex-wrap items-center justify-between gap-6 py-3 lg:gap-0 lg:py-4'>

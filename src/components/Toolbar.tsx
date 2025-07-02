@@ -75,6 +75,14 @@ export const Toolbar = ({
    // Notification state
    const defaultNotifications = [
       {
+         id: '3',
+         title: 'New Landing Page + New Domain Name',
+         content: `We have launched a new landing page for Buildfy with a fresh design and improved user experience. Leave a feedback on the new design, we would love to hear your thoughts!
+         
+         Also, we have got a new domain name to buildfy.online for a more professional and memorable web address. Make sure to bookmark it!`,
+         date: '2025-07-02',
+      },
+      {
          id: '1',
          title: 'Payments Got Smoother!',
          content: `Payments now support adaptive currency and payment methods. Pay in your local currency and with methods supported in your country. 

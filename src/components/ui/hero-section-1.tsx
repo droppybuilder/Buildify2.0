@@ -5,6 +5,7 @@ import { AnimatedGroup } from '@/components/ui/animated-group'
 import { cn } from '@/lib/utils'
 import { useScrollAnimation } from '@/hooks/useScrollAnimation'
 import logo from '/logo6.png'
+import { useState, useEffect } from 'react'
 
 const transitionVariants = {
    container: {
@@ -42,6 +43,21 @@ export function HeroSection({
 }) {
    const heroContentAnimation = useScrollAnimation<HTMLDivElement>({ threshold: 0.2, triggerOnce: true })
    const heroImageAnimation = useScrollAnimation<HTMLDivElement>({ threshold: 0.1, triggerOnce: true })
+   const [isBelowLg, setIsBelowLg] = useState(() => window.innerWidth < 1024)
+
+   useEffect(() => {
+      const handleResize = () => setIsBelowLg(window.innerWidth < 1024)
+      window.addEventListener('resize', handleResize)
+      return () => window.removeEventListener('resize', handleResize)
+   }, [])
+
+   const handleCTA = () => {
+      if (userExists) {
+         handleNavigation('/')
+      } else {
+         handleNavigation('/auth')
+      }
+   }
 
    return (
       <>
@@ -117,7 +133,10 @@ export function HeroSection({
                            )}
                         >
                            <a
-                              href='#features'
+                              href='https://www.producthunt.com/products/buildfy-web?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-buildfy&#0045;web'
+                              target='_blank'
+                              rel='noopener noreferrer'
+                              aria-label='Product Hunt Badge'
                               className='hover:bg-purple-900/30 bg-purple-900/20 group mx-auto flex w-fit items-center gap-4 rounded-full border border-purple-800 p-1 pl-4 shadow-md shadow-purple-950/20 transition-all duration-300 hover:scale-105 relative'
                            >
                               {/* Subtle glow behind badge */}
@@ -125,6 +144,7 @@ export function HeroSection({
                               <span className='text-purple-200 text-sm relative z-10'>
                                  🚀 We're Live on Product Hunt!
                               </span>
+
                               <span className='block h-4 w-0.5 border-l border-purple-700 bg-purple-700 relative z-10'></span>
 
                               <div className='bg-purple-800 group-hover:bg-purple-700 size-6 overflow-hidden rounded-full duration-500 relative z-10'>
@@ -198,20 +218,24 @@ export function HeroSection({
                               heroContentAnimation.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
                            )}
                         >
-                           <div
-                              key={1}
-                              className='bg-purple-600/20 rounded-[14px] border border-purple-600 p-0.5 hover:scale-105 transition-transform duration-200'
-                           >
-                              <Button
-                                 asChild
-                                 size='lg'
-                                 className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-xl px-8 text-base font-medium'
+                           {isBelowLg && (
+                              <div
+                                 key={1}
+                                 className='bg-purple-600/20 rounded-[14px] border border-purple-600 p-0.5 hover:scale-105 transition-transform duration-200'
                               >
-                                 <a href='#features'>
-                                    <span className='text-nowrap'>Start Building Free</span>
-                                 </a>
-                              </Button>
-                           </div>
+                                 <Button
+                                    asChild
+                                    size='lg'
+                                    className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-xl px-8 text-base font-medium'
+                                    onClick={handleCTA}
+                                 >
+                                    <span className='text-nowrap'>
+                                       {userExists ? 'Enter Canvas' : 'Start Building Free'}
+                                    </span>
+                                 </Button>
+                              </div>
+                           )}
+
                            <Button
                               key={2}
                               asChild
@@ -415,7 +439,7 @@ const HeroHeader = ({
                            </Button>
                         ) : (
                            <>
-                              <Button
+                              {/* <Button
                                  onClick={() => handleNavigation('/auth')}
                                  variant='ghost'
                                  size='sm'
@@ -435,8 +459,8 @@ const HeroHeader = ({
                                  )}
                               >
                                  <span>Sign Up</span>
-                              </Button>
-                              <Button
+                              </Button> */}
+                              {/* <Button
                                  onClick={() => handleNavigation('/auth')}
                                  size='sm'
                                  className={cn(
@@ -445,6 +469,14 @@ const HeroHeader = ({
                                  )}
                               >
                                  <span>Get Started</span>
+                              </Button> */}
+                              <Button
+                                 asChild
+                                 size='sm'
+                                 className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-xl px-6 text-base font-medium'
+                                 onClick={() => handleNavigation('/auth')}
+                              >
+                                 <span className='text-nowrap'>Start Building Free</span>
                               </Button>
                            </>
                         )}

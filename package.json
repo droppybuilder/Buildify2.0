@@ -8,7 +8,12 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "seo:generate": "node scripts/generate-seo.mjs",
+    "seo:validate": "node scripts/validate-seo.mjs",
+    "build:production": "npm run seo:generate && npm run seo:validate && vite build",
+    "deploy": "npm run build:production && vercel --prod",
+    "analyze": "npm run build:production && npm run seo:validate"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^16.6.0",

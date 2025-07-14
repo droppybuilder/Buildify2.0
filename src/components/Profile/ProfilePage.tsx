@@ -13,6 +13,7 @@ import { signOut } from 'firebase/auth'
 import { X } from 'lucide-react'
 import { useSubscription } from '@/hooks/useSubscription'
 import { toast } from 'sonner'
+import { SEO, seoConfig } from '@/components/SEO'
 import { getSubscriptionStatus, getRemainingDays, isExpiringSoon, isSubscriptionExpired } from '@/utils/subscriptionUtils'
 
 interface Profile {
@@ -143,6 +144,7 @@ const ProfilePage: React.FC = () => {
 
    return (
       <div className='min-h-screen w-full relative overflow-x-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white'>
+         <SEO {...seoConfig.profile} />
          {/* Animated Cursor Effect */}
          <div
             className='fixed pointer-events-none z-50 w-6 h-6 rounded-full bg-gradient-to-r from-pink-500 to-violet-500 opacity-30 blur-sm transition-all duration-75 ease-out'

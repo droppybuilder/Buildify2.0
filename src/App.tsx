@@ -2,7 +2,7 @@ import { Toaster } from '@/components/ui/toaster'
 import { Toaster as Sonner } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import Index from './pages/Index'
 import NotFound from './pages/NotFound'
 import AuthPage from './components/Auth/AuthPage'
@@ -13,21 +13,40 @@ import { AuthProvider } from './contexts/AuthContext'
 import ProtectedRoute from './components/Auth/ProtectedRoute'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
+import { AnalyticsProvider, useAnalytics } from './components/Analytics'
 import LandingPage from './pages/LandingPage'
+import React from 'react'
 import './App.css'
 
 const queryClient = new QueryClient()
 
+// Track page views on route changes
+function RouteTracker() {
+   const location = useLocation()
+   const { trackPageView } = useAnalytics()
+
+   React.useEffect(() => {
+      trackPageView(location.pathname, document.title)
+   }, [location, trackPageView])
+
+   return null
+}
+
 const App = () => {
    return (
       <QueryClientProvider client={queryClient}>
-         <Analytics />
-         <SpeedInsights />
-         <AuthProvider>
-            <TooltipProvider>
-               <Toaster />
-               <Sonner />
-               <Routes>
+         <AnalyticsProvider 
+            gaId={import.meta.env.VITE_GA_MEASUREMENT_ID}
+            fbPixelId={import.meta.env.VITE_FB_PIXEL_ID}
+         >
+            <Analytics />
+            <SpeedInsights />
+            <AuthProvider>
+               <TooltipProvider>
+                  <RouteTracker />
+                  <Toaster />
+                  <Sonner />
+                  <Routes>
                   <Route
                      path='/landing'
                      element={<LandingPage />}
@@ -68,6 +87,7 @@ const App = () => {
                </Routes>
             </TooltipProvider>
          </AuthProvider>
+         </AnalyticsProvider>
       </QueryClientProvider>
    )
 }

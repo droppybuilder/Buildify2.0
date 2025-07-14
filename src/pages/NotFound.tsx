@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { SEO, seoConfig } from '@/components/SEO'
 
 const NotFound = () => {
    const location = useLocation()
@@ -22,6 +23,7 @@ const NotFound = () => {
 
    return (
       <div className='min-h-screen w-full relative overflow-x-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white flex items-center justify-center'>
+         <SEO {...seoConfig.notFound} />
          {/* Animated Cursor Effect */}
          <div
             className='fixed w-6 h-6 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full pointer-events-none z-50 opacity-50 transition-all duration-300 ease-out'

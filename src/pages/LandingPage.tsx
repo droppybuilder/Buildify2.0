@@ -14,6 +14,8 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation'
 import logo from '/logo6.png'
 import { ContainerScroll } from '@/components/ui/container-scroll-animation'
 import { HeroSection } from '@/components/ui/hero-section-1'
+import { SEO, seoConfig } from '@/components/SEO'
+import { StructuredData, structuredDataConfigs } from '@/components/StructuredData'
 
 const features = [
    {
@@ -265,6 +267,11 @@ const LandingPage: React.FC = () => {
 
    return (
       <div className='min-h-screen w-full relative overflow-x-hidden bg-slate-950 text-purple-100 font-sans'>
+         <SEO {...seoConfig.landing} />
+         <StructuredData {...structuredDataConfigs.organization} />
+         <StructuredData {...structuredDataConfigs.webApplication} />
+         <StructuredData {...structuredDataConfigs.faq} />
+         <StructuredData {...structuredDataConfigs.buildingGuide} />
          {/* Animated Cursor Effect */}
          <div
             className='fixed w-6 h-6 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full pointer-events-none z-50 opacity-50 transition-all duration-300 ease-out'

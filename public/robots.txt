@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+
+# Priority pages
+Allow: /landing
+Allow: /auth
+Allow: /pricing
+Allow: /profile
+
+# Block sensitive areas
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/
+Disallow: /*.json$
+Disallow: /*?*utm_source=
+Disallow: /*?*utm_medium=
+Disallow: /*?*utm_campaign=
+
+# Sitemap location
+Sitemap: https://buildfy.droppybuilder.com/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1

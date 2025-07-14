@@ -11,6 +11,8 @@ import { isSubscriptionExpired, isExpiringSoon, getRemainingDays } from '@/utils
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '@/integrations/firebase/firebase.config'
 import { updateDoc } from 'firebase/firestore'
+import { SEO, seoConfig } from '@/components/SEO'
+import { useAnalytics } from '@/components/Analytics'
 
 /**
  * 🎯 PAYMENT SYSTEM OVERVIEW
@@ -146,6 +148,7 @@ export default function PricingPlans() {
    const navigate = useNavigate()
    const [failedPayment, setFailedPayment] = useState<any>(null)
    const [checkingFailed, setCheckingFailed] = useState(false)
+   const { trackEvent, trackEngagement } = useAnalytics()
 
    // Mouse tracking for animated cursor
    useEffect(() => {
@@ -180,9 +183,21 @@ export default function PricingPlans() {
    //~ 🚀 PAYMENT HANDLER: Creates DODO static payment link and redirects user
    // This is the core payment function - handles all subscription upgrades
    const handleUpgrade = async (plan: PricingPlan) => {
+      // Track pricing plan click
+      trackEvent({
+         action: 'upgrade_click',
+         category: 'subscription',
+         label: plan.tier
+      })
+
       // Step 1: Validate user authentication
       if (!user) {
          toast.error('Please login to upgrade your plan')
+         trackEvent({
+            action: 'upgrade_failed',
+            category: 'subscription',
+            label: 'not_authenticated'
+         })
          navigate('/auth')
          return
       }
@@ -351,6 +366,7 @@ export default function PricingPlans() {
    }
    return (
       <div className='min-h-screen w-full relative overflow-x-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white'>
+         <SEO {...seoConfig.pricing} />
          {/* Failed Payment Banner */}
          {failedPayment && (
             <div className='max-w-lg mx-auto mt-6 mb-4 p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-between gap-4'>

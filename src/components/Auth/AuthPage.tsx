@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import logo from '/logo6.png'
+import { SEO, seoConfig } from '@/components/SEO'
 
 const AuthPage: React.FC = () => {
    const { loginWithGoogle, user } = useAuth()
@@ -38,6 +39,7 @@ const AuthPage: React.FC = () => {
 
    return (
       <div className='min-h-screen w-full relative overflow-x-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white flex items-center justify-center p-4'>
+         <SEO {...seoConfig.auth} />
          {/* Animated Cursor Effect */}
          <div
             className='fixed w-6 h-6 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full pointer-events-none z-50 opacity-50 transition-all duration-300 ease-out'

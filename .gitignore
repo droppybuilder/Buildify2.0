@@ -34,5 +34,5 @@ src/components/ProjectToolbar.tsx
 .vercel
 DEPLOYMENT_SUMMARY.md
 FREE_EXPORT_DEPLOYMENT.md
-
+dist/**
 PREMIUM_INDICATORS_SUMMARY.md

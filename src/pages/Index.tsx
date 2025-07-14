@@ -21,6 +21,7 @@ import {
    hasUnlimitedExports,
 } from '@/utils/subscriptionUtils'
 import { X } from 'lucide-react'
+import { SEO, seoConfig } from '@/components/SEO'
 
 // Define what constitutes a major state change for undo/redo
 const ACTION_TYPES = {
@@ -478,6 +479,7 @@ const Index = () => {
 
    return (
       <div className='h-screen flex overflow-hidden bg-slate-50'>
+         <SEO {...seoConfig.home} />
          <Sidebar />
          <main className='flex-1 flex flex-col overflow-hidden'>
             {/* --- Easily removable update banner start --- */}

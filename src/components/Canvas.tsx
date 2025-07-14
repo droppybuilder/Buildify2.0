@@ -76,15 +76,8 @@ const Canvas = ({
       height: Math.min(windowSize.height, maxCanvasSize.height),
    }
 
-   // Warn if user tries to resize canvas beyond allowed size
-   useEffect(() => {
-      // Only show warning if subscription has loaded and user doesn't have unlimited access
-      if (windowSize.width > maxCanvasSize.width || windowSize.height > maxCanvasSize.height) {
-         if (!isUnlimitedCanvas && !subscriptionLoading && subscription !== null) {
-            toast.warning('Upgrade to Standard or Pro for unlimited canvas size!')
-         }
-      }
-   }, [windowSize, maxCanvasSize, isUnlimitedCanvas, subscription, subscriptionLoading])
+   // Note: Canvas size limits are now enforced in WindowProperties component
+   // This ensures users cannot resize beyond their subscription limits
 
    // Update titleInput when windowTitle changes
    useEffect(() => {
@@ -713,7 +706,7 @@ const Canvas = ({
          borderColor: '#e2e8f0',
          borderWidth: 1,
          cornerRadius: 8,
-      }      // Common color properties
+      } // Common color properties
       const colorProps = {
          bgColor: '#ffffff',
          fgColor: '#000000',
@@ -744,7 +737,7 @@ const Canvas = ({
             }
          case 'paragraph':
             return {
-               text: 'Paragraph text goes here. Double-click to edit.',
+               text: 'Paragraph text goes here.',
                ...colorProps,
                ...fontProps,
                ...borderProps,
@@ -766,7 +759,8 @@ const Canvas = ({
                src: '',
                fit: 'contain',
                ...borderProps,
-               bgColor: 'white',               fileName: 'placeholder.png',
+               bgColor: 'white',
+               fileName: 'placeholder.png',
                alt: 'Image',
             }
          case 'slider':
@@ -782,11 +776,7 @@ const Canvas = ({
                borderWidth: 0,
             }
          case 'frame':
-            return {relief: 'flat',
-               ...borderProps,
-               ...colorProps,
-               ...fontProps,
-            }
+            return { relief: 'flat', ...borderProps, ...colorProps, ...fontProps }
          case 'checkbox':
             return {
                text: 'Checkbox',
@@ -796,7 +786,8 @@ const Canvas = ({
                checkedColor: '#3b82f6',
                ...fontProps,
             }
-         case 'datepicker':            return {
+         case 'datepicker':
+            return {
                format: 'yyyy-mm-dd',
                ...colorProps,
                ...fontProps,
@@ -1104,7 +1095,8 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
                }}
             >
                {component.props?.text || 'Button'}
-            </div>         )
+            </div>
+         )
       case 'label':
          return (
             <div
@@ -1137,7 +1129,8 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
                }}
             >
                {component.props?.placeholder || 'Enter text...'}
-            </div>         )
+            </div>
+         )
       case 'image':
          return (
             <div
@@ -1195,7 +1188,8 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
                   fontWeight: component.props?.fontWeight || 'normal',
                   fontStyle: component.props?.fontStyle || 'normal',
                   padding: `${component.props?.padding || 8}px`,
-               }}            >
+               }}
+            >
                {component.props?.text || component.props?.placeholder || 'Enter text here...'}
             </div>
          )
@@ -1211,7 +1205,9 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
                   className='w-full h-2 rounded-full relative'
                   style={{
                      backgroundColor: component.props?.bgColor || '#e2e8f0',
-                     border: component.props?.borderWidth ? `${component.props.borderWidth}px solid ${component.props?.borderColor || '#cbd5e1'}` : 'none',
+                     border: component.props?.borderWidth
+                        ? `${component.props.borderWidth}px solid ${component.props?.borderColor || '#cbd5e1'}`
+                        : 'none',
                   }}
                >
                   <div
@@ -1245,18 +1241,19 @@ const ComponentPreview = ({ component, isHovered }: ComponentPreviewProps) => {
                   fontWeight: component.props?.fontWeight || 'normal',
                   fontStyle: component.props?.fontStyle || 'normal',
                }}
-            >               <div
+            >
+               {' '}
+               <div
                   className='w-4 h-4 flex items-center justify-center'
                   style={{
-                     backgroundColor: component.props?.checked
-                        ? component.props?.checkedColor || '#3b82f6'
-                        : 'white',
+                     backgroundColor: component.props?.checked ? component.props?.checkedColor || '#3b82f6' : 'white',
                      border: '2px solid',
                      borderColor: component.props?.borderColor || '#e2e8f0',
                      borderRadius: 3,
-                  }}               >
+                  }}
+               >
                   {component.props?.checked && (
-                     <div 
+                     <div
                         className='text-white font-bold text-xs flex items-center justify-center w-full h-full'
                         style={{ fontSize: '10px' }}
                      >

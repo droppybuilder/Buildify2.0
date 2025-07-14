@@ -226,7 +226,7 @@ export function HeroSection({
                                  <Button
                                     asChild
                                     size='lg'
-                                    className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-xl px-8 text-base font-medium'
+                                    className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-xl px-6 text-base font-medium'
                                     onClick={handleCTA}
                                  >
                                     <span className='text-nowrap'>
@@ -385,7 +385,7 @@ const HeroHeader = ({
                            alt='Buildfy Web'
                            className='h-8 w-8 sm:h-10 sm:w-10 rounded-lg'
                         />
-                        <span className='text-lg font-bold text-purple-300 font-display'>Buildfy Web</span>
+                        <span className='text-xl font-bold text-purple-300 font-display'>Buildfy Web</span>
                      </a>
 
                      <button
@@ -473,7 +473,7 @@ const HeroHeader = ({
                               <Button
                                  asChild
                                  size='sm'
-                                 className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-xl px-6 text-base font-medium'
+                                 className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-xl px-5 text-base font-medium'
                                  onClick={() => handleNavigation('/auth')}
                               >
                                  <span className='text-nowrap'>Start Building Free</span>

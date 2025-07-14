@@ -105,7 +105,8 @@ export const Toolbar = ({
          Additional Updates:
          • Cloud Project status indicator at the top
          • Export codes indicator in the toolbar
-         • Indicator for Pro and lifetime members`,
+         • Indicator for Pro and lifetime members
+         • AutoSaving Delay reduced to 2 seconds from 5 seconds`,
          date: '2025-07-09',
       },
       {

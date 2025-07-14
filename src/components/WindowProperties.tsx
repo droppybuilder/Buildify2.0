@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { ColorInput } from '@/components/ColorInput'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
+import { useSubscription } from '@/hooks/useSubscription'
 
 interface WindowPropertiesProps {
    visible: boolean
@@ -36,6 +37,13 @@ export const WindowProperties: React.FC<WindowPropertiesProps> = ({
    const [localBgColor, setLocalBgColor] = useState(bgColor)
    const [localAppearanceMode, setLocalAppearanceMode] = useState(appearanceMode)
 
+   const { subscription, loading: subscriptionLoading } = useSubscription()
+
+   // Normalize tier for feature checks
+   const normalizedTier = subscription?.tier === 'lifetime' ? 'pro' : subscription?.tier
+   const isUnlimitedCanvas = normalizedTier === 'standard' || normalizedTier === 'pro'
+   const maxCanvasSize = isUnlimitedCanvas ? { width: 3000, height: 2000 } : { width: 800, height: 600 }
+
    useEffect(() => {
       setLocalTitle(title)
       setLocalWidth(size.width.toString())
@@ -44,6 +52,19 @@ export const WindowProperties: React.FC<WindowPropertiesProps> = ({
       setLocalAppearanceMode(appearanceMode)
    }, [title, size, bgColor, appearanceMode])
    const handlePresetSelect = (width: string, height: string) => {
+      const widthNum = parseInt(width)
+      const heightNum = parseInt(height)
+
+      // Check subscription limits before allowing preset selection
+      if (!subscriptionLoading && subscription !== null) {
+         if (widthNum > maxCanvasSize.width || heightNum > maxCanvasSize.height) {
+            if (!isUnlimitedCanvas) {
+               toast.warning('Upgrade to Standard or Pro for unlimited canvas size!')
+               return
+            }
+         }
+      }
+
       setLocalWidth(width)
       setLocalHeight(height)
       toast.success(`Preset selected: ${width}×${height}. Click "Apply Changes" to save.`)
@@ -55,7 +76,22 @@ export const WindowProperties: React.FC<WindowPropertiesProps> = ({
       if (isNaN(width) || isNaN(height) || width < 100 || height < 100) {
          toast.error('Invalid dimensions. Width and height must be at least 100px.')
          return
-      }      setTitle(localTitle)
+      }
+
+      // Check subscription limits before applying size changes
+      if (!subscriptionLoading && subscription !== null) {
+         if (width > maxCanvasSize.width || height > maxCanvasSize.height) {
+            if (!isUnlimitedCanvas) {
+               toast.warning('Upgrade to Standard or Pro for unlimited canvas size!')
+               // Reset to maximum allowed size for free users
+               setLocalWidth(Math.min(width, maxCanvasSize.width).toString())
+               setLocalHeight(Math.min(height, maxCanvasSize.height).toString())
+               return
+            }
+         }
+      }
+
+      setTitle(localTitle)
       // Also update document title
       document.title = localTitle
       setSize({ width, height })
@@ -95,8 +131,12 @@ export const WindowProperties: React.FC<WindowPropertiesProps> = ({
                      onChange={(e) => setLocalWidth(e.target.value)}
                      type='number'
                      min='100'
+                     max={isUnlimitedCanvas ? '3000' : '800'}
                      step='10'
                   />
+                  {!isUnlimitedCanvas && !subscriptionLoading && (
+                     <p className='text-xs text-muted-foreground'>Max: 800px (free plan)</p>
+                  )}
                </div>
                <div className='space-y-2'>
                   <Label htmlFor='window-height'>Height (px)</Label>
@@ -106,15 +146,23 @@ export const WindowProperties: React.FC<WindowPropertiesProps> = ({
                      onChange={(e) => setLocalHeight(e.target.value)}
                      type='number'
                      min='100'
+                     max={isUnlimitedCanvas ? '2000' : '600'}
                      step='10'
                   />
+                  {!isUnlimitedCanvas && !subscriptionLoading && (
+                     <p className='text-xs text-muted-foreground'>Max: 600px (free plan)</p>
+                  )}
                </div>
             </div>
 
             <div className='space-y-2'>
-               <Label>Window Size Presets</Label>{' '}
+               <Label>Window Size Presets</Label>
+               {!isUnlimitedCanvas && !subscriptionLoading && (
+                  <p className='text-xs text-muted-foreground'>
+                     Free plan: Maximum 800×600. Upgrade for larger sizes.
+                  </p>
+               )}
                <div className='flex gap-2 flex-wrap'>
-                  {' '}
                   <Button
                      variant='outline'
                      size='sm'
@@ -133,15 +181,19 @@ export const WindowProperties: React.FC<WindowPropertiesProps> = ({
                      variant='outline'
                      size='sm'
                      onClick={() => handlePresetSelect('1024', '768')}
+                     disabled={!isUnlimitedCanvas && !subscriptionLoading}
+                     className={!isUnlimitedCanvas && !subscriptionLoading ? 'opacity-50' : ''}
                   >
-                     1024×768
+                     1024×768 {!isUnlimitedCanvas && !subscriptionLoading && '🔒'}
                   </Button>
                   <Button
                      variant='outline'
                      size='sm'
                      onClick={() => handlePresetSelect('1280', '720')}
+                     disabled={!isUnlimitedCanvas && !subscriptionLoading}
+                     className={!isUnlimitedCanvas && !subscriptionLoading ? 'opacity-50' : ''}
                   >
-                     1280×720
+                     1280×720 {!isUnlimitedCanvas && !subscriptionLoading && '🔒'}
                   </Button>
                </div>
             </div>            <div className='grid grid-cols-2 gap-4'>

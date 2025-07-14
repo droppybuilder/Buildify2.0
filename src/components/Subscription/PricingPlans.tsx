@@ -57,10 +57,10 @@ const plans: PricingPlan[] = [
       features: [
          { name: 'Basic widgets', included: true },
          { name: 'Limited canvas size', included: true },
-         { name: 'Watermarked exports', included: true },
+         { name: 'Watermarked canvas', included: true },
          { name: 'Community support', included: true },
          { name: 'Cloud projects (limit: 3)', included: true },
-         { name: 'Export code', included: false },
+         { name: 'Code export (3 per month)', included: true },
          { name: 'Advanced widgets', included: false },
          { name: 'No watermarks', included: false },
          { name: 'Priority support', included: false },
@@ -77,7 +77,7 @@ const plans: PricingPlan[] = [
       features: [
          { name: 'Basic widgets', included: true },
          { name: 'Unlimited canvas size', included: true },
-         { name: 'Export code without watermark', included: true },
+         { name: 'Unlimited code export', included: true },
          { name: 'Community support', included: true },
          { name: 'Advanced widgets', included: true },
          { name: 'Email support', included: true },
@@ -97,7 +97,7 @@ const plans: PricingPlan[] = [
       features: [
          { name: 'Basic widgets', included: true },
          { name: 'Unlimited canvas size', included: true },
-         { name: 'Export code without watermark', included: true },
+         { name: 'Unlimited code export', included: true },
          { name: 'Community support', included: true },
          { name: 'Advanced widgets', included: true },
          { name: 'Email support', included: true },
@@ -117,7 +117,7 @@ const plans: PricingPlan[] = [
       features: [
          { name: 'Basic widgets', included: true },
          { name: 'Unlimited canvas size', included: true },
-         { name: 'Export code without watermark', included: true },
+         { name: 'Unlimited code export', included: true },
          { name: 'Community support', included: true },
          { name: 'Advanced widgets', included: true },
          { name: 'Email support', included: true },
@@ -167,7 +167,7 @@ export default function PricingPlans() {
       }
    }, [])
 
-   // Get DODO product IDs for each plan (these come from your environment variables)
+   //~ Get DODO product IDs for each plan (these come from your environment variables)
    const getProductId = (planTier: string): string | null => {
       const productIds = {
          standard: import.meta.env.VITE_DODO_STANDARD_PRODUCT_ID || 'pdt_4lEkfDCzFAnt4MjQ4L8Ze', // Fallback for standard
@@ -177,7 +177,7 @@ export default function PricingPlans() {
       return productIds[planTier as keyof typeof productIds] || null
    }
 
-   // 🚀 PAYMENT HANDLER: Creates DODO static payment link and redirects user
+   //~ 🚀 PAYMENT HANDLER: Creates DODO static payment link and redirects user
    // This is the core payment function - handles all subscription upgrades
    const handleUpgrade = async (plan: PricingPlan) => {
       // Step 1: Validate user authentication
@@ -270,7 +270,7 @@ export default function PricingPlans() {
       }
    }
 
-   // Fetch latest failed payment attempt from Firestore
+   //~ Fetch latest failed payment attempt from Firestore
    useEffect(() => {
       if (!user) return
       setCheckingFailed(true)
@@ -281,18 +281,18 @@ export default function PricingPlans() {
             // Find all failed attempts, sort by attempted_at desc
             const failedAttempts = Object.entries(attempts)
                .map(([id, data]: any) => ({ payment_id: id, ...data }))
-               .filter(a => a.status === 'failed')
+               .filter((a) => a.status === 'failed')
                .sort((a, b) => {
-                  const aTime = a.attempted_at ? new Date(a.attempted_at).getTime() : 0;
-                  const bTime = b.attempted_at ? new Date(b.attempted_at).getTime() : 0;
-                  return bTime - aTime;
-               });
+                  const aTime = a.attempted_at ? new Date(a.attempted_at).getTime() : 0
+                  const bTime = b.attempted_at ? new Date(b.attempted_at).getTime() : 0
+                  return bTime - aTime
+               })
             // Only show the latest failed attempt if it is not seen
-            const latest = failedAttempts[0];
+            const latest = failedAttempts[0]
             if (latest && !latest.seen) {
-               setFailedPayment(latest);
+               setFailedPayment(latest)
             } else {
-               setFailedPayment(null);
+               setFailedPayment(null)
             }
          } catch (e) {
             setFailedPayment(null)
@@ -307,13 +307,13 @@ export default function PricingPlans() {
       if (!user || !failedPayment) return
       try {
          await updateDoc(doc(db, 'users', user.uid), {
-            [`payment_attempts.${failedPayment.payment_id}.seen`]: true
+            [`payment_attempts.${failedPayment.payment_id}.seen`]: true,
          })
       } catch (e) {}
       setFailedPayment(null)
    }
 
-   // Helper to get the user's current tier
+   //~ Helper to get the user's current tier
    const getCurrentTier = () => {
       if (!subscription) return 'free'
       return normalizeTier(subscription.tier)

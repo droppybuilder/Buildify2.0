@@ -10,9 +10,16 @@ import { WindowProperties } from '@/components/WindowProperties'
 import { ProjectToolbar } from '@/components/ProjectToolbar'
 import { toast } from 'sonner'
 import { useSubscription } from '@/hooks/useSubscription'
+import { useAuth } from '@/contexts/AuthContext'
 import { useProjectManager } from '@/hooks/useProjectManager'
 import WatermarkedCanvas from '@/components/WatermarkedCanvas'
-import { FEATURES, hasFeature } from '@/utils/subscriptionUtils'
+import {
+   FEATURES,
+   hasFeature,
+   canExportCode,
+   incrementExportCount,
+   hasUnlimitedExports,
+} from '@/utils/subscriptionUtils'
 import { X } from 'lucide-react'
 
 // Define what constitutes a major state change for undo/redo
@@ -27,6 +34,7 @@ const ACTION_TYPES = {
 
 const Index = () => {
    const navigate = useNavigate()
+   const { user } = useAuth()
    const { subscription, loading: subscriptionLoading } = useSubscription()
 
    const [selectedComponent, setSelectedComponent] = useState(null)
@@ -83,10 +91,14 @@ const Index = () => {
    useEffect(() => {
       try {
          const savedComponents = localStorage.getItem('guiBuilderComponents')
+         
          if (savedComponents) {
             const parsedComponents = JSON.parse(savedComponents)
             setComponents(parsedComponents)
-            addToHistory(parsedComponents, ACTION_TYPES.ADD_COMPONENT)
+            // Initialize history with loaded components instead of calling addToHistory
+            setHistory([parsedComponents])
+            setHistoryIndex(0)
+            setActionHistory(['initial'])
          }
 
          const savedWindowTitle = localStorage.getItem('guiBuilderWindowTitle')
@@ -100,18 +112,6 @@ const Index = () => {
          console.error('Failed to load saved components:', error)
       }
    }, [])
-
-   // Update document title when window title changes
-   useEffect(() => {
-      document.title = windowTitle
-      try {
-         localStorage.setItem('guiBuilderWindowTitle', windowTitle)
-         localStorage.setItem('guiBuilderWindowSize', JSON.stringify(windowSize))
-         localStorage.setItem('guiBuilderWindowBgColor', windowBgColor)
-      } catch (error) {
-         console.error('Failed to save window properties:', error)
-      }
-   }, [windowTitle, windowSize, windowBgColor])
 
    useEffect(() => {
       try {
@@ -299,7 +299,7 @@ const Index = () => {
       [components, handleComponentsChange, selectedComponents]
    )
 
-   const toggleCodePreview = useCallback(() => {
+   const toggleCodePreview = useCallback(async () => {
       // Check if user has permission to view code
       if (!hasFeature(subscription, FEATURES.EXPORT_CODE) && !showCodePreview) {
          toast.error('Upgrade to Standard or Pro plan to export code', {
@@ -311,10 +311,40 @@ const Index = () => {
          return
       }
 
+      // For free users, check export limits
+      if (!showCodePreview && user && subscription?.tier === 'free') {
+         try {
+            const exportStatus = await canExportCode(subscription, user.uid)
+            if (!exportStatus.canExport) {
+               toast.error(
+                  `You've reached your monthly export limit (${exportStatus.limit} exports). Upgrade for unlimited exports.`,
+                  {
+                     action: {
+                        label: 'Upgrade',
+                        onClick: () => navigate('/pricing'),
+                     },
+                  }
+               )
+               return
+            }
+
+            // Show remaining exports info for free users
+            if (exportStatus.remaining <= 1) {
+               toast.info(
+                  `${exportStatus.remaining} export${exportStatus.remaining === 1 ? '' : 's'} remaining this month`
+               )
+            }
+         } catch (error) {
+            console.error('Error checking export limits:', error)
+            toast.error('Unable to check export limits. Please try again.')
+            return
+         }
+      }
+
       setShowCodePreview((prev) => !prev)
       setShowLayers(false)
       setShowWindowProperties(false)
-   }, [subscription, showCodePreview, navigate])
+   }, [subscription, showCodePreview, navigate, user])
 
    const toggleLayers = useCallback(() => {
       setShowLayers((prev) => !prev)
@@ -516,6 +546,7 @@ const Index = () => {
                               appearanceMode: windowAppearanceMode,
                            }}
                            subscription={subscription}
+                           userId={user?.uid}
                         />
                      </div>
                      <div className='w-72 bg-white border-l border-slate-200/50 flex flex-col overflow-hidden shadow-lg'>

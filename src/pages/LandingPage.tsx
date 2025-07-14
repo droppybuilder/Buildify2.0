@@ -135,7 +135,7 @@ const plans = [
          { name: 'Watermarked exports', included: true },
          { name: 'Community support', included: true },
          { name: 'Cloud projects (limit: 3)', included: true },
-         { name: 'Export code', included: false },
+         { name: 'Code export (3 per month)', included: true },
          { name: 'Advanced widgets', included: false },
          { name: 'No watermarks', included: false },
          { name: 'Priority support', included: false },
@@ -151,7 +151,7 @@ const plans = [
       features: [
          { name: 'Basic widgets', included: true },
          { name: 'Unlimited canvas size', included: true },
-         { name: 'Export code without watermark', included: true },
+         { name: 'Unlimited code export', included: true },
          { name: 'Community support', included: true },
          { name: 'Advanced widgets', included: true },
          { name: 'Email support', included: true },
@@ -170,7 +170,7 @@ const plans = [
       features: [
          { name: 'Basic widgets', included: true },
          { name: 'Unlimited canvas size', included: true },
-         { name: 'Export code without watermark', included: true },
+         { name: 'Unlimited code export', included: true },
          { name: 'Community support', included: true },
          { name: 'Advanced widgets', included: true },
          { name: 'Email support', included: true },
@@ -191,7 +191,7 @@ const lifetimePlan = {
    features: [
       { name: 'Basic widgets', included: true },
       { name: 'Unlimited canvas size', included: true },
-      { name: 'Export code without watermark', included: true },
+      { name: 'Unlimited code export', included: true },
       { name: 'Community support', included: true },
       { name: 'Advanced widgets', included: true },
       { name: 'Email support', included: true },

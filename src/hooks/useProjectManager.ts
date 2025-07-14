@@ -38,6 +38,7 @@ export const useProjectManager = ({
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true)
   const [lastSaveData, setLastSaveData] = useState<string>('')
   const [lastCloudSaveData, setLastCloudSaveData] = useState<string>('')
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
   const autoSaveIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // Generate current state hash for comparison
@@ -56,6 +57,14 @@ export const useProjectManager = ({
   useEffect(() => {
     const currentHash = getCurrentStateHash()
     
+    // Skip change detection during initial load
+    if (isInitialLoad) {
+      setIsInitialLoad(false)
+      setLastSaveData(currentHash)
+      setLastCloudSaveData(currentHash)
+      return
+    }
+    
     // Check for local unsaved changes
     if (lastSaveData && currentHash !== lastSaveData) {
       setHasUnsavedChanges(true)
@@ -65,16 +74,20 @@ export const useProjectManager = ({
     if (lastCloudSaveData && currentHash !== lastCloudSaveData) {
       setHasUnsavedCloudChanges(true)
     }
-  }, [getCurrentStateHash, lastSaveData, lastCloudSaveData])
+  }, [getCurrentStateHash, lastSaveData, lastCloudSaveData, isInitialLoad])
   // Auto-save functionality (localStorage only)
   useEffect(() => {
-    if (autoSaveEnabled && hasUnsavedChanges) {
-      if (autoSaveIntervalRef.current) {
-        clearTimeout(autoSaveIntervalRef.current)
-      }
-      
+    // Clear any existing auto-save timeout
+    if (autoSaveIntervalRef.current) {
+      clearTimeout(autoSaveIntervalRef.current)
+      autoSaveIntervalRef.current = null
+    }
+
+    // Only auto-save if enabled, has changes, not during initial load, and has actual content
+    if (autoSaveEnabled && hasUnsavedChanges && !isInitialLoad) {
       autoSaveIntervalRef.current = setTimeout(() => {
-        try {          // Save to localStorage only
+        try {
+          // Save to localStorage only
           localStorage.setItem('guiBuilderComponents', JSON.stringify(components))
           localStorage.setItem('guiBuilderWindowTitle', windowTitle)
           localStorage.setItem('guiBuilderWindowSize', JSON.stringify(windowSize))
@@ -96,7 +109,7 @@ export const useProjectManager = ({
         clearTimeout(autoSaveIntervalRef.current)
       }
     }
-  }, [autoSaveEnabled, hasUnsavedChanges, components, windowTitle, windowSize, windowBgColor, getCurrentStateHash])
+  }, [autoSaveEnabled, hasUnsavedChanges, components, windowTitle, windowSize, windowBgColor, getCurrentStateHash, isInitialLoad])
 
   const handleNewProject = useCallback(() => {
     setComponents([])

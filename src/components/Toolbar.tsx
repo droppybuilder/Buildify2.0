@@ -15,6 +15,9 @@ import {
    PanelLeftClose,
    PanelLeftOpen,
    Bell,
+   Crown,
+   Zap,
+   Download,
 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -36,6 +39,14 @@ import { Label } from '@/components/ui/label'
 import { feedbackService } from '@/services/feedbackService'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
+import { useSubscription } from '@/hooks/useSubscription'
+import {
+   isPremiumUser,
+   canExportCode,
+   getCurrentMonthExportCount,
+   getExportLimit,
+   initializeUserTracking,
+} from '@/utils/subscriptionUtils'
 
 interface ToolbarProps {
    components: any[]
@@ -66,14 +77,37 @@ export const Toolbar = ({
 }: ToolbarProps) => {
    const navigate = useNavigate()
    const { user } = useAuth()
+   const { subscription } = useSubscription()
    const [modalOpen, setModalOpen] = useState(false)
    const [title, setTitle] = useState('')
    const [description, setDescription] = useState('')
    const [submissionType, setSubmissionType] = useState<'feedback' | 'feature-request'>('feedback')
    const [submitting, setSubmitting] = useState(false)
 
+   // Export tracking state
+   const [currentExports, setCurrentExports] = useState<number>(0)
+   const [exportLimit, setExportLimit] = useState<number>(0)
+
    // Notification state
    const defaultNotifications = [
+      {
+         id: '4',
+         title: 'Free Code Exports Now Available! 🎉',
+         content: `Great news! We're now offering 3 free code exports per month for all free plan users. You can now export your Python GUI projects without upgrading!
+
+         This means you can:
+         • Export clean Python code 3 times per month
+         • Test your applications before upgrading
+         • Share your projects with others
+         
+         Want unlimited exports? Upgrade to Standard or Pro for unlimited code exports without watermarks!
+         
+         Additional Updates:
+         • Cloud Project status indicator at the top
+         • Export codes indicator in the toolbar
+         • Indicator for Pro and lifetime members`,
+         date: '2025-07-09',
+      },
       {
          id: '3',
          title: 'New Landing Page + New Domain Name',
@@ -152,6 +186,65 @@ export const Toolbar = ({
    // Handler to close notification modal
    const closeNotificationModal = () => setActiveNotification(null)
 
+   //~ Fetch export count and limits
+   useEffect(() => {
+      const fetchExportData = async () => {
+         if (!user) return
+
+         try {
+            // Initialize user tracking first
+            await initializeUserTracking(user.uid)
+
+            const tier = subscription?.tier || 'free'
+            const limit = getExportLimit(tier)
+
+            setExportLimit(limit)
+
+            if (limit !== -1) {
+               const count = await getCurrentMonthExportCount(user.uid)
+               setCurrentExports(count)
+               console.log('📊 Export count loaded:', count, 'Limit:', limit)
+            }
+         } catch (error) {
+            console.error('Error fetching export data:', error)
+         }
+      }
+
+      fetchExportData()
+   }, [user, subscription])
+
+   //~ Function to refresh export count (can be called after export)
+   const refreshExportCount = async () => {
+      if (!user || exportLimit === -1) return
+
+      try {
+         const count = await getCurrentMonthExportCount(user.uid)
+         setCurrentExports(count)
+         console.log('🔄 Export count refreshed:', count)
+      } catch (error) {
+         console.error('Error refreshing export count:', error)
+      }
+   }
+
+   //~ Periodically refresh export count for free users
+   useEffect(() => {
+      if (!user || exportLimit === -1) return
+
+      const interval = setInterval(refreshExportCount, 30000) // Refresh every 30 seconds
+
+      // Listen for export events to refresh immediately
+      const handleExportCountChanged = () => {
+         refreshExportCount()
+      }
+
+      window.addEventListener('exportCountChanged', handleExportCountChanged)
+
+      return () => {
+         clearInterval(interval)
+         window.removeEventListener('exportCountChanged', handleExportCountChanged)
+      }
+   }, [user, exportLimit])
+
    const handleSignOut = async () => {
       await signOut(auth)
       navigate('/')
@@ -188,6 +281,27 @@ export const Toolbar = ({
          setSubmitting(false)
       }
    }
+
+   //~ Fetch export and project limits when subscription changes
+   useEffect(() => {
+      const fetchUsageData = async () => {
+         if (!user || !subscription) return
+
+         try {
+            // Get export data
+            const tier = subscription.tier
+            const limit = getExportLimit(tier)
+            const current = limit === -1 ? 0 : await getCurrentMonthExportCount(user.uid)
+
+            setExportLimit(limit)
+            setCurrentExports(current)
+         } catch (error) {
+            console.error('Error fetching usage data:', error)
+         }
+      }
+
+      fetchUsageData()
+   }, [user, subscription])
 
    return (
       <div className='flex items-center justify-between px-6 py-4 bg-white border-b border-slate-200/50 shadow-sm'>
@@ -381,6 +495,72 @@ export const Toolbar = ({
                <span className='text-sm font-medium text-slate-700'>{components.length}</span>
                <span className='text-xs text-slate-500'>components</span>
             </div>
+            {/* Export Status */}
+            {user && (
+               <TooltipProvider>
+                  <Tooltip>
+                     <TooltipTrigger asChild>
+                        <div
+                           className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${
+                              exportLimit === -1
+                                 ? 'bg-gradient-to-r from-yellow-100 to-orange-100 border border-yellow-300'
+                                 : exportLimit - currentExports <= 1
+                                 ? 'bg-gradient-to-r from-red-100 to-pink-100 border border-red-300'
+                                 : 'bg-slate-100'
+                           }`}
+                        >
+                           {exportLimit === -1 ? (
+                              <Zap
+                                 size={12}
+                                 className='text-yellow-600'
+                              />
+                           ) : (
+                              <Download
+                                 size={12}
+                                 className={exportLimit - currentExports <= 1 ? 'text-red-500' : 'text-blue-500'}
+                              />
+                           )}
+                           <span
+                              className={`text-sm font-medium ${
+                                 exportLimit === -1
+                                    ? 'text-yellow-700'
+                                    : exportLimit - currentExports <= 1
+                                    ? 'text-red-700'
+                                    : 'text-slate-700'
+                              }`}
+                           >
+                              {exportLimit === -1 ? '∞' : `${Math.max(0, exportLimit - currentExports)}/${exportLimit}`}
+                           </span>
+                           <span
+                              className={`text-xs ${
+                                 exportLimit === -1
+                                    ? 'text-yellow-600'
+                                    : exportLimit - currentExports <= 1
+                                    ? 'text-red-600'
+                                    : 'text-slate-500'
+                              }`}
+                           >
+                              exports
+                           </span>
+                        </div>
+                     </TooltipTrigger>
+                     <TooltipContent
+                        side='bottom'
+                        className='bg-slate-900 text-white text-xs'
+                     >
+                        <p>
+                           {exportLimit === -1
+                              ? 'Unlimited exports (Premium)'
+                              : exportLimit - currentExports <= 1
+                              ? `Only ${Math.max(0, exportLimit - currentExports)} export${
+                                   exportLimit - currentExports === 1 ? '' : 's'
+                                } remaining!`
+                              : `${Math.max(0, exportLimit - currentExports)} exports remaining this month`}
+                        </p>
+                     </TooltipContent>
+                  </Tooltip>
+               </TooltipProvider>
+            )}
             {/* Actions Menu */}
             <DropdownMenu>
                <DropdownMenuTrigger asChild>
@@ -429,29 +609,43 @@ export const Toolbar = ({
                   </DropdownMenuItem> */}
                </DropdownMenuContent>
             </DropdownMenu>{' '}
-            {/* Profile Button */}
+            {/* Profile Button with Crown for Premium Users */}
             <DropdownMenu>
                <DropdownMenuTrigger asChild>
-                  <button className='w-9 h-9 rounded-xl overflow-hidden shadow-lg border-2 border-white bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center hover:scale-105 transition-transform cursor-pointer'>
-                     {user?.photoURL ? (
-                        <img
-                           src={user.photoURL}
-                           alt='Profile'
-                           className='w-full h-full object-cover'
-                           onError={(e) => {
-                              e.currentTarget.style.display = 'none'
-                              const sibling = e.currentTarget.nextElementSibling as HTMLElement
-                              if (sibling) sibling.style.display = 'flex'
-                           }}
-                        />
-                     ) : null}
-                     <span
-                        className='text-white font-semibold text-sm flex items-center justify-center w-full h-full'
-                        style={{ display: user?.photoURL ? 'none' : 'flex' }}
+                  <div className='relative'>
+                     <button
+                        className={`w-9 h-9 rounded-xl overflow-hidden shadow-lg border-2 ${
+                           isPremiumUser(subscription)
+                              ? 'border-yellow-400 bg-gradient-to-br from-yellow-500 to-orange-600 shadow-yellow-400/50'
+                              : 'border-white bg-gradient-to-br from-violet-500 to-purple-600'
+                        } flex items-center justify-center hover:scale-105 transition-transform cursor-pointer`}
                      >
-                        {user?.displayName?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U'}
-                     </span>
-                  </button>
+                        {user?.photoURL ? (
+                           <img
+                              src={user.photoURL}
+                              alt='Profile'
+                              className='w-full h-full object-cover'
+                              onError={(e) => {
+                                 e.currentTarget.style.display = 'none'
+                                 const sibling = e.currentTarget.nextElementSibling as HTMLElement
+                                 if (sibling) sibling.style.display = 'flex'
+                              }}
+                           />
+                        ) : null}
+                        <span
+                           className='text-white font-semibold text-sm flex items-center justify-center w-full h-full'
+                           style={{ display: user?.photoURL ? 'none' : 'flex' }}
+                        >
+                           {user?.displayName?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U'}
+                        </span>
+                     </button>
+                     {/* Crown for Premium Users */}
+                     {isPremiumUser(subscription) && (
+                        <div className='absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg border border-white'>
+                           <Crown className='w-3 h-3 text-white' />
+                        </div>
+                     )}
+                  </div>
                </DropdownMenuTrigger>
                <DropdownMenuContent
                   align='end'
@@ -462,8 +656,16 @@ export const Toolbar = ({
                      className='rounded-lg'
                   >
                      <User className='mr-3 h-4 w-4 text-slate-500' />
-                     <div>
-                        <div className='font-medium'>My Profile</div>
+                     <div className='flex-1'>
+                        <div className='flex items-center gap-2'>
+                           <span className='font-medium'>My Profile</span>
+                           {isPremiumUser(subscription) && (
+                              <Badge className='bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs px-1.5 py-0.5 h-4'>
+                                 <Crown className='w-2.5 h-2.5 mr-1' />
+                                 {subscription?.tier === 'lifetime' ? 'LIFETIME' : subscription?.tier?.toUpperCase()}
+                              </Badge>
+                           )}
+                        </div>
                         <div className='text-xs text-slate-500'>Account settings</div>
                      </div>
                   </DropdownMenuItem>

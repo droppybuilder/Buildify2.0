@@ -8,6 +8,9 @@ import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import { projectService, ProjectData, SaveProjectData } from '@/services/projectService'
 import { useAuth } from '@/contexts/AuthContext'
+import { useSubscription } from '@/hooks/useSubscription'
+import { getCloudProjectLimit, isPremiumUser } from '@/utils/subscriptionUtils'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import {
    Save,
    FolderOpen,
@@ -19,6 +22,7 @@ import {
    Cloud,
    HardDrive,
    Settings,
+   Folder,
 } from 'lucide-react'
 
 interface ProjectToolbarProps {
@@ -57,6 +61,7 @@ export const ProjectToolbar: React.FC<ProjectToolbarProps> = ({
    windowSettings,
 }) => {
    const { user } = useAuth()
+   const { subscription } = useSubscription()
    const [showSaveDialog, setShowSaveDialog] = useState(false)
    const [showLoadDialog, setShowLoadDialog] = useState(false)
    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
@@ -64,6 +69,30 @@ export const ProjectToolbar: React.FC<ProjectToolbarProps> = ({
    const [projectName, setProjectName] = useState('')
    const [userProjects, setUserProjects] = useState<ProjectData[]>([])
    const [loading, setLoading] = useState(false)
+   const [cloudProjectLimit, setCloudProjectLimit] = useState<number>(0)
+
+   // Fetch cloud project limit when subscription changes
+   useEffect(() => {
+      if (subscription) {
+         const limit = getCloudProjectLimit(subscription.tier)
+         setCloudProjectLimit(limit)
+      }
+   }, [subscription])
+
+   // Load user projects count for the indicator
+   useEffect(() => {
+      const loadProjectsCount = async () => {
+         if (user) {
+            try {
+               const projects = await projectService.getUserProjects(user.uid)
+               setUserProjects(projects)
+            } catch (error) {
+               console.error('Error loading projects count:', error)
+            }
+         }
+      }
+      loadProjectsCount()
+   }, [user])
    const handleNewProject = () => {
       if (hasUnsavedCloudChanges) {
          setConfirmAction(() => () => {
@@ -80,6 +109,10 @@ export const ProjectToolbar: React.FC<ProjectToolbarProps> = ({
          // Save existing project to cloud
          try {
             await onSaveProject(currentProject.name, currentProject.id)
+            
+            // Refresh project list to update indicator
+            await loadUserProjects()
+            
             toast.success('Project saved to cloud!')
          } catch (error) {
             toast.error('Failed to save to cloud')
@@ -100,6 +133,10 @@ export const ProjectToolbar: React.FC<ProjectToolbarProps> = ({
       try {
          setLoading(true)
          await onSaveProject(projectName.trim())
+         
+         // Refresh project list to update indicator  
+         await loadUserProjects()
+         
          setShowSaveDialog(false)
          setProjectName('')
          toast.success('Project saved to cloud!')
@@ -152,7 +189,9 @@ export const ProjectToolbar: React.FC<ProjectToolbarProps> = ({
       if (confirm(`Are you sure you want to delete "${projectName}"? This action cannot be undone.`)) {
          try {
             await projectService.deleteProject(projectId)
-            setUserProjects((prev) => prev.filter((p) => p.id !== projectId))
+            // Update local state immediately for real-time update
+            const updatedProjects = userProjects.filter((p) => p.id !== projectId)
+            setUserProjects(updatedProjects)
 
             if (currentProject?.id === projectId) {
                setCurrentProject(null)
@@ -167,8 +206,11 @@ export const ProjectToolbar: React.FC<ProjectToolbarProps> = ({
    const handleDuplicateProject = async (project: ProjectData) => {
       try {
          const newName = `${project.name} (Copy)`
-         await projectService.duplicateProject(project.id, newName, user!.uid)
+         const newProjectId = await projectService.duplicateProject(project.id, newName, user!.uid)
+         
+         // Update local state immediately for real-time update
          await loadUserProjects()
+         
          toast.success('Project duplicated successfully')
       } catch (error) {
          toast.error('Failed to duplicate project')
@@ -266,6 +308,36 @@ export const ProjectToolbar: React.FC<ProjectToolbarProps> = ({
                         <span className='text-sm text-gray-500 italic'>No project loaded</span>
                      )}
                   </div>
+                  
+                  {/* Cloud Projects Limit Indicator */}
+                  {user && (
+                     <TooltipProvider>
+                        <Tooltip>
+                           <TooltipTrigger asChild>
+                              <div className={`flex items-center gap-2 px-2 py-1 rounded-lg ${
+                                 cloudProjectLimit === -1 
+                                    ? 'bg-gradient-to-r from-yellow-100 to-orange-100 border border-yellow-300' 
+                                    : 'bg-white border border-blue-200'
+                              }`}>
+                                 <Folder size={12} className={cloudProjectLimit === -1 ? 'text-yellow-600' : 'text-blue-600'} />
+                                 <span className={`text-xs font-medium ${
+                                    cloudProjectLimit === -1 ? 'text-yellow-700' : 'text-blue-700'
+                                 }`}>
+                                    {cloudProjectLimit === -1 ? '∞' : `${userProjects.length}/${cloudProjectLimit}`}
+                                 </span>
+                              </div>
+                           </TooltipTrigger>
+                           <TooltipContent side='bottom' className='bg-slate-900 text-white text-xs'>
+                              <p>
+                                 {cloudProjectLimit === -1 
+                                    ? 'Unlimited cloud projects (Premium)' 
+                                    : `${userProjects.length} of ${cloudProjectLimit} cloud projects used`
+                                 }
+                              </p>
+                           </TooltipContent>
+                        </Tooltip>
+                     </TooltipProvider>
+                  )}
                </div>
                {/* Divider */}
                <div className='w-px h-8 bg-gray-300' /> {/* Cloud Actions */}

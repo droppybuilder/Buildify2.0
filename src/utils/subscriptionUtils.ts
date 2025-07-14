@@ -74,7 +74,7 @@ export const FEATURES = {
 }
 
 export const TIER_FEATURES = {
-   free: [FEATURES.UNLIMITED_CANVAS],
+   free: [FEATURES.UNLIMITED_CANVAS, FEATURES.EXPORT_CODE],
    standard: [FEATURES.UNLIMITED_CANVAS, FEATURES.EXPORT_CODE, FEATURES.ADVANCED_WIDGETS, FEATURES.REMOVE_WATERMARK],
    pro: [
       FEATURES.UNLIMITED_CANVAS,
@@ -84,6 +84,175 @@ export const TIER_FEATURES = {
       FEATURES.PRIORITY_SUPPORT,
       FEATURES.CUSTOM_INTEGRATIONS,
    ],
+}
+
+// Export limits per tier per month
+export const EXPORT_LIMITS = {
+   free: 3,
+   standard: -1, // unlimited
+   pro: -1, // unlimited
+   lifetime: -1, // unlimited
+}
+
+/**
+ * Get monthly export limit for a tier
+ */
+export function getExportLimit(tier: string): number {
+   const normalizedTier = normalizeTier(tier)
+   return EXPORT_LIMITS[normalizedTier as keyof typeof EXPORT_LIMITS] || EXPORT_LIMITS.free
+}
+
+/**
+ * Check if user has unlimited exports
+ */
+export function hasUnlimitedExports(subscription: Subscription | null): boolean {
+   const tier = subscription?.tier || 'free'
+   return getExportLimit(tier) === -1
+}
+
+/**
+ * Initialize user tracking data (exports and projects)
+ * Call this when user first logs in or when needed
+ */
+export async function initializeUserTracking(userId: string): Promise<void> {
+   try {
+      const monthKey = getCurrentMonthKey()
+      
+      // Initialize export tracking if not exists
+      const exportDoc = await getDoc(doc(db, `users/${userId}/exports`, monthKey))
+      if (!exportDoc.exists()) {
+         await setDoc(doc(db, `users/${userId}/exports`, monthKey), {
+            count: 0,
+            lastUpdated: new Date().toISOString(),
+            month: monthKey,
+            initialized: true
+         })
+         console.log('✅ Export tracking initialized for user:', userId)
+      }
+   } catch (error) {
+      console.error('Error initializing user tracking:', error)
+   }
+}
+
+/**
+ * Get current month key for tracking exports
+ */
+export function getCurrentMonthKey(): string {
+   const now = new Date()
+   return `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`
+}
+
+/**
+ * Get user's export count for current month from Firestore
+ * Automatically initializes tracking for new users
+ */
+export async function getCurrentMonthExportCount(userId: string): Promise<number> {
+   try {
+      const monthKey = getCurrentMonthKey()
+      const exportDoc = await getDoc(doc(db, `users/${userId}/exports`, monthKey))
+      
+      if (!exportDoc.exists()) {
+         // Auto-initialize export tracking for new/existing users
+         await setDoc(doc(db, `users/${userId}/exports`, monthKey), {
+            count: 0,
+            lastUpdated: new Date().toISOString(),
+            month: monthKey,
+            initialized: true
+         })
+         return 0
+      }
+      
+      return exportDoc.data().count || 0
+   } catch (error) {
+      console.error('Error getting export count:', error)
+      return 0
+   }
+}
+
+/**
+ * Increment user's export count for current month
+ */
+export async function incrementExportCount(userId: string): Promise<void> {
+   try {
+      const monthKey = getCurrentMonthKey()
+      const exportDocRef = doc(db, `users/${userId}/exports`, monthKey)
+      const exportDoc = await getDoc(exportDocRef)
+      
+      const currentCount = exportDoc.exists() ? exportDoc.data().count || 0 : 0
+      const newCount = currentCount + 1
+      
+      console.log(`📈 Incrementing export count: ${currentCount} → ${newCount} for user ${userId}`);
+      
+      await setDoc(exportDocRef, {
+         count: newCount,
+         lastUpdated: new Date().toISOString(),
+         month: monthKey,
+         initialized: true
+      })
+      
+      console.log(`✅ Export count successfully updated to ${newCount}`);
+   } catch (error) {
+      console.error('❌ Error incrementing export count:', error)
+      throw error
+   }
+}
+
+/**
+ * Check if user can export code (has remaining exports)
+ */
+export async function canExportCode(subscription: Subscription | null, userId: string): Promise<{ canExport: boolean; remaining: number; limit: number }> {
+   const tier = subscription?.tier || 'free'
+   const limit = getExportLimit(tier)
+   
+   // Unlimited exports
+   if (limit === -1) {
+      return { canExport: true, remaining: -1, limit: -1 }
+   }
+   
+   // Check current month's usage
+   const currentCount = await getCurrentMonthExportCount(userId)
+   const remaining = Math.max(0, limit - currentCount)
+   
+   return {
+      canExport: remaining > 0,
+      remaining,
+      limit
+   }
+}
+
+/**
+ * Cloud project limits by tier
+ */
+export const CLOUD_PROJECT_LIMITS = {
+   free: 3,
+   standard: 10,
+   pro: 20,
+   lifetime: -1, // unlimited
+}
+
+/**
+ * Get cloud project limit for a tier
+ */
+export function getCloudProjectLimit(tier: string): number {
+   const normalizedTier = tier === 'lifetime' ? 'lifetime' : normalizeTier(tier)
+   return CLOUD_PROJECT_LIMITS[normalizedTier as keyof typeof CLOUD_PROJECT_LIMITS] || CLOUD_PROJECT_LIMITS.free
+}
+
+/**
+ * Check if user has unlimited cloud projects
+ */
+export function hasUnlimitedCloudProjects(subscription: Subscription | null): boolean {
+   const tier = subscription?.tier || 'free'
+   return getCloudProjectLimit(tier) === -1
+}
+
+/**
+ * Check if user is premium (has paid subscription)
+ */
+export function isPremiumUser(subscription: Subscription | null): boolean {
+   if (!subscription) return false
+   const tier = subscription.tier
+   return tier === 'standard' || tier === 'pro' || tier === 'lifetime'
 }
 
 /**

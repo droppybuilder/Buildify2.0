@@ -6,6 +6,7 @@ import { Copy, Download, Code, File } from 'lucide-react';
 import { toast } from 'sonner';
 import { CustomTkinterGuide } from './CustomTkinterGuide';
 import { Subscription } from '@/hooks/useSubscription';
+import { canExportCode, incrementExportCount, hasUnlimitedExports } from '@/utils/subscriptionUtils';
 
 interface CodePreviewProps {
   components: any[];
@@ -17,6 +18,7 @@ interface CodePreviewProps {
     appearanceMode?: string;
   };
   subscription?: Subscription | null;
+  userId?: string;
 }
 
 export const CodePreview: React.FC<CodePreviewProps> = ({ 
@@ -27,7 +29,8 @@ export const CodePreview: React.FC<CodePreviewProps> = ({
     bgColor: "#1A1A1A",
     appearanceMode: "system"
   },
-  subscription 
+  subscription,
+  userId
 }) => {
   const [code, setCode] = useState('');
   const [isExporting, setIsExporting] = useState(false);
@@ -71,6 +74,21 @@ export const CodePreview: React.FC<CodePreviewProps> = ({
   };
 
   const handleExport = async () => {
+    // Check export limits for free users
+    if (userId && subscription?.tier === 'free') {
+      try {
+        const exportStatus = await canExportCode(subscription, userId)
+        if (!exportStatus.canExport) {
+          toast.error(`You've reached your monthly export limit (${exportStatus.limit} exports). Upgrade for unlimited exports.`)
+          return
+        }
+      } catch (error) {
+        console.error('Error checking export limits:', error)
+        toast.error('Unable to check export limits. Please try again.')
+        return
+      }
+    }
+
     try {
       setIsExporting(true);
       toast.info("Preparing project for export...");
@@ -96,7 +114,37 @@ export const CodePreview: React.FC<CodePreviewProps> = ({
       });
         console.log("Starting project export with prepared components:", preparedComponents.length);
       await exportProject(preparedComponents, windowSettings);
-      toast.success("Project exported successfully!");
+      
+      // Track export count for all users, but only enforce limits for free users
+      if (userId) {
+        console.log('🔄 Tracking export for user:', userId, 'Tier:', subscription?.tier);
+        try {
+          await incrementExportCount(userId)
+          console.log('✅ Export count incremented successfully');
+          
+          // Dispatch custom event to refresh export count in Toolbar
+          window.dispatchEvent(new CustomEvent('exportCountChanged'));
+          
+          // Only show remaining count messages for free users
+          if (subscription?.tier === 'free') {
+            const updatedStatus = await canExportCode(subscription, userId)
+            console.log('📊 Updated export status:', updatedStatus);
+            if (updatedStatus.remaining > 0) {
+              toast.success(`Project exported successfully! ${updatedStatus.remaining} exports remaining this month.`)
+            } else {
+              toast.success("Project exported successfully! You've used all your free exports this month.")
+            }
+          } else {
+            toast.success("Project exported successfully!")
+          }
+        } catch (error) {
+          console.error('❌ Error updating export count:', error)
+          toast.success("Project exported successfully!")
+        }
+      } else {
+        console.log('⚠️ No user ID found, skipping export tracking');
+        toast.success("Project exported successfully!")
+      }
     } catch (error) {
       console.error("Export error:", error);
       toast.error(`Failed to export project: ${error instanceof Error ? error.message : 'Unknown error'}`);

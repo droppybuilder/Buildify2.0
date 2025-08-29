@@ -34,7 +34,7 @@ export const StructuredData = ({ type, data }: StructuredDataProps) => {
 }
 
 const generateStructuredData = (type: string, data: any) => {
-  const baseUrl = 'https://buildfy.droppybuilder.com'
+  const baseUrl = 'https://buildfy.online'
   
   switch (type) {
     case 'Organization':
@@ -49,8 +49,8 @@ const generateStructuredData = (type: string, data: any) => {
         "foundingDate": "2024",
         "sameAs": [
           "https://www.producthunt.com/products/buildfy-web",
-          "https://github.com/buildfyweb",
-          "https://twitter.com/buildfyweb"
+          // "https://github.com/buildfyweb",
+          // "https://twitter.com/buildfyweb"
         ],
         "contactPoint": {
           "@type": "ContactPoint",

@@ -59,7 +59,7 @@
     "file-saver": "^2.0.5",
     "firebase": "^11.7.3",
     "firebase-admin": "^13.4.0",
-    "framer-motion": "^12.22.0",
+    "framer-motion": "^12.23.12",
     "input-otp": "^1.2.4",
     "jszip": "^3.10.1",
     "lucide-react": "^0.462.0",

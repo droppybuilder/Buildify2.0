@@ -222,7 +222,7 @@ export default function PricingPlans() {
          // IMPORTANT: For local testing, we must use production URLs because DODO validates them
          const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
          const baseUrl = isLocal
-            ? 'https://buildify20.vercel.app' // Use your production URL for DODO validation
+            ? 'https://buildfy.online' // Use your production URL for DODO validation
             : window.location.origin // Use current URL in production
 
          const returnUrl = `${baseUrl}/payment-success`

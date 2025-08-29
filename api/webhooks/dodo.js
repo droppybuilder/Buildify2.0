@@ -20,24 +20,24 @@ const db = getFirestore();
 
 const webhook = new Webhook(process.env.DODO_WEBHOOK_KEY);
 
+
 export default async function handler(req, res) {
-  // Enhanced logging for debugging
-  console.log('🎯 DodoPayments webhook called!', {
+  // Immediate debug log for every request
+  console.log('🟡 Incoming request to DodoPayments webhook:', {
     method: req.method,
     url: req.url,
-    headers: {
-      'webhook-id': req.headers['webhook-id'],
-      'webhook-timestamp': req.headers['webhook-timestamp'], 
-      'webhook-signature': req.headers['webhook-signature'] ? 'present' : 'missing',
-      'content-type': req.headers['content-type'],
-      'user-agent': req.headers['user-agent']
-    },
+    headers: req.headers,
     environment: {
       webhook_key_configured: !!process.env.DODO_WEBHOOK_KEY,
-      webhook_key_preview: process.env.DODO_WEBHOOK_KEY ? 
-        `${process.env.DODO_WEBHOOK_KEY.substring(0, 10)}...` : 'NOT SET'
+      webhook_key_preview: process.env.DODO_WEBHOOK_KEY ? `${process.env.DODO_WEBHOOK_KEY.substring(0, 10)}...` : 'NOT SET'
     }
   });
+
+  // Detect and log possible redirect
+  if (req.method === 'GET') {
+    console.log('🔴 GET request received (possible redirect/crawler):', req.url);
+    return res.status(307).json({ error: 'Temporary redirect - webhook endpoint only accepts POST' });
+  }
 
   if (req.method !== 'POST') {
     console.log('❌ Method not allowed:', req.method);
@@ -57,12 +57,16 @@ export default async function handler(req, res) {
     rawBody += chunk;
   });
   req.on('end', async () => {
+    // Log raw body for debugging
+    console.log('🟢 Raw body received:', rawBody);
     try {
       const webhookHeaders = {
         "webhook-id": req.headers["webhook-id"] || "",
         "webhook-signature": req.headers["webhook-signature"] || "",
         "webhook-timestamp": req.headers["webhook-timestamp"] || "",
       };
+      // Log headers for debugging
+      console.log('🟢 Webhook headers:', webhookHeaders);
       // Verify webhook authenticity using raw body
       await webhook.verify(rawBody, webhookHeaders);
       const payload = JSON.parse(rawBody);

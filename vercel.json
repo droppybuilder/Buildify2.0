@@ -22,7 +22,7 @@
       "source": "/api/(.*)",
       "headers": [        {
           "key": "Access-Control-Allow-Origin",
-          "value": "https://buildfyweb.vercel.app"
+          "value": "https://buildfy.online"
         },
         {
           "key": "Access-Control-Allow-Methods",

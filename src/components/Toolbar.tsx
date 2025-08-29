@@ -91,6 +91,13 @@ export const Toolbar = ({
    // Notification state
    const defaultNotifications = [
       {
+         id: '5',
+         title: 'Payments Got Fixed 🎉',
+         content: `We've resolved the payment issues that users were facing.
+         Issue: User payment was successful, but he isn't getting upgraded to paid Tier. You can now make payments smoothly and instantly get upgraded. Thank you for your patience & Sorry for the trouble users faced.`,
+         date: '2025-08-29',
+      },
+      {
          id: '4',
          title: 'Free Code Exports Now Available! 🎉',
          content: `Great news! We're now offering 3 free code exports per month for all free plan users. You can now export your Python GUI projects without upgrading!

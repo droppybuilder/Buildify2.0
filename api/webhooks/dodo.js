@@ -1,6 +1,14 @@
+
 import { Webhook } from "standardwebhooks";
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+
+// Vercel: disable body parsing to get raw body
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
 // Initialize Firebase Admin SDK
 if (!getApps().length) {
@@ -24,8 +32,6 @@ export default async function handler(req, res) {
       'content-type': req.headers['content-type'],
       'user-agent': req.headers['user-agent']
     },
-    bodyType: typeof req.body,
-    bodyKeys: req.body ? Object.keys(req.body) : [],
     environment: {
       webhook_key_configured: !!process.env.DODO_WEBHOOK_KEY,
       webhook_key_preview: process.env.DODO_WEBHOOK_KEY ? 
@@ -38,7 +44,6 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Check if webhook key is configured
   if (!process.env.DODO_WEBHOOK_KEY) {
     console.error('❌ DODO_WEBHOOK_KEY not configured');
     return res.status(500).json({ 
@@ -47,57 +52,62 @@ export default async function handler(req, res) {
     });
   }
 
-  try {
-    // Get raw body as string for webhook verification
-    const rawBody = JSON.stringify(req.body);
-    
-    const webhookHeaders = {
-      "webhook-id": req.headers["webhook-id"] || "",
-      "webhook-signature": req.headers["webhook-signature"] || "",
-      "webhook-timestamp": req.headers["webhook-timestamp"] || "",
-    };    // Verify webhook authenticity
-    await webhook.verify(rawBody, webhookHeaders);
-    const payload = req.body;
+  let rawBody = '';
+  req.on('data', (chunk) => {
+    rawBody += chunk;
+  });
+  req.on('end', async () => {
+    try {
+      const webhookHeaders = {
+        "webhook-id": req.headers["webhook-id"] || "",
+        "webhook-signature": req.headers["webhook-signature"] || "",
+        "webhook-timestamp": req.headers["webhook-timestamp"] || "",
+      };
+      // Verify webhook authenticity using raw body
+      await webhook.verify(rawBody, webhookHeaders);
+      const payload = JSON.parse(rawBody);
 
-    console.log('✅ Webhook verified successfully');
-    console.log('📦 Full DodoPayments webhook payload:', JSON.stringify(payload, null, 2));
-    
-    // Extract the actual payment data from the payload
-    const eventType = payload.type;
-    const paymentData = payload.data || payload; // Use data if present, fallback to payload
-    
-    console.log('📦 Event type:', eventType);
-    console.log('📦 Payment data:', JSON.stringify(paymentData, null, 2));
+      console.log('✅ Webhook verified successfully');
+      console.log('📦 Full DodoPayments webhook payload:', JSON.stringify(payload, null, 2));
 
-    // Handle different webhook events
-    switch (eventType) {
-      case 'payment.succeeded':
-        await handlePaymentSuccess(paymentData);
-        break;
-      case 'payment.failed':
-        await handlePaymentFailed(paymentData);
-        break;
-      case 'subscription.activated':
-        await handleSubscriptionActivated(paymentData);
-        break;
-      case 'subscription.cancelled':
-        await handleSubscriptionCancelled(paymentData);
-        break;
-      default:
-        console.log('Unhandled webhook type:', eventType);
-    }return res.status(200).json({ received: true });
-  } catch (error) {
-    console.error('❌ Webhook error:', {
-      message: error.message,
-      stack: error.stack,
-      headers: req.headers,
-      body: req.body
-    });
-    return res.status(400).json({ 
-      error: 'Webhook verification failed',
-      details: error.message 
-    });
-  }
+      // Extract the actual payment data from the payload
+      const eventType = payload.type;
+      const paymentData = payload.data || payload;
+
+      console.log('📦 Event type:', eventType);
+      console.log('📦 Payment data:', JSON.stringify(paymentData, null, 2));
+
+      // Handle different webhook events
+      switch (eventType) {
+        case 'payment.succeeded':
+          await handlePaymentSuccess(paymentData);
+          break;
+        case 'payment.failed':
+          await handlePaymentFailed(paymentData);
+          break;
+        case 'subscription.activated':
+          await handleSubscriptionActivated(paymentData);
+          break;
+        case 'subscription.cancelled':
+          await handleSubscriptionCancelled(paymentData);
+          break;
+        default:
+          console.log('Unhandled webhook type:', eventType);
+      }
+      return res.status(200).json({ received: true });
+    } catch (error) {
+      console.error('❌ Webhook error:', {
+        message: error.message,
+        stack: error.stack,
+        headers: req.headers,
+        rawBody,
+      });
+      return res.status(400).json({ 
+        error: 'Webhook verification failed',
+        details: error.message 
+      });
+    }
+  });
 }
 
 async function handlePaymentSuccess(paymentData) {

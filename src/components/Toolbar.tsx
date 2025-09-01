@@ -91,6 +91,12 @@ export const Toolbar = ({
    // Notification state
    const defaultNotifications = [
       {
+         id: '6',
+         title: '🥳 DISCOUNT ON PRO MEMBERSHIP 🔥',
+         content: `Get 12% off on Pro memberships for the next 3 days! Use code PRO123 at checkout - Valid till 4/1/2025`,
+         date: '2025-09-01',
+      },
+      {
          id: '5',
          title: 'Payments Got Fixed 🎉',
          content: `We've resolved the payment issues that users were facing.

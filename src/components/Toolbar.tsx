@@ -316,7 +316,7 @@ export const Toolbar = ({
          {/* Left Section - Logo & Project Actions */}
          <div className='flex items-center gap-4'>
             {' '}
-            <div className='flex items-center gap-3'>
+            <button className='flex items-center gap-3' onClick={() => navigate('/landing')}>
                <div className='w-9 h-9 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg'>
                   <span className='text-white font-bold text-sm'>B</span>
                </div>
@@ -326,7 +326,7 @@ export const Toolbar = ({
                   </span>
                   <div className='text-xs text-slate-500 -mt-1'>Visual Builder</div>
                </div>
-            </div>
+            </button>
             <Separator
                orientation='vertical'
                className='h-8 bg-slate-200'

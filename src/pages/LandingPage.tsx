@@ -109,12 +109,12 @@ const reviews = [
 ]
 
 const team = [
-   {
-      name: 'Pratyush Mishra',
-      role: 'Founder & CEO',
-      img: '/prof1.jpg',
-      peerlist: 'https://peerlist.io/pratyush2002',
-   },
+   // {
+   //    name: 'Pratyush Mishra',
+   //    role: 'Founder & CEO',
+   //    img: '/prof1.jpg',
+   //    peerlist: 'https://peerlist.io/pratyush2002',
+   // },
    {
       name: 'Nakul Srivastava',
       role: 'Developer',
@@ -647,7 +647,7 @@ const LandingPage: React.FC = () => {
                   <div className={`space-y-4 sm:space-y-6 lg:space-y-8 h-full flex flex-col justify-center transition-all duration-800 ease-out ${
                      contactAnimation.isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[40px]'
                   }`} style={{ transitionDelay: contactAnimation.isVisible ? '0.6s' : '0s' }}>
-                     <Card className='bg-slate-900/60 backdrop-blur-md border border-purple-800/50 rounded-2xl p-4 sm:p-6 hover:border-purple-600/70 hover:bg-slate-900/80 transition-all duration-300 hover:scale-105 shadow-lg shadow-purple-950/20'>
+                     {/* <Card className='bg-slate-900/60 backdrop-blur-md border border-purple-800/50 rounded-2xl p-4 sm:p-6 hover:border-purple-600/70 hover:bg-slate-900/80 transition-all duration-300 hover:scale-105 shadow-lg shadow-purple-950/20'>
                         <CardContent className='p-0'>
                            <div className='flex items-center space-x-3 sm:space-x-4'>
                               <div className='w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center text-lg sm:text-xl flex-shrink-0'>
@@ -656,6 +656,21 @@ const LandingPage: React.FC = () => {
                               <div className='min-w-0 flex-1'>
                                  <h4 className='font-semibold text-purple-200 text-sm sm:text-base'>Pratyush Mishra</h4>
                                  <p className='text-purple-300 text-xs sm:text-sm break-all'>proxlight02@gmail.com</p>
+                              </div>
+                           </div>
+                        </CardContent>
+                     </Card> */}
+                     <Card className='bg-slate-900/60 backdrop-blur-md border border-purple-800/50 rounded-2xl p-4 sm:p-6 hover:border-purple-600/70 hover:bg-slate-900/80 transition-all duration-300 hover:scale-105 shadow-lg shadow-purple-950/20'>
+                        <CardContent className='p-0'>
+                           <div className='flex items-center space-x-3 sm:space-x-4'>
+                              <div className='w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center text-lg sm:text-xl flex-shrink-0'>
+                                 👨‍💻
+                              </div>
+                              <div className='min-w-0 flex-1'>
+                                 <h4 className='font-semibold text-purple-200 text-sm sm:text-base'>
+                                    Nakul Srivastava
+                                 </h4>
+                                 <p className='text-purple-300 text-xs sm:text-sm break-all'>imnakul44@gmail.com</p>
                               </div>
                            </div>
                         </CardContent>
@@ -686,21 +701,7 @@ const LandingPage: React.FC = () => {
                            </div>
                         </CardContent>
                      </Card>
-                     <Card className='bg-slate-900/60 backdrop-blur-md border border-purple-800/50 rounded-2xl p-4 sm:p-6 hover:border-purple-600/70 hover:bg-slate-900/80 transition-all duration-300 hover:scale-105 shadow-lg shadow-purple-950/20'>
-                        <CardContent className='p-0'>
-                           <div className='flex items-center space-x-3 sm:space-x-4'>
-                              <div className='w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center text-lg sm:text-xl flex-shrink-0'>
-                                 👨‍💻
-                              </div>
-                              <div className='min-w-0 flex-1'>
-                                 <h4 className='font-semibold text-purple-200 text-sm sm:text-base'>
-                                    Nakul Srivastava
-                                 </h4>
-                                 <p className='text-purple-300 text-xs sm:text-sm break-all'>imnakul44@gmail.com</p>
-                              </div>
-                           </div>
-                        </CardContent>
-                     </Card>
+                     
                   </div>
                </div>
             </div>

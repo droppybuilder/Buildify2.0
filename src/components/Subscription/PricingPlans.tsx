@@ -173,9 +173,9 @@ export default function PricingPlans() {
    //~ Get DODO product IDs for each plan (these come from your environment variables)
    const getProductId = (planTier: string): string | null => {
       const productIds = {
-         standard: import.meta.env.VITE_DODO_STANDARD_PRODUCT_ID || 'pdt_4lEkfDCzFAnt4MjQ4L8Ze', // Fallback for standard
-         pro: import.meta.env.VITE_DODO_PRO_PRODUCT_ID || 'pdt_bcgKHxp7021M9qnIa5gIO', // Fallback for pro
-         lifetime: import.meta.env.VITE_DODO_LIFETIME_PRODUCT_ID || 'pdt_OFNzyUH2xSJmmbcvknmfO', // Fallback for lifetime
+         standard: import.meta.env.VITE_DODO_STANDARD_PRODUCT_ID || 'pdt_ctg5ntjBbaQNTK7yC8sfw', // Fallback for standard
+         pro: import.meta.env.VITE_DODO_PRO_PRODUCT_ID || 'pdt_YOt09WOBmXScvTQk2gWrU', // Fallback for pro
+         lifetime: import.meta.env.VITE_DODO_LIFETIME_PRODUCT_ID || 'pdt_3cYYfIiR9mZx2w3WPjmcr', // Fallback for lifetime
       }
       return productIds[planTier as keyof typeof productIds] || null
    }

@@ -92,14 +92,15 @@ export const Toolbar = ({
    const defaultNotifications = [
       {
          id: '7',
-         title: '📢 Important — Project No Longer Maintained',
-         content: `This project is no longer actively maintained. The person whose idea Buildify was has left the team — I'm the one who built this product, and I'm now left with no roadmap ahead. Without any user feedback either, I've decided to leave it here for you all.
+         title: '📢 Buildfy is No Longer Maintained',
+         content: `Buildfy is no longer actively maintained. The person whose idea this was left the team — I'm the builder, now with no roadmap ahead.
 
-Feel free to use it — it will keep working just as it is.
+It's here for you, free to use, as-is. Bookmark buildfyweb.vercel.app to keep using it.
 
-If you ever want access to a Premium or paid plan, just reach out — I can give you free access.
+Want a Premium plan? Just reach out — I'll give you free access.
 
-Still have questions or doubts? I'm around to help — but the contact form won't reach me, so please contact me directly at: https://contact.nakulsrivastava.com`,
+Questions? Contact me at: contact.nakulsrivastava.com
+(The contact form on the site won't reach me — use the link above.)`,
          date: '2026-05-13',
       },
       {

@@ -24,25 +24,34 @@ export const MaintenanceBanner = () => {
 
                   <div className='flex-1 text-sm leading-relaxed space-y-1' style={{ color: '#fcd9a0' }}>
                      <p>
-                        <span className='font-bold' style={{ color: '#fbbf24' }}>This project is no longer actively maintained.</span>
-                        {' '}The person whose idea Buildify was has left the team — I'm the one who built this product,
-                        and I'm now left with no roadmap ahead. Without any user feedback either, I've decided to leave it here for you all.
+                        <span className='font-bold' style={{ color: '#fbbf24' }}>Buildfy is no longer maintained.</span>
+                        {' '}The person whose idea this was left the team — I'm the builder left alone, now with no roadmap ahead.
+                        It's here for you, free to use, as-is.{' '}
+                        Bookmark{' '}
+                        <a
+                           href='https://buildfyweb.vercel.app'
+                           target='_blank'
+                           rel='noopener noreferrer'
+                           className='underline underline-offset-2 font-semibold'
+                           style={{ color: '#fbbf24' }}
+                        >
+                           buildfyweb.vercel.app
+                        </a>
+                        {' '}to keep using it.
                      </p>
                      <p>
-                        <span style={{ color: '#fef3c7' }}>Feel free to use it — it will keep working just as it is.</span>
-                        {' '}If you ever want access to a <span className='font-medium' style={{ color: '#fbbf24' }}>Premium or paid plan</span>, just reach out — I can give you free access.
-                     </p>
-                     <p>
-                        Still have questions or doubts? I'm around to help — but <span className='italic'>the contact form won't reach me</span>, so please contact me directly at{' '}
+                        Want a <span className='font-medium' style={{ color: '#fbbf24' }}>Premium plan - for Free?</span> or Questions - Please Reach out 
+                        {' '}
                         <a
                            href='https://contact.nakulsrivastava.com'
                            target='_blank'
                            rel='noopener noreferrer'
-                           className='underline underline-offset-2 font-semibold transition-colors'
+                           className='underline underline-offset-2 font-semibold'
                            style={{ color: '#fbbf24' }}
                         >
                            contact.nakulsrivastava.com
                         </a>
+                        {' '}<span className='opacity-70 text-xs'>(contact form on website won't work)</span>
                      </p>
                   </div>
 
@@ -64,7 +73,7 @@ export const MaintenanceBanner = () => {
             >
                <Bell size={16} color='#fbbf24' className='shrink-0 mt-0.5' />
                <p className='text-sm flex-1' style={{ color: '#fcd9a0' }}>
-                  You can find this information anytime in the{' '}
+                  You can find this info anytime in the{' '}
                   <span className='font-semibold' style={{ color: '#fbbf24' }}>Notification Panel</span>
                   {' '}in the toolbar.
                </p>

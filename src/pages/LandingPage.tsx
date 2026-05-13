@@ -16,6 +16,7 @@ import { ContainerScroll } from '@/components/ui/container-scroll-animation'
 import { HeroSection } from '@/components/ui/hero-section-1'
 import { SEO, seoConfig } from '@/components/SEO'
 import { StructuredData, structuredDataConfigs } from '@/components/StructuredData'
+import { MaintenanceBanner } from '@/components/MaintenanceBanner'
 
 const features = [
    {
@@ -267,6 +268,7 @@ const LandingPage: React.FC = () => {
 
    return (
       <div className='min-h-screen w-full relative overflow-x-hidden bg-slate-950 text-purple-100 font-sans'>
+         <MaintenanceBanner />
          <SEO {...seoConfig.landing} />
          <StructuredData {...structuredDataConfigs.organization} />
          <StructuredData {...structuredDataConfigs.webApplication} />

@@ -91,6 +91,18 @@ export const Toolbar = ({
    // Notification state
    const defaultNotifications = [
       {
+         id: '7',
+         title: '📢 Important — Project No Longer Maintained',
+         content: `This project is no longer actively maintained. The person whose idea Buildify was has left the team — I'm the one who built this product, and I'm now left with no roadmap ahead. Without any user feedback either, I've decided to leave it here for you all.
+
+Feel free to use it — it will keep working just as it is.
+
+If you ever want access to a Premium or paid plan, just reach out — I can give you free access.
+
+Still have questions or doubts? I'm around to help — but the contact form won't reach me, so please contact me directly at: https://contact.nakulsrivastava.com`,
+         date: '2026-05-13',
+      },
+      {
          id: '6',
          title: '🥳 DISCOUNT ON PRO MEMBERSHIP 🔥',
          content: `Get 12% off on Pro memberships for the next 3 days! Use code PRO123 at checkout - Valid till 4/1/2025`,
